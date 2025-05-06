@@ -42,16 +42,14 @@ import id.andriawan24.cofinance.android.utils.TextSizes
 import id.andriawan24.cofinance.android.utils.ext.dropShadow
 
 @Composable
-fun HomeScreen(
-    onSeeAllTransactionClicked: () -> Unit
-) {
+fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
     val scrollState = rememberScrollState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(scrollState)
-            .padding(Dimensions.SIZE_24)
+            .padding(all = Dimensions.SIZE_24)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             AsyncImage(
