@@ -15,7 +15,7 @@ kotlin {
             }
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -28,9 +28,7 @@ kotlin {
     }
 
     sourceSets {
-        commonMain.dependencies {
-            //put your multiplatform dependencies here
-        }
+        commonMain.dependencies { }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
@@ -40,9 +38,11 @@ kotlin {
 android {
     namespace = "id.andriawan24.cofinance"
     compileSdk = 36
+
     defaultConfig {
         minSdk = 24
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8

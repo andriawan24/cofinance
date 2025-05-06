@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.googleService)
 }
 
 android {
@@ -53,6 +54,9 @@ dependencies {
     implementation(libs.compose.navigation)
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
+
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 
     // Coil image loader
     implementation(libs.coil.compose)
