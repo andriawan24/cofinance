@@ -3,7 +3,10 @@ package id.andriawan24.cofinance.android.ui.navigation
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.credentials.CredentialManager
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
@@ -15,13 +18,15 @@ import id.andriawan24.cofinance.android.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.android.ui.presentation.onboarding.OnboardingScreen
 import id.andriawan24.cofinance.android.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.android.ui.presentation.wallet.WalletScreen
+import id.andriawan24.cofinance.android.utils.AuthHelper
+import kotlinx.coroutines.launch
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
     NavHost(
         modifier = modifier,
         navController = appState.navController,
-        startDestination = Destinations.Onboarding
+        startDestination = if (appState.user != null) Destinations.Main else Destinations.Onboarding
     ) {
         composable<Destinations.Onboarding>(
             enterTransition = { EnterTransition.None },
@@ -42,12 +47,19 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
+            val context = LocalContext.current
+            val credentialManager = remember { CredentialManager.create(context) }
+
             LoginScreen(
                 onSignedIn = {
-                    appState.navController.navigate(Destinations.Home) {
-                        launchSingleTop = true
-                        popUpTo(0) {
-                            inclusive = true
+                    appState.coroutineScope.launch {
+                        AuthHelper.googleSignIn(context, credentialManager) {
+                            appState.navController.navigate(Destinations.Home) {
+                                launchSingleTop = true
+                                popUpTo(0) {
+                                    inclusive = true
+                                }
+                            }
                         }
                     }
                 }
@@ -62,6 +74,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 popExitTransition = { ExitTransition.None }
             ) {
                 HomeScreen(
+                    appState = appState,
                     onSeeAllTransactionClicked = {
                         appState.navigateToTopLevelDestination(
                             topLevelDestination = BottomNavigationDestinations.EXPENSES
@@ -94,7 +107,17 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 popEnterTransition = { EnterTransition.None },
                 popExitTransition = { ExitTransition.None }
             ) {
-                ProfileScreen()
+                ProfileScreen(
+                    appState = appState,
+                    onSignedOut = {
+                        appState.navController.navigate(Destinations.Login) {
+                            launchSingleTop = true
+                            popUpTo(0) {
+                                inclusive = true
+                            }
+                        }
+                    }
+                )
             }
         }
     }

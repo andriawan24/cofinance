@@ -12,4 +12,6 @@
     <string name="label_expenses">Expenses</string>
     <string name="label_wallet">Wallet</string>
     <string name="label_profile">Profile</string>
+    <string name="title_total_balance_this_month">Total balance in this month</string>
+    <string name="label_edit_profile">Edit Profile</string>
 </resources>

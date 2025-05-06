@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,14 +37,19 @@ import coil3.request.crossfade
 import coil3.request.error
 import coil3.request.placeholder
 import id.andriawan24.cofinance.android.R
+import id.andriawan24.cofinance.android.ui.models.CofinanceAppState
+import id.andriawan24.cofinance.android.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.android.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.android.utils.Dimensions
 import id.andriawan24.cofinance.android.utils.TextSizes
+import id.andriawan24.cofinance.android.utils.TimeHelper
+import id.andriawan24.cofinance.android.utils.TimeHelper.getGreeting
 import id.andriawan24.cofinance.android.utils.ext.dropShadow
 
 @Composable
-fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
+fun HomeScreen(appState: CofinanceAppState, onSeeAllTransactionClicked: () -> Unit) {
     val scrollState = rememberScrollState()
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -56,8 +62,8 @@ fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
                 modifier = Modifier
                     .size(Dimensions.SIZE_36)
                     .clip(CircleShape),
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://example.com/image.jpg")
+                model = ImageRequest.Builder(context)
+                    .data(appState.user?.photoUrl)
                     .placeholder(R.drawable.img_placeholder_profile)
                     .error(R.drawable.img_placeholder_profile)
                     .crossfade(true)
@@ -69,12 +75,12 @@ fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
 
             Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_2)) {
                 Text(
-                    text = "Good Morning",
+                    text = context.getGreeting(),
                     style = MaterialTheme.typography.bodySmall
                 )
 
                 Text(
-                    text = "Naufal Fawwaz Andriawan",
+                    text = appState.user?.displayName.orEmpty(),
                     style = MaterialTheme.typography.titleSmall
                 )
             }
@@ -93,7 +99,7 @@ fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
                     spread = Dimensions.zero
                 )
                 .background(
-                    MaterialTheme.colorScheme.primaryContainer,
+                    color = MaterialTheme.colorScheme.primaryContainer,
                     shape = MaterialTheme.shapes.medium
                 )
                 .clip(shape = MaterialTheme.shapes.medium)
@@ -101,7 +107,7 @@ fun HomeScreen(onSeeAllTransactionClicked: () -> Unit) {
         ) {
             Column {
                 Text(
-                    text = "Total balance in this month",
+                    text = stringResource(R.string.title_total_balance_this_month),
                     style = MaterialTheme.typography.bodySmall.copy(
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.6f)
@@ -249,6 +255,7 @@ private fun HomeScreenPreview() {
             color = MaterialTheme.colorScheme.background
         ) {
             HomeScreen(
+                appState = rememberCofinanceAppState(),
                 onSeeAllTransactionClicked = { }
             )
         }

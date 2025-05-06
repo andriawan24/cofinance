@@ -56,7 +56,13 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.auth)
     implementation(libs.firebase.analytics)
+
+    // Google sign in
+    implementation(libs.credentials)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
 
     // Coil image loader
     implementation(libs.coil.compose)

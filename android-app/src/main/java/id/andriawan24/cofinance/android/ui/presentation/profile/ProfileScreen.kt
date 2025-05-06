@@ -1,6 +1,7 @@
 package id.andriawan24.cofinance.android.ui.presentation.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,23 +37,23 @@ import coil3.request.crossfade
 import coil3.request.error
 import coil3.request.placeholder
 import id.andriawan24.cofinance.android.R
+import id.andriawan24.cofinance.android.ui.models.CofinanceAppState
+import id.andriawan24.cofinance.android.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.android.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.android.utils.Dimensions
 import id.andriawan24.cofinance.android.utils.TextSizes
 
 @Composable
-fun ProfileScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(Dimensions.SIZE_24)
-    ) {
+fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = Dimensions.SIZE_24),
                 text = "Profile",
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium
@@ -69,7 +71,7 @@ fun ProfileScreen() {
                         .size(Dimensions.SIZE_80)
                         .clip(CircleShape),
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data("https://picsum.photos/200")
+                        .data(appState.user?.photoUrl)
                         .placeholder(R.drawable.img_placeholder_profile)
                         .error(R.drawable.img_placeholder_profile)
                         .crossfade(true)
@@ -80,7 +82,7 @@ fun ProfileScreen() {
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
                 Text(
-                    text = "Naufal Fawwaz Andriawan",
+                    text = appState.user?.displayName.orEmpty(),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontSize = TextSizes.SIZE_20
                     )
@@ -91,7 +93,9 @@ fun ProfileScreen() {
                         TODO("Not implemented yet")
                     }
                 ) {
-                    Text("Edit Profile")
+                    Text(
+                        text = stringResource(R.string.label_edit_profile)
+                    )
                 }
 
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
@@ -101,6 +105,7 @@ fun ProfileScreen() {
                     verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)
                 ) {
                     Text(
+                        modifier = Modifier.padding(horizontal = Dimensions.SIZE_24),
                         text = "Cash",
                         style = MaterialTheme.typography.labelMedium
                     )
@@ -115,7 +120,10 @@ fun ProfileScreen() {
                                 shape = MaterialTheme.shapes.small
                             )
                             .clip(shape = MaterialTheme.shapes.small)
-                            .padding(vertical = Dimensions.SIZE_8, horizontal = Dimensions.SIZE_2),
+                            .padding(
+                                vertical = Dimensions.SIZE_12,
+                                horizontal = Dimensions.SIZE_24
+                            ),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -141,39 +149,19 @@ fun ProfileScreen() {
                                 shape = MaterialTheme.shapes.small
                             )
                             .clip(shape = MaterialTheme.shapes.small)
-                            .padding(vertical = Dimensions.SIZE_8, horizontal = Dimensions.SIZE_2),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Blu by BCA",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                            )
-                        )
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                            contentDescription = null
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.small
-                            )
-                            .clip(shape = MaterialTheme.shapes.small)
-                            .padding(vertical = Dimensions.SIZE_8, horizontal = Dimensions.SIZE_2),
+                            .clickable(true) {
+                                appState.signOut(onSignedOut)
+                            }
+                            .padding(
+                                vertical = Dimensions.SIZE_12,
+                                horizontal = Dimensions.SIZE_24
+                            ),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
                             text = "Logout",
-                            style = MaterialTheme.typography.bodySmall.copy(
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                             )
@@ -194,7 +182,7 @@ private fun ProfileScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            ProfileScreen()
+            ProfileScreen(appState = rememberCofinanceAppState(), onSignedOut = { })
         }
     }
 }

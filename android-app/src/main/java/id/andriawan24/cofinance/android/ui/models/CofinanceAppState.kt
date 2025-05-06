@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.android.ui.models
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -11,7 +12,11 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import id.andriawan24.cofinance.android.ui.navigation.models.BottomNavigationDestinations
+import id.andriawan24.cofinance.android.ui.presentation.MainActivity
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -20,15 +25,22 @@ fun rememberCofinanceAppState(
     navController: NavHostController = rememberNavController()
 ): CofinanceAppState {
     return remember(coroutineScope, navController) {
-        CofinanceAppState(navController = navController)
+        CofinanceAppState(navController = navController, coroutineScope = coroutineScope)
     }
 }
 
 @Stable
-class CofinanceAppState(val navController: NavHostController) {
+class CofinanceAppState(
+    val navController: NavHostController,
+    val coroutineScope: CoroutineScope
+) {
     val bottomNavigationDestinations = BottomNavigationDestinations.entries
     val bottomNavigationRoutes = bottomNavigationDestinations.map { it.routeClass.route }
     private val previousDestination = mutableStateOf<NavDestination?>(null)
+    val auth = Firebase.auth
+
+    val user: FirebaseUser?
+        get() = auth.currentUser
 
     val currentDestination: NavDestination?
         @Composable get() {
@@ -57,5 +69,14 @@ class CofinanceAppState(val navController: NavHostController) {
         }
 
         navController.navigate(route = topLevelDestination.routeClass, navOptions = topLevelOption)
+    }
+
+    fun signOut(onSuccess: () -> Unit) {
+        try {
+            auth.signOut()
+            onSuccess()
+        } catch (e: Exception) {
+            Log.e(MainActivity::class.simpleName, "signOut: ${e.message}", e)
+        }
     }
 }
