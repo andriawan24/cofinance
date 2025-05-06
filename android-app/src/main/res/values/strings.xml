@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Cofinance</string>
+    <string name="title_onboarding">Save your money, save your future</string>
+    <string name="description_onboarding">You have been spending like you are rich. You are not. Track it, fix it, stack it</string>
+    <string name="action_continue_now">Continue Now</string>
+    <string name="content_description_google_button">Google Icon Button</string>
+    <string name="action_sign_in_google">Sign in with Google</string>
+    <string name="title_login">Welcome, are you ready to start?</string>
+    <string name="description_login">Let\'s sign you in first</string>
+    <string name="label_home">Home</string>
+    <string name="label_expenses">Expenses</string>
+    <string name="label_wallet">Wallet</string>
+    <string name="label_profile">Profile</string>
+</resources>
