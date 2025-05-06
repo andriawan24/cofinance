@@ -1,7 +1,13 @@
 package id.andriawan24.cofinance.android.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -10,6 +16,8 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,18 +29,39 @@ import id.andriawan24.cofinance.android.utils.Dimensions
 
 @Composable
 fun CofinanceBottomNavigation(appState: CofinanceAppState) {
-    NavigationBar(
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = Dimensions.zero
-    ) {
-        appState.bottomNavigationDestinations.forEach { destination ->
-            CofinanceBottomNavigationItem(
-                destination = destination,
-                currentDestination = appState.currentTopBottomNavDest,
-                onItemClicked = {
-                    appState.navigateToTopLevelDestination(destination)
+    Box {
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            tonalElevation = Dimensions.zero
+        ) {
+            appState.bottomNavigationDestinations.forEachIndexed { index, destination ->
+                if (index == appState.bottomNavigationDestinations.size / 2) {
+                    Spacer(Modifier.weight(1f))
                 }
+
+                CofinanceBottomNavigationItem(
+                    destination = destination,
+                    currentDestination = appState.currentTopBottomNavDest,
+                    onItemClicked = {
+                        appState.navigateToTopLevelDestination(destination)
+                    }
+                )
+            }
+        }
+
+        FloatingActionButton(
+            modifier = Modifier.align(Alignment.TopCenter),
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = Dimensions.SIZE_2
+            ),
+            onClick = {
+                TODO("Not implemented")
+            }
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = null
             )
         }
     }
