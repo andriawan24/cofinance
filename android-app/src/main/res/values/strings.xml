@@ -14,4 +14,6 @@
     <string name="label_profile">Profile</string>
     <string name="title_total_balance_this_month">Total balance in this month</string>
     <string name="label_edit_profile">Edit Profile</string>
+    <string name="title_profile">Profile</string>
+    <string name="label_logout">Logout</string>
 </resources>

@@ -54,7 +54,7 @@ fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = Dimensions.SIZE_24),
-                text = "Profile",
+                text = stringResource(R.string.title_profile),
                 textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.titleMedium
             )
@@ -160,7 +160,7 @@ fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Logout",
+                            text = stringResource(R.string.label_logout),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
