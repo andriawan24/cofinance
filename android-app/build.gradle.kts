@@ -3,19 +3,18 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.googleService)
 }
 
 android {
-    namespace = "id.andriawan24.cofinance.android"
+    namespace = "id.andriawan24.cofinance.andro"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "id.andriawan24.cofinance.android"
+        applicationId = "id.andriawan24.cofinance.andro"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
     }
 
     buildFeatures {
@@ -55,10 +54,6 @@ dependencies {
     implementation(libs.compose.ui.tooling.preview)
     debugImplementation(libs.compose.ui.tooling)
 
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.auth)
-    implementation(libs.firebase.analytics)
-
     // Google sign in
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
@@ -67,6 +62,11 @@ dependencies {
     // Coil image loader
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Koin dependency injection
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.android.compose)
 
     implementation(libs.kotlinx.serialization.json)
 }

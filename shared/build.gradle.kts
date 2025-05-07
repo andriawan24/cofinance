@@ -1,8 +1,12 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinSerialization)
+    id("com.codingfeline.buildkonfig")
 }
 
 kotlin {
@@ -28,10 +32,40 @@ kotlin {
     }
 
     sourceSets {
-        commonMain.dependencies { }
+        commonMain.dependencies {
+            // SUPABASE
+            implementation(project.dependencies.platform(libs.supabasekt.bom))
+            implementation(libs.supabasekt.postgrest)
+            implementation(libs.supabasekt.auth)
+            implementation(libs.supabasekt.realtime)
+
+            // KTOR
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+
+            // Koin
+            implementation(libs.koin.core)
+        }
+
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+buildkonfig {
+    packageName = "com.andreasgift.kmpweatherapp"
+
+    defaultConfigs {
+        val localProperties = gradleLocalProperties(rootDir, providers)
+        val supabaseUrl = localProperties.getProperty("supabase.project_url")
+        val supabaseApiKey = localProperties.getProperty("supabase.public_api_key")
+
+        require(supabaseUrl.isNotEmpty()) { "Register supabase url on local.properties" }
+        require(supabaseApiKey.isNotEmpty()) { "Register supabase api key on local.properties" }
+
+        buildConfigField(FieldSpec.Type.STRING, "SUPABASE_URL", supabaseUrl)
+        buildConfigField(FieldSpec.Type.STRING, "SUPABASE_API_KEY", supabaseApiKey)
     }
 }
 

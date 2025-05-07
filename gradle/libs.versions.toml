@@ -1,10 +1,10 @@
 [versions]
 agp = "8.11.0-alpha07"
+buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.1.0"
 coil-network-okhttp = "3.1.0"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
-firebaseBom = "33.13.0"
 googleid = "1.1.1"
 kotlin = "2.1.20"
 googleService = "4.4.2"
@@ -13,15 +13,16 @@ compose-material3 = "1.3.2"
 compose-activity = "1.10.1"
 compose-navigation = "2.8.9"
 kotlinx-serialization-json = "1.8.1"
+supabasekt = "3.1.4"
+ktor = "3.1.3"
+koin = "3.2.0"
 
 [libraries]
+buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-network-okhttp" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-auth = { module = "com.google.firebase:firebase-auth" }
-firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
@@ -29,16 +30,23 @@ compose-navigation = { module = "androidx.navigation:navigation-compose", versio
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
-compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
 compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
+supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabasekt-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-android-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
-kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 googleService = { id = "com.google.gms.google-services", version.ref = "googleService" }
