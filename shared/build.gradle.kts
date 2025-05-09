@@ -43,6 +43,9 @@ kotlin {
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.cio)
 
+            // Logging
+            implementation(libs.napier)
+
             // Koin
             implementation(libs.koin.core)
         }

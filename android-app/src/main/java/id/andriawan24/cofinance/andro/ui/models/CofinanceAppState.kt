@@ -1,6 +1,5 @@
 package id.andriawan24.cofinance.andro.ui.models
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -13,7 +12,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
-import id.andriawan24.cofinance.andro.MainActivity
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
@@ -34,10 +32,6 @@ class CofinanceAppState(
     val bottomNavigationDestinations = BottomNavigationDestinations.entries
     val bottomNavigationRoutes = bottomNavigationDestinations.map { it.routeClass.route }
     private val previousDestination = mutableStateOf<NavDestination?>(null)
-//    val auth = Firebase.auth
-//
-//    val user: FirebaseUser?
-//        get() = auth.currentUser
 
     val currentDestination: NavDestination?
         @Composable get() {
@@ -66,14 +60,5 @@ class CofinanceAppState(
         }
 
         navController.navigate(route = topLevelDestination.routeClass, navOptions = topLevelOption)
-    }
-
-    fun signOut(onSuccess: () -> Unit) {
-        try {
-//            auth.signOut()
-            onSuccess()
-        } catch (e: Exception) {
-            Log.e(MainActivity::class.simpleName, "signOut: ${e.message}", e)
-        }
     }
 }

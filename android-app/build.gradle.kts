@@ -1,8 +1,16 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.compose.compiler)
+}
+
+val localProperties = gradleLocalProperties(rootDir, providers)
+val googleClientId: String = localProperties.getProperty("google_auth_client_id")
+require(googleClientId.isNotEmpty()) {
+    "Google Client ID is empty"
 }
 
 android {
@@ -15,10 +23,13 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
+
+        buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${googleClientId}\"")
     }
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -62,6 +73,9 @@ dependencies {
     // Coil image loader
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
+
+    // Logging
+    implementation(libs.napier)
 
     // Koin dependency injection
     implementation(libs.koin.core)

@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,11 +29,27 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_7_PRO
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
+import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun OnboardingScreen(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
+fun OnboardingScreen(
+    modifier: Modifier = Modifier,
+    onNavigateToHome: () -> Unit,
+    onContinueClicked: () -> Unit
+) {
+    val viewModel: OnboardingViewModel = koinViewModel()
+
+    viewModel.navigateToHome.CollectAsEffect {
+        onNavigateToHome()
+    }
+
+    LaunchedEffect(true) {
+        viewModel.getUser()
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -119,7 +136,7 @@ private fun OnboardingScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            OnboardingScreen(onContinueClicked = {})
+            OnboardingScreen(onContinueClicked = {}, onNavigateToHome = {})
         }
     }
 }
@@ -136,7 +153,7 @@ private fun OnboardingScreenDarkPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            OnboardingScreen(onContinueClicked = { })
+            OnboardingScreen(onContinueClicked = { }, onNavigateToHome = {})
         }
     }
 }

@@ -6,6 +6,7 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import id.andriawan24.cofinance.andro.BuildConfig
 import id.andriawan24.cofinance.andro.MainActivity
 
 object AuthHelper {
@@ -15,7 +16,7 @@ object AuthHelper {
         onSignedIn: (String) -> Unit
     ) {
         val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId("441243986243-ks2t66rum6ee4nq1k62mnn68gauth5q1.apps.googleusercontent.com")
+            .setServerClientId(BuildConfig.GOOGLE_CLIENT_ID)
             .setFilterByAuthorizedAccounts(false)
             .build()
 

@@ -23,6 +23,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,20 +32,39 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.error
 import coil3.request.placeholder
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
+import id.andriawan24.cofinance.andro.ui.presentation.login.LoginEvent
+import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
+import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.TextSizes
+import io.github.aakira.napier.Napier
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
+fun ProfileScreen(
+    onSignedOut: () -> Unit,
+    loginViewModel: LoginViewModel = koinViewModel()
+) {
+    val user by loginViewModel.user.collectAsStateWithLifecycle()
+
+    loginViewModel.loginEvent.CollectAsEffect {
+        when (it) {
+            is LoginEvent.NavigateLoginPage -> onSignedOut()
+            is LoginEvent.ShowMessage -> Napier.e("Failed to logout ${it.message}")
+            else -> {
+                // Do nothing
+            }
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -66,27 +86,27 @@ fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
                     .padding(vertical = Dimensions.SIZE_24),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-//                AsyncImage(
-//                    modifier = Modifier
-//                        .size(Dimensions.SIZE_80)
-//                        .clip(CircleShape),
-//                    model = ImageRequest.Builder(LocalContext.current)
-//                        .data(appState.user?.photoUrl)
-//                        .placeholder(R.drawable.img_placeholder_profile)
-//                        .error(R.drawable.img_placeholder_profile)
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = null
-//                )
+                AsyncImage(
+                    modifier = Modifier
+                        .size(Dimensions.SIZE_80)
+                        .clip(CircleShape),
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(user?.profileUrl)
+                        .placeholder(R.drawable.img_placeholder_profile)
+                        .error(R.drawable.img_placeholder_profile)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = null
+                )
 
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
-//                Text(
-//                    text = appState.user?.displayName.orEmpty(),
-//                    style = MaterialTheme.typography.headlineSmall.copy(
-//                        fontSize = TextSizes.SIZE_20
-//                    )
-//                )
+                Text(
+                    text = user?.name.orEmpty(),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontSize = TextSizes.SIZE_20
+                    )
+                )
 
                 TextButton(
                     onClick = {
@@ -150,7 +170,7 @@ fun ProfileScreen(appState: CofinanceAppState, onSignedOut: () -> Unit) {
                             )
                             .clip(shape = MaterialTheme.shapes.small)
                             .clickable(true) {
-                                appState.signOut(onSignedOut)
+                                loginViewModel.logout()
                             }
                             .padding(
                                 vertical = Dimensions.SIZE_12,
@@ -182,7 +202,7 @@ private fun ProfileScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            ProfileScreen(appState = rememberCofinanceAppState(), onSignedOut = { })
+            ProfileScreen(onSignedOut = { })
         }
     }
 }

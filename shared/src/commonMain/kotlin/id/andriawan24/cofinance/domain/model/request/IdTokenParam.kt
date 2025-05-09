@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.domain.model
+package id.andriawan24.cofinance.domain.model.request
 
 import id.andriawan24.cofinance.data.model.request.IdTokenRequest
 

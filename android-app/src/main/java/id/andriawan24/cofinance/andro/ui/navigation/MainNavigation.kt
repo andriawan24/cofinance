@@ -24,7 +24,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
 import id.andriawan24.cofinance.andro.utils.AuthHelper
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
-import id.andriawan24.cofinance.domain.model.IdTokenParam
+import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -44,6 +44,14 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             OnboardingScreen(
                 onContinueClicked = {
                     appState.navController.navigate(route = Destinations.Login)
+                },
+                onNavigateToHome = {
+                    appState.navController.navigate(Destinations.Home) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
@@ -60,17 +68,19 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
 
             viewModel.loginEvent.CollectAsEffect {
                 when (it) {
-                    LoginEvent.NavigateHomePage -> {
-                        appState.navController.navigate(Destinations.Home) {
-                            launchSingleTop = true
-                            popUpTo(0) {
-                                inclusive = true
-                            }
+                    LoginEvent.NavigateHomePage -> appState.navController.navigate(Destinations.Home) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
                         }
                     }
 
                     is LoginEvent.ShowMessage -> {
                         Log.d(MainActivity::class.simpleName, "LoginScreen: ${it.message}")
+                    }
+
+                    else -> {
+                        // Do nothing
                     }
                 }
             }
@@ -80,12 +90,6 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                     appState.coroutineScope.launch {
                         AuthHelper.signInGoogle(context, credentialManager) {
                             viewModel.signInWithIdToken(IdTokenParam(it))
-//                            appState.navController.navigate(Destinations.Home) {
-//                                launchSingleTop = true
-//                                popUpTo(0) {
-//                                    inclusive = true
-//                                }
-//                            }
                         }
                     }
                 }
@@ -100,7 +104,6 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 popExitTransition = { ExitTransition.None }
             ) {
                 HomeScreen(
-                    appState = appState,
                     onSeeAllTransactionClicked = {
                         appState.navigateToTopLevelDestination(
                             topLevelDestination = BottomNavigationDestinations.HOME
@@ -134,7 +137,6 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 popExitTransition = { ExitTransition.None }
             ) {
                 ProfileScreen(
-                    appState = appState,
                     onSignedOut = {
                         appState.navController.navigate(Destinations.Login) {
                             launchSingleTop = true
