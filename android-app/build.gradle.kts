@@ -20,6 +20,7 @@ android {
     defaultConfig {
         applicationId = "id.andriawan24.cofinance.andro"
         minSdk = 24
+        //noinspection OldTargetApi
         targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
