@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
+import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.home.HomeScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
@@ -61,6 +62,15 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                     }
                 }
             )
+        }
+
+        composable<Destinations.AddExpenses>(
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
+            AddExpensesScreen()
         }
 
         navigation<Destinations.Main>(startDestination = Destinations.Home) {

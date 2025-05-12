@@ -45,11 +45,11 @@ import id.andriawan24.cofinance.andro.utils.NumberHelper
 @Composable
 fun PieChart(
     modifier: Modifier = Modifier,
-    data: Map<String, Int>,
+    data: Map<String, Long>,
     radiusOuter: Dp = Dimensions.SIZE_90,
     chartBarWidth: Dp = Dimensions.SIZE_20,
     animationDuration: Int = 1000,
-    detailChart: @Composable ColumnScope.(data: Map<String, Int>, colors: List<Color>) -> Unit
+    detailChart: @Composable ColumnScope.(data: Map<String, Long>, colors: List<Color>) -> Unit
 ) {
     val totalSum = data.values.sum()
     val floatValue = mutableListOf<Float>()

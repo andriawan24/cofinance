@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
+import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
@@ -56,7 +57,7 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
                 defaultElevation = Dimensions.SIZE_2
             ),
             onClick = {
-                TODO("Not implemented")
+                appState.navController.navigate(Destinations.AddExpenses)
             }
         ) {
             Icon(
