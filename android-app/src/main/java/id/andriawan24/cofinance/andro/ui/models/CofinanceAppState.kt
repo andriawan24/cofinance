@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.models
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
@@ -13,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun rememberCofinanceAppState(
@@ -25,14 +27,12 @@ fun rememberCofinanceAppState(
 }
 
 @Stable
-class CofinanceAppState(
-    val navController: NavHostController,
-    val coroutineScope: CoroutineScope
-) {
+class CofinanceAppState(val navController: NavHostController, val coroutineScope: CoroutineScope) {
     val bottomNavigationDestinations = BottomNavigationDestinations.entries
     val bottomNavigationRoutes = bottomNavigationDestinations.map { it.routeClass.route }
-    private val previousDestination = mutableStateOf<NavDestination?>(null)
+    var snackBarHostState = SnackbarHostState()
 
+    private val previousDestination = mutableStateOf<NavDestination?>(null)
     val currentDestination: NavDestination?
         @Composable get() {
             val currentEntry =
@@ -60,5 +60,11 @@ class CofinanceAppState(
         }
 
         navController.navigate(route = topLevelDestination.routeClass, navOptions = topLevelOption)
+    }
+
+    fun showSnackbar(message: String) {
+        coroutineScope.launch {
+            snackBarHostState.showSnackbar(message)
+        }
     }
 }
