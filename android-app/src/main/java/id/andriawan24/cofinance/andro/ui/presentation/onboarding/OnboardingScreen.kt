@@ -38,10 +38,9 @@ import org.koin.androidx.compose.koinViewModel
 fun OnboardingScreen(
     modifier: Modifier = Modifier,
     onNavigateToHome: () -> Unit,
-    onContinueClicked: () -> Unit
+    onContinueClicked: () -> Unit,
+    viewModel: OnboardingViewModel = koinViewModel()
 ) {
-    val viewModel: OnboardingViewModel = koinViewModel()
-
     viewModel.navigateToHome.CollectAsEffect {
         onNavigateToHome()
     }
@@ -50,6 +49,11 @@ fun OnboardingScreen(
         viewModel.getUser()
     }
 
+    OnboardingContent(modifier = modifier, onContinueClicked = onContinueClicked)
+}
+
+@Composable
+fun OnboardingContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
     Column(modifier = modifier.fillMaxSize()) {
         Box(
             modifier = Modifier
@@ -136,7 +140,7 @@ private fun OnboardingScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            OnboardingScreen(onContinueClicked = {}, onNavigateToHome = {})
+            OnboardingContent(onContinueClicked = {})
         }
     }
 }
@@ -153,7 +157,7 @@ private fun OnboardingScreenDarkPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            OnboardingScreen(onContinueClicked = { }, onNavigateToHome = {})
+            OnboardingContent(onContinueClicked = {})
         }
     }
 }
