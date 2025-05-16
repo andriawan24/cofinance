@@ -5,7 +5,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 val LightColorScheme = lightColorScheme(
-    primary = Color(0xFF0766EB),
+    primary = Color(0xFF6C89FE),
     onPrimary = Color.White, // Typical text/icon color on primary
     primaryContainer = Color(0xFFD0E4FF), // Lighter shade of primary
     onPrimaryContainer = Color(0xFF001E30), // Darker text color on primary container
@@ -20,9 +20,9 @@ val LightColorScheme = lightColorScheme(
     background = Color(0xFFFBFCFE),
     onBackground = Color(0xFF1A1C1E),
     surfaceTint = Color(0xFF475D92),
-    surface = Color(0xFFFBFCFE),
+    surface = Color(0xFFEEF9F8),
     onSurface = Color.White,
-    surfaceVariant = Color(0xFFE0E2EC),
+    surfaceVariant = Color(0xFFF0F3FF),
     onSurfaceVariant = Color(0xFF43474E),
     outline = Color(0xFF73777F),
     inverseOnSurface = Color(0xFFF1F0F4),

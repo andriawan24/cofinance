@@ -5,64 +5,72 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.utils.TextSizes
 
-val RethinkFontFamily = FontFamily(
-    Font(R.font.rethink_sans_bold, FontWeight.Bold),
-    Font(R.font.rethink_sans_semibold, FontWeight.SemiBold),
-    Font(R.font.rethink_sans_medium, FontWeight.Medium),
-    Font(R.font.rethink_sans, FontWeight.Normal),
+val ManropeFontFamily = FontFamily(
+    Font(R.font.manrope_extrabold, FontWeight.ExtraBold),
+    Font(R.font.manrope_bold, FontWeight.Bold),
+    Font(R.font.manrope_semibold, FontWeight.SemiBold),
+    Font(R.font.manrope_medium, FontWeight.Medium),
+    Font(R.font.manrope, FontWeight.Normal),
 )
 
 private val defaultTypography = Typography()
 
 val cofinanceTypography = Typography(
     displayLarge = defaultTypography.displayLarge.copy(
-        fontFamily = RethinkFontFamily,
+        fontFamily = ManropeFontFamily,
         fontWeight = FontWeight.Bold
     ),
     displayMedium = defaultTypography.displayMedium.copy(
-        fontFamily = RethinkFontFamily,
+        fontFamily = ManropeFontFamily,
         fontWeight = FontWeight.SemiBold
     ),
     displaySmall = defaultTypography.displaySmall.copy(
-        fontFamily = RethinkFontFamily,
+        fontFamily = ManropeFontFamily,
         fontWeight = FontWeight.Medium
     ),
     headlineLarge = defaultTypography.headlineLarge.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     headlineMedium = defaultTypography.headlineMedium.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     headlineSmall = defaultTypography.headlineSmall.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     titleLarge = defaultTypography.titleLarge.copy(
-        fontFamily = RethinkFontFamily,
+        fontFamily = ManropeFontFamily,
         fontWeight = FontWeight.Bold
     ),
     titleMedium = defaultTypography.titleMedium.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     titleSmall = defaultTypography.titleSmall.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     bodyLarge = defaultTypography.bodyLarge.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     bodyMedium = defaultTypography.bodyMedium.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     bodySmall = defaultTypography.bodySmall.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily
     ),
     labelLarge = defaultTypography.labelLarge.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = TextSizes.SIZE_20
     ),
     labelMedium = defaultTypography.labelMedium.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = TextSizes.SIZE_16
     ),
     labelSmall = defaultTypography.labelSmall.copy(
-        fontFamily = RethinkFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = TextSizes.SIZE_14
     )
 )
