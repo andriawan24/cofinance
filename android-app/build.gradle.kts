@@ -9,9 +9,8 @@ plugins {
 
 val localProperties = gradleLocalProperties(rootDir, providers)
 val googleClientId: String = localProperties.getProperty("google_auth_client_id")
-require(googleClientId.isNotEmpty()) {
-    "Google Client ID is empty"
-}
+
+require(googleClientId.isNotEmpty()) { "Google Client ID is empty" }
 
 android {
     namespace = "id.andriawan24.cofinance.andro"
@@ -82,6 +81,9 @@ dependencies {
     implementation(libs.koin.core)
     implementation(libs.koin.android)
     implementation(libs.koin.android.compose)
+
+    // Dot indicator
+    implementation(libs.dotsindicator)
 
     implementation(libs.kotlinx.serialization.json)
 }

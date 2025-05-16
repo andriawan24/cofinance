@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
@@ -32,43 +30,30 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.AsyncImage
-import coil3.request.ImageRequest
-import coil3.request.crossfade
-import coil3.request.error
-import coil3.request.placeholder
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.presentation.login.LoginEvent
-import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.TextSizes
 import io.github.aakira.napier.Napier
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileScreen(
     onSignedOut: () -> Unit,
-    loginViewModel: LoginViewModel = koinViewModel()
+    profileViewModel: ProfileViewModel = koinViewModel()
 ) {
-    val user by loginViewModel.user.collectAsStateWithLifecycle()
+    // val user by profileViewModel.user.collectAsStateWithLifecycle()
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
 
-    loginViewModel.loginEvent.CollectAsEffect {
+    profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
-            is LoginEvent.NavigateLoginPage -> onSignedOut()
-            is LoginEvent.ShowMessage -> Napier.e("Failed to logout ${it.message}")
-            else -> {
-                // Do nothing
-            }
+            is ProfileEvent.NavigateToLoginPage -> onSignedOut()
+            is ProfileEvent.ShowMessage -> Napier.e("Failed to logout ${it.message}")
         }
     }
 
@@ -93,27 +78,27 @@ fun ProfileScreen(
                     .padding(vertical = Dimensions.SIZE_24),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                AsyncImage(
-                    modifier = Modifier
-                        .size(Dimensions.SIZE_80)
-                        .clip(CircleShape),
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(user?.profileUrl)
-                        .placeholder(R.drawable.img_placeholder_profile)
-                        .error(R.drawable.img_placeholder_profile)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = null
-                )
+//                AsyncImage(
+//                    modifier = Modifier
+//                        .size(Dimensions.SIZE_80)
+//                        .clip(CircleShape),
+//                    model = ImageRequest.Builder(LocalContext.current)
+//                        .data(user?.profileUrl)
+//                        .placeholder(R.drawable.img_placeholder_profile)
+//                        .error(R.drawable.img_placeholder_profile)
+//                        .crossfade(true)
+//                        .build(),
+//                    contentDescription = null
+//                )
 
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
-                Text(
-                    text = user?.name.orEmpty(),
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontSize = TextSizes.SIZE_20
-                    )
-                )
+//                Text(
+//                    text = user?.name.orEmpty(),
+//                    style = MaterialTheme.typography.headlineSmall.copy(
+//                        fontSize = TextSizes.SIZE_20
+//                    )
+//                )
 
                 TextButton(
                     onClick = {
@@ -224,7 +209,7 @@ fun ProfileScreen(
                         ),
                         onClick = {
                             showConfirmationLogoutDialog = false
-                            loginViewModel.logout()
+//                            loginViewModel.logout()
                         }
                     ) {
                         Text("Yes")

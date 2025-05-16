@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import id.andriawan24.cofinance.domain.usecase.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.LoginIdTokenUseCase
-import id.andriawan24.cofinance.domain.usecase.LogoutUseCase
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.SharingStarted
@@ -18,14 +17,12 @@ import kotlinx.coroutines.launch
 
 sealed class LoginEvent {
     data object NavigateHomePage : LoginEvent()
-    data object NavigateLoginPage : LoginEvent()
     data class ShowMessage(val message: String) : LoginEvent()
 }
 
 class LoginViewModel(
     private val loginIdTokenUseCase: LoginIdTokenUseCase,
-    getUserUseCase: GetUserUseCase,
-    private val logoutUseCase: LogoutUseCase
+    getUserUseCase: GetUserUseCase
 ) : ViewModel() {
 
     private val _loginEvent = Channel<LoginEvent>(Channel.BUFFERED)
@@ -39,19 +36,6 @@ class LoginViewModel(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = null
         )
-
-    fun logout() {
-        viewModelScope.launch {
-            logoutUseCase.execute().collectLatest {
-                when {
-                    it.isSuccess -> _loginEvent.send(LoginEvent.NavigateLoginPage)
-                    it.isFailure -> {
-                        _loginEvent.send(LoginEvent.ShowMessage(it.exceptionOrNull()?.message.orEmpty()))
-                    }
-                }
-            }
-        }
-    }
 
     fun signInWithIdToken(param: IdTokenParam) {
         viewModelScope.launch {

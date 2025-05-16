@@ -13,7 +13,6 @@ import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddExpensesScr
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.home.HomeScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
-import id.andriawan24.cofinance.andro.ui.presentation.onboarding.OnboardingScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
 
@@ -22,46 +21,15 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
     NavHost(
         modifier = modifier,
         navController = appState.navController,
-        startDestination = Destinations.Onboarding
+        startDestination = Destinations.Login
     ) {
-        composable<Destinations.Onboarding>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            OnboardingScreen(
-                onContinueClicked = {
-                    appState.navController.navigate(route = Destinations.Login)
-                },
-                onNavigateToHome = {
-                    appState.navController.navigate(Destinations.Home) {
-                        launchSingleTop = true
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
-                }
-            )
-        }
-
         composable<Destinations.Login>(
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            LoginScreen(
-                appState = appState,
-                onSignedIn = {
-                    appState.navController.navigate(Destinations.Home) {
-                        launchSingleTop = true
-                        popUpTo(0) {
-                            inclusive = true
-                        }
-                    }
-                }
-            )
+            LoginScreen(appState = appState)
         }
 
         composable<Destinations.AddExpenses>(

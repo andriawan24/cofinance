@@ -12,6 +12,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.MainNavigation
@@ -38,7 +39,14 @@ class MainActivity : ComponentActivity() {
                     Surface(
                         modifier = Modifier.Companion
                             .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.background)
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        MaterialTheme.colorScheme.surface,
+                                        MaterialTheme.colorScheme.surfaceVariant
+                                    )
+                                )
+                            )
                             .padding(it)
                     ) {
                         MainNavigation(appState = appState)

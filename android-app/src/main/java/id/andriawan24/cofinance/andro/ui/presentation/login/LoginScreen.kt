@@ -1,15 +1,16 @@
 package id.andriawan24.cofinance.andro.ui.presentation.login
 
 import android.content.Context
-import androidx.compose.foundation.layout.Arrangement
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -23,11 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.credentials.CredentialManager
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
+import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.AuthHelper
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
@@ -38,89 +40,89 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
-    onSignedIn: () -> Unit,
     appState: CofinanceAppState,
+    context: Context = LocalContext.current,
     viewModel: LoginViewModel = koinViewModel()
 ) {
-    val context: Context = LocalContext.current
     val credentialManager = remember { CredentialManager.create(context) }
-
     viewModel.loginEvent.CollectAsEffect {
         when (it) {
-            LoginEvent.NavigateHomePage -> onSignedIn()
+            LoginEvent.NavigateHomePage -> appState.navController.navigate(Destinations.Home) {
+                launchSingleTop = true
+                popUpTo(0) {
+                    inclusive = true
+                }
+            }
+
             is LoginEvent.ShowMessage -> appState.coroutineScope.launch {
                 appState.snackBarHostState.showSnackbar(it.message)
             }
-
-            else -> Unit
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = Dimensions.SIZE_24, vertical = Dimensions.SIZE_36),
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        Text(
-            text = stringResource(R.string.title_login),
-            style = MaterialTheme.typography.displaySmall
-        )
-
-        Spacer(modifier = Modifier.height(height = Dimensions.SIZE_8))
-
-        Text(
-            text = stringResource(R.string.description_login),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
-        )
-
-        Spacer(modifier = Modifier.height(height = Dimensions.SIZE_24))
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.extraLarge,
-            contentPadding = PaddingValues(vertical = Dimensions.SIZE_12),
-            colors = ButtonDefaults.elevatedButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceTint,
-                contentColor = MaterialTheme.colorScheme.onSurface
-            ),
-            onClick = {
-                appState.coroutineScope.launch {
-                    AuthHelper.signInGoogle(
-                        context = context,
-                        credentialManager = credentialManager,
-                        onSignedIn = {
-                            viewModel.signInWithIdToken(IdTokenParam(it))
-                        },
-                        onSignedInFailed = appState::showSnackbar
-                    )
-                }
-            }
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(
-                    space = Dimensions.SIZE_12,
-                    alignment = Alignment.CenterHorizontally
-                ),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.action_sign_in_google),
-                    style = MaterialTheme.typography.labelLarge
+    LoginContent(
+        onContinueClicked = {
+            appState.coroutineScope.launch {
+                AuthHelper.signInGoogle(
+                    context = context,
+                    credentialManager = credentialManager,
+                    onSignedIn = { viewModel.signInWithIdToken(IdTokenParam(it)) },
+                    onSignedInFailed = appState::showSnackbar
                 )
+            }
+        }
+    )
+}
 
+@Composable
+fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
+
+        Image(
+            painter = painterResource(R.drawable.img_cofinance),
+            contentDescription = null
+        )
+
+        OnboardingContent(modifier = Modifier.weight(1f))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16)
+                .padding(bottom = Dimensions.SIZE_16),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                contentPadding = PaddingValues(vertical = Dimensions.SIZE_16),
+                colors = ButtonDefaults.elevatedButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                onClick = onContinueClicked
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_google),
-                    contentDescription = stringResource(R.string.content_description_google_button)
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
+                )
+
+                Spacer(modifier = Modifier.width(Dimensions.SIZE_8))
+
+                Text(
+                    text = stringResource(R.string.action_sign_in_google),
+                    style = MaterialTheme.typography.labelMedium
                 )
             }
         }
     }
 }
 
-@Preview
+@Preview(showBackground = true, device = Devices.PIXEL)
 @Composable
 private fun LoginScreenPreview() {
     CofinanceTheme {
@@ -128,9 +130,23 @@ private fun LoginScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginScreen(
-                appState = rememberCofinanceAppState(),
-                onSignedIn = { }
+            LoginContent(
+                onContinueClicked = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, device = Devices.PIXEL_4_XL, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun LoginScreenDarkPreview() {
+    CofinanceTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            LoginContent(
+                onContinueClicked = {}
             )
         }
     }
