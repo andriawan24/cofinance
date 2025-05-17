@@ -113,14 +113,14 @@ private fun CofinanceBottomNavigationItemPreview() {
         Surface {
             Row {
                 CofinanceBottomNavigationItem(
-                    destination = BottomNavigationDestinations.HOME,
-                    currentDestination = BottomNavigationDestinations.HOME,
+                    destination = BottomNavigationDestinations.ACTIVITY,
+                    currentDestination = BottomNavigationDestinations.ACTIVITY,
                     onItemClicked = {}
                 )
 
                 CofinanceBottomNavigationItem(
                     destination = BottomNavigationDestinations.BUDGET,
-                    currentDestination = BottomNavigationDestinations.HOME,
+                    currentDestination = BottomNavigationDestinations.ACTIVITY,
                     onItemClicked = {}
                 )
             }

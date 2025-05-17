@@ -61,7 +61,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 ActivityScreen(
                     onSeeAllTransactionClicked = {
                         appState.navigateToTopLevelDestination(
-                            topLevelDestination = BottomNavigationDestinations.HOME
+                            topLevelDestination = BottomNavigationDestinations.ACTIVITY
                         )
                     }
                 )

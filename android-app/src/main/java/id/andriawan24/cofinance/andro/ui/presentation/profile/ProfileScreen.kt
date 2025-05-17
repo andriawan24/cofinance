@@ -209,7 +209,7 @@ fun ProfileScreen(
                         ),
                         onClick = {
                             showConfirmationLogoutDialog = false
-//                            loginViewModel.logout()
+                            profileViewModel.logout()
                         }
                     ) {
                         Text("Yes")

@@ -20,7 +20,7 @@ private val defaultTypography = Typography()
 val cofinanceTypography = Typography(
     displayLarge = defaultTypography.displayLarge.copy(
         fontFamily = ManropeFontFamily,
-        fontWeight = FontWeight.Bold
+        fontWeight = FontWeight.SemiBold
     ),
     displayMedium = defaultTypography.displayMedium.copy(
         fontFamily = ManropeFontFamily,
@@ -28,7 +28,7 @@ val cofinanceTypography = Typography(
     ),
     displaySmall = defaultTypography.displaySmall.copy(
         fontFamily = ManropeFontFamily,
-        fontWeight = FontWeight.Medium,
+        fontWeight = FontWeight.SemiBold,
         fontSize = TextSizes.SIZE_24
     ),
     headlineLarge = defaultTypography.headlineLarge.copy(
@@ -44,10 +44,14 @@ val cofinanceTypography = Typography(
         fontFamily = ManropeFontFamily,
     ),
     titleMedium = defaultTypography.titleMedium.copy(
-        fontFamily = ManropeFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = TextSizes.SIZE_16
     ),
     titleSmall = defaultTypography.titleSmall.copy(
-        fontFamily = ManropeFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = TextSizes.SIZE_14
     ),
     bodyLarge = defaultTypography.bodyLarge.copy(
         fontFamily = ManropeFontFamily
@@ -60,17 +64,17 @@ val cofinanceTypography = Typography(
     ),
     labelLarge = defaultTypography.labelLarge.copy(
         fontFamily = ManropeFontFamily,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         fontSize = TextSizes.SIZE_20
     ),
     labelMedium = defaultTypography.labelMedium.copy(
         fontFamily = ManropeFontFamily,
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.SemiBold,
         fontSize = TextSizes.SIZE_16
     ),
     labelSmall = defaultTypography.labelSmall.copy(
         fontFamily = ManropeFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = TextSizes.SIZE_14
+        fontWeight = FontWeight.SemiBold,
+        fontSize = TextSizes.SIZE_12
     )
 )

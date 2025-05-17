@@ -18,4 +18,5 @@
     <string name="label_logout">Logout</string>
     <string name="label_activity">Activity</string>
     <string name="label_account">Account</string>
+    <string name="label_budget">Budget</string>
 </resources>

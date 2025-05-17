@@ -1,6 +1,8 @@
 package id.andriawan24.cofinance.andro.utils.ext
 
 import android.graphics.BlurMaskFilter
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
@@ -23,19 +25,39 @@ fun Modifier.dropShadow(
     val shadowSize = Size(size.width + spread.toPx(), size.height + spread.toPx())
     val shadowOutline = shape.createOutline(shadowSize, layoutDirection, this)
 
-    val paint = Paint()
-    paint.color = color
-
-    if (blur.toPx() > 0) {
-        paint.asFrameworkPaint().apply {
-            maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
+    val paint = Paint().apply {
+        this.color = color
+        if (blur.toPx() > 0) {
+            this.asFrameworkPaint().apply {
+                maskFilter = BlurMaskFilter(blur.toPx(), BlurMaskFilter.Blur.NORMAL)
+            }
         }
     }
 
     drawIntoCanvas { canvas ->
-        canvas.save()
-        canvas.translate(offsetX.toPx(), offsetY.toPx())
-        canvas.drawOutline(shadowOutline, paint)
-        canvas.restore()
+        canvas.run {
+            save()
+            translate(offsetX.toPx(), offsetY.toPx())
+            drawOutline(shadowOutline, paint)
+            restore()
+        }
+    }
+}
+
+@Composable
+@Stable
+fun Modifier.conditional(
+    condition: Boolean,
+    trueModifier: @Composable Modifier.() -> Modifier,
+    falseModifier: (Modifier.() -> Modifier)? = null
+): Modifier {
+    return if (condition) {
+        then(trueModifier(Modifier))
+    } else {
+        if (falseModifier != null) {
+            then(falseModifier(Modifier))
+        } else {
+            this
+        }
     }
 }

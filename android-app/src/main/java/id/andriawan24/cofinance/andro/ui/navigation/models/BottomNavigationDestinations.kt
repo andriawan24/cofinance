@@ -10,14 +10,14 @@ enum class BottomNavigationDestinations(
     @StringRes val labelId: Int,
     val route: Destinations
 ) {
-    HOME(
+    ACTIVITY(
         iconId = R.drawable.ic_activity,
         labelId = R.string.label_activity,
         route = Destinations.Activity
     ),
     BUDGET(
         iconId = R.drawable.ic_budget,
-        labelId = R.string.label_expenses,
+        labelId = R.string.label_budget,
         route = Destinations.Budget
     ),
     ACCOUNT(

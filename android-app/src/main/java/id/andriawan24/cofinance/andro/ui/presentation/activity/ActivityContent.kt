@@ -1,29 +1,65 @@
 package id.andriawan24.cofinance.andro.ui.presentation.activity
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
+import id.andriawan24.cofinance.andro.ui.presentation.activity.components.EmptyActivity
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
-fun ActivityContent() {
+fun ActivityContent(onBookmarkClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(Dimensions.SIZE_16)
     ) {
-        Row {
-            Text(
-                text = "Activity",
-                style = MaterialTheme.typography.displaySmall
+        ActivityTitle(onBookmarkClicked = onBookmarkClicked)
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
+        DateSwitcher(label = "May 2025")
+        EmptyActivity(modifier = Modifier.weight(1f))
+    }
+}
+
+@Composable
+private fun ActivityTitle(modifier: Modifier = Modifier, onBookmarkClicked: () -> Unit) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = stringResource(R.string.label_activity),
+            style = MaterialTheme.typography.displaySmall
+        )
+
+        IconButton(
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.primary
+            ),
+            onClick = onBookmarkClicked
+        ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_bookmark),
+                contentDescription = null
             )
         }
     }
@@ -34,7 +70,7 @@ fun ActivityContent() {
 private fun ActivityContentPreview() {
     CofinanceTheme {
         Surface {
-            ActivityContent()
+            ActivityContent(onBookmarkClicked = { })
         }
     }
 }

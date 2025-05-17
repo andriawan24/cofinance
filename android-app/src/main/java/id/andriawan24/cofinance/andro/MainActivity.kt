@@ -4,18 +4,29 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import id.andriawan24.cofinance.andro.di.viewModelModule
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
+import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.navigation.MainNavigation
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
+import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.ext.conditional
 import id.andriawan24.cofinance.di.dataModule
 import id.andriawan24.cofinance.di.domainModule
 import org.koin.android.ext.koin.androidContext
@@ -48,11 +59,24 @@ class MainActivity : ComponentActivity() {
                             }
                         },
                         snackbarHost = { SnackbarHost(appState.snackBarHostState) }
-                    ) {
+                    ) { contentPadding ->
                         Surface(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .padding(it)
+                                .conditional(
+                                    condition = appState.currentDestination?.route == Destinations.Login.route,
+                                    trueModifier = {
+                                        background(
+                                            brush = Brush.linearGradient(
+                                                colors = listOf(
+                                                    MaterialTheme.colorScheme.surfaceContainerHigh,
+                                                    MaterialTheme.colorScheme.surfaceContainerLow
+                                                )
+                                            )
+                                        )
+                                    }
+                                )
+                                .padding(contentPadding)
                         ) {
                             MainNavigation(appState = appState)
                         }
