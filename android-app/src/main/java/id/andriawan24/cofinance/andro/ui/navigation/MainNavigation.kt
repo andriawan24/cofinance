@@ -11,7 +11,7 @@ import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
-import id.andriawan24.cofinance.andro.ui.presentation.home.HomeScreen
+import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
@@ -42,7 +42,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             LoginScreen(appState = appState)
         }
 
-        composable<Destinations.AddExpenses>(
+        composable<Destinations.AddNew>(
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
@@ -51,14 +51,14 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             AddExpensesScreen()
         }
 
-        navigation<Destinations.Main>(startDestination = Destinations.Home) {
-            composable<Destinations.Home>(
+        navigation<Destinations.Main>(startDestination = Destinations.Activity) {
+            composable<Destinations.Activity>(
                 enterTransition = { EnterTransition.None },
                 exitTransition = { ExitTransition.None },
                 popEnterTransition = { EnterTransition.None },
                 popExitTransition = { ExitTransition.None }
             ) {
-                HomeScreen(
+                ActivityScreen(
                     onSeeAllTransactionClicked = {
                         appState.navigateToTopLevelDestination(
                             topLevelDestination = BottomNavigationDestinations.HOME
@@ -67,7 +67,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 )
             }
 
-            composable<Destinations.Expenses>(
+            composable<Destinations.Budget>(
                 enterTransition = { EnterTransition.None },
                 exitTransition = { ExitTransition.None },
                 popEnterTransition = { EnterTransition.None },
@@ -76,7 +76,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
                 ExpensesScreen()
             }
 
-            composable<Destinations.Wallet>(
+            composable<Destinations.Account>(
                 enterTransition = { EnterTransition.None },
                 exitTransition = { ExitTransition.None },
                 popEnterTransition = { EnterTransition.None },

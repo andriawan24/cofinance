@@ -29,7 +29,7 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
-fun OnboardingContent(modifier: Modifier = Modifier) {
+fun OnboardingSwiper(modifier: Modifier = Modifier) {
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     Column(
@@ -99,7 +99,7 @@ fun OnboardingContent(modifier: Modifier = Modifier) {
 private fun OnboardingContentPreview() {
     CofinanceTheme {
         Surface(color = MaterialTheme.colorScheme.surface) {
-            OnboardingContent()
+            OnboardingSwiper()
         }
     }
 }

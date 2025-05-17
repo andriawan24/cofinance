@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.login.components
+package id.andriawan24.cofinance.andro.ui.presentation.login
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.presentation.login.components.OnboardingSwiper
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
@@ -51,7 +52,7 @@ fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
             contentDescription = null
         )
 
-        OnboardingContent(modifier = Modifier.weight(1f))
+        OnboardingSwiper(modifier = Modifier.weight(1f))
 
         Column(
             modifier = Modifier

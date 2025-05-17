@@ -1,11 +1,11 @@
 package id.andriawan24.cofinance.andro.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -18,9 +18,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
@@ -30,10 +32,14 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
 fun CofinanceBottomNavigation(appState: CofinanceAppState) {
-    Box {
+    Box(
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.onPrimary)
+            .padding(top = Dimensions.SIZE_16)
+    ) {
         NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier,
+            containerColor = MaterialTheme.colorScheme.onPrimary,
             tonalElevation = Dimensions.zero
         ) {
             appState.bottomNavigationDestinations.forEachIndexed { index, destination ->
@@ -53,15 +59,15 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
 
         FloatingActionButton(
             modifier = Modifier.align(Alignment.TopCenter),
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = Dimensions.SIZE_2
-            ),
+            shape = MaterialTheme.shapes.extraLarge,
+            elevation = FloatingActionButtonDefaults.elevation(defaultElevation = Dimensions.zero),
+            containerColor = MaterialTheme.colorScheme.primary,
             onClick = {
-                appState.navController.navigate(Destinations.AddExpenses)
-            }
+                appState.navController.navigate(Destinations.AddNew)
+            },
         ) {
             Icon(
-                imageVector = Icons.Default.Add,
+                painter = painterResource(R.drawable.ic_add),
                 contentDescription = null
             )
         }
@@ -78,30 +84,23 @@ fun RowScope.CofinanceBottomNavigationItem(
         selected = currentDestination == destination,
         label = {
             Text(
-                text = stringResource(destination.iconTextId),
+                text = stringResource(destination.labelId),
                 style = MaterialTheme.typography.labelSmall
             )
         },
         alwaysShowLabel = true,
         icon = {
-            if (currentDestination == destination) {
-                Icon(
-                    painter = painterResource(destination.selectedIcon),
-                    contentDescription = null
-                )
-            } else {
-                Icon(
-                    painter = painterResource(destination.unselectedIcon),
-                    contentDescription = null
-                )
-            }
+            Icon(
+                painter = painterResource(destination.iconId),
+                contentDescription = null
+            )
         },
         colors = NavigationBarItemDefaults.colors(
-            indicatorColor = MaterialTheme.colorScheme.surfaceTint.copy(alpha = 0.3f),
-            selectedTextColor = MaterialTheme.colorScheme.onBackground,
-            unselectedTextColor = MaterialTheme.colorScheme.onBackground,
-            selectedIconColor = MaterialTheme.colorScheme.onBackground,
-            unselectedIconColor = MaterialTheme.colorScheme.onBackground
+            indicatorColor = Color.Transparent,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = Color.Unspecified
         ),
         onClick = onItemClicked
     )
@@ -120,7 +119,7 @@ private fun CofinanceBottomNavigationItemPreview() {
                 )
 
                 CofinanceBottomNavigationItem(
-                    destination = BottomNavigationDestinations.EXPENSES,
+                    destination = BottomNavigationDestinations.BUDGET,
                     currentDestination = BottomNavigationDestinations.HOME,
                     onItemClicked = {}
                 )

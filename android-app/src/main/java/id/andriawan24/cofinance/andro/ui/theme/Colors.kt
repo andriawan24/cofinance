@@ -6,7 +6,9 @@ import androidx.compose.ui.graphics.Color
 
 val LightColorScheme = lightColorScheme(
     primary = Color(0xFF6C89FE),
-    onSurface = Color(0xFF0B0E19),
+    onSurface = Color(0xFF222222),
+    onSurfaceVariant = Color(0xFF7A7A7A),
+    onBackground = Color(0xFF222222),
     surfaceContainerHigh = Color(0xFFEEF9F8),
     surfaceContainerLow = Color(0xFFF0F3FF),
     surface = Color(0xFFF5F7FF),
@@ -16,6 +18,7 @@ val LightColorScheme = lightColorScheme(
 val DarkColorScheme = darkColorScheme(
     primary = Color(0xFF6C89FE),
     onSurface = Color(0xFF0B0E19),
+    onBackground = Color(0xFF222222),
     surfaceContainerHigh = Color(0xFFEEF9F8),
     surfaceContainerLow = Color(0xFFF0F3FF),
     surface = Color(0xFFF5F7FF),

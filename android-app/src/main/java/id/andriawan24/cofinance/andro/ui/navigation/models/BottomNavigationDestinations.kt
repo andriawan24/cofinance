@@ -4,41 +4,30 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
-import kotlin.reflect.KClass
 
 enum class BottomNavigationDestinations(
-    @DrawableRes val selectedIcon: Int,
-    @DrawableRes val unselectedIcon: Int,
-    @StringRes val iconTextId: Int,
-    val route: KClass<*>,
-    val routeClass: Destinations
+    @DrawableRes val iconId: Int,
+    @StringRes val labelId: Int,
+    val route: Destinations
 ) {
     HOME(
-        selectedIcon = R.drawable.ic_home_filled,
-        unselectedIcon = R.drawable.ic_home_outlined,
-        iconTextId = R.string.label_home,
-        route = Destinations.Home::class,
-        routeClass = Destinations.Home
+        iconId = R.drawable.ic_activity,
+        labelId = R.string.label_activity,
+        route = Destinations.Activity
     ),
-    EXPENSES(
-        selectedIcon = R.drawable.ic_expenses_filled,
-        unselectedIcon = R.drawable.ic_expenses_outlined,
-        iconTextId = R.string.label_expenses,
-        route = Destinations.Expenses::class,
-        routeClass = Destinations.Expenses
+    BUDGET(
+        iconId = R.drawable.ic_budget,
+        labelId = R.string.label_expenses,
+        route = Destinations.Budget
     ),
-    WALLET(
-        selectedIcon = R.drawable.ic_wallet_filled,
-        unselectedIcon = R.drawable.ic_wallet_outlined,
-        iconTextId = R.string.label_wallet,
-        route = Destinations.Wallet::class,
-        routeClass = Destinations.Wallet
+    ACCOUNT(
+        iconId = R.drawable.ic_account,
+        labelId = R.string.label_account,
+        route = Destinations.Account
     ),
     PROFILE(
-        selectedIcon = R.drawable.ic_person_filled,
-        unselectedIcon = R.drawable.ic_person_outlined,
-        iconTextId = R.string.label_profile,
-        route = Destinations.Profile::class,
-        routeClass = Destinations.Profile
+        iconId = R.drawable.ic_profile,
+        labelId = R.string.label_profile,
+        route = Destinations.Profile
     )
 }

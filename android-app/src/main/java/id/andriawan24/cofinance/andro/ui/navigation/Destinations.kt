@@ -16,18 +16,18 @@ sealed class Destinations(val route: String) {
 
     // MARK: Bottom Navigation Routes
     @Serializable
-    data object Home : Destinations(Home::class.java.canonicalName.orEmpty())
+    data object Activity : Destinations(Activity::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object Expenses : Destinations(Expenses::class.java.canonicalName.orEmpty())
+    data object Budget : Destinations(Budget::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object Wallet : Destinations(Wallet::class.java.canonicalName.orEmpty())
+    data object Account : Destinations(Account::class.java.canonicalName.orEmpty())
 
     @Serializable
     data object Profile : Destinations(Profile::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object AddExpenses : Destinations(AddExpenses::class.java.canonicalName.orEmpty())
+    data object AddNew : Destinations(AddNew::class.java.canonicalName.orEmpty())
 }
 

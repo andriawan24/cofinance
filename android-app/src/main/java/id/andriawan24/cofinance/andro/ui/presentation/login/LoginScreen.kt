@@ -7,7 +7,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
-import id.andriawan24.cofinance.andro.ui.presentation.login.components.LoginContent
 import id.andriawan24.cofinance.andro.utils.AuthHelper
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
@@ -23,7 +22,7 @@ fun LoginScreen(
     val credentialManager = remember { CredentialManager.create(context) }
     viewModel.loginEvent.CollectAsEffect {
         when (it) {
-            LoginEvent.NavigateHomePage -> appState.navController.navigate(Destinations.Home) {
+            LoginEvent.NavigateHomePage -> appState.navController.navigate(Destinations.Activity) {
                 launchSingleTop = true
                 popUpTo(0) {
                     inclusive = true
