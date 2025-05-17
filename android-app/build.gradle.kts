@@ -79,11 +79,14 @@ dependencies {
 
     // Koin dependency injection
     implementation(libs.koin.core)
-    implementation(libs.koin.android)
     implementation(libs.koin.android.compose)
+
+    // Splash Screen
+    implementation(libs.splashscreen)
 
     // Dot indicator
     implementation(libs.dotsindicator)
 
+    // JSON Serialization
     implementation(libs.kotlinx.serialization.json)
 }
