@@ -3,6 +3,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.login
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -32,8 +33,9 @@ fun OnboardingContent(modifier: Modifier = Modifier) {
     val pagerState = rememberPagerState(pageCount = { 3 })
 
     Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
         HorizontalPager(state = pagerState) {
             Column(
