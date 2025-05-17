@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -14,21 +15,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.utils.AccountManager
 import kotlinx.coroutines.flow.collectLatest
-import org.koin.compose.koinInject
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SplashScreen(appState: CofinanceAppState) {
-    val accountManager = koinInject<AccountManager>()
-
+fun SplashScreen(
+    appState: CofinanceAppState,
+    splashViewModel: SplashViewModel = koinViewModel()
+) {
     LaunchedEffect(true) {
-        accountManager.getUser().collectLatest {
-            if (it != null) {
+        splashViewModel.fetchUser().collectLatest {
+            val user = it.getOrNull()
+            if (user != null) {
                 appState.navController.navigate(Destinations.Main)
             } else {
                 appState.navController.navigate(Destinations.Login)
@@ -36,6 +37,11 @@ fun SplashScreen(appState: CofinanceAppState) {
         }
     }
 
+    SplashScreenContent()
+}
+
+@Composable
+fun SplashScreenContent() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
@@ -59,6 +65,8 @@ fun SplashScreen(appState: CofinanceAppState) {
 @Composable
 fun SplashScreenPreview(modifier: Modifier = Modifier) {
     CofinanceTheme {
-        SplashScreen(appState = rememberCofinanceAppState())
+        Surface {
+            SplashScreenContent()
+        }
     }
 }

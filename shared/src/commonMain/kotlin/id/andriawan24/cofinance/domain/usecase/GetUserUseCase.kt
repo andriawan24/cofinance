@@ -7,9 +7,5 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 class GetUserUseCase(private val authRepository: AuthenticationRepository) {
-
-    fun execute(): Flow<Result<User>> = flow {
-        val user = authRepository.getUser()
-        emit(Result.success(user))
-    }
+    fun execute() = authRepository.getUser()
 }

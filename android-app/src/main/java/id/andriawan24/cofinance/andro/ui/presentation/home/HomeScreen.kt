@@ -21,7 +21,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,14 +31,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import coil3.request.error
 import coil3.request.placeholder
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.TextSizes
@@ -50,11 +47,11 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     onSeeAllTransactionClicked: () -> Unit,
-    loginViewModel: LoginViewModel = koinViewModel()
+    homeViewModel: HomeViewModel = koinViewModel()
 ) {
     val scrollState = rememberScrollState()
     val context = LocalContext.current
-    val user by loginViewModel.user.collectAsStateWithLifecycle()
+    val user = homeViewModel.user
 
     Column(
         modifier = Modifier
@@ -68,7 +65,7 @@ fun HomeScreen(
                     .size(Dimensions.SIZE_36)
                     .clip(CircleShape),
                 model = ImageRequest.Builder(context)
-                    .data(user?.profileUrl)
+                    .data(user.profileUrl)
                     .placeholder(R.drawable.img_placeholder_profile)
                     .error(R.drawable.img_placeholder_profile)
                     .crossfade(true)
@@ -85,7 +82,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = user?.name.orEmpty(),
+                    text = user.name,
                     style = MaterialTheme.typography.titleSmall
                 )
             }

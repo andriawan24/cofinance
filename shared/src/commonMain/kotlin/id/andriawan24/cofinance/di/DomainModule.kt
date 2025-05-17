@@ -4,13 +4,12 @@ import id.andriawan24.cofinance.domain.usecase.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.LogoutUseCase
-import id.andriawan24.cofinance.utils.AccountManager
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
 val domainModule = module {
-    single<FetchUserUseCase> { FetchUserUseCase(get()) }
-    single<LoginIdTokenUseCase> { LoginIdTokenUseCase(get()) }
-    single<GetUserUseCase> { GetUserUseCase(get()) }
-    single<LogoutUseCase> { LogoutUseCase(get()) }
-    single<AccountManager> { AccountManager(get()) }
+    singleOf(::FetchUserUseCase)
+    singleOf(::LoginIdTokenUseCase)
+    singleOf(::GetUserUseCase)
+    singleOf(::LogoutUseCase)
 }

@@ -11,9 +11,7 @@ import io.github.jan.supabase.auth.user.UserInfo
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
 
-    fun getUser(): UserInfo? {
-        return supabase.auth.currentUserOrNull()
-    }
+    fun getUser(): UserInfo? = supabase.auth.currentUserOrNull()
 
     suspend fun fetchUser(): UserInfo {
         val userInfo = supabase.auth.retrieveUserForCurrentSession(updateSession = true)

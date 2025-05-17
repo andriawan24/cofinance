@@ -6,7 +6,7 @@ import id.andriawan24.cofinance.domain.model.request.IdTokenParam.Companion.toRe
 import id.andriawan24.cofinance.domain.model.response.User
 
 interface AuthenticationRepository {
-    suspend fun getUser(): User
+    fun getUser(): User
     suspend fun fetchUser(): User
     suspend fun login(idTokenParam: IdTokenParam)
     suspend fun logout()
@@ -16,9 +16,7 @@ class AuthenticationRepositoryImpl(
     private val supabaseDataSource: SupabaseDataSource
 ) : AuthenticationRepository {
 
-    override suspend fun getUser(): User {
-        return User.from(supabaseDataSource.getUser())
-    }
+    override fun getUser(): User = User.from(supabaseDataSource.getUser())
 
     override suspend fun fetchUser(): User {
         val user = supabaseDataSource.fetchUser()
