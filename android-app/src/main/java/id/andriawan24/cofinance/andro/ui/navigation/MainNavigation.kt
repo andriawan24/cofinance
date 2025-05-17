@@ -14,6 +14,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.home.HomeScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
+import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
 import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
 
 @Composable
@@ -21,8 +22,17 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
     NavHost(
         modifier = modifier,
         navController = appState.navController,
-        startDestination = Destinations.Login
+        startDestination = Destinations.Splash
     ) {
+        composable<Destinations.Splash>(
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
+            SplashScreen(appState = appState)
+        }
+
         composable<Destinations.Login>(
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },

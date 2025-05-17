@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.login
+package id.andriawan24.cofinance.andro.ui.presentation.login.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement

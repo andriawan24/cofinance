@@ -5,6 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class Destinations(val route: String) {
     @Serializable
+    data object Splash : Destinations(Splash::class.java.canonicalName.orEmpty())
+
+    @Serializable
     data object Login : Destinations(Login::class.java.canonicalName.orEmpty())
 
     // MARK: Nested Navigation
