@@ -16,4 +16,6 @@
     <string name="label_edit_profile">Edit Profile</string>
     <string name="title_profile">Profile</string>
     <string name="label_logout">Logout</string>
+    <string name="label_activity">Activity</string>
+    <string name="label_account">Account</string>
 </resources>
