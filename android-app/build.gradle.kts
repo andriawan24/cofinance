@@ -87,6 +87,15 @@ dependencies {
     // Dot indicator
     implementation(libs.dotsindicator)
 
+    // Accompanist permission
+    implementation(libs.accompanist.permissions)
+
+    // CameraX
+    implementation(libs.camera.core)
+    implementation(libs.camera.compose)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+
     // JSON Serialization
     implementation(libs.kotlinx.serialization.json)
 }

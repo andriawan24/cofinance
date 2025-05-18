@@ -29,5 +29,8 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object AddNew : Destinations(AddNew::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data object Camera : Destinations(Camera::class.java.canonicalName.orEmpty())
 }
 

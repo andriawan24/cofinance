@@ -29,4 +29,6 @@
     <string name="label_category">Category</string>
     <string name="label_notes">Notes</string>
     <string name="action_save">Save</string>
+    <string name="action_ok">Ok</string>
+    <string name="action_cancel">Cancel</string>
 </resources>

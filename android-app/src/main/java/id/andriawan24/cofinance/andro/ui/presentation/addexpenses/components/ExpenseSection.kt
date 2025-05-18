@@ -45,7 +45,7 @@ import id.andriawan24.cofinance.andro.utils.NumberFormatTransformation
 import id.andriawan24.cofinance.andro.utils.ext.conditional
 
 @Composable
-fun ExpenseSection(modifier: Modifier = Modifier) {
+fun ExpenseSection(modifier: Modifier = Modifier, onInputPictureClicked: () -> Unit) {
     var inputAmount by remember { mutableStateOf("") }
     var inputFee by remember { mutableStateOf("") }
     var includeFee by remember { mutableStateOf(false) }
@@ -54,7 +54,7 @@ fun ExpenseSection(modifier: Modifier = Modifier) {
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
-        InputPicture(onInputPictureClicked = { })
+        InputPicture(onInputPictureClicked = onInputPictureClicked)
 
         InputAmount(
             inputAmount = inputAmount,
@@ -150,7 +150,6 @@ fun ExpenseSection(modifier: Modifier = Modifier) {
 fun InputPicture(onInputPictureClicked: () -> Unit) {
     Row(
         modifier = Modifier
-            .clickable { onInputPictureClicked() }
             .padding(
                 horizontal = Dimensions.SIZE_16,
                 vertical = Dimensions.SIZE_16
@@ -167,9 +166,7 @@ fun InputPicture(onInputPictureClicked: () -> Unit) {
                 shape = MaterialTheme.shapes.large
             )
             .clip(shape = MaterialTheme.shapes.large)
-            .clickable {
-
-            }
+            .clickable(true) { onInputPictureClicked() }
             .padding(Dimensions.SIZE_16),
         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
         verticalAlignment = Alignment.CenterVertically
@@ -472,7 +469,7 @@ fun AddNewSection(
 private fun ExpenseSectionPreview() {
     CofinanceTheme {
         Surface {
-            ExpenseSection()
+            ExpenseSection(onInputPictureClicked = {})
         }
     }
 }

@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
+import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.components.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
@@ -37,12 +38,21 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddNewScreen(appState: CofinanceAppState) {
-    AddNewContent(onBackPressed = { appState.navController.navigateUp() })
+    AddNewContent(
+        onBackPressed = { appState.navController.navigateUp() },
+        onInputPictureClicked = {
+            appState.navController.navigate(Destinations.Camera)
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNewContent(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
+fun AddNewContent(
+    modifier: Modifier = Modifier,
+    onBackPressed: () -> Unit,
+    onInputPictureClicked: () -> Unit
+) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
 
@@ -117,7 +127,11 @@ fun AddNewContent(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
             state = expenseTypePagerState
         ) {
             when (it) {
-                ExpensesType.EXPENSES.index -> ExpenseSection(modifier = Modifier.fillMaxSize())
+                ExpensesType.EXPENSES.index -> ExpenseSection(
+                    modifier = Modifier.fillMaxSize(),
+                    onInputPictureClicked = onInputPictureClicked
+                )
+
                 else -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = "This is $it ${ExpensesType.getByIndex(it).label}")
@@ -160,7 +174,7 @@ private fun AddExpensesScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AddNewContent(onBackPressed = { })
+            AddNewContent(onBackPressed = { }, onInputPictureClicked = {})
         }
     }
 }
