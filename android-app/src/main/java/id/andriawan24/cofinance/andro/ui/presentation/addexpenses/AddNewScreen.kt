@@ -50,7 +50,7 @@ private enum class ExpensesType(val index: Int, val label: String) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddExpensesScreen() {
+fun AddNewScreen() {
     val focusManager = LocalFocusManager.current
     var selectedSection by remember { mutableStateOf(ExpensesType.EXPENSES) }
     val sectionPagerState = rememberPagerState(initialPage = selectedSection.index) {
@@ -155,7 +155,7 @@ private fun AddExpensesScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AddExpensesScreen()
+            AddNewScreen()
         }
     }
 }

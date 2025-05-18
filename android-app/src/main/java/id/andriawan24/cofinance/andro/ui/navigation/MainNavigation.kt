@@ -9,9 +9,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
-import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddExpensesScreen
-import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
+import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddNewScreen
+import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
@@ -48,7 +48,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            AddExpensesScreen()
+            AddNewScreen()
         }
 
         navigation<Destinations.Main>(startDestination = Destinations.Activity) {

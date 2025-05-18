@@ -80,9 +80,7 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
             shape = MaterialTheme.shapes.extraLarge,
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = Dimensions.zero),
             containerColor = MaterialTheme.colorScheme.primary,
-            onClick = {
-                appState.navController.navigate(Destinations.AddNew)
-            },
+            onClick = { appState.navController.navigate(Destinations.AddNew) }
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_add),
