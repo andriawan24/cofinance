@@ -9,8 +9,7 @@ object NumberHelper {
         val currencyInstance = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
         currencyInstance.roundingMode = RoundingMode.DOWN
         currencyInstance.maximumFractionDigits = 0
-        val currency = currencyInstance.format(0).replace("0", "")
-        return currencyInstance.format(number).replace(currency, "$currency ")
+        return currencyInstance.format(number)
     }
 
     fun rupiahToNumber(value: String): Long {

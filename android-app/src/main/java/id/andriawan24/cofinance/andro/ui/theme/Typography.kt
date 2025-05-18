@@ -38,7 +38,9 @@ val cofinanceTypography = Typography(
         fontFamily = ManropeFontFamily
     ),
     headlineSmall = defaultTypography.headlineSmall.copy(
-        fontFamily = ManropeFontFamily
+        fontFamily = ManropeFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = TextSizes.SIZE_16
     ),
     titleLarge = defaultTypography.titleLarge.copy(
         fontFamily = ManropeFontFamily,

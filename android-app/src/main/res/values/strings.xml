@@ -19,4 +19,6 @@
     <string name="label_activity">Activity</string>
     <string name="label_account">Account</string>
     <string name="label_budget">Budget</string>
+    <string name="label_balance">Balance</string>
+    <string name="label_income">Income</string>
 </resources>
