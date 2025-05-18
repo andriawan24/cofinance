@@ -21,4 +21,12 @@
     <string name="label_budget">Budget</string>
     <string name="label_balance">Balance</string>
     <string name="label_income">Income</string>
+    <string name="action_add_activity">Add Activity</string>
+    <string name="title_add_activity">Add Activity</string>
+    <string name="label_rupiah">Rp</string>
+    <string name="label_zero">0</string>
+    <string name="label_fee">Fee</string>
+    <string name="label_category">Category</string>
+    <string name="label_notes">Notes</string>
+    <string name="action_save">Save</string>
 </resources>

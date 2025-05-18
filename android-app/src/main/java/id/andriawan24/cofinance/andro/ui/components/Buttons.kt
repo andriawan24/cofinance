@@ -21,6 +21,7 @@ fun PrimaryButton(
     onClick: () -> Unit,
     horizontalPadding: Dp = Dimensions.SIZE_24,
     verticalPadding: Dp = Dimensions.SIZE_16,
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Button(
@@ -31,9 +32,12 @@ fun PrimaryButton(
         ),
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         ),
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled
     ) {
         content()
     }

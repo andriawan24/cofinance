@@ -48,7 +48,7 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            AddNewScreen()
+            AddNewScreen(appState = appState)
         }
 
         navigation<Destinations.Main>(startDestination = Destinations.Activity) {

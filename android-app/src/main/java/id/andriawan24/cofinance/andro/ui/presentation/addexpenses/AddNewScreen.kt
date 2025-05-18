@@ -3,114 +3,110 @@ package id.andriawan24.cofinance.andro.ui.presentation.addexpenses
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
+import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.components.ExpenseSection
+import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import kotlinx.coroutines.launch
 
-private enum class ExpensesType(val index: Int, val label: String) {
-    INCOME(0, "Income"),
-    EXPENSES(1, "Expense"),
-    TRANSFER(2, "Transfer");
-
-    companion object {
-        fun getByIndex(index: Int): ExpensesType {
-            return ExpensesType.entries.firstOrNull { it.index == index } ?: EXPENSES
-        }
-    }
+@Composable
+fun AddNewScreen(appState: CofinanceAppState) {
+    AddNewContent(onBackPressed = { appState.navController.navigateUp() })
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddNewScreen() {
-    val focusManager = LocalFocusManager.current
-    var selectedSection by remember { mutableStateOf(ExpensesType.EXPENSES) }
-    val sectionPagerState = rememberPagerState(initialPage = selectedSection.index) {
-        ExpensesType.entries.size
-    }
-
-    LaunchedEffect(selectedSection) {
-        sectionPagerState.animateScrollToPage(selectedSection.index)
-    }
-
-    LaunchedEffect(sectionPagerState.currentPage, sectionPagerState.isScrollInProgress) {
-        if (!sectionPagerState.isScrollInProgress) {
-            selectedSection = ExpensesType.getByIndex(sectionPagerState.currentPage)
-        }
-    }
+fun AddNewContent(modifier: Modifier = Modifier, onBackPressed: () -> Unit) {
+    val scope = rememberCoroutineScope()
+    val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
 
     Column(modifier = Modifier.fillMaxSize()) {
         Box(
-            modifier = Modifier
-                .padding(top = Dimensions.SIZE_24)
-                .padding(horizontal = Dimensions.SIZE_24)
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = Dimensions.SIZE_12, bottom = Dimensions.SIZE_24)
+                .padding(horizontal = Dimensions.SIZE_16)
         ) {
-            FilledIconButton(
-                onClick = {
-
-                },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            IconButton(
+                onClick = onBackPressed,
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Icon(
-                    imageVector = Icons.Default.Close,
+                    painter = painterResource(R.drawable.ic_arrow_left),
                     contentDescription = null
                 )
             }
 
             Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                text = "Add Expense",
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
+                modifier = Modifier.align(Alignment.Center),
+                text = stringResource(R.string.title_add_activity),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             )
         }
 
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
-
-        PrimaryTabRow(
-            selectedTabIndex = sectionPagerState.currentPage,
-            contentColor = MaterialTheme.colorScheme.onBackground
+        SecondaryTabRow(
+            modifier = Modifier
+                .padding(horizontal = Dimensions.SIZE_16)
+                .clip(MaterialTheme.shapes.extraLarge),
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            selectedTabIndex = expenseTypePagerState.currentPage,
+            indicator = {
+                FancyIndicator(
+                    modifier = Modifier.tabIndicatorOffset(expenseTypePagerState.currentPage),
+                    label = ExpensesType.getByIndex(expenseTypePagerState.currentPage).label
+                )
+            },
+            divider = { }
         ) {
-            ExpensesType.entries.forEach {
+            ExpensesType.entries.forEachIndexed { index, type ->
                 Tab(
-                    selected = selectedSection.index == it.index,
+                    modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
+                    selected = expenseTypePagerState.currentPage == index,
                     onClick = {
-                        selectedSection = it
+                        scope.launch {
+                            expenseTypePagerState.animateScrollToPage(index)
+                        }
                     },
                     text = {
-                        Text(it.label)
+                        Text(
+                            text = type.label,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = if (index == expenseTypePagerState.currentPage) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        )
                     }
                 )
             }
@@ -118,31 +114,40 @@ fun AddNewScreen() {
 
         HorizontalPager(
             modifier = Modifier.weight(1f),
-            state = sectionPagerState
+            state = expenseTypePagerState
         ) {
             when (it) {
-                ExpensesType.INCOME.index -> Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    IncomeSection()
-                }
-
+                ExpensesType.EXPENSES.index -> ExpenseSection(modifier = Modifier.fillMaxSize())
                 else -> {
-                    LaunchedEffect(true) {
-                        focusManager.clearFocus()
-                    }
-
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text("Page ${selectedSection.label}")
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(text = "This is $it ${ExpensesType.getByIndex(it).label}")
                     }
                 }
             }
-
         }
+    }
+}
+
+@Composable
+fun FancyIndicator(modifier: Modifier = Modifier, label: String) {
+    Box(
+        modifier
+            .padding(all = Dimensions.SIZE_8)
+            .fillMaxSize()
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.extraLarge
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = label,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.labelSmall.copy(
+                color = MaterialTheme.colorScheme.onPrimary
+            )
+        )
     }
 }
 
@@ -155,7 +160,7 @@ private fun AddExpensesScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AddNewScreen()
+            AddNewContent(onBackPressed = { })
         }
     }
 }

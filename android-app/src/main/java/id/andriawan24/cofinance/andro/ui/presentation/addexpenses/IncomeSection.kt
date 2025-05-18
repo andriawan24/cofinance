@@ -23,17 +23,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.text.isDigitsOnly
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.NumberHelper
+import id.andriawan24.cofinance.andro.utils.NumberFormatTransformation
 
 @Composable
 fun IncomeSection(modifier: Modifier = Modifier) {
@@ -86,20 +82,6 @@ fun IncomeSection(modifier: Modifier = Modifier) {
                 visualTransformation = NumberFormatTransformation()
             )
         }
-    }
-}
-
-class NumberFormatTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        val formattedNumber = NumberHelper.formatNumber(text.text.toLongOrNull() ?: 0)
-
-        return TransformedText(
-            text = AnnotatedString(formattedNumber),
-            offsetMapping = object : OffsetMapping {
-                override fun originalToTransformed(offset: Int): Int = formattedNumber.length
-                override fun transformedToOriginal(offset: Int): Int = text.length
-            }
-        )
     }
 }
 
