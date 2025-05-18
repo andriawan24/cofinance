@@ -3,10 +3,8 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -34,13 +32,17 @@ fun ActivityContent(onBookmarkClicked: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(Dimensions.SIZE_16)
+            .padding(horizontal = Dimensions.SIZE_16)
     ) {
-        ActivityTitle(onBookmarkClicked = onBookmarkClicked)
-        VerticalSpacing(size = Dimensions.SIZE_24)
+        ActivityTitle(
+            modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
+            onBookmarkClicked = onBookmarkClicked
+        )
+
         DateSwitcher(label = "May 2025")
 
         // EmptyActivity(modifier = Modifier.weight(1f))
+
         BalanceCard(
             modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
             balance = 6_000_000,
@@ -52,8 +54,11 @@ fun ActivityContent(onBookmarkClicked: () -> Unit) {
             modifier = Modifier.verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)
         ) {
-            ExpenseByMonth()
-            ExpenseByMonth()
+            repeat(3) {
+                ExpenseByMonth()
+            }
+
+            VerticalSpacing(Dimensions.SIZE_24)
         }
     }
 }

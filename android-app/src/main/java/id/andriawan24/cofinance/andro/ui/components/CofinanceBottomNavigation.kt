@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,11 +31,18 @@ import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
 fun CofinanceBottomNavigation(appState: CofinanceAppState) {
     Box(
         modifier = Modifier
+            .dropShadow(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                shape = RectangleShape,
+                offsetY = -Dimensions.SIZE_4,
+                blur = Dimensions.SIZE_10
+            )
             .background(MaterialTheme.colorScheme.onPrimary)
             .padding(top = Dimensions.SIZE_16)
     ) {
@@ -58,7 +67,16 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
         }
 
         FloatingActionButton(
-            modifier = Modifier.align(Alignment.TopCenter),
+            modifier = Modifier
+                .dropShadow(
+                    shape = CircleShape,
+                    blur = Dimensions.SIZE_16,
+                    offsetY = Dimensions.SIZE_4,
+                    offsetX = Dimensions.SIZE_4,
+                    spread = Dimensions.SIZE_10,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                )
+                .align(Alignment.TopCenter),
             shape = MaterialTheme.shapes.extraLarge,
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = Dimensions.zero),
             containerColor = MaterialTheme.colorScheme.primary,
