@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addexpenses
+package id.andriawan24.cofinance.andro.ui.presentation.addnew
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -30,19 +30,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
-import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.components.ExpenseSection
-import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.models.ExpensesType
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.ExpenseSection
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNewScreen(appState: CofinanceAppState) {
+fun AddNewScreen(appState: CofinanceAppState, totalPrice: Long, date: String) {
     AddNewContent(
         onBackPressed = { appState.navController.navigateUp() },
-        onInputPictureClicked = {
-            appState.navController.navigate(Destinations.Camera)
-        }
+        onInputPictureClicked = { appState.navController.navigate(Destinations.Camera) },
+        totalPrice = totalPrice,
+        date = date
     )
 }
 
@@ -51,7 +51,9 @@ fun AddNewScreen(appState: CofinanceAppState) {
 fun AddNewContent(
     modifier: Modifier = Modifier,
     onBackPressed: () -> Unit,
-    onInputPictureClicked: () -> Unit
+    onInputPictureClicked: () -> Unit,
+    totalPrice: Long,
+    date: String
 ) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
@@ -129,7 +131,9 @@ fun AddNewContent(
             when (it) {
                 ExpensesType.EXPENSES.index -> ExpenseSection(
                     modifier = Modifier.fillMaxSize(),
-                    onInputPictureClicked = onInputPictureClicked
+                    onInputPictureClicked = onInputPictureClicked,
+                    totalPrice = totalPrice,
+                    date = date
                 )
 
                 else -> {
@@ -174,7 +178,12 @@ private fun AddExpensesScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            AddNewContent(onBackPressed = { }, onInputPictureClicked = {})
+            AddNewContent(
+                onBackPressed = { },
+                onInputPictureClicked = {},
+                totalPrice = 0,
+                date = ""
+            )
         }
     }
 }

@@ -3,6 +3,7 @@ package id.andriawan24.cofinance.andro.di
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
+import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashViewModel
 import org.koin.core.module.dsl.viewModelOf
@@ -14,4 +15,5 @@ val viewModelModule = module {
     viewModelOf(::ActivityViewModel)
     viewModelOf(::SplashViewModel)
     viewModelOf(::CameraViewModel)
+    viewModelOf(::PreviewViewModel)
 }

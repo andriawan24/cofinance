@@ -28,9 +28,17 @@ sealed class Destinations(val route: String) {
     data object Profile : Destinations(Profile::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object AddNew : Destinations(AddNew::class.java.canonicalName.orEmpty())
+    data class AddNew(
+        val totalPrice: Long = 0,
+        val date: String = ""
+    ) : Destinations(AddNew::class.java.canonicalName.orEmpty())
 
     @Serializable
     data object Camera : Destinations(Camera::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data class Preview(
+        val imageUrl: String
+    ) : Destinations(Preview::class.java.canonicalName.orEmpty())
 }
 

@@ -3,7 +3,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
-import id.andriawan24.cofinance.domain.usecase.LoginIdTokenUseCase
+import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow

@@ -30,9 +30,19 @@ fun SplashScreen(
         splashViewModel.fetchUser().collectLatest {
             val user = it.getOrNull()
             if (user != null) {
-                appState.navController.navigate(Destinations.Main)
+                appState.navController.navigate(Destinations.Main) {
+                    launchSingleTop = true
+                    popUpTo(0) {
+                        inclusive = true
+                    }
+                }
             } else {
-                appState.navController.navigate(Destinations.Login)
+                appState.navController.navigate(Destinations.Login) {
+                    launchSingleTop = true
+                    popUpTo(0) {
+                        inclusive = true
+                    }
+                }
             }
         }
     }

@@ -4,6 +4,7 @@ agp = "8.8.2"
 buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.1.0"
 coil-network-okhttp = "3.1.0"
+generativeaiGoogle = "0.9.0-1.1.0"
 splashscreen = "1.0.1"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
@@ -28,6 +29,7 @@ coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }

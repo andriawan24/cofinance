@@ -1,27 +1,21 @@
 package id.andriawan24.cofinance.andro
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.navigation.compose.currentBackStackEntryAsState
 import id.andriawan24.cofinance.andro.di.viewModelModule
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
@@ -36,10 +30,14 @@ import org.koin.android.ext.koin.androidLogger
 import org.koin.compose.KoinApplication
 
 class MainActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.TRANSPARENT)
+        )
 
         setContent {
             KoinApplication(
@@ -50,27 +48,7 @@ class MainActivity : ComponentActivity() {
                 }
             ) {
                 CofinanceTheme {
-                    val darkTheme = isSystemInDarkTheme()
                     val appState = rememberCofinanceAppState()
-                    val currentRoute by appState.navController.currentBackStackEntryAsState()
-                    val routeIsCamera by remember { derivedStateOf { currentRoute?.destination?.route == Destinations.Camera.route } }
-
-                    LaunchedEffect(darkTheme, routeIsCamera) {
-                        enableEdgeToEdge(
-                            statusBarStyle = SystemBarStyle.auto(
-                                android.graphics.Color.TRANSPARENT,
-                                android.graphics.Color.TRANSPARENT,
-                            ) {
-                                darkTheme
-                            },
-                            navigationBarStyle = SystemBarStyle.auto(
-                                lightScrim,
-                                darkScrim,
-                            ) {
-                                darkTheme || routeIsCamera
-                            },
-                        )
-                    }
 
                     Scaffold(
                         bottomBar = {
@@ -96,8 +74,13 @@ class MainActivity : ComponentActivity() {
                                         )
                                     }
                                 )
-                                .padding(contentPadding),
-                            color = Color.Transparent
+                                .conditional(
+                                    condition = appState.currentDestination?.route == Destinations.Camera.route,
+                                    trueModifier = {
+                                        background(androidx.compose.ui.graphics.Color.Black)
+                                    }
+                                )
+                                .padding(contentPadding)
                         ) {
                             MainNavigation(appState = appState)
                         }
@@ -107,6 +90,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-private val lightScrim = android.graphics.Color.argb(0xe6, 0xFF, 0xFF, 0xFF)
-private val darkScrim = android.graphics.Color.argb(0x80, 0x1b, 0x1b, 0x1b)

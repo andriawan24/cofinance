@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addexpenses.models
+package id.andriawan24.cofinance.andro.ui.presentation.addnew.models
 
 enum class ExpensesType(val index: Int, val label: String) {
     EXPENSES(0, "Expenses"),

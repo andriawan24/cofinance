@@ -2,7 +2,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.andriawan24.cofinance.domain.usecase.LogoutUseCase
+import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow

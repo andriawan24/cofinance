@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.domain.usecase
+package id.andriawan24.cofinance.domain.usecase.authentication
 
 import id.andriawan24.cofinance.data.repository.AuthenticationRepository
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam

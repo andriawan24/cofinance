@@ -4,16 +4,19 @@ import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.core.net.toUri
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import androidx.navigation.toRoute
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
-import id.andriawan24.cofinance.andro.ui.presentation.addexpenses.AddNewScreen
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.AddNewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraScreen
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
+import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
 import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
@@ -49,7 +52,13 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            AddNewScreen(appState = appState)
+            val params = it.toRoute<Destinations.AddNew>()
+
+            AddNewScreen(
+                appState = appState,
+                totalPrice = params.totalPrice,
+                date = params.date
+            )
         }
 
         composable<Destinations.Camera>(
@@ -58,7 +67,17 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None }
         ) {
-            CameraScreen()
+            CameraScreen(appState = appState)
+        }
+
+        composable<Destinations.Preview>(
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
+        ) {
+            val params = it.toRoute<Destinations.Preview>()
+            PreviewScreen(appState = appState, imageUri = params.imageUrl.toUri())
         }
 
         navigation<Destinations.Main>(startDestination = Destinations.Activity) {
