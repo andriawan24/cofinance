@@ -1,28 +1,29 @@
 package id.andriawan24.cofinance.data.model.response
 
+import id.andriawan24.cofinance.utils.GeminiHelper
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class ReceiptScanResponse(
-    @SerialName("total_price")
+    @SerialName(GeminiHelper.TOTAL_PRICE_FIELD)
     val totalPrice: Long? = null,
-    @SerialName("transaction_date")
+    @SerialName(GeminiHelper.TRANSACTION_DATE_FIELD)
     val transactionDate: String? = null,
-    @SerialName("bank_name")
+    @SerialName(GeminiHelper.BANK_NAME_FIELD)
     val bankName: String? = null,
-    @SerialName("transaction_type")
+    @SerialName(GeminiHelper.TRANSACTION_TYPE_FIELD)
     val transactionType: String? = null,
     val category: String? = null,
-    @SerialName("sender_account")
+    @SerialName(GeminiHelper.SENDER_ACCOUNT_FIELD)
     val sender: BankAccount? = null,
-    @SerialName("receiver_account")
+    @SerialName(GeminiHelper.RECEIVER_ACCOUNT_FIELD)
     val receiver: BankAccount? = null
 ) {
     @Serializable
     data class BankAccount(
         val name: String? = null,
-        @SerialName("account_number")
+        @SerialName(GeminiHelper.SENDER_ACCOUNT_NUMBER_FIELD)
         val accountNumber: String? = null
     )
 }

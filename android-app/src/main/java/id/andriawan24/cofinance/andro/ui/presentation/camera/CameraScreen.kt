@@ -4,13 +4,11 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.compose.CameraXViewfinder
-import androidx.camera.viewfinder.core.ImplementationMode
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,7 +78,7 @@ fun CameraScreen(appState: CofinanceAppState) {
     }
 
     CameraContent(
-        onBackPressed = appState.navController::navigateUp,
+        onBackPressed = { appState.navController.navigateUp() },
         cameraContent = {
             if (cameraPermission.status.isGranted) {
                 CameraPreviewContent()
@@ -198,11 +196,7 @@ fun CameraPreviewContent(
     surfaceRequest?.let { request ->
         CameraXViewfinder(
             modifier = Modifier.fillMaxSize(),
-            surfaceRequest = request,
-            implementationMode = when {
-                Build.VERSION.SDK_INT > 24 -> ImplementationMode.EXTERNAL
-                else -> ImplementationMode.EMBEDDED
-            }
+            surfaceRequest = request
         )
     }
 }

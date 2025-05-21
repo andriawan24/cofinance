@@ -8,76 +8,124 @@ import dev.shreyaspatil.ai.client.generativeai.type.content
 import dev.shreyaspatil.ai.client.generativeai.type.generationConfig
 
 object GeminiHelper {
+    private const val MODEL_NAME = "gemini-2.0-flash-lite-001"
+
+    private const val JSON_MIME_TYPE = "application/json"
+
+    private const val TRANSACTION_SCHEMA = "transaction"
+    private const val TRANSACTION_SCHEMA_DESCRIPTION = "Transaction object received from the image"
+
+    const val TOTAL_PRICE_FIELD = "total_price"
+    private const val TOTAL_PRICE_FIELD_DESCRIPTION = "Total price derived from the receipt"
+
+    const val TRANSACTION_DATE_FIELD = "transaction_date"
+    private const val TRANSACTION_DATE_FIELD_DESCRIPTION =
+        "Transaction date derived. Use ISO 8601 compatible with complete time, date, and timezone"
+
+    const val BANK_NAME_FIELD = "bank_name"
+    private const val BANK_NAME_FIELD_DESCRIPTION = "Bank name from the receipt"
+
+    const val TRANSACTION_TYPE_FIELD = "transaction_type"
+    private const val TRANSACTION_TYPE_FIELD_DESCRIPTION =
+        "Transaction type, whether it is QRIS, Transfer, etc. This one is nullable so return null if there isn't any"
+
+    private const val CATEGORY_FIELD = "category"
+    private const val CATEGORY_FIELD_DESCRIPTION =
+        "Transaction category, it could be based on the receiver name or any description. This one is non nullable so just return Others if there's no category"
+
+    const val SENDER_ACCOUNT_FIELD = "sender"
+    private const val SENDER_ACCOUNT_FIELD_DESCRIPTION =
+        "Sender account object, containing name and it's account number. This one is nullable so return null if there isn't any"
+
+    private const val SENDER_NAME_FIELD = "name"
+    private const val SENDER_NAME_FIELD_DESCRIPTION = "Name of the sender"
+
+    const val SENDER_ACCOUNT_NUMBER_FIELD = "account_number"
+    private const val SENDER_ACCOUNT_NUMBER_FIELD_DESCRIPTION = "Account number of the sender"
+
+    const val RECEIVER_ACCOUNT_FIELD = "receiver"
+    private const val RECEIVER_ACCOUNT_FIELD_DESCRIPTION =
+        "Receiver account object, containing name and it's account number. This one is nullable so return null if there isn't any"
+
+    private const val RECEIVER_NAME_FIELD = "name"
+    private const val RECEIVER_NAME_FIELD_DESCRIPTION = "Name of the receiver"
+
+    private const val RECEIVER_ACCOUNT_NUMBER_FIELD = "account_number"
+    private const val RECEIVER_ACCOUNT_NUMBER_FIELD_DESCRIPTION = "Account number of the receiver"
+
+    private const val SYSTEM_INSTRUCTION =
+        "Extract information from the receipt image provided by the user. For date and time, please make it ISO 8601 compatible with complete time, date, and timezone. If there are any missing field, just return null, don't return any empty value just null"
+
     private val transactionSchema = Schema(
-        name = "transaction",
-        description = "Transaction object received from the image",
+        name = TRANSACTION_SCHEMA,
+        description = TRANSACTION_SCHEMA_DESCRIPTION,
         type = FunctionType.OBJECT,
         nullable = false,
-        required = listOf("total_price", "transaction_date", "bank_name"),
+        required = listOf(TOTAL_PRICE_FIELD, TRANSACTION_DATE_FIELD, BANK_NAME_FIELD),
         properties = mapOf(
-            "total_price" to Schema(
-                name = "total_price",
-                description = "Total price derived from the receipt",
+            TOTAL_PRICE_FIELD to Schema(
+                name = TOTAL_PRICE_FIELD,
+                description = TOTAL_PRICE_FIELD_DESCRIPTION,
                 type = FunctionType.INTEGER,
                 nullable = true
             ),
-            "transaction_date" to Schema(
-                name = "transaction_date",
-                description = "Transaction date derived. Use ISO 8601 compatible with complete time, date, and timezone",
+            TRANSACTION_DATE_FIELD to Schema(
+                name = TRANSACTION_DATE_FIELD,
+                description = TRANSACTION_DATE_FIELD_DESCRIPTION,
                 type = FunctionType.STRING,
                 nullable = true
             ),
-            "bank_name" to Schema(
-                name = "bank_name",
-                description = "Bank name",
+            BANK_NAME_FIELD to Schema(
+                name = BANK_NAME_FIELD,
+                description = BANK_NAME_FIELD_DESCRIPTION,
                 type = FunctionType.STRING,
                 nullable = true
             ),
-            "transaction_type" to Schema(
-                name = "transaction_type",
-                description = "Transaction type, whether it is QRIS, Transfer, etc. This one is nullable so return null if there isn't any",
+            TRANSACTION_TYPE_FIELD to Schema(
+                name = TRANSACTION_TYPE_FIELD,
+                description = TRANSACTION_TYPE_FIELD_DESCRIPTION,
                 type = FunctionType.STRING,
                 nullable = true
             ),
-            "category" to Schema(
-                name = "category",
-                description = "Transaction category, it could be based on the receiver name or any description. This one is non nullable so just return Others if there's no category",
+            CATEGORY_FIELD to Schema(
+                name = CATEGORY_FIELD,
+                description = CATEGORY_FIELD_DESCRIPTION,
                 type = FunctionType.STRING,
                 nullable = false
             ),
-            "sender_account" to Schema(
-                name = "sender_account",
-                description = "Sender account object, containing name and it's account number. This one is nullable so return null if there isn't any",
+            SENDER_ACCOUNT_FIELD to Schema(
+                name = SENDER_ACCOUNT_FIELD,
+                description = SENDER_ACCOUNT_FIELD_DESCRIPTION,
                 type = FunctionType.OBJECT,
                 properties = mapOf(
-                    "name" to Schema(
-                        name = "name",
-                        description = "Name of the sender",
+                    SENDER_NAME_FIELD to Schema(
+                        name = SENDER_NAME_FIELD,
+                        description = SENDER_NAME_FIELD_DESCRIPTION,
                         type = FunctionType.STRING,
                         nullable = true
                     ),
-                    "account_number" to Schema(
-                        name = "account_number",
-                        description = "Account number of the sender",
+                    SENDER_ACCOUNT_NUMBER_FIELD to Schema(
+                        name = SENDER_ACCOUNT_NUMBER_FIELD,
+                        description = SENDER_ACCOUNT_NUMBER_FIELD_DESCRIPTION,
                         type = FunctionType.STRING,
                         nullable = true
                     )
                 )
             ),
-            "receiver_account" to Schema(
-                name = "receiver_account",
-                description = "Receiver account object, containing name and it's account number. This one is nullable so return null if there isn't any",
+            RECEIVER_ACCOUNT_FIELD to Schema(
+                name = RECEIVER_ACCOUNT_FIELD,
+                description = RECEIVER_ACCOUNT_FIELD_DESCRIPTION,
                 type = FunctionType.OBJECT,
                 properties = mapOf(
-                    "name" to Schema(
-                        name = "name",
-                        description = "Name of the receiver",
+                    RECEIVER_NAME_FIELD to Schema(
+                        name = RECEIVER_NAME_FIELD,
+                        description = RECEIVER_NAME_FIELD_DESCRIPTION,
                         type = FunctionType.STRING,
                         nullable = true
                     ),
-                    "account_number" to Schema(
-                        name = "account_number",
-                        description = "Account number of the receiver",
+                    RECEIVER_ACCOUNT_NUMBER_FIELD to Schema(
+                        name = RECEIVER_ACCOUNT_NUMBER_FIELD,
+                        description = RECEIVER_ACCOUNT_NUMBER_FIELD_DESCRIPTION,
                         type = FunctionType.STRING,
                         nullable = true
                     )
@@ -87,16 +135,14 @@ object GeminiHelper {
     )
 
     fun createModel(): GenerativeModel = GenerativeModel(
-        modelName = "gemini-2.5-flash-preview-04-17",
+        modelName = MODEL_NAME,
         apiKey = BuildKonfig.GEMINI_API_KEY,
-        systemInstruction = content {
-            text(text = "Extract information from the receipt image provided by the user. For date and time, please make it ISO 8601 compatible with complete time, date, and timezone. If there are any missing field, just return null, don't return any empty value just null")
-        },
+        systemInstruction = content { text(text = SYSTEM_INSTRUCTION) },
         generationConfig = generationConfig {
             temperature = 0.2f
             topP = 0.95f
             topK = 64
-            responseMimeType = "application/json"
+            responseMimeType = JSON_MIME_TYPE
             responseSchema = transactionSchema
         }
     )

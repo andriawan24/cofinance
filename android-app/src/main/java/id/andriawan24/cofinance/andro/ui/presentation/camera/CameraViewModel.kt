@@ -28,7 +28,9 @@ class CameraViewModel : ViewModel() {
         val cameraSelector = CameraSelector.Builder()
             .requireLensFacing(CameraSelector.LENS_FACING_BACK)
             .build()
+
         processCameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, cameraPreviewUseCase)
+
         try {
             awaitCancellation()
         } finally {
