@@ -16,7 +16,8 @@ object GeminiHelper {
     private const val TRANSACTION_SCHEMA_DESCRIPTION = "Transaction object received from the image"
 
     const val TOTAL_PRICE_FIELD = "total_price"
-    private const val TOTAL_PRICE_FIELD_DESCRIPTION = "Total price derived from the receipt"
+    private const val TOTAL_PRICE_FIELD_DESCRIPTION =
+        "Total price derived from the receipt. Don't include fee if there is a fee, just put the pure transaction nominal before any additional cost"
 
     const val TRANSACTION_DATE_FIELD = "transaction_date"
     private const val TRANSACTION_DATE_FIELD_DESCRIPTION =
