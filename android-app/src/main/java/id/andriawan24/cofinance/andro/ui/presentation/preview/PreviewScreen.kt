@@ -58,7 +58,8 @@ fun PreviewScreen(
                 appState.navController.navigate(
                     Destinations.AddNew(
                         totalPrice = it.result.totalPrice,
-                        date = it.result.transactionDate
+                        date = it.result.transactionDate,
+                        imageUri = imageUri.toString()
                     )
                 ) {
                     popUpTo<Destinations.AddNew> {

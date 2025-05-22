@@ -1,6 +1,7 @@
 package id.andriawan24.cofinance.andro.di
 
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.ExpenseViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewViewModel
@@ -16,4 +17,5 @@ val viewModelModule = module {
     viewModelOf(::SplashViewModel)
     viewModelOf(::CameraViewModel)
     viewModelOf(::PreviewViewModel)
+    viewModelOf(::ExpenseViewModel)
 }

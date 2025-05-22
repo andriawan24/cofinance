@@ -47,6 +47,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -98,4 +100,7 @@ dependencies {
 
     // JSON Serialization
     implementation(libs.kotlinx.serialization.json)
+
+    // Core library desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 }

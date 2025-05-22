@@ -57,7 +57,8 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             AddNewScreen(
                 appState = appState,
                 totalPrice = params.totalPrice,
-                date = params.date
+                date = params.date,
+                imageUri = params.imageUri
             )
         }
 

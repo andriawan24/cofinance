@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.navigation
 
+import id.andriawan24.cofinance.andro.utils.emptyString
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,7 +31,8 @@ sealed class Destinations(val route: String) {
     @Serializable
     data class AddNew(
         val totalPrice: Long = 0,
-        val date: String = ""
+        val date: String = emptyString(),
+        val imageUri: String = emptyString()
     ) : Destinations(AddNew::class.java.canonicalName.orEmpty())
 
     @Serializable

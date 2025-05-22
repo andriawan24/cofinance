@@ -34,15 +34,17 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.ExpenseS
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.emptyString
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNewScreen(appState: CofinanceAppState, totalPrice: Long, date: String) {
+fun AddNewScreen(appState: CofinanceAppState, totalPrice: Long, date: String, imageUri: String) {
     AddNewContent(
         onBackPressed = { appState.navController.navigateUp() },
         onInputPictureClicked = { appState.navController.navigate(Destinations.Camera) },
         totalPrice = totalPrice,
-        date = date
+        date = date,
+        imageUri = imageUri
     )
 }
 
@@ -53,7 +55,8 @@ fun AddNewContent(
     onBackPressed: () -> Unit,
     onInputPictureClicked: () -> Unit,
     totalPrice: Long,
-    date: String
+    date: String,
+    imageUri: String
 ) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
@@ -133,7 +136,8 @@ fun AddNewContent(
                     modifier = Modifier.fillMaxSize(),
                     onInputPictureClicked = onInputPictureClicked,
                     totalPrice = totalPrice,
-                    date = date
+                    date = date,
+                    imageUri = imageUri
                 )
 
                 else -> {
@@ -182,7 +186,8 @@ private fun AddExpensesScreenPreview() {
                 onBackPressed = { },
                 onInputPictureClicked = {},
                 totalPrice = 0,
-                date = ""
+                date = emptyString(),
+                imageUri = emptyString()
             )
         }
     }
