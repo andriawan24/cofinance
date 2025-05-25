@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
@@ -40,6 +41,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.ExpenseV
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.ExpensesUiEvent
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import kotlinx.coroutines.launch
@@ -59,7 +61,9 @@ fun ExpenseSection(
     val scope = rememberCoroutineScope()
     val uiState by expenseViewModel.uiState.collectAsStateWithLifecycle()
     var showCategoryBottomSheet by remember { mutableStateOf(false) }
+    var showAccountBottomSheet by remember { mutableStateOf(false) }
     val categoryBottomSheetState = rememberModalBottomSheetState()
+    val accountBottomSheetState = rememberModalBottomSheetState()
 
     LaunchedEffect(true) {
         expenseViewModel.init(
@@ -97,6 +101,10 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_account),
+            value = emptyString(),
+            onSectionClicked = {
+                showAccountBottomSheet = true
+            },
             startIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_account),
@@ -199,6 +207,37 @@ fun ExpenseSection(
                     scope.launch {
                         categoryBottomSheetState.hide()
                         showCategoryBottomSheet = false
+                    }
+                }
+            )
+        }
+    }
+
+    if (showAccountBottomSheet) {
+        ModalBottomSheet(
+            sheetState = categoryBottomSheetState,
+            onDismissRequest = {
+                showAccountBottomSheet = false
+            },
+            shape = RoundedCornerShape(
+                topStart = Dimensions.SIZE_10,
+                topEnd = Dimensions.SIZE_10
+            ),
+            containerColor = MaterialTheme.colorScheme.onPrimary
+        ) {
+            AccountBottomSheet(
+//                selectedCategory = uiState.category,
+//                onCategorySaved = {
+//                    expenseViewModel.onEvent(ExpensesUiEvent.SetCategory(it))
+//                    scope.launch {
+//                        categoryBottomSheetState.hide()
+//                        showCategoryBottomSheet = false
+//                    }
+//                },
+                onCloseClicked = {
+                    scope.launch {
+                        accountBottomSheetState.hide()
+                        showAccountBottomSheet = false
                     }
                 }
             )

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -81,12 +81,11 @@ fun CategoryBottomSheet(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-            items(ExpenseCategory.entries) { category ->
+            itemsIndexed(ExpenseCategory.entries) { index, category ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = Dimensions.SIZE_16)
-                        .padding(end = Dimensions.SIZE_4)
+                        .padding(start = Dimensions.SIZE_16, end = Dimensions.SIZE_4)
                         .padding(vertical = Dimensions.SIZE_14),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
@@ -123,11 +122,13 @@ fun CategoryBottomSheet(
                     )
                 }
 
-                HorizontalDivider(
-                    modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-                    thickness = Dimensions.SIZE_1,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow
-                )
+                if (index != ExpenseCategory.entries.lastIndex) {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                        thickness = Dimensions.SIZE_1,
+                        color = MaterialTheme.colorScheme.surfaceContainerLow
+                    )
+                }
             }
         }
 
