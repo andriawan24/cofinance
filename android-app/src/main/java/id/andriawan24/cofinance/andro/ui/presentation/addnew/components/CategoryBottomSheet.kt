@@ -35,14 +35,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 
 @Composable
-fun CategoryBottomSheet(onCloseCategoryClicked: () -> Unit) {
-    // TODO: Passing from argument for selected category
-    var selectedCategory by remember { mutableStateOf<ExpenseCategory?>(null) }
+fun CategoryBottomSheet(
+    selectedCategory: ExpenseCategory?,
+    onCategorySaved: (ExpenseCategory) -> Unit,
+    onCloseCategoryClicked: () -> Unit
+) {
+    var currentSelectedCategory by remember { mutableStateOf(selectedCategory) }
 
     Column {
         Box(
@@ -72,7 +76,9 @@ fun CategoryBottomSheet(onCloseCategoryClicked: () -> Unit) {
         }
 
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
             items(ExpenseCategory.entries) { category ->
@@ -107,12 +113,12 @@ fun CategoryBottomSheet(onCloseCategoryClicked: () -> Unit) {
                     )
 
                     RadioButton(
-                        selected = selectedCategory == category,
+                        selected = currentSelectedCategory == category,
                         colors = RadioButtonDefaults.colors(
                             unselectedColor = MaterialTheme.colorScheme.primary
                         ),
                         onClick = {
-                            selectedCategory = category
+                            currentSelectedCategory = category
                         }
                     )
                 }
@@ -124,15 +130,36 @@ fun CategoryBottomSheet(onCloseCategoryClicked: () -> Unit) {
                 )
             }
         }
+
+        PrimaryButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16, vertical = Dimensions.SIZE_24),
+            onClick = {
+                currentSelectedCategory?.let { currentSelectedCategory ->
+                    onCategorySaved(currentSelectedCategory)
+                }
+            },
+            enabled = currentSelectedCategory != null
+        ) {
+            Text(
+                text = stringResource(R.string.action_save),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
     }
 }
 
-@Preview(heightDp = 300)
+@Preview
 @Composable
 private fun CategoryBottomSheetPreview() {
     CofinanceTheme {
         Surface {
-            CategoryBottomSheet(onCloseCategoryClicked = { })
+            CategoryBottomSheet(
+                selectedCategory = ExpenseCategory.FOOD,
+                onCategorySaved = {},
+                onCloseCategoryClicked = { }
+            )
         }
     }
 }

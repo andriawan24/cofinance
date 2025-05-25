@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -16,7 +17,7 @@ data class ExpenseUiState(
     var fee: String = emptyString(),
     var includeFee: Boolean = false,
     var imageUri: Uri? = null,
-    var category: String = emptyString(),
+    var category: ExpenseCategory? = null,
     var dateTime: Date = Date(),
     var notes: String = emptyString()
 )
@@ -24,7 +25,9 @@ data class ExpenseUiState(
 sealed class ExpensesUiEvent {
     data class SetIncludeFee(val includeFee: Boolean) : ExpensesUiEvent()
     data class SetAmount(val amount: String) : ExpensesUiEvent()
+    data class SetCategory(val category: ExpenseCategory) : ExpensesUiEvent()
     data class SetFee(val fee: String) : ExpensesUiEvent()
+    data class SetNote(val note: String) : ExpensesUiEvent()
 }
 
 class ExpenseViewModel : ViewModel() {
@@ -62,6 +65,14 @@ class ExpenseViewModel : ViewModel() {
 
             is ExpensesUiEvent.SetFee -> _uiState.update {
                 it.copy(fee = event.fee)
+            }
+
+            is ExpensesUiEvent.SetCategory -> _uiState.update {
+                it.copy(category = event.category)
+            }
+
+            is ExpensesUiEvent.SetNote -> _uiState.update {
+                it.copy(notes = event.note)
             }
         }
     }
