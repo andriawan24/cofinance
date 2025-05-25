@@ -30,8 +30,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.emptyString

@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addnew
+package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 
 import android.net.Uri
 import androidx.core.net.toUri
