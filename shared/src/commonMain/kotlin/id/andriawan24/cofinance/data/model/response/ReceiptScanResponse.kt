@@ -12,6 +12,8 @@ data class ReceiptScanResponse(
     val transactionDate: String? = null,
     @SerialName(GeminiHelper.BANK_NAME_FIELD)
     val bankName: String? = null,
+    @SerialName(GeminiHelper.FEE_FIELD)
+    val fee: Long? = null,
     @SerialName(GeminiHelper.TRANSACTION_TYPE_FIELD)
     val transactionType: String? = null,
     val category: String? = null,

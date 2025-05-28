@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?><!-- @formatter:off -->
+<journey name="Sign In with Google">
+    <description>Test login flow using google</description>
+    <actions>
+        <action>Wait until the login page showing	</action><action>Click on sign in with google</action><action>Choose the first account</action><action>Wait until the home page showing</action>
+    </actions>
+</journey>

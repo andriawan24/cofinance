@@ -38,14 +38,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.domain.model.response.Account
 
 @Composable
-fun AccountBottomSheet(onCloseClicked: () -> Unit) {
+fun AccountBottomSheet(
+    selectedAccount: Account?,
+    onAccountSaved: (Account) -> Unit,
+    onCloseClicked: () -> Unit
+) {
     var shownDropdown by remember { mutableIntStateOf(-1) }
-    var currentSelectedAccount by remember { mutableStateOf<Account?>(null) }
+    var currentSelectedAccount by remember { mutableStateOf<Account?>(selectedAccount) }
 
     Column {
         Box(
@@ -159,6 +164,22 @@ fun AccountBottomSheet(onCloseClicked: () -> Unit) {
                 }
             }
         }
+
+        PrimaryButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    horizontal = Dimensions.SIZE_16,
+                    vertical = Dimensions.SIZE_24
+                ),
+            enabled = currentSelectedAccount != null,
+            onClick = { currentSelectedAccount?.let(onAccountSaved) }
+        ) {
+            Text(
+                text = stringResource(R.string.action_save),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
     }
 }
 
@@ -168,7 +189,9 @@ private fun AccountBottomSheetPreview() {
     CofinanceTheme {
         Surface {
             AccountBottomSheet(
-                onCloseClicked = {}
+                selectedAccount = null,
+                onAccountSaved = { },
+                onCloseClicked = { }
             )
         }
     }

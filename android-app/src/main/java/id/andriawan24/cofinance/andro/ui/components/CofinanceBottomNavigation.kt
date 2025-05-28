@@ -32,6 +32,7 @@ import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDesti
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 
 @Composable
 fun CofinanceBottomNavigation(appState: CofinanceAppState) {
@@ -80,7 +81,7 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
             shape = MaterialTheme.shapes.extraLarge,
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = Dimensions.zero),
             containerColor = MaterialTheme.colorScheme.primary,
-            onClick = { appState.navController.navigate(Destinations.AddNew()) }
+            onClick = { appState.navController.navigate(Destinations.AddNew(receiptScanned = ReceiptScan())) }
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_add),

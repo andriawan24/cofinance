@@ -30,21 +30,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.FancyIndicator
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNewScreen(appState: CofinanceAppState, totalPrice: Long, date: String, imageUri: String) {
+fun AddNewScreen(appState: CofinanceAppState, receiptScan: ReceiptScan) {
     AddNewContent(
+        receiptScan = receiptScan,
         onBackPressed = { appState.navController.navigateUp() },
-        onInputPictureClicked = { appState.navController.navigate(Destinations.Camera) },
-        totalPrice = totalPrice,
-        date = date,
-        imageUri = imageUri
+        onInputPictureClicked = { appState.navController.navigate(Destinations.Camera) }
     )
 }
 
@@ -52,11 +51,9 @@ fun AddNewScreen(appState: CofinanceAppState, totalPrice: Long, date: String, im
 @Composable
 fun AddNewContent(
     modifier: Modifier = Modifier,
+    receiptScan: ReceiptScan,
     onBackPressed: () -> Unit,
-    onInputPictureClicked: () -> Unit,
-    totalPrice: Long,
-    date: String,
-    imageUri: String
+    onInputPictureClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
@@ -134,42 +131,18 @@ fun AddNewContent(
             when (it) {
                 ExpensesType.EXPENSES.index -> ExpenseSection(
                     modifier = Modifier.fillMaxSize(),
-                    onInputPictureClicked = onInputPictureClicked,
-                    totalPrice = totalPrice,
-                    date = date,
-                    imageUri = imageUri
+                    receiptScan = receiptScan,
+                    onInputPictureClicked = onInputPictureClicked
                 )
 
-                else -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(text = "This is $it ${ExpensesType.getByIndex(it).label}")
-                    }
+                else -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "This is $it ${ExpensesType.getByIndex(it).label}")
                 }
             }
         }
-    }
-}
-
-@Composable
-fun FancyIndicator(modifier: Modifier = Modifier, label: String) {
-    Box(
-        modifier
-            .padding(all = Dimensions.SIZE_8)
-            .fillMaxSize()
-            .background(
-                color = MaterialTheme.colorScheme.primary,
-                shape = MaterialTheme.shapes.extraLarge
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = label,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = MaterialTheme.colorScheme.onPrimary
-            )
-        )
     }
 }
 
@@ -183,11 +156,9 @@ private fun AddExpensesScreenPreview() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             AddNewContent(
+                receiptScan = ReceiptScan(),
                 onBackPressed = { },
-                onInputPictureClicked = {},
-                totalPrice = 0,
-                date = emptyString(),
-                imageUri = emptyString()
+                onInputPictureClicked = { }
             )
         }
     }

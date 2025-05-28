@@ -20,6 +20,9 @@ import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
 import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
+import id.andriawan24.cofinance.andro.utils.CustomNavType
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
+import kotlin.reflect.typeOf
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
@@ -50,15 +53,16 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             enterTransition = { EnterTransition.None },
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
+            popExitTransition = { ExitTransition.None },
+            typeMap = mapOf(
+                typeOf<ReceiptScan>() to CustomNavType.receiptScanType
+            )
         ) {
             val params = it.toRoute<Destinations.AddNew>()
 
             AddNewScreen(
                 appState = appState,
-                totalPrice = params.totalPrice,
-                date = params.date,
-                imageUri = params.imageUri
+                receiptScan = params.receiptScanned
             )
         }
 

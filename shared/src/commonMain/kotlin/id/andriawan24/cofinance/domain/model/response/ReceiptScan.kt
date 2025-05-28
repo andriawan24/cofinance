@@ -1,16 +1,20 @@
 package id.andriawan24.cofinance.domain.model.response
 
 import id.andriawan24.cofinance.data.model.response.ReceiptScanResponse
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class ReceiptScan(
     val totalPrice: Long = 0,
     val transactionDate: String = "",
     val bankName: String = "",
     val transactionType: String = "",
     val category: String = "",
+    val fee: Long = 0,
     val sender: BankAccount = BankAccount(),
     val receiver: BankAccount = BankAccount()
 ) {
+    @Serializable
     data class BankAccount(
         val name: String = "",
         val accountNumber: String = ""

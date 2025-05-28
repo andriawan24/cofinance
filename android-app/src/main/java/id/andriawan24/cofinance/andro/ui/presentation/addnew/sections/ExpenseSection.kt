@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,9 +43,10 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.ExpenseV
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.ExpensesUiEvent
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -51,26 +54,22 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExpenseSection(
     modifier: Modifier = Modifier,
-    totalPrice: Long,
-    date: String,
-    imageUri: String,
+    receiptScan: ReceiptScan,
     onInputPictureClicked: () -> Unit,
-    expenseViewModel: ExpenseViewModel = koinViewModel()
+    expenseViewModel: ExpenseViewModel = koinViewModel(),
+    scope: CoroutineScope = rememberCoroutineScope(),
+    focusManager: FocusManager = LocalFocusManager.current,
 ) {
-    val focusManager = LocalFocusManager.current
-    val scope = rememberCoroutineScope()
     val uiState by expenseViewModel.uiState.collectAsStateWithLifecycle()
-    var showCategoryBottomSheet by remember { mutableStateOf(false) }
-    var showAccountBottomSheet by remember { mutableStateOf(false) }
+
     val categoryBottomSheetState = rememberModalBottomSheetState()
     val accountBottomSheetState = rememberModalBottomSheetState()
 
+    var showCategoryBottomSheet by remember { mutableStateOf(false) }
+    var showAccountBottomSheet by remember { mutableStateOf(false) }
+
     LaunchedEffect(true) {
-        expenseViewModel.init(
-            totalPrice = totalPrice,
-            date = date,
-            imageUri = imageUri
-        )
+        expenseViewModel.init(receiptScan = receiptScan)
     }
 
     Column(
@@ -101,7 +100,7 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_account),
-            value = emptyString(),
+            value = uiState.account?.label.orEmpty(),
             onSectionClicked = {
                 showAccountBottomSheet = true
             },
@@ -160,9 +159,7 @@ fun ExpenseSection(
         InputNote(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             note = uiState.notes
-        ) { newNote ->
-            expenseViewModel.onEvent(ExpensesUiEvent.SetNote(newNote))
-        }
+        ) { newNote -> expenseViewModel.onEvent(ExpensesUiEvent.SetNote(newNote)) }
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -183,16 +180,11 @@ fun ExpenseSection(
     }
 
     if (showCategoryBottomSheet) {
-        ModalBottomSheet(
-            sheetState = categoryBottomSheetState,
+        BaseBottomSheet(
+            state = categoryBottomSheetState,
             onDismissRequest = {
                 showCategoryBottomSheet = false
-            },
-            shape = RoundedCornerShape(
-                topStart = Dimensions.SIZE_10,
-                topEnd = Dimensions.SIZE_10
-            ),
-            containerColor = MaterialTheme.colorScheme.onPrimary
+            }
         ) {
             CategoryBottomSheet(
                 selectedCategory = uiState.category,
@@ -214,26 +206,19 @@ fun ExpenseSection(
     }
 
     if (showAccountBottomSheet) {
-        ModalBottomSheet(
-            sheetState = categoryBottomSheetState,
-            onDismissRequest = {
-                showAccountBottomSheet = false
-            },
-            shape = RoundedCornerShape(
-                topStart = Dimensions.SIZE_10,
-                topEnd = Dimensions.SIZE_10
-            ),
-            containerColor = MaterialTheme.colorScheme.onPrimary
+        BaseBottomSheet(
+            state = accountBottomSheetState,
+            onDismissRequest = { showAccountBottomSheet = false }
         ) {
             AccountBottomSheet(
-//                selectedCategory = uiState.category,
-//                onCategorySaved = {
-//                    expenseViewModel.onEvent(ExpensesUiEvent.SetCategory(it))
-//                    scope.launch {
-//                        categoryBottomSheetState.hide()
-//                        showCategoryBottomSheet = false
-//                    }
-//                },
+                selectedAccount = uiState.account,
+                onAccountSaved = {
+                    expenseViewModel.onEvent(ExpensesUiEvent.SetAccount(it))
+                    scope.launch {
+                        accountBottomSheetState.hide()
+                        showAccountBottomSheet = false
+                    }
+                },
                 onCloseClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
@@ -242,6 +227,26 @@ fun ExpenseSection(
                 }
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BaseBottomSheet(
+    state: SheetState,
+    onDismissRequest: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    ModalBottomSheet(
+        sheetState = state,
+        containerColor = MaterialTheme.colorScheme.onPrimary,
+        shape = RoundedCornerShape(
+            topStart = Dimensions.SIZE_10,
+            topEnd = Dimensions.SIZE_10
+        ),
+        onDismissRequest = onDismissRequest,
+    ) {
+        content()
     }
 }
 

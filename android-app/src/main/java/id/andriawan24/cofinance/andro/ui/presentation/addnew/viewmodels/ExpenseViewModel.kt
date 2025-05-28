@@ -1,10 +1,11 @@
 package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 
 import android.net.Uri
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.domain.model.response.Account
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,6 +18,7 @@ data class ExpenseUiState(
     var fee: String = emptyString(),
     var includeFee: Boolean = false,
     var imageUri: Uri? = null,
+    var account: Account? = null,
     var category: ExpenseCategory? = null,
     var dateTime: Date = Date(),
     var notes: String = emptyString()
@@ -26,6 +28,7 @@ sealed class ExpensesUiEvent {
     data class SetIncludeFee(val includeFee: Boolean) : ExpensesUiEvent()
     data class SetAmount(val amount: String) : ExpensesUiEvent()
     data class SetCategory(val category: ExpenseCategory) : ExpensesUiEvent()
+    data class SetAccount(val account: Account) : ExpensesUiEvent()
     data class SetFee(val fee: String) : ExpensesUiEvent()
     data class SetNote(val note: String) : ExpensesUiEvent()
 }
@@ -34,13 +37,17 @@ class ExpenseViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun init(totalPrice: Long, date: String, imageUri: String) {
-        _uiState.update {
-            it.copy(
-                amount = totalPrice.takeIf { price -> price > 0 }?.toString().orEmpty(),
-                dateTime = if (date.isNotBlank()) getDateTimeFromIsoString(date) else Date(),
-                imageUri = if (imageUri.isBlank()) null else imageUri.toUri()
-            )
+    fun init(receiptScan: ReceiptScan) {
+        if (receiptScan.totalPrice > 0) {
+            val date = getDateTimeFromIsoString(receiptScan.transactionDate)
+            _uiState.update {
+                it.copy(
+                    amount = receiptScan.totalPrice.toString(),
+                    fee = receiptScan.fee.toString(),
+                    includeFee = receiptScan.fee > 0,
+                    dateTime = date
+                )
+            }
         }
     }
 
@@ -73,6 +80,10 @@ class ExpenseViewModel : ViewModel() {
 
             is ExpensesUiEvent.SetNote -> _uiState.update {
                 it.copy(notes = event.note)
+            }
+
+            is ExpensesUiEvent.SetAccount -> _uiState.update {
+                it.copy(account = event.account)
             }
         }
     }

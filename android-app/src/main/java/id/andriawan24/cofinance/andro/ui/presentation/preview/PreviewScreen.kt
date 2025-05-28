@@ -55,13 +55,7 @@ fun PreviewScreen(
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {
             is PreviewUiEvent.NavigateToBalance -> {
-                appState.navController.navigate(
-                    Destinations.AddNew(
-                        totalPrice = it.result.totalPrice,
-                        date = it.result.transactionDate,
-                        imageUri = imageUri.toString()
-                    )
-                ) {
+                appState.navController.navigate(Destinations.AddNew(receiptScanned = it.result)) {
                     popUpTo<Destinations.AddNew> {
                         inclusive = true
                     }

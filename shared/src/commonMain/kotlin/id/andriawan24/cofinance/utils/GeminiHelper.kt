@@ -26,6 +26,9 @@ object GeminiHelper {
     const val BANK_NAME_FIELD = "bank_name"
     private const val BANK_NAME_FIELD_DESCRIPTION = "Bank name from the receipt"
 
+    const val FEE_FIELD = "fee"
+    private const val FEE_FIELD_DESCRIPTION = "Fee from the receipt"
+
     const val TRANSACTION_TYPE_FIELD = "transaction_type"
     private const val TRANSACTION_TYPE_FIELD_DESCRIPTION =
         "Transaction type, whether it is QRIS, Transfer, etc. This one is nullable so return null if there isn't any"
@@ -67,7 +70,13 @@ object GeminiHelper {
             TOTAL_PRICE_FIELD to Schema(
                 name = TOTAL_PRICE_FIELD,
                 description = TOTAL_PRICE_FIELD_DESCRIPTION,
-                type = FunctionType.INTEGER,
+                type = FunctionType.LONG,
+                nullable = true
+            ),
+            FEE_FIELD to Schema(
+                name = FEE_FIELD,
+                description = FEE_FIELD_DESCRIPTION,
+                type = FunctionType.LONG,
                 nullable = true
             ),
             TRANSACTION_DATE_FIELD to Schema(

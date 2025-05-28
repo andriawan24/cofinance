@@ -1,6 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.navigation
 
-import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -30,9 +30,7 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data class AddNew(
-        val totalPrice: Long = 0,
-        val date: String = emptyString(),
-        val imageUri: String = emptyString()
+        val receiptScanned: ReceiptScan
     ) : Destinations(AddNew::class.java.canonicalName.orEmpty())
 
     @Serializable
