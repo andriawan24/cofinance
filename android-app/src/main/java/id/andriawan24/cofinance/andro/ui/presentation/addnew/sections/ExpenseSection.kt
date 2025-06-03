@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +16,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -36,6 +41,7 @@ import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.DialogDatePickerContent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputNote
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.UploadPhotoCardButton
@@ -49,6 +55,8 @@ import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import java.util.Calendar
+import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,14 +70,34 @@ fun ExpenseSection(
 ) {
     val uiState by expenseViewModel.uiState.collectAsStateWithLifecycle()
 
-    val categoryBottomSheetState = rememberModalBottomSheetState()
-    val accountBottomSheetState = rememberModalBottomSheetState()
+    val categoryBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val accountBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val dateBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    val timePickerState = rememberTimePickerState(is24Hour = true)
+    val datePickerState = rememberDatePickerState()
 
     var showCategoryBottomSheet by remember { mutableStateOf(false) }
     var showAccountBottomSheet by remember { mutableStateOf(false) }
+    var showDateBottomSheet by remember { mutableStateOf(false) }
+    var showTimePickerDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(true) {
-        expenseViewModel.init(receiptScan = receiptScan)
+        expenseViewModel.init(
+            receiptScan = receiptScan,
+            onDateTime = {
+                val calendar = Calendar.getInstance().apply {
+                    time = it
+                }
+
+                timePickerState.apply {
+                    minute = calendar.get(Calendar.MINUTE)
+                    hour = calendar.get(Calendar.HOUR)
+                }
+
+                datePickerState.selectedDateMillis = calendar.time.time
+            }
+        )
     }
 
     Column(
@@ -147,6 +175,9 @@ fun ExpenseSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_dates),
             value = uiState.dateTime.formatToString(),
+            onSectionClicked = {
+                showDateBottomSheet = true
+            },
             startIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_calendar),
@@ -159,7 +190,9 @@ fun ExpenseSection(
         InputNote(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             note = uiState.notes
-        ) { newNote -> expenseViewModel.onEvent(ExpensesUiEvent.SetNote(newNote)) }
+        ) { newNote ->
+            expenseViewModel.onEvent(ExpensesUiEvent.SetNote(newNote))
+        }
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -227,6 +260,85 @@ fun ExpenseSection(
                 }
             )
         }
+    }
+
+    if (showDateBottomSheet) {
+        BaseBottomSheet(
+            state = dateBottomSheetState,
+            onDismissRequest = { showDateBottomSheet = false }
+        ) {
+            DialogDatePickerContent(
+                currentDate = uiState.dateTime,
+                datePickerState = datePickerState,
+                onSavedDate = {
+                    val chosenCal = Calendar.getInstance().apply {
+                        time = datePickerState.selectedDateMillis?.let { Date(it) } ?: Date()
+                    }
+
+                    val calendar = Calendar.getInstance().apply {
+                        time = uiState.dateTime
+                        set(Calendar.YEAR, chosenCal.get(Calendar.YEAR))
+                        set(Calendar.MONTH, chosenCal.get(Calendar.MONTH))
+                        set(Calendar.DAY_OF_MONTH, chosenCal.get(Calendar.DAY_OF_MONTH))
+                    }
+
+                    expenseViewModel.onEvent(ExpensesUiEvent.SetDateTime(calendar.time))
+
+                    scope.launch {
+                        dateBottomSheetState.hide()
+                        showDateBottomSheet = false
+                    }
+                },
+                onHourClicked = {
+                    showTimePickerDialog = true
+                },
+                onCloseDate = {
+                    scope.launch {
+                        dateBottomSheetState.hide()
+                        showDateBottomSheet = false
+                    }
+                }
+            )
+        }
+    }
+
+    if (showTimePickerDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showTimePickerDialog = false
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showTimePickerDialog = false
+                    }
+                ) {
+                    Text(stringResource(R.string.label_cancel))
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val calendar = Calendar.getInstance().apply {
+                            time = uiState.dateTime
+                            set(Calendar.HOUR_OF_DAY, timePickerState.hour)
+                            set(Calendar.MINUTE, timePickerState.minute)
+                        }
+
+                        expenseViewModel.onEvent(ExpensesUiEvent.SetDateTime(calendar.time))
+
+                        showTimePickerDialog = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            text = {
+                TimePicker(
+                    state = timePickerState
+                )
+            }
+        )
     }
 }
 

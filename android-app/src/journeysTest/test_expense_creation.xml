@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<journey name="Test Expense Creation">
+    <description>Test create expense flow</description>
+    <actions>
+        <action>If user is not signed in, sign in with google using the first account on the list,
+            then wait until the home page shown
+        </action>
+        <action>Click on the plus button on navigation bar, and wait until the add activity page
+            showing
+        </action>
+        <action>Make sure that you are on the Expenses section</action>
+        <action>Verify that the save button is disabled (when you clicked it, it didn't do any
+            actions)
+        </action>
+        <action>Fill in all form field</action>
+        <action>Make sure the save button is enabled</action>
+    </actions>
+</journey>

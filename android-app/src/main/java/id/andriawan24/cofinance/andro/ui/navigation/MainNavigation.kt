@@ -54,12 +54,9 @@ fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
             exitTransition = { ExitTransition.None },
             popEnterTransition = { EnterTransition.None },
             popExitTransition = { ExitTransition.None },
-            typeMap = mapOf(
-                typeOf<ReceiptScan>() to CustomNavType.receiptScanType
-            )
+            typeMap = mapOf(typeOf<ReceiptScan>() to CustomNavType.receiptScanType)
         ) {
             val params = it.toRoute<Destinations.AddNew>()
-
             AddNewScreen(
                 appState = appState,
                 receiptScan = params.receiptScanned

@@ -10,6 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
@@ -49,10 +50,12 @@ fun SecondaryButton(
     onClick: () -> Unit,
     horizontalPadding: Dp = Dimensions.SIZE_24,
     verticalPadding: Dp = Dimensions.SIZE_16,
+    shape: Shape = ButtonDefaults.shape,
     content: @Composable () -> Unit
 ) {
     Button(
         modifier = modifier,
+        shape = shape,
         contentPadding = PaddingValues(
             vertical = verticalPadding,
             horizontal = horizontalPadding

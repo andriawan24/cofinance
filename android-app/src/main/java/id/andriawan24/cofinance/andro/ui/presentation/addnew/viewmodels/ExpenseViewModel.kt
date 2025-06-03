@@ -21,7 +21,8 @@ data class ExpenseUiState(
     var account: Account? = null,
     var category: ExpenseCategory? = null,
     var dateTime: Date = Date(),
-    var notes: String = emptyString()
+    var notes: String = emptyString(),
+    var isValid: Boolean = false
 )
 
 sealed class ExpensesUiEvent {
@@ -29,6 +30,7 @@ sealed class ExpensesUiEvent {
     data class SetAmount(val amount: String) : ExpensesUiEvent()
     data class SetCategory(val category: ExpenseCategory) : ExpensesUiEvent()
     data class SetAccount(val account: Account) : ExpensesUiEvent()
+    data class SetDateTime(val dateTime: Date) : ExpensesUiEvent()
     data class SetFee(val fee: String) : ExpensesUiEvent()
     data class SetNote(val note: String) : ExpensesUiEvent()
 }
@@ -37,9 +39,10 @@ class ExpenseViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(ExpenseUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun init(receiptScan: ReceiptScan) {
+    fun init(receiptScan: ReceiptScan, onDateTime: (Date) -> Unit) {
+        var date = Date()
         if (receiptScan.totalPrice > 0) {
-            val date = getDateTimeFromIsoString(receiptScan.transactionDate)
+            date = getDateTimeFromIsoString(receiptScan.transactionDate)
             _uiState.update {
                 it.copy(
                     amount = receiptScan.totalPrice.toString(),
@@ -49,6 +52,7 @@ class ExpenseViewModel : ViewModel() {
                 )
             }
         }
+        onDateTime(date)
     }
 
     private fun getDateTimeFromIsoString(dateTime: String): Date {
@@ -66,8 +70,10 @@ class ExpenseViewModel : ViewModel() {
                 )
             }
 
-            is ExpensesUiEvent.SetAmount -> _uiState.update {
-                it.copy(amount = event.amount)
+            is ExpensesUiEvent.SetAmount -> {
+                _uiState.update {
+                    it.copy(amount = event.amount)
+                }
             }
 
             is ExpensesUiEvent.SetFee -> _uiState.update {
@@ -84,6 +90,10 @@ class ExpenseViewModel : ViewModel() {
 
             is ExpensesUiEvent.SetAccount -> _uiState.update {
                 it.copy(account = event.account)
+            }
+
+            is ExpensesUiEvent.SetDateTime -> _uiState.update {
+                it.copy(dateTime = event.dateTime)
             }
         }
     }

@@ -38,4 +38,8 @@
     <string name="label_dates">Dates</string>
     <string name="title_auto_fill_photo">Auto-Fill with Receipt Photo</string>
     <string name="description_auto_fill_photo">Upload your receipt and we’ll fill it in!</string>
+    <string name="action_choose_date">Choose date</string>
+    <string name="label_date">Date</string>
+    <string name="label_time">Time</string>
+    <string name="label_cancel">Cancel</string>
 </resources>
