@@ -1,6 +1,5 @@
 package id.andriawan24.cofinance.andro.ui.navigation
 
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -10,6 +9,16 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object Login : Destinations(Login::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data object AddNew : Destinations(AddNew::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data object Camera : Destinations(Camera::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data class Preview(val imageUrl: String) :
+        Destinations(Preview::class.java.canonicalName.orEmpty())
 
     // MARK: Nested Navigation
     @Serializable
@@ -27,18 +36,5 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object Profile : Destinations(Profile::class.java.canonicalName.orEmpty())
-
-    @Serializable
-    data class AddNew(
-        val receiptScanned: ReceiptScan
-    ) : Destinations(AddNew::class.java.canonicalName.orEmpty())
-
-    @Serializable
-    data object Camera : Destinations(Camera::class.java.canonicalName.orEmpty())
-
-    @Serializable
-    data class Preview(
-        val imageUrl: String
-    ) : Destinations(Preview::class.java.canonicalName.orEmpty())
 }
 
