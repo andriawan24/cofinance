@@ -6,14 +6,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,7 +19,6 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -40,6 +36,7 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSection
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.BaseBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.DialogDatePickerContent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
@@ -51,7 +48,6 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -62,7 +58,6 @@ import java.util.Date
 @Composable
 fun ExpenseSection(
     modifier: Modifier = Modifier,
-    receiptScan: ReceiptScan,
     onInputPictureClicked: () -> Unit,
     expenseViewModel: ExpenseViewModel = koinViewModel(),
     scope: CoroutineScope = rememberCoroutineScope(),
@@ -81,24 +76,6 @@ fun ExpenseSection(
     var showAccountBottomSheet by remember { mutableStateOf(false) }
     var showDateBottomSheet by remember { mutableStateOf(false) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
-
-    LaunchedEffect(true) {
-        expenseViewModel.init(
-            receiptScan = receiptScan,
-            onDateTime = {
-                val calendar = Calendar.getInstance().apply {
-                    time = it
-                }
-
-                timePickerState.apply {
-                    minute = calendar.get(Calendar.MINUTE)
-                    hour = calendar.get(Calendar.HOUR)
-                }
-
-                datePickerState.selectedDateMillis = calendar.time.time
-            }
-        )
-    }
 
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
@@ -200,7 +177,7 @@ fun ExpenseSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = Dimensions.SIZE_16),
-            enabled = false,
+            enabled = uiState.isValid,
             onClick = { },
         ) {
             Text(
@@ -324,9 +301,7 @@ fun ExpenseSection(
                             set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                             set(Calendar.MINUTE, timePickerState.minute)
                         }
-
                         expenseViewModel.onEvent(ExpensesUiEvent.SetDateTime(calendar.time))
-
                         showTimePickerDialog = false
                     }
                 ) {
@@ -334,31 +309,9 @@ fun ExpenseSection(
                 }
             },
             text = {
-                TimePicker(
-                    state = timePickerState
-                )
+                TimePicker(state = timePickerState)
             }
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BaseBottomSheet(
-    state: SheetState,
-    onDismissRequest: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    ModalBottomSheet(
-        sheetState = state,
-        containerColor = MaterialTheme.colorScheme.onPrimary,
-        shape = RoundedCornerShape(
-            topStart = Dimensions.SIZE_10,
-            topEnd = Dimensions.SIZE_10
-        ),
-        onDismissRequest = onDismissRequest,
-    ) {
-        content()
     }
 }
 

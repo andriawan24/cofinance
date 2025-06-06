@@ -74,27 +74,49 @@ class ExpenseViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(amount = event.amount)
                 }
+                validateInputs()
             }
 
-            is ExpensesUiEvent.SetFee -> _uiState.update {
-                it.copy(fee = event.fee)
+            is ExpensesUiEvent.SetFee -> {
+                _uiState.update {
+                    it.copy(fee = event.fee)
+                }
+                validateInputs()
             }
 
-            is ExpensesUiEvent.SetCategory -> _uiState.update {
-                it.copy(category = event.category)
+            is ExpensesUiEvent.SetCategory -> {
+                _uiState.update {
+                    it.copy(category = event.category)
+                }
+                validateInputs()
+            }
+
+            is ExpensesUiEvent.SetAccount -> {
+                _uiState.update {
+                    it.copy(account = event.account)
+                }
+                validateInputs()
+            }
+
+            is ExpensesUiEvent.SetDateTime -> {
+                _uiState.update {
+                    it.copy(dateTime = event.dateTime)
+                }
+                validateInputs()
             }
 
             is ExpensesUiEvent.SetNote -> _uiState.update {
                 it.copy(notes = event.note)
             }
+        }
+    }
 
-            is ExpensesUiEvent.SetAccount -> _uiState.update {
-                it.copy(account = event.account)
-            }
-
-            is ExpensesUiEvent.SetDateTime -> _uiState.update {
-                it.copy(dateTime = event.dateTime)
-            }
+    private fun validateInputs() {
+        _uiState.update { currentState ->
+            val isValid = currentState.amount.isNotBlank() &&
+                    currentState.category != null &&
+                    currentState.account != null
+            currentState.copy(isValid = isValid)
         }
     }
 }
