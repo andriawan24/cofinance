@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
@@ -22,10 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SplashScreen(
-    appState: CofinanceAppState,
-    splashViewModel: SplashViewModel = koinViewModel()
-) {
+fun SplashScreen(appState: CofinanceAppState, splashViewModel: SplashViewModel = koinViewModel()) {
     LaunchedEffect(true) {
         splashViewModel.fetchUser().collectLatest {
             val user = it.getOrNull()
@@ -52,10 +50,7 @@ fun SplashScreen(
 
 @Composable
 fun SplashScreenContent() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Image(
             painter = painterResource(R.drawable.img_splash_screen),
             contentDescription = null
@@ -65,7 +60,7 @@ fun SplashScreenContent() {
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = Dimensions.SIZE_24),
-            text = "Fetching information...",
+            text = stringResource(R.string.label_fetching_information),
             style = MaterialTheme.typography.bodyMedium
         )
     }
@@ -73,7 +68,7 @@ fun SplashScreenContent() {
 
 @Preview(showBackground = true)
 @Composable
-fun SplashScreenPreview(modifier: Modifier = Modifier) {
+fun SplashScreenPreview() {
     CofinanceTheme {
         Surface {
             SplashScreenContent()

@@ -42,4 +42,5 @@
     <string name="label_date">Date</string>
     <string name="label_time">Time</string>
     <string name="label_cancel">Cancel</string>
+    <string name="label_fetching_information">Fetching information…</string>
 </resources>
