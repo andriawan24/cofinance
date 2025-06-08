@@ -1,12 +1,16 @@
 package id.andriawan24.cofinance.andro.ui.presentation.login
 
 import android.content.Context
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.credentials.CredentialManager
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.utils.AuthHelper
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
@@ -15,36 +19,42 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun LoginScreen(
-    appState: CofinanceAppState,
+    onNavigateToHome: () -> Unit,
     context: Context = LocalContext.current,
     viewModel: LoginViewModel = koinViewModel()
 ) {
+    val scope = rememberCoroutineScope()
+    val snackState = remember { SnackbarHostState() }
     val credentialManager = remember { CredentialManager.create(context) }
+
     viewModel.loginEvent.CollectAsEffect {
         when (it) {
-            LoginEvent.NavigateHomePage -> appState.navController.navigate(Destinations.Activity) {
-                launchSingleTop = true
-                popUpTo(0) {
-                    inclusive = true
-                }
-            }
-
-            is LoginEvent.ShowMessage -> appState.coroutineScope.launch {
-                appState.snackBarHostState.showSnackbar(it.message)
+            LoginEvent.NavigateHomePage -> onNavigateToHome()
+            is LoginEvent.ShowMessage -> scope.launch {
+                snackState.showSnackbar(it.message)
             }
         }
     }
 
-    LoginContent(
-        onContinueClicked = {
-            appState.coroutineScope.launch {
-                AuthHelper.signInGoogle(
-                    context = context,
-                    credentialManager = credentialManager,
-                    onSignedIn = { viewModel.signInWithIdToken(IdTokenParam(it)) },
-                    onSignedInFailed = appState::showSnackbar
-                )
+    Scaffold(snackbarHost = { SnackbarHost(snackState) }) {
+        LoginContent(
+            modifier = Modifier.padding(it),
+            onContinueClicked = {
+                scope.launch {
+                    AuthHelper.signInGoogle(
+                        context = context,
+                        credentialManager = credentialManager,
+                        onSignedIn = { idToken ->
+                            viewModel.signInWithIdToken(IdTokenParam(idToken))
+                        },
+                        onSignedInFailed = { message ->
+                            scope.launch {
+                                snackState.showSnackbar(message)
+                            }
+                        }
+                    )
+                }
             }
-        }
-    )
+        )
+    }
 }

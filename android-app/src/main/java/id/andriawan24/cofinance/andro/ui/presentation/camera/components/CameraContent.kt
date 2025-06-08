@@ -28,6 +28,7 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
 fun CameraContent(
+    modifier: Modifier = Modifier,
     isFlashOn: Boolean,
     onBackPressed: () -> Unit,
     onOpenGalleryClicked: () -> Unit,
@@ -42,76 +43,78 @@ fun CameraContent(
     ) {
         cameraContent()
 
-        IconButton(
-            modifier = Modifier.padding(all = Dimensions.SIZE_16),
-            onClick = onBackPressed,
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.onPrimary,
-                contentColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_left),
-                contentDescription = null
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(horizontal = Dimensions.SIZE_40)
-                .padding(bottom = Dimensions.SIZE_24),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
+        Box(modifier = modifier.fillMaxSize()) {
             IconButton(
-                onClick = onOpenGalleryClicked,
+                modifier = Modifier.padding(all = Dimensions.SIZE_16),
+                onClick = onBackPressed,
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.onPrimary,
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_picture),
+                    painter = painterResource(R.drawable.ic_arrow_left),
                     contentDescription = null
                 )
             }
 
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(Dimensions.SIZE_66)
-                    .border(
-                        width = Dimensions.SIZE_4,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        shape = CircleShape
-                    )
-                    .clip(CircleShape)
-                    .clickable(onClick = onTakePictureClicked)
-                    .padding(Dimensions.SIZE_6)
-                    .background(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        shape = CircleShape
-                    )
-            )
-
-            IconButton(
-                onClick = onFlashClicked,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.onPrimary,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .padding(horizontal = Dimensions.SIZE_40)
+                    .padding(bottom = Dimensions.SIZE_24),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (isFlashOn) {
+                IconButton(
+                    onClick = onOpenGalleryClicked,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
                     Icon(
-                        painter = painterResource(R.drawable.ic_flash_off),
+                        painter = painterResource(R.drawable.ic_picture),
                         contentDescription = null
                     )
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_flash_on),
-                        contentDescription = null
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(Dimensions.SIZE_66)
+                        .border(
+                            width = Dimensions.SIZE_4,
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            shape = CircleShape
+                        )
+                        .clip(CircleShape)
+                        .clickable(onClick = onTakePictureClicked)
+                        .padding(Dimensions.SIZE_6)
+                        .background(
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            shape = CircleShape
+                        )
+                )
+
+                IconButton(
+                    onClick = onFlashClicked,
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.onPrimary,
+                        contentColor = MaterialTheme.colorScheme.primary
                     )
+                ) {
+                    if (isFlashOn) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_flash_off),
+                            contentDescription = null
+                        )
+                    } else {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_flash_on),
+                            contentDescription = null
+                        )
+                    }
                 }
             }
         }

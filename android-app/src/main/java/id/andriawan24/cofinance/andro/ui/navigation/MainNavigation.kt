@@ -1,138 +1,140 @@
 package id.andriawan24.cofinance.andro.ui.navigation
 
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.core.net.toUri
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import androidx.navigation.toRoute
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
-import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.AddNewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraScreen
-import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
+import id.andriawan24.cofinance.andro.ui.presentation.main.MainScreen
 import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewScreen
-import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
-import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
-import id.andriawan24.cofinance.andro.utils.CustomNavType
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
-import kotlin.reflect.typeOf
 
 @Composable
-fun MainNavigation(modifier: Modifier = Modifier, appState: CofinanceAppState) {
+fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostController) {
     NavHost(
         modifier = modifier,
-        navController = appState.navController,
-        startDestination = Destinations.Splash
+        navController = navController,
+        startDestination = Destinations.Splash,
+        enterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(500)
+            )
+        },
+        exitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Left,
+                animationSpec = tween(500)
+            )
+        },
+        popEnterTransition = {
+            slideIntoContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(500)
+            )
+        },
+        popExitTransition = {
+            slideOutOfContainer(
+                towards = AnimatedContentTransitionScope.SlideDirection.Right,
+                animationSpec = tween(500)
+            )
+        }
     ) {
-        composable<Destinations.Splash>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            SplashScreen(appState = appState)
-        }
-
-        composable<Destinations.Login>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            LoginScreen(appState = appState)
-        }
-
-        composable<Destinations.AddNew>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None },
-            typeMap = mapOf(typeOf<ReceiptScan>() to CustomNavType.receiptScanType)
-        ) {
-            val params = it.toRoute<Destinations.AddNew>()
-            AddNewScreen(
-                appState = appState,
-                receiptScan = params.receiptScanned
+        composable<Destinations.Splash> {
+            SplashScreen(
+                onNavigateToMain = {
+                    navController.navigate(Destinations.Main) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Destinations.Login) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
             )
         }
 
-        composable<Destinations.Camera>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            CameraScreen(appState = appState)
-        }
-
-        composable<Destinations.Preview>(
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            popEnterTransition = { EnterTransition.None },
-            popExitTransition = { ExitTransition.None }
-        ) {
-            val params = it.toRoute<Destinations.Preview>()
-            PreviewScreen(appState = appState, imageUri = params.imageUrl.toUri())
-        }
-
-        navigation<Destinations.Main>(startDestination = Destinations.Activity) {
-            composable<Destinations.Activity>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                ActivityScreen(
-                    onSeeAllTransactionClicked = {
-                        appState.navigateToTopLevelDestination(
-                            topLevelDestination = BottomNavigationDestinations.ACTIVITY
-                        )
-                    }
-                )
-            }
-
-            composable<Destinations.Budget>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                ExpensesScreen()
-            }
-
-            composable<Destinations.Account>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                WalletScreen()
-            }
-
-            composable<Destinations.Profile>(
-                enterTransition = { EnterTransition.None },
-                exitTransition = { ExitTransition.None },
-                popEnterTransition = { EnterTransition.None },
-                popExitTransition = { ExitTransition.None }
-            ) {
-                ProfileScreen(
-                    onSignedOut = {
-                        appState.navController.navigate(Destinations.Login) {
-                            launchSingleTop = true
-                            popUpTo(0) {
-                                inclusive = true
-                            }
+        composable<Destinations.Login> {
+            LoginScreen(
+                onNavigateToHome = {
+                    navController.navigate(Destinations.Main) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
                         }
                     }
-                )
-            }
+                }
+            )
+        }
+
+        composable<Destinations.AddNew> {
+            AddNewScreen(
+                onBackPressed = {
+                    navController.navigateUp()
+                },
+                onInputPictureClicked = {
+                    navController.navigate(Destinations.Camera)
+                }
+            )
+        }
+
+        composable<Destinations.Camera> {
+            CameraScreen(
+                onBackPressed = {
+                    navController.navigateUp()
+                },
+                onNavigateToPreview = { imageUri ->
+                    navController.navigate(route = Destinations.Preview(imageUrl = imageUri.toString()))
+                }
+            )
+        }
+
+        composable<Destinations.Preview> {
+            val params = it.toRoute<Destinations.Preview>()
+
+            PreviewScreen(
+                imageUri = params.imageUrl.toUri(),
+                onNavigateToAdd = {
+                    navController.navigate(Destinations.AddNew) {
+                        popUpTo<Destinations.AddNew> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
+            )
+        }
+
+        composable<Destinations.Main> {
+            MainScreen(
+                onNavigateToLogin = {
+                    navController.navigate(Destinations.Login) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToAdd = {
+                    navController.navigate(Destinations.AddNew)
+                }
+            )
         }
     }
 }

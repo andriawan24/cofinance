@@ -15,6 +15,8 @@ fun <T> Flow<T>.CollectAsEffect(
     block: (T) -> Unit
 ) {
     LaunchedEffect(true) {
-        onEach(block).flowOn(context).launchIn(this)
+        onEach(block)
+            .flowOn(context)
+            .launchIn(this)
     }
 }

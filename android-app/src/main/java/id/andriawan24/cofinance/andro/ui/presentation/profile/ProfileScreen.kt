@@ -78,27 +78,7 @@ fun ProfileScreen(
                     .padding(vertical = Dimensions.SIZE_24),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-//                AsyncImage(
-//                    modifier = Modifier
-//                        .size(Dimensions.SIZE_80)
-//                        .clip(CircleShape),
-//                    model = ImageRequest.Builder(LocalContext.current)
-//                        .data(user?.profileUrl)
-//                        .placeholder(R.drawable.img_placeholder_profile)
-//                        .error(R.drawable.img_placeholder_profile)
-//                        .crossfade(true)
-//                        .build(),
-//                    contentDescription = null
-//                )
-
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
-
-//                Text(
-//                    text = user?.name.orEmpty(),
-//                    style = MaterialTheme.typography.headlineSmall.copy(
-//                        fontSize = TextSizes.SIZE_20
-//                    )
-//                )
 
                 TextButton(
                     onClick = {

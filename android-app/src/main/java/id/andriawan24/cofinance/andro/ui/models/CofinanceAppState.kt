@@ -29,7 +29,6 @@ fun rememberCofinanceAppState(
 @Stable
 class CofinanceAppState(val navController: NavHostController, val coroutineScope: CoroutineScope) {
     val bottomNavigationDestinations = BottomNavigationDestinations.entries
-    val bottomNavigationRoutes = bottomNavigationDestinations.map { it.route.route }
     var snackBarHostState = SnackbarHostState()
 
     private val previousDestination = mutableStateOf<NavDestination?>(null)
@@ -51,7 +50,7 @@ class CofinanceAppState(val navController: NavHostController, val coroutineScope
             }
         }
 
-    fun navigateToTopLevelDestination(topLevelDestination: BottomNavigationDestinations) {
+    fun navigateToTopLevelDestination(topLevelDestination: BottomNavigationDestinations = BottomNavigationDestinations.ACTIVITY) {
         val topLevelOption = navOptions {
             popUpTo(BottomNavigationDestinations.entries.first().route.route) {
                 saveState = true

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -15,42 +16,41 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SplashScreen(appState: CofinanceAppState, splashViewModel: SplashViewModel = koinViewModel()) {
+fun SplashScreen(
+    onNavigateToMain: () -> Unit,
+    onNavigateToLogin: () -> Unit,
+    splashViewModel: SplashViewModel = koinViewModel()
+) {
     LaunchedEffect(true) {
         splashViewModel.fetchUser().collectLatest {
             val user = it.getOrNull()
             if (user != null) {
-                appState.navController.navigate(Destinations.Main) {
-                    launchSingleTop = true
-                    popUpTo(0) {
-                        inclusive = true
-                    }
-                }
+                onNavigateToMain()
             } else {
-                appState.navController.navigate(Destinations.Login) {
-                    launchSingleTop = true
-                    popUpTo(0) {
-                        inclusive = true
-                    }
-                }
+                onNavigateToLogin()
             }
         }
     }
 
-    SplashScreenContent()
+    Scaffold { contentPadding ->
+        SplashScreenContent(
+            modifier = Modifier.padding(contentPadding)
+        )
+    }
 }
 
 @Composable
-fun SplashScreenContent() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+fun SplashScreenContent(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
         Image(
             painter = painterResource(R.drawable.img_splash_screen),
             contentDescription = null

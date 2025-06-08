@@ -2,6 +2,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.camera
 
 import android.Manifest
 import android.content.Context
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -23,8 +25,6 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.presentation.camera.components.CameraContent
 import id.andriawan24.cofinance.andro.ui.presentation.camera.components.CameraPreviewContent
 import id.andriawan24.cofinance.andro.ui.presentation.camera.components.RationalPermissionDialog
@@ -35,7 +35,8 @@ import org.koin.androidx.compose.koinViewModel
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun CameraScreen(
-    appState: CofinanceAppState,
+    onNavigateToPreview: (Uri) -> Unit,
+    onBackPressed: () -> Unit,
     cameraViewModel: CameraViewModel = koinViewModel(),
     context: Context = LocalContext.current
 ) {
@@ -46,18 +47,17 @@ fun CameraScreen(
         contract = ActivityResultContracts.PickVisualMedia(),
         onResult = { selectedImage ->
             if (selectedImage != null) {
-                appState.navController.navigate(Destinations.Preview(selectedImage.toString()))
+                onNavigateToPreview(selectedImage)
             }
         }
     )
 
     cameraViewModel.uiEvent.CollectAsEffect {
         when (it) {
-            is CameraUiEvent.ImageCaptured -> appState.navController.navigate(
-                Destinations.Preview(it.imageUri.toString())
-            )
-
-            is CameraUiEvent.ShowError -> appState.showSnackbar(it.message)
+            is CameraUiEvent.ImageCaptured -> onNavigateToPreview(it.imageUri)
+            is CameraUiEvent.ShowError -> {
+                // TODO: Show snackbar later
+            }
         }
     }
 
@@ -69,32 +69,37 @@ fun CameraScreen(
         }
     }
 
-    CameraContent(
-        isFlashOn = uiState.flashlightOn,
-        onBackPressed = { appState.navController.navigateUp() },
-        cameraContent = {
-            if (cameraPermission.status.isGranted) {
-                CameraPreviewContent(cameraViewModel = cameraViewModel)
+    Scaffold { contentPadding ->
+        CameraContent(
+            modifier = Modifier.padding(contentPadding),
+            isFlashOn = uiState.flashlightOn,
+            onBackPressed = onBackPressed,
+            cameraContent = {
+                if (cameraPermission.status.isGranted) {
+                    CameraPreviewContent(
+                        cameraViewModel = cameraViewModel
+                    )
+                }
+            },
+            onOpenGalleryClicked = {
+                imagePickerLauncher.launch(
+                    input = PickVisualMediaRequest(
+                        mediaType = ActivityResultContracts.PickVisualMedia.ImageOnly
+                    )
+                )
+            },
+            onFlashClicked = {
+                cameraViewModel.toggleFlashlight()
+            },
+            onTakePictureClicked = {
+                cameraViewModel.captureImage(context)
             }
-        },
-        onOpenGalleryClicked = {
-            imagePickerLauncher.launch(
-                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-            )
-        },
-        onFlashClicked = {
-            cameraViewModel.toggleFlashlight()
-        },
-        onTakePictureClicked = {
-            cameraViewModel.captureImage(context)
-        }
-    )
+        )
+    }
 
     if (uiState.shouldShowRationalDialog) {
         RationalPermissionDialog(
-            onDialogDismissed = {
-                cameraViewModel.showRationaleDialog(false)
-            }
+            onDialogDismissed = { cameraViewModel.showRationaleDialog(false) }
         )
     }
 

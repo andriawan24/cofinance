@@ -27,15 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 
 @Composable
-fun CofinanceBottomNavigation(appState: CofinanceAppState) {
+fun CofinanceBottomNavigation(appState: CofinanceAppState, onNavigateToAdd: () -> Unit) {
     Box(
         modifier = Modifier
             .dropShadow(
@@ -81,7 +79,7 @@ fun CofinanceBottomNavigation(appState: CofinanceAppState) {
             shape = MaterialTheme.shapes.extraLarge,
             elevation = FloatingActionButtonDefaults.elevation(defaultElevation = Dimensions.zero),
             containerColor = MaterialTheme.colorScheme.primary,
-            onClick = { appState.navController.navigate(Destinations.AddNew(receiptScanned = ReceiptScan())) }
+            onClick = onNavigateToAdd
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_add),
@@ -149,6 +147,9 @@ private fun CofinanceBottomNavigationItemPreview() {
 @Composable
 private fun CofinanceBottomNavigationPreview() {
     CofinanceTheme {
-        CofinanceBottomNavigation(appState = rememberCofinanceAppState())
+        CofinanceBottomNavigation(
+            appState = rememberCofinanceAppState(),
+            onNavigateToAdd = {}
+        )
     }
 }

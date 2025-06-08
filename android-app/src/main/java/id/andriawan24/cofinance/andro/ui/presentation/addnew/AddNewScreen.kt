@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -28,39 +29,37 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.models.CofinanceAppState
-import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.FancyIndicator
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.launch
 
 @Composable
-fun AddNewScreen(appState: CofinanceAppState, receiptScan: ReceiptScan) {
-    AddNewContent(
-        receiptScan = receiptScan,
-        onBackPressed = { appState.navController.navigateUp() },
-        onInputPictureClicked = { appState.navController.navigate(Destinations.Camera) }
-    )
+fun AddNewScreen(onBackPressed: () -> Unit, onInputPictureClicked: () -> Unit) {
+    Scaffold { contentPadding ->
+        AddNewContent(
+            modifier = Modifier.padding(contentPadding),
+            onBackPressed = onBackPressed,
+            onInputPictureClicked = onInputPictureClicked
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddNewContent(
     modifier: Modifier = Modifier,
-    receiptScan: ReceiptScan,
     onBackPressed: () -> Unit,
     onInputPictureClicked: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = modifier.fillMaxSize()) {
         Box(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = Dimensions.SIZE_12, bottom = Dimensions.SIZE_24)
                 .padding(horizontal = Dimensions.SIZE_16)
@@ -99,7 +98,9 @@ fun AddNewContent(
                     label = ExpensesType.getByIndex(expenseTypePagerState.currentPage).label
                 )
             },
-            divider = { }
+            divider = {
+                // Put nothing on divider
+            }
         ) {
             ExpensesType.entries.forEachIndexed { index, type ->
                 Tab(
@@ -131,7 +132,6 @@ fun AddNewContent(
             when (it) {
                 ExpensesType.EXPENSES.index -> ExpenseSection(
                     modifier = Modifier.fillMaxSize(),
-                    receiptScan = receiptScan,
                     onInputPictureClicked = onInputPictureClicked
                 )
 
@@ -156,7 +156,6 @@ private fun AddExpensesScreenPreview() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             AddNewContent(
-                receiptScan = ReceiptScan(),
                 onBackPressed = { },
                 onInputPictureClicked = { }
             )
