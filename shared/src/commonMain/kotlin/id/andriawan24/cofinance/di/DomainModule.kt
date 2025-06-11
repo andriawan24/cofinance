@@ -1,5 +1,7 @@
 package id.andriawan24.cofinance.di
 
+import id.andriawan24.cofinance.domain.usecase.accounts.AddAccountUseCase
+import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
@@ -14,4 +16,6 @@ val domainModule = module {
     singleOf(::GetUserUseCase)
     singleOf(::LogoutUseCase)
     singleOf(::ScanReceiptUseCase)
+    singleOf(::GetAccountsUseCase)
+    singleOf(::AddAccountUseCase)
 }

@@ -1,16 +1,25 @@
 package id.andriawan24.cofinance.domain.model.response
 
+import id.andriawan24.cofinance.data.model.response.AccountResponse
+
 data class Account(
-    val label: String,
-    val group: String
+    val id: Int,
+    val name: String,
+    val group: String,
+    val balance: Int,
+    val usersId: String,
+    val createdAt: String
 ) {
     companion object {
-        fun dummy() = listOf(
-            Account("Allowance", "Cash"),
-            Account("BCA", "Debit Card"),
-            Account("BNI", "Debit Card"),
-            Account("BRI", "Debit Card"),
-            Account("Mandiri", "Debit Card"),
-        )
+        fun from(response: AccountResponse): Account {
+            return Account(
+                id = response.id ?: 0,
+                name = response.name.orEmpty(),
+                group = response.group.orEmpty(),
+                balance = response.balance ?: 0,
+                usersId = response.usersId.orEmpty(),
+                createdAt = response.createdAt.orEmpty()
+            )
+        }
     }
 }
