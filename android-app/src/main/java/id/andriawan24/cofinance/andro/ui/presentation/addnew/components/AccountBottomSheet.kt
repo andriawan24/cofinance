@@ -39,18 +39,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
+import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.domain.model.response.Account
 
 @Composable
 fun AccountBottomSheet(
+    accounts: List<Account>,
     selectedAccount: Account?,
     onAccountSaved: (Account) -> Unit,
+    onAddAccountClicked: () -> Unit,
     onCloseClicked: () -> Unit
 ) {
     var shownDropdown by remember { mutableIntStateOf(-1) }
-    var currentSelectedAccount by remember { mutableStateOf<Account?>(selectedAccount) }
+    var currentSelectedAccount by remember { mutableStateOf(selectedAccount) }
 
     Column {
         Box(
@@ -85,7 +88,7 @@ fun AccountBottomSheet(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-            itemsIndexed(Account.dummy().groupBy { it.group }.toList()) { index, data ->
+            itemsIndexed(accounts.groupBy { it.group }.toList()) { index, data ->
                 val animatedRotation by animateFloatAsState(
                     targetValue = if (shownDropdown == index) 180f else 0f,
                     label = "animate dropdown icon"
@@ -133,7 +136,7 @@ fun AccountBottomSheet(
                                 ) {
                                     Text(
                                         modifier = Modifier.weight(1f),
-                                        text = account.label,
+                                        text = account.name,
                                         style = MaterialTheme.typography.labelMedium.copy(
                                             fontWeight = FontWeight.Medium,
                                             color = MaterialTheme.colorScheme.onBackground
@@ -155,12 +158,24 @@ fun AccountBottomSheet(
                     }
                 }
 
-                if (index != Account.dummy().groupBy { it.group }.toList().lastIndex) {
+                if (index != accounts.groupBy { it.group }.toList().lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
                         thickness = Dimensions.SIZE_1,
                         color = MaterialTheme.colorScheme.surfaceContainerLow
                     )
+                }
+            }
+
+            item {
+                SecondaryButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = Dimensions.SIZE_24)
+                        .padding(horizontal = Dimensions.SIZE_24),
+                    onClick = onAddAccountClicked
+                ) {
+                    Text("Add new account")
                 }
             }
         }
@@ -189,9 +204,11 @@ private fun AccountBottomSheetPreview() {
     CofinanceTheme {
         Surface {
             AccountBottomSheet(
+                accounts = emptyList(),
                 selectedAccount = null,
                 onAccountSaved = { },
-                onCloseClicked = { }
+                onCloseClicked = { },
+                onAddAccountClicked = {}
             )
         }
     }

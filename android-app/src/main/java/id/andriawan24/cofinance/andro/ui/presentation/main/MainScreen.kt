@@ -8,7 +8,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
@@ -20,7 +19,6 @@ import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
 
 @Composable
 fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
-    val innerNavController = rememberNavController()
     val appState = rememberCofinanceAppState()
 
     Scaffold(
@@ -36,7 +34,7 @@ fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(contentPadding),
-            navController = innerNavController,
+            navController = appState.navController,
             startDestination = Destinations.Activity
         ) {
             composable<Destinations.Activity> {
