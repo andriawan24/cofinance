@@ -2,11 +2,11 @@ package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.AccountGroupType
 import id.andriawan24.cofinance.domain.model.request.AccountParam
 import id.andriawan24.cofinance.domain.usecase.accounts.AddAccountUseCase
 import id.andriawan24.cofinance.utils.None
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,9 +18,10 @@ import kotlinx.coroutines.launch
 
 data class AddAccountUiState(
     val category: AccountGroupType? = null,
-    val name: String = "",
-    val amount: String = "",
-    val openCategoryChooser: Boolean = false
+    val name: String = emptyString(),
+    val amount: String = emptyString(),
+    val openCategoryChooser: Boolean = false,
+    val isLoading: Boolean = false
 )
 
 class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : ViewModel() {
@@ -34,21 +35,19 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
     val showMessage = _showMessage.receiveAsFlow()
 
     fun openCategoryChooser() {
-        _uiState.value = _uiState.value.copy(openCategoryChooser = true)
+        _uiState.update { it.copy(openCategoryChooser = true) }
     }
 
     fun closeCategoryChooser() {
-        _uiState.value = _uiState.value.copy(openCategoryChooser = false)
+        _uiState.update { it.copy(openCategoryChooser = false) }
     }
 
     fun onCategorySelected(category: AccountGroupType) {
-        _uiState.value = _uiState.value.copy(category = category)
+        _uiState.update { it.copy(category = category) }
     }
 
     fun onNameChanged(name: String) {
-        _uiState.update {
-            it.copy(name = name)
-        }
+        _uiState.update { it.copy(name = name) }
     }
 
     fun onAmountChanged(amount: String) {
@@ -62,16 +61,19 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
 
         if (category != null && name.isNotBlank() && amount.isNotBlank()) {
             val account = AccountParam(name = name, balance = amount.toInt(), group = category.name)
-            Napier.d("Account submitted $account")
+
             viewModelScope.launch {
+                _uiState.update { it.copy(isLoading = false) }
+
                 addAccountUseCase.execute(account).collectLatest {
                     if (it.isSuccess) {
+                        _uiState.update { it.copy(isLoading = false) }
                         _closeBottomSheet.send(None)
                     }
 
                     if (it.isFailure) {
-                        Napier.e("Failed to save account", it.exceptionOrNull())
                         _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                        _uiState.update { it.copy(isLoading = false) }
                     }
                 }
             }

@@ -1,21 +1,25 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addnew.components
+package id.andriawan24.cofinance.andro.ui.presentation.common
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
-fun FancyIndicator(modifier: Modifier = Modifier, label: String) {
+fun FancyTabIndicator(modifier: Modifier = Modifier, label: String) {
     Box(
-        modifier
+        modifier = modifier
             .padding(all = Dimensions.SIZE_8)
             .fillMaxSize()
             .background(
@@ -31,6 +35,19 @@ fun FancyIndicator(modifier: Modifier = Modifier, label: String) {
             style = MaterialTheme.typography.labelSmall.copy(
                 color = MaterialTheme.colorScheme.onPrimary
             )
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun FancyTabIndicatorPreview() {
+    CofinanceTheme {
+        FancyTabIndicator(
+            modifier = Modifier
+                .height(Dimensions.SIZE_64)
+                .width(Dimensions.SIZE_200),
+            label = "Test"
         )
     }
 }

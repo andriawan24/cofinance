@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addnew.components
+package id.andriawan24.cofinance.andro.ui.presentation.common
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

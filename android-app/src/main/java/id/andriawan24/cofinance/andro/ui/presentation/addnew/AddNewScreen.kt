@@ -27,18 +27,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.FancyIndicator
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewViewModel
+import id.andriawan24.cofinance.andro.ui.presentation.common.FancyTabIndicator
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
-import id.andriawan24.cofinance.domain.model.response.Account
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
-import java.util.Date
 
 @Composable
 fun AddNewScreen(onBackPressed: () -> Unit, onInputPictureClicked: () -> Unit) {
@@ -49,28 +46,12 @@ fun AddNewScreen(onBackPressed: () -> Unit, onInputPictureClicked: () -> Unit) {
         AddNewContent(
             modifier = Modifier.padding(contentPadding),
             uiState = uiState,
-            onBackPressed = onBackPressed,
-            onInputPictureClicked = onInputPictureClicked,
-            onAmountChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetAmount(it))
-            },
-            onFeeChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetFee(it))
-            },
-            onNoteChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetNote(it))
-            },
-            onCategoryChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetCategory(it))
-            },
-            onAccountChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetAccount(it))
-            },
-            onDateTimeChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetDateTime(it))
-            },
-            onIncludeFeeChanged = {
-                addNewViewModel.onEvent(AddNewUiEvent.SetIncludeFee(it))
+            onEvent = {
+                when (it) {
+                    AddNewUiEvent.OnBackPressed -> onBackPressed.invoke()
+                    AddNewUiEvent.OnPictureClicked -> onInputPictureClicked.invoke()
+                    else -> addNewViewModel.onEvent(it)
+                }
             }
         )
     }
@@ -81,15 +62,7 @@ fun AddNewScreen(onBackPressed: () -> Unit, onInputPictureClicked: () -> Unit) {
 fun AddNewContent(
     modifier: Modifier = Modifier,
     uiState: AddNewUiState,
-    onBackPressed: () -> Unit,
-    onInputPictureClicked: () -> Unit,
-    onAmountChanged: (String) -> Unit,
-    onFeeChanged: (String) -> Unit,
-    onNoteChanged: (String) -> Unit,
-    onCategoryChanged: (ExpenseCategory) -> Unit,
-    onAccountChanged: (Account) -> Unit,
-    onDateTimeChanged: (Date) -> Unit,
-    onIncludeFeeChanged: (Boolean) -> Unit,
+    onEvent: (AddNewUiEvent) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
@@ -102,7 +75,7 @@ fun AddNewContent(
                 .padding(horizontal = Dimensions.SIZE_16)
         ) {
             IconButton(
-                onClick = onBackPressed,
+                onClick = { onEvent.invoke(AddNewUiEvent.OnBackPressed) },
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.primary
@@ -130,9 +103,9 @@ fun AddNewContent(
             containerColor = MaterialTheme.colorScheme.onPrimary,
             selectedTabIndex = expenseTypePagerState.currentPage,
             indicator = {
-                FancyIndicator(
+                FancyTabIndicator(
                     modifier = Modifier.tabIndicatorOffset(expenseTypePagerState.currentPage),
-                    label = ExpensesType.getByIndex(expenseTypePagerState.currentPage).label
+                    label = stringResource(ExpensesType.getByIndex(expenseTypePagerState.currentPage).labelResId)
                 )
             },
             divider = {
@@ -150,11 +123,15 @@ fun AddNewContent(
                     },
                     text = {
                         Text(
-                            text = type.label,
+                            text = stringResource(id = type.labelResId),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                color = if (index == expenseTypePagerState.currentPage) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                color = if (index == expenseTypePagerState.currentPage) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurfaceVariant
+                                }
                             )
                         )
                     }
@@ -162,37 +139,13 @@ fun AddNewContent(
             }
         }
 
-        HorizontalPager(
-            modifier = Modifier.weight(1f),
-            state = expenseTypePagerState
-        ) {
+        HorizontalPager(modifier = Modifier.weight(1f), state = expenseTypePagerState) {
             when (it) {
                 ExpensesType.EXPENSES.index -> ExpenseSection(
                     modifier = Modifier.fillMaxSize(),
                     uiState = uiState,
-                    onInputPictureClicked = onInputPictureClicked,
-                    onAmountChanged = onAmountChanged,
-                    onFeeChanged = onFeeChanged,
-                    onNoteChanged = onNoteChanged,
-                    onCategoryChanged = onCategoryChanged,
-                    onAccountChanged = onAccountChanged,
-                    onDateTimeChanged = onDateTimeChanged,
-                    onIncludeFeeChanged = onIncludeFeeChanged,
+                    onEvent = onEvent
                 )
-
-//                ExpensesType.INCOME.index -> ExpenseSection(
-//                    modifier = Modifier.fillMaxSize(),
-//                    uiState = uiState,
-//                    addNewViewModel = addNewViewModel,
-//                    onInputPictureClicked = onInputPictureClicked
-//                )
-//
-//                ExpensesType.TRANSFER.index -> ExpenseSection(
-//                    modifier = Modifier.fillMaxSize(),
-//                    uiState = uiState,
-//                    addNewViewModel = addNewViewModel,
-//                    onInputPictureClicked = onInputPictureClicked
-//                )
             }
         }
     }

@@ -46,4 +46,6 @@
     <string name="label_name">Name</string>
     <string name="label_add_account">Add Account</string>
     <string name="label_account_category">Account Category</string>
+    <string name="label_ok">OK</string>
+    <string name="label_transfer">Transfer</string>
 </resources>

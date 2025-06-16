@@ -11,6 +11,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -34,18 +35,17 @@ import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddAccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSection
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.BaseBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.DialogDatePickerContent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputNote
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.UploadPhotoCardButton
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
+import id.andriawan24.cofinance.andro.ui.presentation.common.BaseBottomSheet
+import id.andriawan24.cofinance.andro.ui.presentation.common.DialogDatePickerContent
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
-import id.andriawan24.cofinance.domain.model.response.Account
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -55,14 +55,7 @@ import java.util.Date
 @Composable
 fun ExpenseSection(
     uiState: AddNewUiState,
-    onInputPictureClicked: () -> Unit,
-    onAmountChanged: (String) -> Unit,
-    onFeeChanged: (String) -> Unit,
-    onNoteChanged: (String) -> Unit,
-    onCategoryChanged: (ExpenseCategory) -> Unit,
-    onAccountChanged: (Account) -> Unit,
-    onDateTimeChanged: (Date) -> Unit,
-    onIncludeFeeChanged: (Boolean) -> Unit,
+    onEvent: (AddNewUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope: CoroutineScope = rememberCoroutineScope()
@@ -86,17 +79,19 @@ fun ExpenseSection(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
-        UploadPhotoCardButton(onInputPictureClicked = onInputPictureClicked)
+        UploadPhotoCardButton(
+            onInputPictureClicked = { onEvent.invoke(AddNewUiEvent.OnPictureClicked) }
+        )
 
         InputAmount(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             amount = uiState.amount,
             fee = uiState.fee,
             includeFee = uiState.includeFee,
-            onAmountChanged = onAmountChanged,
-            onFeeChanged = onFeeChanged,
-            onIncludeFeeChanged = {
-                onIncludeFeeChanged(it)
+            onAmountChanged = { amount -> onEvent.invoke(AddNewUiEvent.SetAmount(amount)) },
+            onFeeChanged = { fee -> onEvent.invoke(AddNewUiEvent.SetAmount(fee)) },
+            onIncludeFeeChanged = { isIncludeFee ->
+                onEvent.invoke(AddNewUiEvent.SetIncludeFee(isIncludeFee))
                 focusManager.clearFocus()
             }
         )
@@ -126,9 +121,7 @@ fun ExpenseSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_category),
             value = uiState.category?.label.orEmpty(),
-            onSectionClicked = {
-                showCategoryBottomSheet = true
-            },
+            onSectionClicked = { showCategoryBottomSheet = true },
             startIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_category),
@@ -149,9 +142,7 @@ fun ExpenseSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_dates),
             value = uiState.dateTime.formatToString(),
-            onSectionClicked = {
-                showDateBottomSheet = true
-            },
+            onSectionClicked = { showDateBottomSheet = true },
             startIcon = {
                 Icon(
                     painter = painterResource(R.drawable.ic_calendar),
@@ -164,7 +155,7 @@ fun ExpenseSection(
         InputNote(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             note = uiState.notes,
-            onNoteChanged = onNoteChanged
+            onNoteChanged = { note -> onEvent.invoke(AddNewUiEvent.SetNote(note)) }
         )
 
         Spacer(modifier = Modifier.weight(1f))
@@ -178,9 +169,7 @@ fun ExpenseSection(
         ) {
             Text(
                 text = stringResource(R.string.action_save),
-                style = MaterialTheme.typography.labelMedium.copy(
-                    fontWeight = FontWeight.Bold
-                )
+                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
     }
@@ -188,14 +177,12 @@ fun ExpenseSection(
     if (showCategoryBottomSheet) {
         BaseBottomSheet(
             state = categoryBottomSheetState,
-            onDismissRequest = {
-                showCategoryBottomSheet = false
-            }
+            onDismissRequest = { showCategoryBottomSheet = false }
         ) {
             CategoryBottomSheet(
                 selectedCategory = uiState.category,
                 onCategorySaved = { category ->
-                    onCategoryChanged(category)
+                    onEvent.invoke(AddNewUiEvent.SetCategory(category))
                     scope.launch {
                         categoryBottomSheetState.hide()
                         showCategoryBottomSheet = false
@@ -229,7 +216,7 @@ fun ExpenseSection(
                         set(Calendar.MONTH, chosenCal.get(Calendar.MONTH))
                         set(Calendar.DAY_OF_MONTH, chosenCal.get(Calendar.DAY_OF_MONTH))
                     }
-                    onDateTimeChanged(calendar.time)
+                    onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {
                         dateBottomSheetState.hide()
                         showDateBottomSheet = false
@@ -255,7 +242,7 @@ fun ExpenseSection(
                 accounts = uiState.accounts,
                 selectedAccount = uiState.account,
                 onAccountSaved = { account ->
-                    onAccountChanged(account)
+                    onEvent(AddNewUiEvent.SetAccount(account))
                     scope.launch {
                         accountBottomSheetState.hide()
                         showAccountBottomSheet = false
@@ -289,6 +276,7 @@ fun ExpenseSection(
                         addAccountBottomSheetState.hide()
                         showAddAccountBottomSheet = false
                         showAccountBottomSheet = true
+                        onEvent.invoke(AddNewUiEvent.UpdateAccount)
                     }
                 },
                 onCloseClicked = {
@@ -304,13 +292,10 @@ fun ExpenseSection(
     if (showTimePickerDialog) {
         AlertDialog(
             onDismissRequest = { showTimePickerDialog = false },
+            text = { TimePicker(state = timePickerState) },
             dismissButton = {
-                TextButton(
-                    onClick = {
-                        showTimePickerDialog = false
-                    }
-                ) {
-                    Text(stringResource(R.string.label_cancel))
+                TextButton(onClick = { showTimePickerDialog = false }) {
+                    Text(text = stringResource(R.string.label_cancel))
                 }
             },
             confirmButton = {
@@ -321,14 +306,14 @@ fun ExpenseSection(
                             set(Calendar.HOUR_OF_DAY, timePickerState.hour)
                             set(Calendar.MINUTE, timePickerState.minute)
                         }
-                        onDateTimeChanged(calendar.time)
+
+                        onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                         showTimePickerDialog = false
                     }
                 ) {
-                    Text("OK")
+                    Text(text = stringResource(R.string.label_ok))
                 }
-            },
-            text = { TimePicker(state = timePickerState) }
+            }
         )
     }
 }
@@ -337,16 +322,11 @@ fun ExpenseSection(
 @Composable
 private fun ExpenseSectionPreview() {
     CofinanceTheme {
-        ExpenseSection(
-            uiState = AddNewUiState(),
-            onInputPictureClicked = { },
-            onAmountChanged = { },
-            onFeeChanged = { },
-            onNoteChanged = { },
-            onCategoryChanged = { },
-            onAccountChanged = { },
-            onDateTimeChanged = { },
-            onIncludeFeeChanged = { },
-        )
+        Surface {
+            ExpenseSection(
+                uiState = AddNewUiState(),
+                onEvent = { }
+            )
+        }
     }
 }

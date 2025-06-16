@@ -31,6 +31,9 @@ data class AddNewUiState(
 )
 
 sealed class AddNewUiEvent {
+    data object OnBackPressed : AddNewUiEvent()
+    data object OnPictureClicked : AddNewUiEvent()
+    data object UpdateAccount : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
     data class SetCategory(val category: ExpenseCategory) : AddNewUiEvent()
@@ -69,9 +72,7 @@ class AddNewViewModel(private val getAccountsUseCase: GetAccountsUseCase) : View
             getAccountsUseCase.execute().collectLatest {
                 if (it.isSuccess) {
                     _uiState.update { currentState ->
-                        currentState.copy(
-                            accounts = it.getOrDefault(emptyList())
-                        )
+                        currentState.copy(accounts = it.getOrDefault(emptyList()))
                     }
                 }
             }
@@ -94,43 +95,35 @@ class AddNewViewModel(private val getAccountsUseCase: GetAccountsUseCase) : View
             }
 
             is AddNewUiEvent.SetAmount -> {
-                _uiState.update {
-                    it.copy(amount = event.amount)
-                }
+                _uiState.update { it.copy(amount = event.amount) }
                 validateInputs()
             }
 
             is AddNewUiEvent.SetFee -> {
-                _uiState.update {
-                    it.copy(fee = event.fee)
-                }
+                _uiState.update { it.copy(fee = event.fee) }
                 validateInputs()
             }
 
             is AddNewUiEvent.SetCategory -> {
-                _uiState.update {
-                    it.copy(category = event.category)
-                }
+                _uiState.update { it.copy(category = event.category) }
                 validateInputs()
             }
 
             is AddNewUiEvent.SetAccount -> {
-                _uiState.update {
-                    it.copy(account = event.account)
-                }
+                _uiState.update { it.copy(account = event.account) }
                 validateInputs()
             }
 
             is AddNewUiEvent.SetDateTime -> {
-                _uiState.update {
-                    it.copy(dateTime = event.dateTime)
-                }
+                _uiState.update { it.copy(dateTime = event.dateTime) }
                 validateInputs()
             }
 
-            is AddNewUiEvent.SetNote -> _uiState.update {
-                it.copy(notes = event.note)
-            }
+            is AddNewUiEvent.SetNote -> _uiState.update { it.copy(notes = event.note) }
+            is AddNewUiEvent.UpdateAccount -> getAccounts()
+
+            is AddNewUiEvent.OnBackPressed,
+            is AddNewUiEvent.OnPictureClicked -> Unit
         }
     }
 

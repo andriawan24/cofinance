@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
@@ -39,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddAccountUiState
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddAccountViewModel
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
@@ -56,7 +56,31 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
         onAccountSaved()
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    AddAccountBottomSheetContent(
+        uiState = uiState,
+        onCloseClicked = onCloseClicked,
+        onOpenCategoryChooser = addAccountViewModel::openCategoryChooser,
+        onCloseCategoryChooser = addAccountViewModel::closeCategoryChooser,
+        onCategoryChosen = addAccountViewModel::onCategorySelected,
+        onNameChanged = addAccountViewModel::onNameChanged,
+        onAmountChanged = addAccountViewModel::onAmountChanged,
+        onSaveAccount = addAccountViewModel::saveAccount
+    )
+}
+
+@Composable
+private fun AddAccountBottomSheetContent(
+    modifier: Modifier = Modifier,
+    uiState: AddAccountUiState,
+    onCloseClicked: () -> Unit,
+    onOpenCategoryChooser: () -> Unit,
+    onCloseCategoryChooser: () -> Unit,
+    onCategoryChosen: (AccountGroupType) -> Unit,
+    onNameChanged: (String) -> Unit,
+    onAmountChanged: (String) -> Unit,
+    onSaveAccount: () -> Unit
+) {
+    Column(modifier = modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -77,9 +101,7 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
                 modifier = Modifier
                     .align(Alignment.CenterEnd)
                     .clip(CircleShape)
-                    .clickable {
-                        onCloseClicked()
-                    },
+                    .clickable(true) { onCloseClicked() },
                 painter = painterResource(R.drawable.ic_close),
                 contentDescription = null
             )
@@ -97,9 +119,7 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
                     ),
                 label = stringResource(R.string.label_account_category),
                 value = uiState.category?.displayName.orEmpty(),
-                onSectionClicked = {
-                    addAccountViewModel.openCategoryChooser()
-                },
+                onSectionClicked = onOpenCategoryChooser,
                 startIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_account),
@@ -119,7 +139,7 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
 
             DropdownMenu(
                 expanded = uiState.openCategoryChooser,
-                onDismissRequest = { addAccountViewModel.closeCategoryChooser() },
+                onDismissRequest = onCloseCategoryChooser,
                 containerColor = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             ) {
@@ -132,10 +152,8 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
                             )
                         },
                         onClick = {
-                            addAccountViewModel.run {
-                                onCategorySelected(option)
-                                closeCategoryChooser()
-                            }
+                            onCategoryChosen(option)
+                            onCloseCategoryChooser()
                         }
                     )
                 }
@@ -164,10 +182,10 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
             BasicTextField(
                 modifier = Modifier.weight(1f),
                 value = uiState.name,
-                onValueChange = addAccountViewModel::onNameChanged,
+                onValueChange = onNameChanged,
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Number
+                    keyboardType = KeyboardType.Text
                 ),
                 textStyle = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
@@ -222,11 +240,11 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
                         value = uiState.amount,
                         onValueChange = {
                             if (it.isDigitsOnly() && it.length < 13) {
-                                addAccountViewModel.onAmountChanged(it)
+                                onAmountChanged(it)
                             }
                         },
                         keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
+                            imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number
                         ),
                         textStyle = MaterialTheme.typography.labelMedium.copy(
@@ -249,14 +267,14 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        VerticalSpacing(size = Dimensions.SIZE_200)
 
         PrimaryButton(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(all = Dimensions.SIZE_24),
-            onClick = addAccountViewModel::saveAccount,
-            enabled = true
+            onClick = onSaveAccount,
+            enabled = !uiState.isLoading
         ) {
             Text(
                 text = stringResource(R.string.action_save),
@@ -271,9 +289,15 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
 private fun AddAccountBottomSheetPreview() {
     CofinanceTheme {
         Surface(color = MaterialTheme.colorScheme.onPrimary) {
-            AddAccountBottomSheet(
-                onAccountSaved = {},
-                onCloseClicked = {}
+            AddAccountBottomSheetContent(
+                uiState = AddAccountUiState(),
+                onCloseClicked = { },
+                onOpenCategoryChooser = { },
+                onCloseCategoryChooser = { },
+                onCategoryChosen = { },
+                onNameChanged = { },
+                onAmountChanged = { },
+                onSaveAccount = { }
             )
         }
     }
