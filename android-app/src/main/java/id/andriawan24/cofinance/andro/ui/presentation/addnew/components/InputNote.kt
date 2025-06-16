@@ -11,6 +11,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -22,6 +26,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.emptyString
 
 @Composable
 fun InputNote(modifier: Modifier = Modifier, note: String, onNoteChanged: (String) -> Unit) {
@@ -47,9 +52,10 @@ fun InputNote(modifier: Modifier = Modifier, note: String, onNoteChanged: (Strin
                 value = note,
                 onValueChange = onNoteChanged,
                 keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Number
+                    imeAction = ImeAction.Done,
+                    keyboardType = KeyboardType.Text
                 ),
+                singleLine = false,
                 textStyle = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 ),
@@ -75,6 +81,9 @@ fun InputNote(modifier: Modifier = Modifier, note: String, onNoteChanged: (Strin
 @Composable
 private fun InputNotePreview() {
     CofinanceTheme {
-        InputNote(note = "This is note") { }
+        var note by remember { mutableStateOf(emptyString()) }
+        InputNote(note = note) {
+            note = it
+        }
     }
 }
