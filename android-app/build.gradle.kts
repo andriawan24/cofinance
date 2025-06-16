@@ -14,13 +14,12 @@ require(googleClientId.isNotEmpty()) { "Google Client ID is empty" }
 
 android {
     namespace = "id.andriawan24.cofinance.andro"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "id.andriawan24.cofinance.andro"
         minSdk = 24
-        //noinspection OldTargetApi
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
 
@@ -58,6 +57,7 @@ android {
 
 dependencies {
     implementation(projects.shared)
+    implementation(libs.core.ktx)
 
     // Compose
     implementation(libs.compose.ui)
