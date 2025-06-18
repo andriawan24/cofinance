@@ -29,6 +29,6 @@ val dataModule = module {
     }
 
     single<AuthenticationRepository> { AuthenticationRepositoryImpl(get()) }
-    single<TransactionRepository> { TransactionRepositoryImpl(get()) }
+    single<TransactionRepository> { TransactionRepositoryImpl(get(), get()) }
     single<AccountRepository> { AccountRepositoryImpl(get()) }
 }

@@ -3,18 +3,21 @@ package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.utils.None
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.domain.model.request.TransactionParam
 import id.andriawan24.cofinance.domain.model.response.Account
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
+import okhttp3.internal.toLongOrDefault
 import java.util.Date
 
 data class AddNewUiState(
@@ -28,12 +31,14 @@ data class AddNewUiState(
     var notes: String = emptyString(),
     var isValid: Boolean = false,
     var accounts: List<Account> = emptyList(),
+    var isLoading: Boolean = false
 )
 
 sealed class AddNewUiEvent {
     data object OnBackPressed : AddNewUiEvent()
     data object OnPictureClicked : AddNewUiEvent()
     data object UpdateAccount : AddNewUiEvent()
+    data object SaveTransaction : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
     data class SetCategory(val category: ExpenseCategory) : AddNewUiEvent()
@@ -43,28 +48,21 @@ sealed class AddNewUiEvent {
     data class SetNote(val note: String) : AddNewUiEvent()
 }
 
-class AddNewViewModel(private val getAccountsUseCase: GetAccountsUseCase) : ViewModel() {
+class AddNewViewModel(
+    private val getAccountsUseCase: GetAccountsUseCase,
+    private val createTransactionUseCase: CreateTransactionUseCase
+) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
 
+    private val _onSuccessSaved = Channel<None>(Channel.BUFFERED)
+    val onSuccessSaved = _onSuccessSaved.receiveAsFlow()
+
+    private val _showMessage = Channel<String>(Channel.BUFFERED)
+    val showMessage = _showMessage.receiveAsFlow()
+
     init {
         getAccounts()
-    }
-
-    fun init(receiptScan: ReceiptScan, onDateTime: (Date) -> Unit) {
-        var date = Date()
-        if (receiptScan.totalPrice > 0) {
-            date = getDateTimeFromIsoString(receiptScan.transactionDate)
-            _uiState.update {
-                it.copy(
-                    amount = receiptScan.totalPrice.toString(),
-                    fee = receiptScan.fee.toString(),
-                    includeFee = receiptScan.fee > 0,
-                    dateTime = date
-                )
-            }
-        }
-        onDateTime(date)
     }
 
     private fun getAccounts() {
@@ -77,12 +75,6 @@ class AddNewViewModel(private val getAccountsUseCase: GetAccountsUseCase) : View
                 }
             }
         }
-    }
-
-    private fun getDateTimeFromIsoString(dateTime: String): Date {
-        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
-        val offsetDateTime = OffsetDateTime.parse(dateTime, formatter)
-        return Date.from(offsetDateTime.toInstant())
     }
 
     fun onEvent(event: AddNewUiEvent) {
@@ -121,6 +113,33 @@ class AddNewViewModel(private val getAccountsUseCase: GetAccountsUseCase) : View
 
             is AddNewUiEvent.SetNote -> _uiState.update { it.copy(notes = event.note) }
             is AddNewUiEvent.UpdateAccount -> getAccounts()
+
+            is AddNewUiEvent.SaveTransaction -> {
+                viewModelScope.launch {
+                    _uiState.update { it.copy(isLoading = true) }
+                    val param = TransactionParam(
+                        amount = uiState.value.amount.toLong(),
+                        category = uiState.value.category?.name.orEmpty(),
+                        date = uiState.value.dateTime.toString(),
+                        fee = uiState.value.fee.toLongOrDefault(0),
+                        notes = uiState.value.notes,
+                        accountsId = uiState.value.account?.id ?: 0
+                    )
+                    createTransactionUseCase.execute(param).collectLatest {
+                        if (it.isSuccess) {
+                            _uiState.update { currentState ->
+                                currentState.copy(isLoading = false)
+                            }
+                            _onSuccessSaved.send(None)
+                        } else {
+                            _uiState.update { currentState ->
+                                currentState.copy(isLoading = false)
+                            }
+                            _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                        }
+                    }
+                }
+            }
 
             is AddNewUiEvent.OnBackPressed,
             is AddNewUiEvent.OnPictureClicked -> Unit

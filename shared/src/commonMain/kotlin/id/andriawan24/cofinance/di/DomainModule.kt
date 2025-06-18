@@ -6,6 +6,7 @@ import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.ScanReceiptUseCase
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
@@ -16,6 +17,7 @@ val domainModule = module {
     singleOf(::GetUserUseCase)
     singleOf(::LogoutUseCase)
     singleOf(::ScanReceiptUseCase)
+    singleOf(::CreateTransactionUseCase)
     singleOf(::GetAccountsUseCase)
     singleOf(::AddAccountUseCase)
 }

@@ -14,10 +14,13 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,16 +36,30 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUi
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.common.FancyTabIndicator
+import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AddNewScreen(onBackPressed: () -> Unit, onInputPictureClicked: () -> Unit) {
+fun AddTransactionScreen(
+    onBackPressed: () -> Unit,
+    onSuccessSave: () -> Unit,
+    onInputPictureClicked: () -> Unit
+) {
     val addNewViewModel: AddNewViewModel = koinViewModel()
     val uiState by addNewViewModel.uiState.collectAsStateWithLifecycle()
+    val snackState = remember { SnackbarHostState() }
 
-    Scaffold { contentPadding ->
+    addNewViewModel.onSuccessSaved.CollectAsEffect {
+        onSuccessSave.invoke()
+    }
+
+    addNewViewModel.showMessage.CollectAsEffect {
+        // snackState.showSnackbar(it)
+    }
+
+    Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->
         AddNewContent(
             modifier = Modifier.padding(contentPadding),
             uiState = uiState,

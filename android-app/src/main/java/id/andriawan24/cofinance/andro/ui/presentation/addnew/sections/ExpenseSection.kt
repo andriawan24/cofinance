@@ -165,7 +165,9 @@ fun ExpenseSection(
                 .fillMaxWidth()
                 .padding(all = Dimensions.SIZE_16),
             enabled = uiState.isValid,
-            onClick = { },
+            onClick = {
+                onEvent.invoke(AddNewUiEvent.SaveTransaction)
+            },
         ) {
             Text(
                 text = stringResource(R.string.action_save),

@@ -9,7 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.AddNewScreen
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.AddTransactionScreen
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.andro.ui.presentation.main.MainScreen
@@ -82,12 +82,16 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
         }
 
         composable<Destinations.AddNew> {
-            AddNewScreen(
+            AddTransactionScreen(
                 onBackPressed = {
                     navController.navigateUp()
                 },
                 onInputPictureClicked = {
                     navController.navigate(Destinations.Camera)
+                },
+                onSuccessSave = {
+                    // TODO: Just do this so far
+                    navController.navigateUp()
                 }
             )
         }
