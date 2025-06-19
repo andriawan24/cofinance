@@ -1,8 +1,8 @@
 package id.andriawan24.cofinance.domain.model.request
 
-import id.andriawan24.cofinance.data.model.request.TransactionRequest
+import id.andriawan24.cofinance.data.model.request.AddTransactionRequest
 
-data class TransactionParam(
+data class AddTransactionParam(
     val amount: Long,
     val category: String,
     val date: String,
@@ -12,8 +12,8 @@ data class TransactionParam(
     val accountsId: Int,
 ) {
     companion object {
-        fun TransactionParam.toRequest(): TransactionRequest {
-            return TransactionRequest(
+        fun AddTransactionParam.toRequest(): AddTransactionRequest {
+            return AddTransactionRequest(
                 amount = this.amount,
                 category = this.category,
                 date = this.date,

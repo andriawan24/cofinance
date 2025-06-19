@@ -6,7 +6,7 @@ import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.None
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
-import id.andriawan24.cofinance.domain.model.request.TransactionParam
+import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
@@ -117,7 +117,7 @@ class AddNewViewModel(
             is AddNewUiEvent.SaveTransaction -> {
                 viewModelScope.launch {
                     _uiState.update { it.copy(isLoading = true) }
-                    val param = TransactionParam(
+                    val param = AddTransactionParam(
                         amount = uiState.value.amount.toLong(),
                         category = uiState.value.category?.name.orEmpty(),
                         date = uiState.value.dateTime.toString(),
@@ -125,11 +125,13 @@ class AddNewViewModel(
                         notes = uiState.value.notes,
                         accountsId = uiState.value.account?.id ?: 0
                     )
+
                     createTransactionUseCase.execute(param).collectLatest {
                         if (it.isSuccess) {
                             _uiState.update { currentState ->
                                 currentState.copy(isLoading = false)
                             }
+
                             _onSuccessSaved.send(None)
                         } else {
                             _uiState.update { currentState ->

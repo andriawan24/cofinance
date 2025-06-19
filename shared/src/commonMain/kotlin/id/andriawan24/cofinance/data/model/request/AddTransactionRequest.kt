@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class TransactionRequest(
+data class AddTransactionRequest(
     val amount: Long,
     val category: String,
     val date: String,
