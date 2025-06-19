@@ -14,10 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
+import id.andriawan24.cofinance.domain.model.response.Transaction
 
 @Composable
-fun ExpenseByMonth(modifier: Modifier = Modifier) {
+fun ExpenseByMonth(modifier: Modifier = Modifier, data: Pair<String, List<Transaction>>) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -37,7 +39,7 @@ fun ExpenseByMonth(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "Thu, 15 May 2025",
+                text = data.first,
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -58,7 +60,7 @@ fun ExpenseByMonth(modifier: Modifier = Modifier) {
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
-            repeat(4) {
+            data.second.forEach {
                 ExpenseItem()
             }
         }
@@ -70,7 +72,21 @@ fun ExpenseByMonth(modifier: Modifier = Modifier) {
 private fun ExpenseByMonthPreview() {
     CofinanceTheme {
         ExpenseByMonth(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            data = Pair(
+                "Test",
+                listOf(
+                    Transaction(
+                        amount = 1000,
+                        category = "TEST",
+                        date = "sss",
+                        fee = 0,
+                        notes = emptyString(),
+                        usersId = emptyString(),
+                        accountsId = 0
+                    )
+                )
+            )
         )
     }
 }

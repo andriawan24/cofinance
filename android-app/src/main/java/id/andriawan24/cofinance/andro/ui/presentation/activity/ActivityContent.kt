@@ -1,13 +1,15 @@
 package id.andriawan24.cofinance.andro.ui.presentation.activity
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -15,20 +17,25 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.BalanceCard
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
+import id.andriawan24.cofinance.andro.ui.presentation.activity.components.EmptyActivity
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.ExpenseByMonth
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
-fun ActivityContent(onBookmarkClicked: () -> Unit) {
+fun ActivityContent(
+    uiState: ActivityUiState,
+    onEvent: (ActivityUiEvent) -> Unit,
+    onBookmarkClicked: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -39,26 +46,41 @@ fun ActivityContent(onBookmarkClicked: () -> Unit) {
             onBookmarkClicked = onBookmarkClicked
         )
 
-        DateSwitcher(label = "May 2025")
-
-        // EmptyActivity(modifier = Modifier.weight(1f))
-
-        BalanceCard(
-            modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
-            balance = 6_000_000,
-            income = 10_000_000,
-            expense = 4_000_000
+        DateSwitcher(
+            label = "${uiState.monthString} ${uiState.year}",
+            onPreviousClicked = {
+                onEvent(ActivityUiEvent.OnPreviousMonth)
+            },
+            onNextClicked = {
+                onEvent(ActivityUiEvent.OnNextMonth)
+            }
         )
 
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)
-        ) {
-            repeat(3) {
-                ExpenseByMonth()
+        if (uiState.isLoading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Dimensions.SIZE_48)
+            ) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
             }
+        } else {
+            if (uiState.transactions.isNotEmpty()) {
+                BalanceCard(
+                    modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
+                    balance = uiState.balance,
+                    income = uiState.income,
+                    expense = uiState.expense
+                )
 
-            VerticalSpacing(Dimensions.SIZE_24)
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
+                    items(uiState.transactions.toList()) {
+                        ExpenseByMonth(data = it)
+                    }
+                }
+            } else {
+                EmptyActivity(modifier = Modifier.weight(1f))
+            }
         }
     }
 }
@@ -94,7 +116,11 @@ private fun ActivityTitle(modifier: Modifier = Modifier, onBookmarkClicked: () -
 private fun ActivityContentPreview() {
     CofinanceTheme {
         Surface {
-            ActivityContent(onBookmarkClicked = { })
+            ActivityContent(
+                uiState = ActivityUiState(isLoading = true),
+                onBookmarkClicked = { },
+                onEvent = { }
+            )
         }
     }
 }

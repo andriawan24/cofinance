@@ -23,7 +23,12 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun DateSwitcher(modifier: Modifier = Modifier, label: String) {
+fun DateSwitcher(
+    modifier: Modifier = Modifier,
+    label: String,
+    onPreviousClicked: () -> Unit,
+    onNextClicked: () -> Unit
+) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -45,9 +50,7 @@ fun DateSwitcher(modifier: Modifier = Modifier, label: String) {
         ) {
             IconButton(
                 colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                onClick = {
-                    // TODO: Handle previous month
-                }
+                onClick = onPreviousClicked
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_chevron_left),
@@ -70,9 +73,7 @@ fun DateSwitcher(modifier: Modifier = Modifier, label: String) {
 
             IconButton(
                 colors = IconButtonDefaults.iconButtonColors(contentColor = MaterialTheme.colorScheme.primary),
-                onClick = {
-                    // TODO: Handle next month
-                }
+                onClick = onNextClicked
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_chevron_right),
@@ -95,7 +96,9 @@ private fun DateSwitcherPreview() {
         ) {
             DateSwitcher(
                 modifier = Modifier.fillMaxWidth(),
-                label = "May 2025"
+                label = "May 2025",
+                onNextClicked = {},
+                onPreviousClicked = {}
             )
         }
     }

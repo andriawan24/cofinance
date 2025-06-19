@@ -11,7 +11,6 @@ import androidx.navigation.compose.composable
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
-import id.andriawan24.cofinance.andro.ui.navigation.models.BottomNavigationDestinations
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
@@ -39,11 +38,6 @@ fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
         ) {
             composable<Destinations.Activity> {
                 ActivityScreen(
-                    onSeeAllTransactionClicked = {
-                        appState.navigateToTopLevelDestination(
-                            topLevelDestination = BottomNavigationDestinations.ACTIVITY
-                        )
-                    }
                 )
             }
 
