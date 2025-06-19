@@ -14,8 +14,8 @@ data class Transaction(
     companion object {
         fun from(response: TransactionResponse): Transaction {
             return Transaction(
-                amount = response.amount,
                 category = response.category,
+                amount = response.amount,
                 date = response.date,
                 fee = response.fee,
                 notes = response.notes,
