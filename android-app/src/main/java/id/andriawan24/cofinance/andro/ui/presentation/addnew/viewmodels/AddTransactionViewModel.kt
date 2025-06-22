@@ -10,7 +10,6 @@ import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +18,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
+import java.text.DateFormat
 import java.util.Date
 
 data class AddNewUiState(
@@ -117,33 +117,30 @@ class AddNewViewModel(
 
             is AddNewUiEvent.SaveTransaction -> {
                 viewModelScope.launch {
-                    _uiState.update { it.copy(isLoading = true) }
+                    _uiState.value = uiState.value.copy(isLoading = true)
+
                     val param = AddTransactionParam(
                         amount = uiState.value.amount.toLong(),
                         category = uiState.value.category?.name.orEmpty(),
-                        date = uiState.value.dateTime.toString(),
+                        date = DateFormat.getInstance().format(uiState.value.dateTime),
                         fee = uiState.value.fee.toLongOrDefault(0),
                         notes = uiState.value.notes,
-                        accountsId = uiState.value.account?.id.orEmpty()
+                        accountsId = uiState.value.account?.id.orEmpty(),
                     )
 
                     createTransactionUseCase.execute(param).collectLatest {
                         if (it.isSuccess) {
-                            _uiState.update { currentState ->
-                                currentState.copy(isLoading = false)
-                            }
+                            _uiState.value = uiState.value.copy(isLoading = false)
                             _onSuccessSaved.send(None)
                         } else {
-                            _uiState.update { currentState ->
-                                currentState.copy(isLoading = false)
-                            }
+                            _uiState.value = uiState.value.copy(isLoading = false)
                             _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                            Napier.e("Failed to save transaction ${it.exceptionOrNull()?.message.orEmpty()}")
                         }
                     }
                 }
             }
 
+            // Handled on component
             is AddNewUiEvent.OnBackPressed,
             is AddNewUiEvent.OnPictureClicked -> Unit
         }

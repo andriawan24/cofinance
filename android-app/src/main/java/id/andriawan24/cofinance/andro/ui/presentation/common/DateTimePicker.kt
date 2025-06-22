@@ -32,6 +32,7 @@ import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import java.util.Date
 
@@ -113,7 +114,7 @@ fun DialogDatePickerContent(
                 onClick = onHourClicked
             ) {
                 Text(
-                    text = currentDate.formatToString("HH:mm z"),
+                    text = currentDate.formatToString("HH:mm z", locale = LocaleHelper.indonesian),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Medium
                     )

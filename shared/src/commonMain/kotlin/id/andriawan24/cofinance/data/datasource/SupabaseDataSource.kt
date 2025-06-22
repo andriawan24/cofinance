@@ -6,7 +6,6 @@ import id.andriawan24.cofinance.data.model.request.GetTransactionsRequest
 import id.andriawan24.cofinance.data.model.request.IdTokenRequest
 import id.andriawan24.cofinance.data.model.response.AccountResponse
 import id.andriawan24.cofinance.data.model.response.TransactionResponse
-import io.github.aakira.napier.Napier
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
@@ -15,6 +14,7 @@ import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -85,10 +85,15 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                         lt(TransactionResponse.DATE_FIELD, endExclusive)
                     }
                 }
-            }
-        }
 
-        Napier.d { "Test debug transaction ${transactions.data}" }
+                eq("is_draft", request.isDraft)
+            }
+
+            order(
+                TransactionResponse.DATE_FIELD,
+                Order.DESCENDING
+            )
+        }
 
         return transactions.decodeList<TransactionResponse>()
     }
@@ -99,7 +104,16 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
 
         return supabase.from(table = TransactionResponse.TABLE_NAME)
             .insert(value = newRequest) {
-                select()
+                select(
+                    columns = Columns.raw(
+                        """
+                            *,
+                            accounts (
+                                *
+                            )
+                        """.trimIndent()
+                    )
+                )
             }
             .decodeSingle<TransactionResponse>()
     }

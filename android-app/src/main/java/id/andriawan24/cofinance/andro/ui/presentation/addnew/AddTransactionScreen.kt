@@ -50,13 +50,16 @@ fun AddTransactionScreen(
     val addNewViewModel: AddNewViewModel = koinViewModel()
     val uiState by addNewViewModel.uiState.collectAsStateWithLifecycle()
     val snackState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     addNewViewModel.onSuccessSaved.CollectAsEffect {
         onSuccessSave.invoke()
     }
 
     addNewViewModel.showMessage.CollectAsEffect {
-        // snackState.showSnackbar(it)
+        scope.launch {
+            snackState.showSnackbar(it)
+        }
     }
 
     Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->

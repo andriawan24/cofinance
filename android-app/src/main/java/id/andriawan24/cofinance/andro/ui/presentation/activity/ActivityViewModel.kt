@@ -12,12 +12,10 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.utils.enums.TransactionType
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -66,14 +64,12 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
 
             ActivityUiEvent.OnPreviousMonth -> {
                 val currentMonth = uiState.value.month
-
                 var nextYear = uiState.value.year
+
                 var nextMonth = if (currentMonth == 1) {
                     nextYear--
                     12
-                } else {
-                    currentMonth - 1
-                }
+                } else currentMonth - 1
 
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
@@ -88,16 +84,14 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
 
     fun fetchTransaction() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(isLoading = true)
-            }
+            _uiState.value = uiState.value.copy(isLoading = true)
 
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
-
             withContext(Dispatchers.IO) {
                 getTransactionsUseCase.execute(param = param).collectLatest { result ->
                     if (result.isSuccess) {
-                        val transactionGrouped = result.getOrNull().orEmpty().groupBy {
+                        val transactions = result.getOrNull().orEmpty()
+                        val transactionGrouped = transactions.groupBy {
                             it.date.toDate().formatToString("EEE, dd MMMM yyyy")
                         }
 
@@ -109,6 +103,7 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                             val expenseThisMonth = it.value
                                 .filter { it.type == TransactionType.EXPENSE }
                                 .sumOf { it.amount }
+
                             val incomeThisMonth = it.value
                                 .filter { it.type == TransactionType.INCOME }
                                 .sumOf { it.amount }
@@ -136,7 +131,6 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                     }
 
                     if (result.isFailure) {
-                        Napier.e("Failed to fetch transaction ${result.exceptionOrNull()?.message.orEmpty()}")
                         withContext(Dispatchers.Main) {
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,

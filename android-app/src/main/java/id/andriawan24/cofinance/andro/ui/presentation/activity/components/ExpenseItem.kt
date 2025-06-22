@@ -103,7 +103,7 @@ private fun ExpenseItemPreview() {
                     date = emptyString(),
                     fee = 100,
                     notes = emptyString(),
-                    account = Account(),
+                    account = Account(name = "Test Account"),
                     type = TransactionType.EXPENSE,
                     id = UUID.randomUUID().toString()
                 )

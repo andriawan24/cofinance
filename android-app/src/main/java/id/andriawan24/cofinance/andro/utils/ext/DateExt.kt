@@ -18,12 +18,16 @@ fun String.toDate(): Date {
     }
 
     val instant = Instant.parse(this)
+
     return Date.from(instant.toJavaInstant())
 }
 
-fun Date.formatToString(format: String = "dd MMM yyyy, HH:mm z"): String {
+fun Date.formatToString(
+    format: String = "dd MMM yyyy, HH:mm z",
+    locale: Locale = Locale.getDefault()
+): String {
     return try {
-        val formatter = SimpleDateFormat(format, Locale.getDefault())
+        val formatter = SimpleDateFormat(format, locale)
         formatter.format(this)
     } catch (e: Exception) {
         Napier.e("Failed to fetch date", e)

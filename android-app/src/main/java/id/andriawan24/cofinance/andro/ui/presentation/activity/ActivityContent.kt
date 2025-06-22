@@ -3,6 +3,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,9 +74,12 @@ fun ActivityContent(
                     expense = uiState.expense
                 )
 
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
-                    items(uiState.transactions) {
-                        ExpenseByMonth(data = it)
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24),
+                    contentPadding = PaddingValues(bottom = Dimensions.SIZE_24)
+                ) {
+                    items(uiState.transactions) { item ->
+                        ExpenseByMonth(item = item)
                     }
                 }
             } else {

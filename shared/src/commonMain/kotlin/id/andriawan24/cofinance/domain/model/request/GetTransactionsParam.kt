@@ -4,13 +4,15 @@ import id.andriawan24.cofinance.data.model.request.GetTransactionsRequest
 
 data class GetTransactionsParam(
     val month: Int? = null,
-    val year: Int? = null
+    val year: Int? = null,
+    val isDraft: Boolean = false
 ) {
     companion object {
         fun GetTransactionsParam.toRequest(): GetTransactionsRequest {
             return GetTransactionsRequest(
                 month = this.month,
-                year = this.year
+                year = this.year,
+                isDraft = this.isDraft
             )
         }
     }

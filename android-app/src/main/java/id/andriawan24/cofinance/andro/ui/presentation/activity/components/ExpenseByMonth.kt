@@ -19,7 +19,7 @@ import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun ExpenseByMonth(modifier: Modifier = Modifier, data: TransactionByDate) {
+fun ExpenseByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -32,21 +32,21 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, data: TransactionByDate) {
                 color = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             )
-            .padding(Dimensions.SIZE_16)
+            .padding(all = Dimensions.SIZE_16)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = data.dateLabel,
+                text = item.dateLabel,
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             )
 
             Text(
-                text = NumberHelper.formatRupiah(data.totalAmount),
+                text = NumberHelper.formatRupiah(item.totalAmount),
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -60,7 +60,7 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, data: TransactionByDate) {
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
-            data.transactions.forEach {
+            item.transactions.forEach {
                 ExpenseItem(transaction = it)
             }
         }
@@ -73,7 +73,7 @@ private fun ExpenseByMonthPreview() {
     CofinanceTheme {
         ExpenseByMonth(
             modifier = Modifier.fillMaxWidth(),
-            data = TransactionByDate()
+            item = TransactionByDate()
         )
     }
 }

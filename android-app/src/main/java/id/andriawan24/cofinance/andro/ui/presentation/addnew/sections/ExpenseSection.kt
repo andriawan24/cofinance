@@ -19,6 +19,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -45,6 +46,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.common.BaseBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.common.DialogDatePickerContent
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -67,13 +69,24 @@ fun ExpenseSection(
     val addAccountBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     val timePickerState = rememberTimePickerState(is24Hour = true)
-    val datePickerState = rememberDatePickerState()
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = uiState.dateTime.time)
 
     var showCategoryBottomSheet by remember { mutableStateOf(false) }
     var showAccountBottomSheet by remember { mutableStateOf(false) }
     var showDateBottomSheet by remember { mutableStateOf(false) }
     var showTimePickerDialog by remember { mutableStateOf(false) }
     var showAddAccountBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(true) {
+        val calendar = Calendar.getInstance().apply {
+            time = uiState.dateTime
+        }
+
+        timePickerState.apply {
+            minute = calendar.get(Calendar.MINUTE)
+            hour = calendar.get(Calendar.HOUR_OF_DAY)
+        }
+    }
 
     Column(
         modifier = modifier.verticalScroll(rememberScrollState()),
@@ -89,7 +102,7 @@ fun ExpenseSection(
             fee = uiState.fee,
             includeFee = uiState.includeFee,
             onAmountChanged = { amount -> onEvent.invoke(AddNewUiEvent.SetAmount(amount)) },
-            onFeeChanged = { fee -> onEvent.invoke(AddNewUiEvent.SetAmount(fee)) },
+            onFeeChanged = { fee -> onEvent.invoke(AddNewUiEvent.SetFee(fee)) },
             onIncludeFeeChanged = { isIncludeFee ->
                 onEvent.invoke(AddNewUiEvent.SetIncludeFee(isIncludeFee))
                 focusManager.clearFocus()
@@ -141,7 +154,7 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_dates),
-            value = uiState.dateTime.formatToString(),
+            value = uiState.dateTime.formatToString(locale = LocaleHelper.indonesian),
             onSectionClicked = { showDateBottomSheet = true },
             startIcon = {
                 Icon(
@@ -212,6 +225,7 @@ fun ExpenseSection(
                     val chosenCal = Calendar.getInstance().apply {
                         time = datePickerState.selectedDateMillis?.let { Date(it) } ?: Date()
                     }
+
                     val calendar = Calendar.getInstance().apply {
                         time = uiState.dateTime
                         set(Calendar.YEAR, chosenCal.get(Calendar.YEAR))
