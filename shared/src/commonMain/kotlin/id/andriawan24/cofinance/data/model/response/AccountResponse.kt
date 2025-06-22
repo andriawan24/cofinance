@@ -10,12 +10,14 @@ data class AccountResponse(
     val name: String? = null,
     val group: String? = null,
     val balance: Int? = null,
-    @SerialName("users")
+    @SerialName(USERS_FIELD)
     val user: UserInfo? = null,
-    @SerialName("created_at")
+    @SerialName(CREATED_AT_FIELD)
     val createdAt: String? = null
 ) {
     companion object {
         const val TABLE_NAME = "accounts"
+        const val CREATED_AT_FIELD = "created_at"
+        const val USERS_FIELD = "users"
     }
 }

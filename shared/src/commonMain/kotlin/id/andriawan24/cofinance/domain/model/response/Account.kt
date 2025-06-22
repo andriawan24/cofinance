@@ -10,13 +10,13 @@ data class Account(
     val createdAt: String = ""
 ) {
     companion object {
-        fun from(response: AccountResponse): Account {
+        fun from(response: AccountResponse?): Account {
             return Account(
-                id = response.id.orEmpty(),
-                name = response.name.orEmpty(),
-                group = response.group.orEmpty(),
-                balance = response.balance ?: 0,
-                createdAt = response.createdAt.orEmpty()
+                id = response?.id.orEmpty(),
+                name = response?.name.orEmpty(),
+                group = response?.group.orEmpty(),
+                balance = response?.balance ?: 0,
+                createdAt = response?.createdAt.orEmpty()
             )
         }
     }
