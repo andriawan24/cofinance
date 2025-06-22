@@ -14,6 +14,7 @@ import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
@@ -58,7 +59,16 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         val month = request.month
         val year = request.year
 
-        val transactions = supabase.from(TransactionResponse.TABLE_NAME).select {
+        val columns = Columns.raw(
+            """
+                *,
+                accounts (
+                    *
+                )
+            """.trimIndent()
+        )
+
+        val transactions = supabase.from(TransactionResponse.TABLE_NAME).select(columns = columns) {
             filter {
                 if (month != null && year != null) {
                     val startOfMonth = LocalDateTime(year, month, 1, 0, 0)
@@ -70,16 +80,15 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                     val start = startOfMonth.toString()
                     val endExclusive = startOfNextMonth.toString()
 
-                    Napier.d("Start date $start")
-                    Napier.d("End date $endExclusive")
-
                     and {
-                        gte("date", start)
-                        lt("date", endExclusive)
+                        gte(TransactionResponse.DATE_FIELD, start)
+                        lt(TransactionResponse.DATE_FIELD, endExclusive)
                     }
                 }
             }
         }
+
+        Napier.d { "Test debug transaction ${transactions.data}" }
 
         return transactions.decodeList<TransactionResponse>()
     }

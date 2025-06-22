@@ -63,7 +63,7 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
             val account = AccountParam(name = name, balance = amount.toInt(), group = category.name)
 
             viewModelScope.launch {
-                _uiState.update { it.copy(isLoading = false) }
+                _uiState.update { it.copy(isLoading = true) }
 
                 addAccountUseCase.execute(account).collectLatest {
                     if (it.isSuccess) {

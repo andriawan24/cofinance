@@ -9,7 +9,7 @@ data class AddTransactionParam(
     val fee: Long,
     val notes: String,
     val usersId: String = "",
-    val accountsId: Int,
+    val accountsId: String = "",
 ) {
     companion object {
         fun AddTransactionParam.toRequest(): AddTransactionRequest {

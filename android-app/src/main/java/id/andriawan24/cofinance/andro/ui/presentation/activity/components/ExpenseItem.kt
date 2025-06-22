@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -22,9 +23,19 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
+import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.andro.utils.ext.formatToString
+import id.andriawan24.cofinance.andro.utils.ext.toDate
+import id.andriawan24.cofinance.domain.model.response.Account
+import id.andriawan24.cofinance.domain.model.response.Transaction
+import id.andriawan24.cofinance.utils.enums.TransactionType
+import java.util.UUID
 
 @Composable
-fun ExpenseItem(modifier: Modifier = Modifier) {
+fun ExpenseItem(modifier: Modifier = Modifier, transaction: Transaction) {
+    val category = remember { ExpenseCategory.getCategoryByName(transaction.category) }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -33,13 +44,13 @@ fun ExpenseItem(modifier: Modifier = Modifier) {
         Box(
             modifier = Modifier
                 .background(
-                    colorResource(R.color.backgroundGreen),
+                    color = category.color,
                     shape = MaterialTheme.shapes.small
                 )
                 .padding(Dimensions.SIZE_12)
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_category_home),
+                painter = painterResource(category.iconRes),
                 contentDescription = null
             )
         }
@@ -49,7 +60,7 @@ fun ExpenseItem(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
         ) {
             Text(
-                text = "Listerine",
+                text = transaction.notes.ifEmpty { category.label },
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground
@@ -57,7 +68,9 @@ fun ExpenseItem(modifier: Modifier = Modifier) {
             )
 
             Text(
-                text = "12:30 · Blu By BCA",
+                text = "${
+                    transaction.date.toDate().formatToString("hh:mm")
+                } · ${transaction.account.name}",
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -66,7 +79,7 @@ fun ExpenseItem(modifier: Modifier = Modifier) {
         }
 
         Text(
-            text = NumberHelper.formatRupiah(30_000),
+            text = NumberHelper.formatRupiah(transaction.amount),
             style = MaterialTheme.typography.labelMedium.copy(
                 lineHeightStyle = LineHeightStyle(
                     alignment = LineHeightStyle.Alignment.Center,
@@ -83,7 +96,18 @@ fun ExpenseItem(modifier: Modifier = Modifier) {
 private fun ExpenseItemPreview() {
     CofinanceTheme {
         Surface {
-            ExpenseItem()
+            ExpenseItem(
+                transaction = Transaction(
+                    amount = 100,
+                    category = ExpenseCategory.SUBSCRIPTION.toString(),
+                    date = emptyString(),
+                    fee = 100,
+                    notes = emptyString(),
+                    account = Account(),
+                    type = TransactionType.EXPENSE,
+                    id = UUID.randomUUID().toString()
+                )
+            )
         }
     }
 }

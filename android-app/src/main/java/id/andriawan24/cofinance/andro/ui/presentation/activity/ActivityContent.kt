@@ -74,7 +74,7 @@ fun ActivityContent(
                 )
 
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
-                    items(uiState.transactions.toList()) {
+                    items(uiState.transactions) {
                         ExpenseByMonth(data = it)
                     }
                 }

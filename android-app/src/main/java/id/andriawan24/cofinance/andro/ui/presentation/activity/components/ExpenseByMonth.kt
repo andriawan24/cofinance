@@ -12,14 +12,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
-import id.andriawan24.cofinance.domain.model.response.Transaction
 
 @Composable
-fun ExpenseByMonth(modifier: Modifier = Modifier, data: Pair<String, List<Transaction>>) {
+fun ExpenseByMonth(modifier: Modifier = Modifier, data: TransactionByDate) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -39,14 +39,14 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, data: Pair<String, List<Transa
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = data.first,
+                text = data.dateLabel,
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             )
 
             Text(
-                text = "Rp85.000",
+                text = NumberHelper.formatRupiah(data.totalAmount),
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -60,8 +60,8 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, data: Pair<String, List<Transa
         )
 
         Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
-            data.second.forEach {
-                ExpenseItem()
+            data.transactions.forEach {
+                ExpenseItem(transaction = it)
             }
         }
     }
@@ -73,20 +73,7 @@ private fun ExpenseByMonthPreview() {
     CofinanceTheme {
         ExpenseByMonth(
             modifier = Modifier.fillMaxWidth(),
-            data = Pair(
-                "Test",
-                listOf(
-                    Transaction(
-                        amount = 1000,
-                        category = "TEST",
-                        date = "sss",
-                        fee = 0,
-                        notes = emptyString(),
-                        usersId = emptyString(),
-                        accountsId = 0
-                    )
-                )
-            )
+            data = TransactionByDate()
         )
     }
 }

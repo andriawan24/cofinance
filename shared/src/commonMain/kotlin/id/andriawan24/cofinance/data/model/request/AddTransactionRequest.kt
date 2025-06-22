@@ -13,5 +13,5 @@ data class AddTransactionRequest(
     @SerialName("users_id")
     val usersId: String,
     @SerialName("accounts_id")
-    val accountsId: Int,
+    val accountsId: String,
 )

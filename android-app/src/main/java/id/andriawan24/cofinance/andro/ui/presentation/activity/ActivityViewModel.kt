@@ -2,6 +2,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentMonth
@@ -9,8 +10,8 @@ import id.andriawan24.cofinance.andro.utils.ext.getCurrentYear
 import id.andriawan24.cofinance.andro.utils.ext.getMonthLabel
 import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
-import id.andriawan24.cofinance.domain.model.response.Transaction
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.utils.enums.TransactionType
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,12 +21,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-data class TransactionByDate(
-    val dateLabel: String = emptyString(),
-    val totalAmount: Long = 0L,
-    val transactions: List<Transaction> = emptyList()
-)
-
 data class ActivityUiState(
     val year: Int = getCurrentYear(),
     val month: Int = getCurrentMonth(),
@@ -33,7 +28,7 @@ data class ActivityUiState(
     val balance: Long = 0,
     val income: Long = 0,
     val expense: Long = 0,
-    val transactions: Map<String, List<Transaction>> = emptyMap(),
+    val transactions: List<TransactionByDate> = emptyList(),
     var isLoading: Boolean = false,
     var message: String = emptyString()
 )
@@ -102,24 +97,46 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
             withContext(Dispatchers.IO) {
                 getTransactionsUseCase.execute(param = param).collectLatest { result ->
                     if (result.isSuccess) {
-                        val transactionByDate = result.getOrNull().orEmpty().groupBy {
-                            it.date.toDate().formatToString("EEE, dd MM yyyy")
+                        val transactionGrouped = result.getOrNull().orEmpty().groupBy {
+                            it.date.toDate().formatToString("EEE, dd MMMM yyyy")
                         }
 
-                        val expense = result.getOrNull()?.sumOf { it.amount } ?: 0
+                        var expense = 0L
+                        var income = 0L
+                        val transactionByDate = mutableListOf<TransactionByDate>()
 
-                        Napier.d { "Transaction by date $transactionByDate" }
+                        transactionGrouped.forEach {
+                            val expenseThisMonth = it.value
+                                .filter { it.type == TransactionType.EXPENSE }
+                                .sumOf { it.amount }
+                            val incomeThisMonth = it.value
+                                .filter { it.type == TransactionType.INCOME }
+                                .sumOf { it.amount }
+
+                            expense += expenseThisMonth
+                            income += incomeThisMonth
+
+                            transactionByDate.add(
+                                TransactionByDate(
+                                    dateLabel = it.key,
+                                    transactions = it.value,
+                                    totalAmount = expenseThisMonth + incomeThisMonth
+                                )
+                            )
+                        }
 
                         withContext(Dispatchers.Main) {
                             _uiState.value = uiState.value.copy(
                                 isLoading = false,
                                 transactions = transactionByDate,
-                                expense = expense
+                                expense = expense,
+                                income = income
                             )
                         }
                     }
 
                     if (result.isFailure) {
+                        Napier.e("Failed to fetch transaction ${result.exceptionOrNull()?.message.orEmpty()}")
                         withContext(Dispatchers.Main) {
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,

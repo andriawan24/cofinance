@@ -10,6 +10,7 @@ import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -123,7 +124,7 @@ class AddNewViewModel(
                         date = uiState.value.dateTime.toString(),
                         fee = uiState.value.fee.toLongOrDefault(0),
                         notes = uiState.value.notes,
-                        accountsId = uiState.value.account?.id ?: 0
+                        accountsId = uiState.value.account?.id.orEmpty()
                     )
 
                     createTransactionUseCase.execute(param).collectLatest {
@@ -131,13 +132,13 @@ class AddNewViewModel(
                             _uiState.update { currentState ->
                                 currentState.copy(isLoading = false)
                             }
-
                             _onSuccessSaved.send(None)
                         } else {
                             _uiState.update { currentState ->
                                 currentState.copy(isLoading = false)
                             }
                             _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                            Napier.e("Failed to save transaction ${it.exceptionOrNull()?.message.orEmpty()}")
                         }
                     }
                 }

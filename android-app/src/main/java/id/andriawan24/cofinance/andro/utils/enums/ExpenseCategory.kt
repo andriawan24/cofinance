@@ -16,5 +16,11 @@ enum class ExpenseCategory(val color: Color, @DrawableRes val iconRes: Int, val 
     DEBT(Color(0xFFF6F4ED), R.drawable.ic_category_debt, "Debt"),
     GIFT(Color(0xFFFFF4FD), R.drawable.ic_category_gift, "Gift"),
     ADMINISTRATION(Color(0xFFEDF7EF), R.drawable.ic_category_administration, "Administration"),
-    OTHERS(Color(0xFFF6EDF9), R.drawable.ic_category_others, "Others")
+    OTHERS(Color(0xFFF6EDF9), R.drawable.ic_category_others, "Others");
+
+    companion object {
+        fun getCategoryByName(name: String): ExpenseCategory {
+            return ExpenseCategory.valueOf(name)
+        }
+    }
 }
