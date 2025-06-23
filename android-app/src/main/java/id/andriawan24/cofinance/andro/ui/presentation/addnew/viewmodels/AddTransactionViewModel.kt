@@ -6,10 +6,13 @@ import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.None
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
+import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,7 +35,8 @@ data class AddNewUiState(
     var notes: String = emptyString(),
     var isValid: Boolean = false,
     var accounts: List<Account> = emptyList(),
-    var isLoading: Boolean = false
+    var isLoading: Boolean = false,
+    var transactionId: String? = null
 )
 
 sealed class AddNewUiEvent {
@@ -51,7 +55,8 @@ sealed class AddNewUiEvent {
 
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
-    private val createTransactionUseCase: CreateTransactionUseCase
+    private val createTransactionUseCase: CreateTransactionUseCase,
+    private val getTransactionsUseCase: GetTransactionsUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
@@ -75,6 +80,25 @@ class AddNewViewModel(
                     }
                 }
             }
+        }
+    }
+
+    fun getDraftedTransaction(id: String) {
+        viewModelScope.launch {
+            getTransactionsUseCase.execute(GetTransactionsParam(transactionId = id, isDraft = true))
+                .collectLatest { response ->
+                    if (response.isSuccess) {
+                        response.getOrNull()?.firstOrNull()?.let { transaction ->
+                            _uiState.update {
+                                it.copy(
+                                    transactionId = transaction.id,
+                                    amount = it.amount.ifBlank { transaction.amount.toString() },
+                                    dateTime = transaction.date.toDate()
+                                )
+                            }
+                        }
+                    }
+                }
         }
     }
 
@@ -120,12 +144,14 @@ class AddNewViewModel(
                     _uiState.value = uiState.value.copy(isLoading = true)
 
                     val param = AddTransactionParam(
+                        id = uiState.value.transactionId,
                         amount = uiState.value.amount.toLong(),
                         category = uiState.value.category?.name.orEmpty(),
                         date = DateFormat.getInstance().format(uiState.value.dateTime),
                         fee = uiState.value.fee.toLongOrDefault(0),
                         notes = uiState.value.notes,
                         accountsId = uiState.value.account?.id.orEmpty(),
+                        isDraft = false
                     )
 
                     createTransactionUseCase.execute(param).collectLatest {

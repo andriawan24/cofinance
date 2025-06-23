@@ -125,7 +125,8 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                                 isLoading = false,
                                 transactions = transactionByDate,
                                 expense = expense,
-                                income = income
+                                income = income,
+                                balance = income - expense
                             )
                         }
                     }

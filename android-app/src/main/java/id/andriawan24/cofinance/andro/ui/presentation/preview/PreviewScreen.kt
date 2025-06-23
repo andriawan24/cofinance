@@ -43,14 +43,13 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
-import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PreviewScreen(
     imageUri: Uri,
-    onNavigateToAdd: (ReceiptScan) -> Unit,
+    onNavigateToAdd: (String) -> Unit,
     onNavigateBack: () -> Unit,
     previewViewModel: PreviewViewModel = koinViewModel()
 ) {
@@ -61,7 +60,7 @@ fun PreviewScreen(
 
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {
-            is PreviewUiEvent.NavigateToBalance -> onNavigateToAdd(it.result)
+            is PreviewUiEvent.NavigateToBalance -> onNavigateToAdd(it.transactionId)
             is PreviewUiEvent.ShowMessage -> scope.launch {
                 snackState.showSnackbar(it.message)
             }

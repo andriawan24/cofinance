@@ -81,17 +81,22 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                     val endExclusive = startOfNextMonth.toString()
 
                     and {
-                        gte(TransactionResponse.DATE_FIELD, start)
-                        lt(TransactionResponse.DATE_FIELD, endExclusive)
+                        gte(column = TransactionResponse.DATE_FIELD, value = start)
+                        lt(column = TransactionResponse.DATE_FIELD, value = endExclusive)
                     }
                 }
 
-                eq("is_draft", request.isDraft)
+                if (request.transactionId != null) {
+                    eq(column = TransactionResponse.ID_FIELD, value = request.transactionId)
+                    this@select.limit(1)
+                }
+
+                eq(column = TransactionResponse.IS_DRAFT_FIELD, value = request.isDraft)
             }
 
             order(
-                TransactionResponse.DATE_FIELD,
-                Order.DESCENDING
+                column = TransactionResponse.DATE_FIELD,
+                order = Order.DESCENDING
             )
         }
 
@@ -103,7 +108,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         val newRequest = request.copy(usersId = userId)
 
         return supabase.from(table = TransactionResponse.TABLE_NAME)
-            .insert(value = newRequest) {
+            .upsert(value = newRequest) {
                 select(
                     columns = Columns.raw(
                         """

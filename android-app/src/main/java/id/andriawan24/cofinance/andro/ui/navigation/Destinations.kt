@@ -11,7 +11,8 @@ sealed class Destinations(val route: String) {
     data object Login : Destinations(Login::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object AddNew : Destinations(AddNew::class.java.canonicalName.orEmpty())
+    data class AddNew(val transactionId: String? = null) :
+        Destinations(AddNew::class.java.canonicalName.orEmpty())
 
     @Serializable
     data object Camera : Destinations(Camera::class.java.canonicalName.orEmpty())

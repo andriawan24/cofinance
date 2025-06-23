@@ -82,7 +82,10 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
         }
 
         composable<Destinations.AddNew> {
+            val route = it.toRoute<Destinations.AddNew>()
+
             AddTransactionScreen(
+                transactionId = route.transactionId,
                 onBackPressed = {
                     navController.navigateUp()
                 },
@@ -109,11 +112,10 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
 
         composable<Destinations.Preview> {
             val params = it.toRoute<Destinations.Preview>()
-
             PreviewScreen(
                 imageUri = params.imageUrl.toUri(),
                 onNavigateToAdd = {
-                    navController.navigate(Destinations.AddNew) {
+                    navController.navigate(Destinations.AddNew(transactionId = it)) {
                         popUpTo<Destinations.AddNew> {
                             inclusive = true
                         }
@@ -136,7 +138,7 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
                     }
                 },
                 onNavigateToAdd = {
-                    navController.navigate(Destinations.AddNew)
+                    navController.navigate(Destinations.AddNew())
                 }
             )
         }

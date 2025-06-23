@@ -5,15 +5,16 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class AddTransactionRequest(
-    val amount: Long,
-    val category: String,
-    val date: String,
-    val fee: Long,
-    val notes: String,
+    val id: String? = null,
+    val amount: Long? = null,
+    val category: String? = null,
+    val date: String? = null,
+    val fee: Long? = null,
+    val notes: String? = null,
     @SerialName("users_id")
-    val usersId: String,
+    val usersId: String? = null,
     @SerialName("accounts_id")
-    val accountsId: String,
+    val accountsId: String? = null,
     @SerialName("is_draft")
-    val isDraft: Boolean
+    val isDraft: Boolean? = null
 )

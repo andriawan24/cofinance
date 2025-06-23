@@ -23,6 +23,7 @@ data class TransactionResponse(
 ) {
     companion object {
         const val TABLE_NAME = "transactions"
+        const val ID_FIELD = "id"
         const val ACCOUNT_FIELD = "accounts"
         const val DATE_FIELD = "date"
         const val CREATED_AT_FIELD = "created_at"

@@ -19,6 +19,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,18 +44,23 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AddTransactionScreen(
+    transactionId: String?,
     onBackPressed: () -> Unit,
     onSuccessSave: () -> Unit,
-    onInputPictureClicked: () -> Unit
+    onInputPictureClicked: () -> Unit,
 ) {
     val addNewViewModel: AddNewViewModel = koinViewModel()
     val uiState by addNewViewModel.uiState.collectAsStateWithLifecycle()
     val snackState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    addNewViewModel.onSuccessSaved.CollectAsEffect {
-        onSuccessSave.invoke()
+    LaunchedEffect(true) {
+        if (transactionId != null) {
+            addNewViewModel.getDraftedTransaction(transactionId)
+        }
     }
+
+    addNewViewModel.onSuccessSaved.CollectAsEffect { onSuccessSave.invoke() }
 
     addNewViewModel.showMessage.CollectAsEffect {
         scope.launch {
