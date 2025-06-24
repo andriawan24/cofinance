@@ -11,6 +11,8 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
+const val FORMAT_DAY_MONTH_YEAR = "EEE, dd MMMM yyyy"
+
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Date {
     if (this.isBlank()) {

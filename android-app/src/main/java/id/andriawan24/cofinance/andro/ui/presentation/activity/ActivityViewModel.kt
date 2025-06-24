@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
 import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.andro.utils.ext.FORMAT_DAY_MONTH_YEAR
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentMonth
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentYear
@@ -13,6 +14,8 @@ import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -27,7 +30,7 @@ data class ActivityUiState(
     val income: Long = 0,
     val expense: Long = 0,
     val transactions: List<TransactionByDate> = emptyList(),
-    var isLoading: Boolean = false,
+    var isLoading: Boolean = true,
     var message: String = emptyString()
 )
 
@@ -40,107 +43,121 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
 
+    private var fetchJob: Job? = null
+
     fun onEvent(event: ActivityUiEvent) {
         when (event) {
             ActivityUiEvent.OnNextMonth -> {
                 val currentMonth = uiState.value.month
-
                 var nextYear = uiState.value.year
-                var nextMonth = if (currentMonth == 12) {
+                var nextMonth = if (currentMonth == DECEMBER) {
+                    // Move to the next year started from January
                     nextYear++
-                    1
-                } else {
-                    currentMonth + 1
-                }
+                    JANUARY
+                } else currentMonth + 1
 
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
                     monthString = getMonthLabel(nextMonth),
-                    year = nextYear
+                    year = nextYear,
+                    transactions = emptyList(),
+                    isLoading = true
                 )
 
-                fetchTransaction()
+                fetchJob?.cancel()
+                fetchJob = viewModelScope.launch {
+                    delay(FETCH_DELAY)
+                    fetchTransaction()
+                }
             }
 
             ActivityUiEvent.OnPreviousMonth -> {
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
-
-                var nextMonth = if (currentMonth == 1) {
+                var nextMonth = if (currentMonth == JANUARY) {
+                    // Move to the previous year started from December
                     nextYear--
-                    12
+                    DECEMBER
                 } else currentMonth - 1
 
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
                     monthString = getMonthLabel(nextMonth),
-                    year = nextYear
+                    year = nextYear,
+                    transactions = emptyList(),
+                    isLoading = true
                 )
 
-                fetchTransaction()
+                fetchJob?.cancel()
+                fetchJob = viewModelScope.launch {
+                    delay(FETCH_DELAY)
+                    fetchTransaction()
+                }
             }
         }
     }
 
-    fun fetchTransaction() {
-        viewModelScope.launch {
-            _uiState.value = uiState.value.copy(isLoading = true)
-
-            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
-            withContext(Dispatchers.IO) {
-                getTransactionsUseCase.execute(param = param).collectLatest { result ->
-                    if (result.isSuccess) {
-                        val transactions = result.getOrNull().orEmpty()
-                        val transactionGrouped = transactions.groupBy {
-                            it.date.toDate().formatToString("EEE, dd MMMM yyyy")
-                        }
-
-                        var expense = 0L
-                        var income = 0L
-                        val transactionByDate = mutableListOf<TransactionByDate>()
-
-                        transactionGrouped.forEach {
-                            val expenseThisMonth = it.value
-                                .filter { it.type == TransactionType.EXPENSE }
-                                .sumOf { it.amount }
-
-                            val incomeThisMonth = it.value
-                                .filter { it.type == TransactionType.INCOME }
-                                .sumOf { it.amount }
-
-                            expense += expenseThisMonth
-                            income += incomeThisMonth
-
-                            transactionByDate.add(
-                                TransactionByDate(
-                                    dateLabel = it.key,
-                                    transactions = it.value,
-                                    totalAmount = expenseThisMonth + incomeThisMonth
-                                )
-                            )
-                        }
-
-                        withContext(Dispatchers.Main) {
-                            _uiState.value = uiState.value.copy(
-                                isLoading = false,
-                                transactions = transactionByDate,
-                                expense = expense,
-                                income = income,
-                                balance = income - expense
-                            )
-                        }
+    suspend fun fetchTransaction() {
+        val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+        withContext(Dispatchers.IO) {
+            getTransactionsUseCase.execute(param = param).collectLatest { result ->
+                if (result.isSuccess) {
+                    val transactions = result.getOrNull().orEmpty()
+                    val transactionGrouped = transactions.groupBy {
+                        it.date.toDate().formatToString(FORMAT_DAY_MONTH_YEAR)
                     }
 
-                    if (result.isFailure) {
-                        withContext(Dispatchers.Main) {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                message = result.exceptionOrNull()?.message.orEmpty()
+                    var expense = 0L
+                    var income = 0L
+                    val transactionByDate = mutableListOf<TransactionByDate>()
+
+                    transactionGrouped.forEach {
+                        val expenseThisMonth = it.value
+                            .filter { it.type == TransactionType.EXPENSE }
+                            .sumOf { it.amount }
+
+                        val incomeThisMonth = it.value
+                            .filter { it.type == TransactionType.INCOME }
+                            .sumOf { it.amount }
+
+                        expense += expenseThisMonth
+                        income += incomeThisMonth
+
+                        transactionByDate.add(
+                            TransactionByDate(
+                                dateLabel = it.key,
+                                transactions = it.value,
+                                totalAmount = expenseThisMonth + incomeThisMonth
                             )
-                        }
+                        )
+                    }
+
+                    withContext(Dispatchers.Main) {
+                        _uiState.value = uiState.value.copy(
+                            isLoading = false,
+                            transactions = transactionByDate,
+                            expense = expense,
+                            income = income,
+                            balance = income - expense
+                        )
+                    }
+                }
+
+                if (result.isFailure) {
+                    withContext(Dispatchers.Main) {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            message = result.exceptionOrNull()?.message.orEmpty()
+                        )
                     }
                 }
             }
         }
+    }
+
+    companion object {
+        private const val FETCH_DELAY = 500L
+        private const val JANUARY = 1
+        private const val DECEMBER = 12
     }
 }
