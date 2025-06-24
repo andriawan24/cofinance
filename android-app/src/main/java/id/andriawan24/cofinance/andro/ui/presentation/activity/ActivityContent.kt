@@ -27,7 +27,7 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.BalanceCard
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.EmptyActivity
-import id.andriawan24.cofinance.andro.ui.presentation.activity.components.ExpenseByMonth
+import id.andriawan24.cofinance.andro.ui.presentation.activity.components.TransactionByMonth
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
@@ -48,13 +48,9 @@ fun ActivityContent(
         )
 
         DateSwitcher(
-            label = "${uiState.monthString} ${uiState.year}",
-            onPreviousClicked = {
-                onEvent(ActivityUiEvent.OnPreviousMonth)
-            },
-            onNextClicked = {
-                onEvent(ActivityUiEvent.OnNextMonth)
-            }
+            label = stringResource(R.string.template_month_year, uiState.monthString, uiState.year),
+            onPreviousClicked = { onEvent(ActivityUiEvent.OnPreviousMonth) },
+            onNextClicked = { onEvent(ActivityUiEvent.OnNextMonth) }
         )
 
         if (uiState.isLoading) {
@@ -79,7 +75,7 @@ fun ActivityContent(
                     contentPadding = PaddingValues(bottom = Dimensions.SIZE_24)
                 ) {
                     items(uiState.transactions) { item ->
-                        ExpenseByMonth(item = item)
+                        TransactionByMonth(item = item)
                     }
                 }
             } else {
