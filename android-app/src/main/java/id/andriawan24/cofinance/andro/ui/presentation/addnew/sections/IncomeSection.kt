@@ -39,7 +39,6 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSe
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputNote
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.UploadPhotoCardButton
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.common.BaseBottomSheet
@@ -56,7 +55,7 @@ import java.util.Date
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseSection(
+fun IncomeSection(
     uiState: AddNewUiState,
     onEvent: (AddNewUiEvent) -> Unit,
     modifier: Modifier = Modifier
@@ -93,16 +92,14 @@ fun ExpenseSection(
         modifier = modifier.verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
-        UploadPhotoCardButton(
-            onInputPictureClicked = { onEvent.invoke(AddNewUiEvent.OnPictureClicked) }
-        )
-
         InputAmount(
-            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+            modifier = Modifier
+                .padding(horizontal = Dimensions.SIZE_16)
+                .padding(top = Dimensions.SIZE_16),
             amount = uiState.amount,
             fee = uiState.fee,
+            enableFee = false,
             includeFee = uiState.includeFee,
-            enableFee = true,
             onAmountChanged = { amount -> onEvent.invoke(AddNewUiEvent.SetAmount(amount)) },
             onFeeChanged = { fee -> onEvent.invoke(AddNewUiEvent.SetFee(fee)) },
             onIncludeFeeChanged = { isIncludeFee ->
@@ -181,7 +178,7 @@ fun ExpenseSection(
                 .padding(all = Dimensions.SIZE_16),
             enabled = uiState.isValid,
             onClick = {
-                onEvent.invoke(AddNewUiEvent.SaveTransaction(TransactionType.EXPENSE))
+                onEvent.invoke(AddNewUiEvent.SaveTransaction(TransactionType.INCOME))
             },
         ) {
             Text(
@@ -338,10 +335,10 @@ fun ExpenseSection(
 
 @Preview
 @Composable
-private fun ExpenseSectionPreview() {
+private fun IncomeSectionPreview() {
     CofinanceTheme {
         Surface {
-            ExpenseSection(
+            IncomeSection(
                 uiState = AddNewUiState(),
                 onEvent = { }
             )

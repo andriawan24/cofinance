@@ -40,6 +40,7 @@ fun InputAmount(
     amount: String,
     fee: String,
     includeFee: Boolean,
+    enableFee: Boolean,
     onAmountChanged: (String) -> Unit,
     onFeeChanged: (String) -> Unit,
     onIncludeFeeChanged: (Boolean) -> Unit
@@ -94,7 +95,7 @@ fun InputAmount(
                 )
             }
 
-            if (!includeFee) {
+            if (enableFee && !includeFee) {
                 OutlinedButton(
                     modifier = Modifier.align(Alignment.CenterEnd),
                     contentPadding = PaddingValues(
@@ -123,7 +124,7 @@ fun InputAmount(
                         )
 
                         Text(
-                            text = "Fee",
+                            text = stringResource(R.string.label_fee),
                             style = MaterialTheme.typography.labelSmall
                         )
                     }
@@ -209,6 +210,7 @@ private fun InputAmountPreview() {
             fee = "1000",
             includeFee = false,
             onAmountChanged = { },
+            enableFee = true,
             onFeeChanged = { },
             onIncludeFeeChanged = { }
         )

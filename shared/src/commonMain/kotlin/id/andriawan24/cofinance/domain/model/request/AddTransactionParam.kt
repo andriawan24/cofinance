@@ -11,6 +11,7 @@ data class AddTransactionParam(
     val notes: String? = null,
     val usersId: String? = null,
     val accountsId: String? = null,
+    val type: String? = null,
     val isDraft: Boolean? = null
 ) {
     companion object {
@@ -24,7 +25,8 @@ data class AddTransactionParam(
                 notes = this.notes,
                 usersId = this.usersId,
                 accountsId = this.accountsId,
-                isDraft = this.isDraft
+                isDraft = this.isDraft,
+                type = this.type
             )
         }
     }

@@ -31,8 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.ExpensesType
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.TransactionTabType
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.IncomeSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewViewModel
@@ -91,7 +92,7 @@ fun AddNewContent(
     onEvent: (AddNewUiEvent) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    val expenseTypePagerState = rememberPagerState { ExpensesType.entries.size }
+    val expenseTypePagerState = rememberPagerState { TransactionTabType.entries.size }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(
@@ -131,14 +132,14 @@ fun AddNewContent(
             indicator = {
                 FancyTabIndicator(
                     modifier = Modifier.tabIndicatorOffset(expenseTypePagerState.currentPage),
-                    label = stringResource(ExpensesType.getByIndex(expenseTypePagerState.currentPage).labelResId)
+                    label = stringResource(TransactionTabType.getByIndex(expenseTypePagerState.currentPage).labelResId)
                 )
             },
             divider = {
                 // Put nothing on divider
             }
         ) {
-            ExpensesType.entries.forEachIndexed { index, type ->
+            TransactionTabType.entries.forEachIndexed { index, type ->
                 Tab(
                     modifier = Modifier.clip(MaterialTheme.shapes.extraLarge),
                     selected = expenseTypePagerState.currentPage == index,
@@ -167,7 +168,13 @@ fun AddNewContent(
 
         HorizontalPager(modifier = Modifier.weight(1f), state = expenseTypePagerState) {
             when (it) {
-                ExpensesType.EXPENSES.index -> ExpenseSection(
+                TransactionTabType.EXPENSES.index -> ExpenseSection(
+                    modifier = Modifier.fillMaxSize(),
+                    uiState = uiState,
+                    onEvent = onEvent
+                )
+
+                TransactionTabType.INCOME.index -> IncomeSection(
                     modifier = Modifier.fillMaxSize(),
                     uiState = uiState,
                     onEvent = onEvent

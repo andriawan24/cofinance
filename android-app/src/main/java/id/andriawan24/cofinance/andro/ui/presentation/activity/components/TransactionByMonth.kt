@@ -19,7 +19,7 @@ import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun ExpenseByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
+fun TransactionByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -61,7 +61,7 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
 
         Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
             item.transactions.forEach {
-                ExpenseItem(transaction = it)
+                TransactionItem(transaction = it)
             }
         }
     }
@@ -69,9 +69,9 @@ fun ExpenseByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
 
 @Preview
 @Composable
-private fun ExpenseByMonthPreview() {
+private fun TransactionByMonthPreview() {
     CofinanceTheme {
-        ExpenseByMonth(
+        TransactionByMonth(
             modifier = Modifier.fillMaxWidth(),
             item = TransactionByDate()
         )

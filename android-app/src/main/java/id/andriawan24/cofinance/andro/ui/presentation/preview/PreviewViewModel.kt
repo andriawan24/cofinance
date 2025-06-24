@@ -8,6 +8,7 @@ import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.response.ReceiptScan
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.ScanReceiptUseCase
+import id.andriawan24.cofinance.utils.enums.TransactionType
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,7 @@ class PreviewViewModel(
                         val input = AddTransactionParam(
                             amount = receiptScan.totalPrice,
                             date = receiptScan.transactionDate,
+                            type = TransactionType.EXPENSE.toString(),
                             isDraft = true
                         )
 

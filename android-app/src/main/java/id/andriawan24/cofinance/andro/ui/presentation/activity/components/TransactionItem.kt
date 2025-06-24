@@ -14,13 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
-import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
+import id.andriawan24.cofinance.andro.utils.ColorHelper
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.emptyString
@@ -33,7 +32,7 @@ import id.andriawan24.cofinance.utils.enums.TransactionType
 import java.util.UUID
 
 @Composable
-fun ExpenseItem(modifier: Modifier = Modifier, transaction: Transaction) {
+fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
     val category = remember { ExpenseCategory.getCategoryByName(transaction.category) }
 
     Row(
@@ -85,7 +84,7 @@ fun ExpenseItem(modifier: Modifier = Modifier, transaction: Transaction) {
                     alignment = LineHeightStyle.Alignment.Center,
                     trim = LineHeightStyle.Trim.Both
                 ),
-                color = colorResource(R.color.red)
+                color = ColorHelper.getColorByExpenseType(transaction.type)
             )
         )
     }
@@ -93,10 +92,10 @@ fun ExpenseItem(modifier: Modifier = Modifier, transaction: Transaction) {
 
 @Preview
 @Composable
-private fun ExpenseItemPreview() {
+private fun TransactionItemPreview() {
     CofinanceTheme {
         Surface {
-            ExpenseItem(
+            TransactionItem(
                 transaction = Transaction(
                     amount = 100,
                     category = ExpenseCategory.SUBSCRIPTION.toString(),

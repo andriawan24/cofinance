@@ -13,6 +13,7 @@ import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,7 +44,7 @@ sealed class AddNewUiEvent {
     data object OnBackPressed : AddNewUiEvent()
     data object OnPictureClicked : AddNewUiEvent()
     data object UpdateAccount : AddNewUiEvent()
-    data object SaveTransaction : AddNewUiEvent()
+    data class SaveTransaction(val type: TransactionType) : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
     data class SetCategory(val category: ExpenseCategory) : AddNewUiEvent()
@@ -151,6 +152,7 @@ class AddNewViewModel(
                         fee = uiState.value.fee.toLongOrDefault(0),
                         notes = uiState.value.notes,
                         accountsId = uiState.value.account?.id.orEmpty(),
+                        type = event.type.toString(),
                         isDraft = false
                     )
 
