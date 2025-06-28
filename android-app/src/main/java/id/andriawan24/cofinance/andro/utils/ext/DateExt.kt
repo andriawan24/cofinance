@@ -12,15 +12,14 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
 const val FORMAT_DAY_MONTH_YEAR = "EEE, dd MMMM yyyy"
+const val FORMAT_HOUR_MINUTE = "HH:mm"
 
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Date {
     if (this.isBlank()) {
         return Date()
     }
-
     val instant = Instant.parse(this)
-
     return Date.from(instant.toJavaInstant())
 }
 
