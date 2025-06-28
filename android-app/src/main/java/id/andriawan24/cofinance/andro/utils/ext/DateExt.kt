@@ -13,6 +13,7 @@ import kotlin.time.toJavaInstant
 
 const val FORMAT_DAY_MONTH_YEAR = "EEE, dd MMMM yyyy"
 const val FORMAT_HOUR_MINUTE = "HH:mm"
+const val FORMAT_ISO_8601 = "yyyy-MM-dd HH:mm:ssXXX"
 
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Date {
