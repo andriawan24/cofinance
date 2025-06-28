@@ -49,4 +49,5 @@
     <string name="label_ok">OK</string>
     <string name="label_transfer">Transfer</string>
     <string name="template_month_year">%1$s %2$s</string>
+    <string name="template_dot">%1$s · %2$s</string>
 </resources>
