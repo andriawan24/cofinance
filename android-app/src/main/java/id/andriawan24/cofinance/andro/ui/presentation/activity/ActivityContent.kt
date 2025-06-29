@@ -35,7 +35,8 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 fun ActivityContent(
     uiState: ActivityUiState,
     onEvent: (ActivityUiEvent) -> Unit,
-    onBookmarkClicked: () -> Unit
+    onBookmarkClicked: () -> Unit,
+    onNavigateToAdd: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -79,7 +80,10 @@ fun ActivityContent(
                     }
                 }
             } else {
-                EmptyActivity(modifier = Modifier.weight(1f))
+                EmptyActivity(
+                    modifier = Modifier.weight(1f),
+                    onNavigateToAdd = onNavigateToAdd
+                )
             }
         }
     }
@@ -119,7 +123,8 @@ private fun ActivityContentPreview() {
             ActivityContent(
                 uiState = ActivityUiState(isLoading = true),
                 onBookmarkClicked = { },
-                onEvent = { }
+                onEvent = { },
+                onNavigateToAdd = { }
             )
         }
     }

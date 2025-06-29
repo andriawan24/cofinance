@@ -23,7 +23,7 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 
 @Composable
-fun EmptyActivity(modifier: Modifier = Modifier) {
+fun EmptyActivity(modifier: Modifier = Modifier, onNavigateToAdd: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -60,7 +60,7 @@ fun EmptyActivity(modifier: Modifier = Modifier) {
             modifier = Modifier,
             horizontalPadding = Dimensions.SIZE_46,
             verticalPadding = Dimensions.SIZE_12,
-            onClick = { }
+            onClick = onNavigateToAdd
         ) {
             Text(
                 text = stringResource(R.string.action_add_activity),
@@ -77,7 +77,10 @@ fun EmptyActivity(modifier: Modifier = Modifier) {
 private fun EmptyActivityPreview() {
     CofinanceTheme {
         Surface {
-            EmptyActivity(modifier = Modifier.fillMaxHeight())
+            EmptyActivity(
+                modifier = Modifier.fillMaxHeight(),
+                onNavigateToAdd = { }
+            )
         }
     }
 }

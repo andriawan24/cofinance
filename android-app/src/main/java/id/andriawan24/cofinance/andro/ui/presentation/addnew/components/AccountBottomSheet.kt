@@ -42,10 +42,12 @@ import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.ext.titlecase
 import id.andriawan24.cofinance.domain.model.response.Account
 
 @Composable
 fun AccountBottomSheet(
+    isLoading: Boolean,
     accounts: List<Account>,
     selectedAccount: Account?,
     onAccountSaved: (Account) -> Unit,
@@ -54,6 +56,7 @@ fun AccountBottomSheet(
 ) {
     var shownDropdown by remember { mutableIntStateOf(-1) }
     var currentSelectedAccount by remember { mutableStateOf(selectedAccount) }
+    val accountByGroups = remember { accounts.groupBy { it.group }.toList() }
 
     Column {
         Box(
@@ -88,7 +91,9 @@ fun AccountBottomSheet(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-            itemsIndexed(accounts.groupBy { it.group }.toList()) { index, data ->
+
+
+            itemsIndexed(accountByGroups) { index, data ->
                 val animatedRotation by animateFloatAsState(
                     targetValue = if (shownDropdown == index) 180f else 0f,
                     label = "animate dropdown icon"
@@ -105,7 +110,7 @@ fun AccountBottomSheet(
                     ) {
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = data.first,
+                            text = data.first.titlecase(),
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground
@@ -204,6 +209,7 @@ private fun AccountBottomSheetPreview() {
     CofinanceTheme {
         Surface {
             AccountBottomSheet(
+                isLoading = false,
                 accounts = emptyList(),
                 selectedAccount = null,
                 onAccountSaved = { },

@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.None
 import id.andriawan24.cofinance.andro.utils.emptyString
-import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
+import id.andriawan24.cofinance.andro.utils.ext.FORMAT_ISO_8601
+import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
@@ -22,7 +24,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
-import java.text.DateFormat
 import java.util.Date
 
 data class AddNewUiState(
@@ -31,11 +32,14 @@ data class AddNewUiState(
     var includeFee: Boolean = false,
     var imageUri: Uri? = null,
     var account: Account? = null,
-    var category: ExpenseCategory? = null,
+    var transactionType: TransactionType = TransactionType.EXPENSE,
+    var expenseCategory: TransactionCategory? = null,
+    var incomeCategory: TransactionCategory? = null,
     var dateTime: Date = Date(),
     var notes: String = emptyString(),
     var isValid: Boolean = false,
     var accounts: List<Account> = emptyList(),
+    var loadingAccount: Boolean = false,
     var isLoading: Boolean = false,
     var transactionId: String? = null
 )
@@ -44,10 +48,12 @@ sealed class AddNewUiEvent {
     data object OnBackPressed : AddNewUiEvent()
     data object OnPictureClicked : AddNewUiEvent()
     data object UpdateAccount : AddNewUiEvent()
-    data class SaveTransaction(val type: TransactionType) : AddNewUiEvent()
+    data class SetTransactionType(val type: TransactionType) : AddNewUiEvent()
+    data object SaveTransaction : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
-    data class SetCategory(val category: ExpenseCategory) : AddNewUiEvent()
+    data class SetExpenseCategory(val category: TransactionCategory) : AddNewUiEvent()
+    data class SetIncomeCategory(val category: TransactionCategory) : AddNewUiEvent()
     data class SetAccount(val account: Account) : AddNewUiEvent()
     data class SetDateTime(val dateTime: Date) : AddNewUiEvent()
     data class SetFee(val fee: String) : AddNewUiEvent()
@@ -73,12 +79,22 @@ class AddNewViewModel(
     }
 
     private fun getAccounts() {
+        _uiState.value = uiState.value.copy(loadingAccount = true)
+
         viewModelScope.launch {
             getAccountsUseCase.execute().collectLatest {
                 if (it.isSuccess) {
                     _uiState.update { currentState ->
-                        currentState.copy(accounts = it.getOrDefault(emptyList()))
+                        currentState.copy(
+                            accounts = it.getOrDefault(emptyList()),
+                            loadingAccount = false
+                        )
                     }
+                }
+
+                if (it.isFailure) {
+                    _uiState.update { currentState -> currentState.copy(loadingAccount = false) }
+                    _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
                 }
             }
         }
@@ -122,8 +138,13 @@ class AddNewViewModel(
                 validateInputs()
             }
 
-            is AddNewUiEvent.SetCategory -> {
-                _uiState.update { it.copy(category = event.category) }
+            is AddNewUiEvent.SetExpenseCategory -> {
+                _uiState.update { it.copy(expenseCategory = event.category) }
+                validateInputs()
+            }
+
+            is AddNewUiEvent.SetIncomeCategory -> {
+                _uiState.update { it.copy(incomeCategory = event.category) }
                 validateInputs()
             }
 
@@ -139,31 +160,38 @@ class AddNewViewModel(
 
             is AddNewUiEvent.SetNote -> _uiState.update { it.copy(notes = event.note) }
             is AddNewUiEvent.UpdateAccount -> getAccounts()
+            is AddNewUiEvent.SetTransactionType -> {
+                _uiState.update { it.copy(transactionType = event.type) }
+            }
 
-            is AddNewUiEvent.SaveTransaction -> {
-                viewModelScope.launch {
-                    _uiState.value = uiState.value.copy(isLoading = true)
+            is AddNewUiEvent.SaveTransaction -> viewModelScope.launch {
+                _uiState.value = uiState.value.copy(isLoading = true)
 
-                    val param = AddTransactionParam(
-                        id = uiState.value.transactionId,
-                        amount = uiState.value.amount.toLong(),
-                        category = uiState.value.category?.name.orEmpty(),
-                        date = DateFormat.getInstance().format(uiState.value.dateTime),
-                        fee = uiState.value.fee.toLongOrDefault(0),
-                        notes = uiState.value.notes,
-                        accountsId = uiState.value.account?.id.orEmpty(),
-                        type = event.type.toString(),
-                        isDraft = false
-                    )
+                val category = if (uiState.value.transactionType == TransactionType.EXPENSE) {
+                    uiState.value.expenseCategory?.name.orEmpty()
+                } else {
+                    uiState.value.incomeCategory?.name.orEmpty()
+                }
 
-                    createTransactionUseCase.execute(param).collectLatest {
-                        if (it.isSuccess) {
-                            _uiState.value = uiState.value.copy(isLoading = false)
-                            _onSuccessSaved.send(None)
-                        } else {
-                            _uiState.value = uiState.value.copy(isLoading = false)
-                            _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                        }
+                val param = AddTransactionParam(
+                    id = uiState.value.transactionId,
+                    amount = uiState.value.amount.toLong(),
+                    category = category,
+                    date = uiState.value.dateTime.formatToString(FORMAT_ISO_8601),
+                    fee = uiState.value.fee.toLongOrDefault(0),
+                    notes = uiState.value.notes,
+                    accountsId = uiState.value.account?.id.orEmpty(),
+                    type = uiState.value.transactionType.toString(),
+                    isDraft = false
+                )
+
+                createTransactionUseCase.execute(param).collectLatest {
+                    if (it.isSuccess) {
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _onSuccessSaved.send(None)
+                    } else {
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
                     }
                 }
             }
@@ -176,8 +204,16 @@ class AddNewViewModel(
 
     private fun validateInputs() {
         _uiState.update { currentState ->
+            val isCategoryValid = if (currentState.transactionType == TransactionType.EXPENSE) {
+                currentState.expenseCategory != null
+            } else if (currentState.transactionType == TransactionType.INCOME) {
+                currentState.incomeCategory != null
+            } else {
+                true
+            }
+
             val isValid = currentState.amount.isNotBlank() &&
-                    currentState.category != null &&
+                    isCategoryValid &&
                     currentState.account != null
             currentState.copy(isValid = isValid)
         }

@@ -36,9 +36,9 @@ import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddAccountBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.AddNewSection
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.CategoryBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputNote
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.TransactionCategoryBottomSheet
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.common.BaseBottomSheet
@@ -46,8 +46,8 @@ import id.andriawan24.cofinance.andro.ui.presentation.common.DialogDatePickerCon
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.LocaleHelper
+import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
-import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
@@ -62,6 +62,8 @@ fun IncomeSection(
 ) {
     val scope: CoroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+
+    val transactionCategories = remember { TransactionCategory.getIncomeCategories() }
 
     val categoryBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val accountBottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -132,7 +134,7 @@ fun IncomeSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_category),
-            value = uiState.category?.label.orEmpty(),
+            value = uiState.incomeCategory?.label.orEmpty(),
             onSectionClicked = { showCategoryBottomSheet = true },
             startIcon = {
                 Icon(
@@ -178,7 +180,7 @@ fun IncomeSection(
                 .padding(all = Dimensions.SIZE_16),
             enabled = uiState.isValid,
             onClick = {
-                onEvent.invoke(AddNewUiEvent.SaveTransaction(TransactionType.INCOME))
+                onEvent.invoke(AddNewUiEvent.SaveTransaction)
             },
         ) {
             Text(
@@ -193,10 +195,11 @@ fun IncomeSection(
             state = categoryBottomSheetState,
             onDismissRequest = { showCategoryBottomSheet = false }
         ) {
-            CategoryBottomSheet(
-                selectedCategory = uiState.category,
+            TransactionCategoryBottomSheet(
+                categories = transactionCategories,
+                selectedCategory = uiState.incomeCategory,
                 onCategorySaved = { category ->
-                    onEvent.invoke(AddNewUiEvent.SetCategory(category))
+                    onEvent.invoke(AddNewUiEvent.SetIncomeCategory(category))
                     scope.launch {
                         categoryBottomSheetState.hide()
                         showCategoryBottomSheet = false
@@ -254,6 +257,7 @@ fun IncomeSection(
             onDismissRequest = { showAccountBottomSheet = false }
         ) {
             AccountBottomSheet(
+                isLoading = uiState.loadingAccount,
                 accounts = uiState.accounts,
                 selectedAccount = uiState.account,
                 onAccountSaved = { account ->

@@ -3,6 +3,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
+import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.andro.utils.ext.FORMAT_DAY_MONTH_YEAR
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
@@ -50,7 +51,7 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
             ActivityUiEvent.OnNextMonth -> {
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
-                var nextMonth = if (currentMonth == DECEMBER) {
+                val nextMonth = if (currentMonth == DECEMBER) {
                     // Move to the next year started from January
                     nextYear++
                     JANUARY
@@ -74,7 +75,7 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
             ActivityUiEvent.OnPreviousMonth -> {
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
-                var nextMonth = if (currentMonth == JANUARY) {
+                val nextMonth = if (currentMonth == JANUARY) {
                     // Move to the previous year started from December
                     nextYear--
                     DECEMBER
@@ -104,7 +105,11 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                 if (result.isSuccess) {
                     val transactions = result.getOrNull().orEmpty()
                     val transactionGrouped = transactions.groupBy {
-                        it.date.toDate().formatToString(FORMAT_DAY_MONTH_YEAR)
+                        it.date.toDate()
+                            .formatToString(
+                                format = FORMAT_DAY_MONTH_YEAR,
+                                locale = LocaleHelper.getCurrentLocale()
+                            )
                     }
 
                     var expense = 0L
@@ -113,12 +118,12 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
 
                     transactionGrouped.forEach {
                         val expenseThisMonth = it.value
-                            .filter { it.type == TransactionType.EXPENSE }
-                            .sumOf { it.amount }
+                            .filter { transaction -> transaction.type == TransactionType.EXPENSE }
+                            .sumOf { transaction -> transaction.amount }
 
                         val incomeThisMonth = it.value
-                            .filter { it.type == TransactionType.INCOME }
-                            .sumOf { it.amount }
+                            .filter { transaction -> transaction.type == TransactionType.INCOME }
+                            .sumOf { transaction -> transaction.amount }
 
                         expense += expenseThisMonth
                         income += incomeThisMonth

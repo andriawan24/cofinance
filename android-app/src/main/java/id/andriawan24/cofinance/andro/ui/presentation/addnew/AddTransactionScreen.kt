@@ -40,6 +40,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewVi
 import id.andriawan24.cofinance.andro.ui.presentation.common.FancyTabIndicator
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -146,6 +147,9 @@ fun AddNewContent(
                     onClick = {
                         scope.launch {
                             expenseTypePagerState.animateScrollToPage(index)
+                            onEvent.invoke(
+                                AddNewUiEvent.SetTransactionType(TransactionType.entries[index])
+                            )
                         }
                     },
                     text = {

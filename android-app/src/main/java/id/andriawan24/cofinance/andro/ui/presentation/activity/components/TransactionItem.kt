@@ -15,15 +15,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.ColorHelper
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.emptyString
-import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
+import id.andriawan24.cofinance.andro.utils.ext.FORMAT_HOUR_MINUTE
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.response.Account
@@ -33,7 +37,7 @@ import java.util.UUID
 
 @Composable
 fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
-    val category = remember { ExpenseCategory.getCategoryByName(transaction.category) }
+    val category = remember { TransactionCategory.getCategoryByName(transaction.category) }
 
     Row(
         modifier = modifier,
@@ -46,7 +50,7 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
                     color = category.color,
                     shape = MaterialTheme.shapes.small
                 )
-                .padding(Dimensions.SIZE_12)
+                .padding(all = Dimensions.SIZE_12)
         ) {
             Image(
                 painter = painterResource(category.iconRes),
@@ -67,9 +71,14 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
             )
 
             Text(
-                text = "${
-                    transaction.date.toDate().formatToString("hh:mm")
-                } · ${transaction.account.name}",
+                text = stringResource(
+                    id = R.string.template_dot,
+                    transaction.date.toDate().formatToString(
+                        format = FORMAT_HOUR_MINUTE,
+                        locale = LocaleHelper.getCurrentLocale()
+                    ),
+                    transaction.account.name
+                ),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -98,7 +107,7 @@ private fun TransactionItemPreview() {
             TransactionItem(
                 transaction = Transaction(
                     amount = 100,
-                    category = ExpenseCategory.SUBSCRIPTION.toString(),
+                    category = TransactionCategory.SUBSCRIPTION.toString(),
                     date = emptyString(),
                     fee = 100,
                     notes = emptyString(),

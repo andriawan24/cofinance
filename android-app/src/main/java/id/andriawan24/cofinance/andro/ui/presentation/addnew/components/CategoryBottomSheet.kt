@@ -38,12 +38,13 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.enums.ExpenseCategory
+import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
 
 @Composable
-fun CategoryBottomSheet(
-    selectedCategory: ExpenseCategory?,
-    onCategorySaved: (ExpenseCategory) -> Unit,
+fun TransactionCategoryBottomSheet(
+    categories: List<TransactionCategory>,
+    selectedCategory: TransactionCategory?,
+    onCategorySaved: (TransactionCategory) -> Unit,
     onCloseCategoryClicked: () -> Unit
 ) {
     var currentSelectedCategory by remember { mutableStateOf(selectedCategory) }
@@ -81,7 +82,7 @@ fun CategoryBottomSheet(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-            itemsIndexed(ExpenseCategory.entries) { index, category ->
+            itemsIndexed(categories) { index, category ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -122,7 +123,7 @@ fun CategoryBottomSheet(
                     )
                 }
 
-                if (index != ExpenseCategory.entries.lastIndex) {
+                if (index != TransactionCategory.entries.lastIndex) {
                     HorizontalDivider(
                         modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
                         thickness = Dimensions.SIZE_1,
@@ -151,13 +152,125 @@ fun CategoryBottomSheet(
     }
 }
 
+//@Composable
+//fun IncomeCategoryBottomSheet(
+//    selectedCategory: TransactionCategory?,
+//    onCategorySaved: (TransactionCategory) -> Unit,
+//    onCloseCategoryClicked: () -> Unit
+//) {
+//    var currentSelectedCategory by remember { mutableStateOf(selectedCategory) }
+//
+//    Column {
+//        Box(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = Dimensions.SIZE_16)
+//        ) {
+//            Text(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .align(Alignment.Center),
+//                text = stringResource(R.string.label_category),
+//                textAlign = TextAlign.Center,
+//                style = MaterialTheme.typography.labelMedium.copy(
+//                    color = MaterialTheme.colorScheme.onBackground
+//                )
+//            )
+//
+//            Image(
+//                modifier = Modifier
+//                    .align(Alignment.CenterEnd)
+//                    .clip(CircleShape)
+//                    .clickable { onCloseCategoryClicked() },
+//                painter = painterResource(R.drawable.ic_close),
+//                contentDescription = null
+//            )
+//        }
+//
+//        LazyColumn(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .weight(1f),
+//            contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
+//        ) {
+//            itemsIndexed(TransactionCategory.getIncomeCategories()) { index, category ->
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(start = Dimensions.SIZE_16, end = Dimensions.SIZE_4)
+//                        .padding(vertical = Dimensions.SIZE_14),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+//                ) {
+//                    Box(
+//                        modifier = Modifier
+//                            .background(color = category.color, shape = MaterialTheme.shapes.small)
+//                            .padding(all = Dimensions.SIZE_8)
+//                    ) {
+//                        Icon(
+//                            painter = painterResource(category.iconRes),
+//                            contentDescription = category.label,
+//                            tint = Color.Unspecified
+//                        )
+//                    }
+//
+//                    Text(
+//                        modifier = Modifier.weight(1f),
+//                        text = category.label,
+//                        style = MaterialTheme.typography.labelMedium.copy(
+//                            fontWeight = FontWeight.Medium,
+//                            color = MaterialTheme.colorScheme.onBackground
+//                        )
+//                    )
+//
+//                    RadioButton(
+//                        selected = currentSelectedCategory == category,
+//                        colors = RadioButtonDefaults.colors(
+//                            unselectedColor = MaterialTheme.colorScheme.primary
+//                        ),
+//                        onClick = {
+//                            currentSelectedCategory = category
+//                        }
+//                    )
+//                }
+//
+//                if (index != TransactionCategory.entries.lastIndex) {
+//                    HorizontalDivider(
+//                        modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+//                        thickness = Dimensions.SIZE_1,
+//                        color = MaterialTheme.colorScheme.surfaceContainerLow
+//                    )
+//                }
+//            }
+//        }
+//
+//        PrimaryButton(
+//            modifier = Modifier
+//                .fillMaxWidth()
+//                .padding(horizontal = Dimensions.SIZE_16, vertical = Dimensions.SIZE_24),
+//            onClick = {
+//                currentSelectedCategory?.let { currentSelectedCategory ->
+//                    onCategorySaved(currentSelectedCategory)
+//                }
+//            },
+//            enabled = currentSelectedCategory != null
+//        ) {
+//            Text(
+//                text = stringResource(R.string.action_save),
+//                style = MaterialTheme.typography.labelMedium
+//            )
+//        }
+//    }
+//}
+
 @Preview
 @Composable
 private fun CategoryBottomSheetPreview() {
     CofinanceTheme {
         Surface {
-            CategoryBottomSheet(
-                selectedCategory = ExpenseCategory.FOOD,
+            TransactionCategoryBottomSheet(
+                categories = TransactionCategory.getIncomeCategories(),
+                selectedCategory = TransactionCategory.FOOD,
                 onCategorySaved = {},
                 onCloseCategoryClicked = { }
             )

@@ -7,7 +7,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ActivityScreen() {
+fun ActivityScreen(onNavigateToAdd: () -> Unit) {
     val activityViewModel: ActivityViewModel = koinViewModel()
     val uiState by activityViewModel.uiState.collectAsStateWithLifecycle()
 
@@ -20,6 +20,7 @@ fun ActivityScreen() {
         onEvent = { activityViewModel.onEvent(it) },
         onBookmarkClicked = {
             // TODO: Handle bookmark page open
-        }
+        },
+        onNavigateToAdd = onNavigateToAdd
     )
 }

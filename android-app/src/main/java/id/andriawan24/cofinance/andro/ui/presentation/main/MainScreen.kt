@@ -37,8 +37,7 @@ fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
             startDestination = Destinations.Activity
         ) {
             composable<Destinations.Activity> {
-                ActivityScreen(
-                )
+                ActivityScreen(onNavigateToAdd = onNavigateToAdd)
             }
 
             composable<Destinations.Budget> {
