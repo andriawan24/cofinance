@@ -16,9 +16,10 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
 
@@ -71,11 +72,19 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         val transactions = supabase.from(TransactionResponse.TABLE_NAME).select(columns = columns) {
             filter {
                 if (month != null && year != null) {
-                    val startOfMonth = LocalDateTime(year, month, 1, 0, 0)
+                    val startOfMonth = LocalDateTime(
+                        year = year,
+                        monthNumber = month,
+                        dayOfMonth = 1,
+                        hour = 0,
+                        minute = 0
+                    ).toInstant(TimeZone.currentSystemDefault())
 
-                    val firstDayOfMonth = LocalDate(year, month, 1)
-                    val startOfNextMonth = firstDayOfMonth.plus(1, DateTimeUnit.MONTH)
-                        .let { LocalDateTime(it.year, it.monthNumber, it.dayOfMonth, 0, 0) }
+                    val startOfNextMonth = startOfMonth.plus(
+                        value = 1,
+                        unit = DateTimeUnit.MONTH,
+                        timeZone = TimeZone.currentSystemDefault()
+                    )
 
                     val start = startOfMonth.toString()
                     val endExclusive = startOfNextMonth.toString()
