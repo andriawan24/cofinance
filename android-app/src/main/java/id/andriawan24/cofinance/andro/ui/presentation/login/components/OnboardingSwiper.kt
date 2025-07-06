@@ -27,6 +27,7 @@ import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.TextSizes
 
 @Composable
 fun OnboardingSwiper(modifier: Modifier = Modifier) {
@@ -45,7 +46,8 @@ fun OnboardingSwiper(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(
                     space = Dimensions.SIZE_24,
                     alignment = Alignment.CenterVertically
-                )
+                ),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
                     painter = painterResource(R.drawable.img_onboarding),
@@ -60,19 +62,23 @@ fun OnboardingSwiper(modifier: Modifier = Modifier) {
                         pushStyle(
                             SpanStyle(
                                 color = MaterialTheme.colorScheme.onBackground,
-                                fontWeight = FontWeight.Bold
+                                fontWeight = FontWeight.Bold,
+                                fontSize = TextSizes.SIZE_24
                             )
                         )
-                        append("Track your money with\n")
+                        append(stringResource(R.string.label_track_your_money))
                         pushStyle(
                             SpanStyle(
                                 color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.ExtraBold
+                                fontWeight = FontWeight.ExtraBold,
+                                fontSize = TextSizes.SIZE_24
                             )
                         )
                         append(stringResource(R.string.app_name))
                     },
-                    style = MaterialTheme.typography.headlineSmall,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        lineHeight = TextSizes.SIZE_32
+                    ),
                     textAlign = TextAlign.Center
                 )
             }
