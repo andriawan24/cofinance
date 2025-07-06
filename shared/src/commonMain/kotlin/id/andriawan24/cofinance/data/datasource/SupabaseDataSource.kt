@@ -72,7 +72,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         val transactions = supabase.from(TransactionResponse.TABLE_NAME).select(columns = columns) {
             filter {
                 if (month != null && year != null) {
-                    val startOfMonth = LocalDateTime(
+                    val startDate = LocalDateTime(
                         year = year,
                         monthNumber = month,
                         dayOfMonth = 1,
@@ -80,18 +80,15 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                         minute = 0
                     ).toInstant(TimeZone.currentSystemDefault())
 
-                    val startOfNextMonth = startOfMonth.plus(
+                    val nextDate = startDate.plus(
                         value = 1,
                         unit = DateTimeUnit.MONTH,
                         timeZone = TimeZone.currentSystemDefault()
                     )
 
-                    val start = startOfMonth.toString()
-                    val endExclusive = startOfNextMonth.toString()
-
                     and {
-                        gte(column = TransactionResponse.DATE_FIELD, value = start)
-                        lt(column = TransactionResponse.DATE_FIELD, value = endExclusive)
+                        gte(column = TransactionResponse.DATE_FIELD, value = startDate.toString())
+                        lt(column = TransactionResponse.DATE_FIELD, value = nextDate.toString())
                     }
                 }
 
