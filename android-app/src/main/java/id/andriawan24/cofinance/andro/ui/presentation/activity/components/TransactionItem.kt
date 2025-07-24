@@ -11,7 +11,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -37,8 +36,6 @@ import java.util.UUID
 
 @Composable
 fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
-    val category = remember { TransactionCategory.getCategoryByName(transaction.category) }
-
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -47,13 +44,13 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
         Box(
             modifier = Modifier
                 .background(
-                    color = category.color,
+                    color = TransactionCategory.getCategoryByName(transaction.category).color,
                     shape = MaterialTheme.shapes.small
                 )
                 .padding(all = Dimensions.SIZE_12)
         ) {
             Image(
-                painter = painterResource(category.iconRes),
+                painter = painterResource(TransactionCategory.getCategoryByName(transaction.category).iconRes),
                 contentDescription = null
             )
         }
@@ -63,7 +60,7 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
             verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
         ) {
             Text(
-                text = transaction.notes.ifEmpty { category.label },
+                text = transaction.notes.ifEmpty { TransactionCategory.getCategoryByName(transaction.category).label },
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground

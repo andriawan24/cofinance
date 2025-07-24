@@ -38,17 +38,17 @@ fun ActivityContent(
     onBookmarkClicked: () -> Unit,
     onNavigateToAdd: () -> Unit
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = Dimensions.SIZE_16)
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         ActivityTitle(
-            modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
+            modifier = Modifier.padding(
+                horizontal = Dimensions.SIZE_16,
+                vertical = Dimensions.SIZE_24
+            ),
             onBookmarkClicked = onBookmarkClicked
         )
 
         DateSwitcher(
+            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.template_month_year, uiState.monthString, uiState.year),
             onPreviousClicked = { onEvent(ActivityUiEvent.OnPreviousMonth) },
             onNextClicked = { onEvent(ActivityUiEvent.OnNextMonth) }
@@ -65,18 +65,24 @@ fun ActivityContent(
         } else {
             if (uiState.transactions.isNotEmpty()) {
                 BalanceCard(
-                    modifier = Modifier.padding(vertical = Dimensions.SIZE_24),
+                    modifier = Modifier.padding(
+                        horizontal = Dimensions.SIZE_16,
+                        vertical = Dimensions.SIZE_24
+                    ),
                     balance = uiState.balance,
                     income = uiState.income,
                     expense = uiState.expense
                 )
 
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24),
-                    contentPadding = PaddingValues(bottom = Dimensions.SIZE_24)
+                    verticalArrangement = Arrangement.spacedBy(space = Dimensions.SIZE_24),
+                    contentPadding = PaddingValues(bottom = Dimensions.SIZE_16)
                 ) {
-                    items(uiState.transactions) { item ->
-                        TransactionByMonth(item = item)
+                    items(items = uiState.transactions) { item ->
+                        TransactionByMonth(
+                            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                            item = item
+                        )
                     }
                 }
             } else {

@@ -8,10 +8,10 @@ class MainApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
-        initNapier()
+        setupNapier()
     }
 
-    private fun initNapier() {
+    private fun setupNapier() {
         Napier.base(DebugAntilog())
     }
 }
