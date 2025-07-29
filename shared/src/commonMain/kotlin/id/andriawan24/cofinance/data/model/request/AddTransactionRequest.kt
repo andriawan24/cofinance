@@ -15,6 +15,8 @@ data class AddTransactionRequest(
     val usersId: String? = null,
     @SerialName("accounts_id")
     val accountsId: String? = null,
+    @SerialName("receiver_accounts_id")
+    val receiverAccountsId: String? = null,
     @SerialName("is_draft")
     val isDraft: Boolean? = null,
     val type: String? = null

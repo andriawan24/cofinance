@@ -23,7 +23,7 @@ enum class TransactionCategory(val color: Color, @DrawableRes val iconRes: Int, 
 
     companion object Companion {
         fun getCategoryByName(name: String): TransactionCategory {
-            return TransactionCategory.valueOf(name)
+            return TransactionCategory.entries.firstOrNull { it.name == name } ?: OTHERS
         }
 
         fun getExpenseCategories(): List<TransactionCategory> {

@@ -34,6 +34,7 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.models.TransactionTabType
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.ExpenseSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.IncomeSection
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.sections.TransferSection
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiEvent
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewViewModel
@@ -179,6 +180,12 @@ fun AddNewContent(
                 )
 
                 TransactionTabType.INCOME.index -> IncomeSection(
+                    modifier = Modifier.fillMaxSize(),
+                    uiState = uiState,
+                    onEvent = onEvent
+                )
+
+                TransactionTabType.TRANSFER.index -> TransferSection(
                     modifier = Modifier.fillMaxSize(),
                     uiState = uiState,
                     onEvent = onEvent

@@ -63,9 +63,8 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         val columns = Columns.raw(
             """
                 *,
-                accounts (
-                    *
-                )
+                sender:transactions_accounts_id_fkey(*),
+                receiver:transactions_receiver_accounts_id_fkey(*)
             """.trimIndent()
         )
 
@@ -119,9 +118,8 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                     columns = Columns.raw(
                         """
                             *,
-                            accounts (
-                                *
-                            )
+                            sender:transactions_accounts_id_fkey(*),
+                            receiver:transactions_receiver_accounts_id_fkey(*)
                         """.trimIndent()
                     )
                 )

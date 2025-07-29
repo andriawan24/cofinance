@@ -16,6 +16,7 @@ import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.utils.enums.TransactionType
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +33,7 @@ data class AddNewUiState(
     var includeFee: Boolean = false,
     var imageUri: Uri? = null,
     var account: Account? = null,
+    var receiverAccount: Account? = null,
     var transactionType: TransactionType = TransactionType.EXPENSE,
     var expenseCategory: TransactionCategory? = null,
     var incomeCategory: TransactionCategory? = null,
@@ -55,6 +57,7 @@ sealed class AddNewUiEvent {
     data class SetExpenseCategory(val category: TransactionCategory) : AddNewUiEvent()
     data class SetIncomeCategory(val category: TransactionCategory) : AddNewUiEvent()
     data class SetAccount(val account: Account) : AddNewUiEvent()
+    data class SetReceiverAccount(val account: Account) : AddNewUiEvent()
     data class SetDateTime(val dateTime: Date) : AddNewUiEvent()
     data class SetFee(val fee: String) : AddNewUiEvent()
     data class SetNote(val note: String) : AddNewUiEvent()
@@ -153,6 +156,11 @@ class AddNewViewModel(
                 validateInputs()
             }
 
+            is AddNewUiEvent.SetReceiverAccount -> {
+                _uiState.update { it.copy(receiverAccount = event.account) }
+                validateInputs()
+            }
+
             is AddNewUiEvent.SetDateTime -> {
                 _uiState.update { it.copy(dateTime = event.dateTime) }
                 validateInputs()
@@ -167,10 +175,9 @@ class AddNewViewModel(
             is AddNewUiEvent.SaveTransaction -> viewModelScope.launch {
                 _uiState.value = uiState.value.copy(isLoading = true)
 
-                val category = if (uiState.value.transactionType == TransactionType.EXPENSE) {
-                    uiState.value.expenseCategory?.name.orEmpty()
-                } else {
-                    uiState.value.incomeCategory?.name.orEmpty()
+                val category = when (uiState.value.transactionType) {
+                    TransactionType.EXPENSE -> uiState.value.expenseCategory?.name.orEmpty()
+                    else -> uiState.value.incomeCategory?.name.orEmpty()
                 }
 
                 val param = AddTransactionParam(
@@ -181,6 +188,7 @@ class AddNewViewModel(
                     fee = uiState.value.fee.toLongOrDefault(0),
                     notes = uiState.value.notes,
                     accountsId = uiState.value.account?.id.orEmpty(),
+                    receiverAccountsId = uiState.value.receiverAccount?.id,
                     type = uiState.value.transactionType.toString(),
                     isDraft = false
                 )
@@ -192,6 +200,7 @@ class AddNewViewModel(
                     } else {
                         _uiState.value = uiState.value.copy(isLoading = false)
                         _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                        Napier.e(it.exceptionOrNull()?.message.orEmpty())
                     }
                 }
             }

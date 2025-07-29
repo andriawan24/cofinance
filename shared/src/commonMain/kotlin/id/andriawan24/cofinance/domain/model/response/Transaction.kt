@@ -22,7 +22,7 @@ data class Transaction(
                 date = response.date.orEmpty(),
                 fee = response.fee ?: 0,
                 notes = response.notes.orEmpty(),
-                account = Account.from(response.account),
+                account = Account.from(response.sender),
                 type = TransactionType.valueOf(response.type.orEmpty())
             )
         }

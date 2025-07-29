@@ -51,4 +51,6 @@
     <string name="template_month_year">%1$s %2$s</string>
     <string name="template_dot">%1$s · %2$s</string>
     <string name="label_track_your_money">Track your money with\n</string>
+    <string name="label_beneficiary_account">Beneficiary Account</string>
+    <string name="label_sender_account">Sender Account</string>
 </resources>

@@ -14,6 +14,7 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.utils.enums.TransactionType
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -149,6 +150,7 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                 }
 
                 if (result.isFailure) {
+                    Napier.d { "Error ${result.exceptionOrNull()?.message}" }
                     withContext(Dispatchers.Main) {
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,

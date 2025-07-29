@@ -11,6 +11,7 @@ data class AddTransactionParam(
     val notes: String? = null,
     val usersId: String? = null,
     val accountsId: String? = null,
+    val receiverAccountsId: String? = null,
     val type: String? = null,
     val isDraft: Boolean? = null
 ) {
@@ -25,6 +26,7 @@ data class AddTransactionParam(
                 notes = this.notes,
                 usersId = this.usersId,
                 accountsId = this.accountsId,
+                receiverAccountsId = this.receiverAccountsId,
                 isDraft = this.isDraft,
                 type = this.type
             )
