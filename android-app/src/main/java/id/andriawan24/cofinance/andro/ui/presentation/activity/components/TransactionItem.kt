@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,13 +45,21 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
         Box(
             modifier = Modifier
                 .background(
-                    color = TransactionCategory.getCategoryByName(transaction.category).color,
+                    color = when (transaction.type) {
+                        TransactionType.TRANSFER -> Color(0xFFEEF6FF)
+                        else -> TransactionCategory.getCategoryByName(transaction.category).color
+                    },
                     shape = MaterialTheme.shapes.small
                 )
                 .padding(all = Dimensions.SIZE_12)
         ) {
             Image(
-                painter = painterResource(TransactionCategory.getCategoryByName(transaction.category).iconRes),
+                painter = painterResource(
+                    when (transaction.type) {
+                        TransactionType.TRANSFER -> R.drawable.ic_transfer
+                        else -> TransactionCategory.getCategoryByName(transaction.category).iconRes
+                    }
+                ),
                 contentDescription = null
             )
         }
@@ -60,7 +69,12 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
             verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
         ) {
             Text(
-                text = transaction.notes.ifEmpty { TransactionCategory.getCategoryByName(transaction.category).label },
+                text = transaction.notes.ifEmpty {
+                    when (transaction.type) {
+                        TransactionType.TRANSFER -> stringResource(R.string.label_transfer)
+                        else -> TransactionCategory.getCategoryByName(transaction.category).label
+                    }
+                },
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onBackground
@@ -74,7 +88,11 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
                         format = FORMAT_HOUR_MINUTE,
                         locale = LocaleHelper.getCurrentLocale()
                     ),
-                    transaction.account.name
+                    transaction.account.name.plus(
+                        if (transaction.receiverAccount.name.isNotEmpty()) {
+                            " → ${transaction.receiverAccount.name}"
+                        } else emptyString()
+                    )
                 ),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Medium,

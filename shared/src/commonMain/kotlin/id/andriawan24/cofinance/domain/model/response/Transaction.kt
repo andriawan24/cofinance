@@ -11,6 +11,7 @@ data class Transaction(
     val fee: Long = 0,
     val notes: String = "",
     val account: Account = Account(),
+    val receiverAccount: Account = Account(),
     val type: TransactionType = TransactionType.EXPENSE,
 ) {
     companion object {
@@ -23,6 +24,7 @@ data class Transaction(
                 fee = response.fee ?: 0,
                 notes = response.notes.orEmpty(),
                 account = Account.from(response.sender),
+                receiverAccount = Account.from(response.receiver),
                 type = TransactionType.valueOf(response.type.orEmpty())
             )
         }
