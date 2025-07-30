@@ -42,7 +42,6 @@ import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.ext.titlecase
 import id.andriawan24.cofinance.domain.model.response.Account
 
 @Composable
@@ -110,7 +109,7 @@ fun AccountBottomSheet(
                     ) {
                         Text(
                             modifier = Modifier.weight(1f),
-                            text = data.first.titlecase(),
+                            text = data.first.displayName,
                             style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onBackground

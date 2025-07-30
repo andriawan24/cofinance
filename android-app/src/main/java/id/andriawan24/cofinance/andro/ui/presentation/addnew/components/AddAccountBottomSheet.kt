@@ -44,7 +44,7 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberFormatTransformation
-import id.andriawan24.cofinance.andro.utils.enums.AccountGroupType
+import id.andriawan24.cofinance.utils.enums.AccountGroupType
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

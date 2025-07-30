@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.di
 
+import id.andriawan24.cofinance.andro.ui.presentation.account.AccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddAccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewViewModel
@@ -20,4 +21,5 @@ val viewModelModule = module {
     viewModelOf(::PreviewViewModel)
     viewModelOf(::AddNewViewModel)
     viewModelOf(::AddAccountViewModel)
+    viewModelOf(::AccountViewModel)
 }

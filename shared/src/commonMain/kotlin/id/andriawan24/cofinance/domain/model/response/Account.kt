@@ -1,12 +1,13 @@
 package id.andriawan24.cofinance.domain.model.response
 
 import id.andriawan24.cofinance.data.model.response.AccountResponse
+import id.andriawan24.cofinance.utils.enums.AccountGroupType
 
 data class Account(
     val id: String = "",
     val name: String = "",
-    val group: String = "",
-    val balance: Int = 0,
+    val group: AccountGroupType = AccountGroupType.CASH,
+    val balance: Long = 0,
     val createdAt: String = ""
 ) {
     companion object {
@@ -14,7 +15,7 @@ data class Account(
             return Account(
                 id = response?.id.orEmpty(),
                 name = response?.name.orEmpty(),
-                group = response?.group.orEmpty(),
+                group = AccountGroupType.getAccountByName(response?.group.orEmpty()),
                 balance = response?.balance ?: 0,
                 createdAt = response?.createdAt.orEmpty()
             )

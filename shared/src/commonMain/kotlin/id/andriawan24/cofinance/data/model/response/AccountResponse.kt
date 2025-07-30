@@ -9,7 +9,7 @@ data class AccountResponse(
     val id: String? = null,
     val name: String? = null,
     val group: String? = null,
-    val balance: Int? = null,
+    val balance: Long? = null,
     @SerialName(USERS_FIELD)
     val user: UserInfo? = null,
     @SerialName(CREATED_AT_FIELD)

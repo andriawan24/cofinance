@@ -11,10 +11,10 @@ import androidx.navigation.compose.composable
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
+import id.andriawan24.cofinance.andro.ui.presentation.account.AccountScreen
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
-import id.andriawan24.cofinance.andro.ui.presentation.wallet.WalletScreen
 
 @Composable
 fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
@@ -45,7 +45,7 @@ fun MainScreen(onNavigateToLogin: () -> Unit, onNavigateToAdd: () -> Unit) {
             }
 
             composable<Destinations.Account> {
-                WalletScreen()
+                AccountScreen()
             }
 
             composable<Destinations.Profile> {

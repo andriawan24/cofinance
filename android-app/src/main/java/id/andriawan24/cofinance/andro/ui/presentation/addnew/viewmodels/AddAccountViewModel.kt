@@ -3,10 +3,10 @@ package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.emptyString
-import id.andriawan24.cofinance.andro.utils.enums.AccountGroupType
 import id.andriawan24.cofinance.domain.model.request.AccountParam
 import id.andriawan24.cofinance.domain.usecase.accounts.AddAccountUseCase
 import id.andriawan24.cofinance.utils.None
+import id.andriawan24.cofinance.utils.enums.AccountGroupType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
