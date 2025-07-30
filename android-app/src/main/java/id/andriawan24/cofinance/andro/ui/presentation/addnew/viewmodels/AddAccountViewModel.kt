@@ -67,7 +67,7 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
 
                 addAccountUseCase.execute(account).collectLatest {
                     if (it.isSuccess) {
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { state -> state.copy(isLoading = false) }
                         _closeBottomSheet.send(None)
                     }
 
