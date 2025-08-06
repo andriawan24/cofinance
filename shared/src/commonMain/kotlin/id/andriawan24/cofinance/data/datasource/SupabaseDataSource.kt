@@ -4,8 +4,10 @@ import id.andriawan24.cofinance.data.model.request.AccountRequest
 import id.andriawan24.cofinance.data.model.request.AddTransactionRequest
 import id.andriawan24.cofinance.data.model.request.GetTransactionsRequest
 import id.andriawan24.cofinance.data.model.request.IdTokenRequest
+import id.andriawan24.cofinance.data.model.request.UpdateBalanceRequest
 import id.andriawan24.cofinance.data.model.response.AccountResponse
 import id.andriawan24.cofinance.data.model.response.TransactionResponse
+import id.andriawan24.cofinance.utils.ext.orZero
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
@@ -20,6 +22,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
+import kotlin.math.max
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
 
@@ -43,7 +46,12 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
 
     suspend fun getAccounts(): List<AccountResponse> {
         return supabase.from(AccountResponse.TABLE_NAME)
-            .select()
+            .select {
+                order(
+                    column = AccountResponse.NAME_FIELD,
+                    order = Order.DESCENDING
+                )
+            }
             .decodeList<AccountResponse>()
     }
 
@@ -53,7 +61,57 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
 
         return supabase.from(AccountResponse.TABLE_NAME)
             .insert(newRequest) { select() }
-            .decodeSingle<AccountResponse>()
+            .decodeSingle()
+    }
+
+    suspend fun increaseBalance(request: UpdateBalanceRequest): AccountResponse {
+        val account = supabase.from(AccountResponse.TABLE_NAME)
+            .select {
+                filter {
+                    AccountResponse::id eq request.accountsId
+                }
+            }
+            .decodeSingleOrNull<AccountResponse>()
+
+        if (account == null) {
+            throw IllegalArgumentException("Account not found")
+        }
+
+        val balance = max(0, account.balance.orZero().plus(request.amount))
+
+        return supabase.from(AccountResponse.TABLE_NAME)
+            .update(update = { AccountResponse::balance setTo balance }) {
+                select()
+                filter {
+                    AccountResponse::id eq request.accountsId
+                }
+            }
+            .decodeSingle()
+    }
+
+    suspend fun reduceBalance(request: UpdateBalanceRequest): AccountResponse {
+        val account = supabase.from(AccountResponse.TABLE_NAME)
+            .select {
+                filter {
+                    AccountResponse::id eq request.accountsId
+                }
+            }
+            .decodeSingleOrNull<AccountResponse>()
+
+        if (account == null) {
+            throw IllegalArgumentException("Account not found")
+        }
+
+        val balance = max(0, account.balance.orZero().minus(request.amount))
+
+        return supabase.from(AccountResponse.TABLE_NAME)
+            .update(update = { AccountResponse::balance setTo balance }) {
+                select()
+                filter {
+                    AccountResponse::id eq request.accountsId
+                }
+            }
+            .decodeSingle()
     }
 
     suspend fun getTransactions(request: GetTransactionsRequest): List<TransactionResponse> {

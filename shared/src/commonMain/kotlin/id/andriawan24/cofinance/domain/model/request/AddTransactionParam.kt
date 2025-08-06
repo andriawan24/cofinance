@@ -1,6 +1,7 @@
 package id.andriawan24.cofinance.domain.model.request
 
 import id.andriawan24.cofinance.data.model.request.AddTransactionRequest
+import id.andriawan24.cofinance.utils.enums.TransactionType
 
 data class AddTransactionParam(
     val id: String? = null,
@@ -9,11 +10,11 @@ data class AddTransactionParam(
     val date: String? = null,
     val fee: Long? = null,
     val notes: String? = null,
-    val usersId: String? = null,
     val accountsId: String? = null,
+    val usersId: String? = null,
     val receiverAccountsId: String? = null,
-    val type: String? = null,
-    val isDraft: Boolean? = null
+    val type: TransactionType,
+    val isDraft: Boolean
 ) {
     companion object {
         fun AddTransactionParam.toRequest(): AddTransactionRequest {
@@ -28,7 +29,7 @@ data class AddTransactionParam(
                 accountsId = this.accountsId,
                 receiverAccountsId = this.receiverAccountsId,
                 isDraft = this.isDraft,
-                type = this.type
+                type = this.type.toString()
             )
         }
     }

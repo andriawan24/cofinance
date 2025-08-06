@@ -19,5 +19,6 @@ data class AccountResponse(
         const val TABLE_NAME = "accounts"
         const val CREATED_AT_FIELD = "created_at"
         const val USERS_FIELD = "users"
+        const val NAME_FIELD = "name"
     }
 }

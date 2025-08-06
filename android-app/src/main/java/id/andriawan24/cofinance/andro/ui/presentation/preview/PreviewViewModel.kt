@@ -41,8 +41,8 @@ class PreviewViewModel(
         viewModelScope.launch {
             _previewUiState.value = previewUiState.value.copy(showLoading = true)
 
-            contentResolver.openInputStream(imageUri)?.use {
-                val bytes = it.buffered().readBytes()
+            contentResolver.openInputStream(imageUri)?.use { uploadedImage ->
+                val bytes = uploadedImage.buffered().readBytes()
 
                 scanReceiptUseCase.execute(bytes).collectLatest { result ->
                     if (result.isSuccess) {
@@ -51,7 +51,7 @@ class PreviewViewModel(
                         val input = AddTransactionParam(
                             amount = receiptScan.totalPrice,
                             date = receiptScan.transactionDate,
-                            type = TransactionType.EXPENSE.toString(),
+                            type = TransactionType.EXPENSE,
                             isDraft = true
                         )
 

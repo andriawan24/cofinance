@@ -189,7 +189,7 @@ class AddNewViewModel(
                     notes = uiState.value.notes,
                     accountsId = uiState.value.account?.id.orEmpty(),
                     receiverAccountsId = uiState.value.receiverAccount?.id,
-                    type = uiState.value.transactionType.toString(),
+                    type = uiState.value.transactionType,
                     isDraft = false
                 )
 
