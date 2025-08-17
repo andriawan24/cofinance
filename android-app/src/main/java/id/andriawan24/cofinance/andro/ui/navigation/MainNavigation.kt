@@ -94,7 +94,9 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
                     navController.navigate(Destinations.Camera)
                 },
                 onSuccessSave = {
-                    // TODO: Just do this so far
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("add_activity_result", true)
                     navController.navigateUp()
                 }
             )

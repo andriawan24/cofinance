@@ -20,6 +20,7 @@ import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 import id.andriawan24.cofinance.andro.ui.presentation.account.AccountScreen
 import id.andriawan24.cofinance.andro.ui.presentation.account.AccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
+import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.expenses.ExpensesScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
 import org.koin.androidx.compose.koinViewModel
@@ -50,6 +51,26 @@ fun MainScreen(
             startDestination = Destinations.Activity
         ) {
             composable<Destinations.Activity> {
+                val activityViewModel: ActivityViewModel = koinViewModel()
+
+                val addAccountSucceeded by parentNavController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.getStateFlow("add_activity_result", false)
+                    ?.collectAsStateWithLifecycle(false)
+                    ?: remember {
+                        mutableStateOf(false)
+                    }
+
+                LaunchedEffect(addAccountSucceeded) {
+                    if (addAccountSucceeded) {
+                        appState.showSnackbar("Successfully add activity")
+                        activityViewModel.fetchTransaction()
+                        parentNavController.currentBackStackEntry?.savedStateHandle?.remove<Boolean>(
+                            "add_activity_result"
+                        )
+                    }
+                }
+
                 ActivityScreen(onNavigateToAdd = onNavigateToAdd)
             }
 
