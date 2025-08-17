@@ -15,18 +15,34 @@ import kotlinx.coroutines.launch
 
 data class UiState(
     val accounts: List<AccountByGroup> = listOf(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val balance: Long = 0L
 )
 
 class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
+    init {
+        getAccounts()
+    }
+
+    fun refresh() {
+        _uiState.update {
+            it.copy(isRefreshing = true)
+        }
+
+        getAccounts()
+    }
+
     fun getAccounts() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
             getAccountsUseCase.execute().collectLatest {
                 val accounts = it.getOrDefault(emptyList()).groupBy { account -> account.group }
+                var totalAssets = 0L
+
                 val accountsByGroup = accounts.map { accountByGroup ->
                     val backgroundColor = when (accountByGroup.key) {
                         AccountGroupType.CASH -> Color(0xFFEEF9F8)
@@ -36,6 +52,7 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
                     }
                     val displayName = accountByGroup.key.displayName
                     val totalAmount = accountByGroup.value.sumOf { account -> account.balance }
+                    totalAssets += totalAmount
                     AccountByGroup(
                         groupLabel = displayName,
                         backgroundColor = backgroundColor,
@@ -53,7 +70,9 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
                 _uiState.update { state ->
                     state.copy(
                         accounts = accountsByGroup,
-                        isLoading = false
+                        isLoading = false,
+                        isRefreshing = false,
+                        balance = totalAssets
                     )
                 }
             }

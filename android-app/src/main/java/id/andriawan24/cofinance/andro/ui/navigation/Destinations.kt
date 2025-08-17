@@ -36,6 +36,9 @@ sealed class Destinations(val route: String) {
     data object Account : Destinations(Account::class.java.canonicalName.orEmpty())
 
     @Serializable
+    data object AddAccount : Destinations(AddAccount::class.java.canonicalName.orEmpty())
+
+    @Serializable
     data object Profile : Destinations(Profile::class.java.canonicalName.orEmpty())
 }
 

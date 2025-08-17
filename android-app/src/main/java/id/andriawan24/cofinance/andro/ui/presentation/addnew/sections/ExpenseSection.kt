@@ -233,9 +233,9 @@ fun ExpenseSection(
 
                     val calendar = Calendar.getInstance().apply {
                         time = uiState.dateTime
-                        set(Calendar.YEAR, chosenCal.get(Calendar.YEAR))
-                        set(Calendar.MONTH, chosenCal.get(Calendar.MONTH))
-                        set(Calendar.DAY_OF_MONTH, chosenCal.get(Calendar.DAY_OF_MONTH))
+                        set(Calendar.YEAR, chosenCal[Calendar.YEAR])
+                        set(Calendar.MONTH, chosenCal[Calendar.MONTH])
+                        set(Calendar.DAY_OF_MONTH, chosenCal[Calendar.DAY_OF_MONTH])
                     }
                     onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {
@@ -306,7 +306,7 @@ fun ExpenseSection(
                         addAccountBottomSheetState.hide()
                         showAddAccountBottomSheet = false
                     }
-                }
+                },
             )
         }
     }

@@ -14,13 +14,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,27 +41,37 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.TextSizes
-import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 import id.andriawan24.cofinance.domain.model.response.Account
 import id.andriawan24.cofinance.utils.enums.AccountGroupType
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AccountScreen(accountViewModel: AccountViewModel = koinViewModel()) {
+fun AccountScreen(
+    accountViewModel: AccountViewModel = koinViewModel(),
+    onNavigateToAddAccount: () -> Unit
+) {
     val uiState by accountViewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(true) {
-        accountViewModel.getAccounts()
-    }
-
-    AccountContent(accounts = uiState.accounts, isLoading = uiState.isLoading)
+    AccountContent(
+        accounts = uiState.accounts,
+        isLoading = uiState.isLoading,
+        isRefreshing = uiState.isRefreshing,
+        balance = uiState.balance,
+        onRefresh = { accountViewModel.refresh() },
+        onNavigateToAddAccount = onNavigateToAddAccount
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AccountContent(
     modifier: Modifier = Modifier,
     accounts: List<AccountByGroup>,
-    isLoading: Boolean
+    balance: Long,
+    isLoading: Boolean,
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+    onNavigateToAddAccount: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Row(
@@ -80,103 +90,31 @@ private fun AccountContent(
         AssetCard(
             modifier = Modifier
                 .padding(horizontal = Dimensions.SIZE_16)
-                .padding(top = Dimensions.SIZE_24)
+                .padding(top = Dimensions.SIZE_24),
+            balance = balance,
+            onAddAccountClicked = onNavigateToAddAccount
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = Dimensions.SIZE_12),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            overscrollEffect = null,
-            contentPadding = PaddingValues(vertical = Dimensions.SIZE_12)
+        PullToRefreshBox(
+            isRefreshing = isRefreshing,
+            onRefresh = {
+                onRefresh()
+            },
         ) {
-            if (isLoading) {
-                item { CircularProgressIndicator() }
-            } else {
-                items(accounts) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = Dimensions.SIZE_16)
-                            .dropShadow(
-                                shape = MaterialTheme.shapes.large,
-                                blur = Dimensions.SIZE_10,
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                                offsetY = Dimensions.SIZE_4
-                            )
-                            .background(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                shape = MaterialTheme.shapes.large
-                            )
-                            .padding(Dimensions.SIZE_16)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(space = Dimensions.SIZE_12)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = it.backgroundColor,
-                                        shape = MaterialTheme.shapes.small
-                                    )
-                                    .padding(all = Dimensions.SIZE_12),
-                            ) {
-                                Image(
-                                    painter = painterResource(it.imageRes),
-                                    contentDescription = null
-                                )
-                            }
-
-                            Text(
-                                modifier = Modifier.weight(1f),
-                                text = it.groupLabel,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-
-                            Text(
-                                text = NumberHelper.formatRupiah(it.totalAmount),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(vertical = Dimensions.SIZE_16),
-                            thickness = Dimensions.SIZE_1,
-                            color = MaterialTheme.colorScheme.surfaceContainerLow
-                        )
-
-                        Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)) {
-                            it.accounts.forEach { account ->
-                                Row(
-                                    modifier = Modifier
-                                        .background(
-                                            color = it.backgroundColor,
-                                            shape = MaterialTheme.shapes.medium
-                                        )
-                                        .padding(all = Dimensions.SIZE_12),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(space = Dimensions.SIZE_12)
-                                ) {
-                                    Text(
-                                        modifier = Modifier.weight(1f),
-                                        text = account.name,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    )
-
-                                    Text(
-                                        text = NumberHelper.formatRupiah(number = account.balance),
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                    )
-                                }
-                            }
-                        }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Dimensions.SIZE_12),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                overscrollEffect = null,
+                contentPadding = PaddingValues(vertical = Dimensions.SIZE_12)
+            ) {
+                if (isLoading) {
+                    item { CircularProgressIndicator() }
+                } else {
+                    items(accounts) { group ->
+                        AccountGroupCard(group = group)
                     }
                 }
             }
@@ -185,7 +123,11 @@ private fun AccountContent(
 }
 
 @Composable
-private fun AssetCard(modifier: Modifier = Modifier) {
+private fun AssetCard(
+    modifier: Modifier = Modifier,
+    balance: Long,
+    onAddAccountClicked: () -> Unit
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -230,7 +172,7 @@ private fun AssetCard(modifier: Modifier = Modifier) {
                 )
                 HorizontalSpacing(Dimensions.SIZE_2)
                 Text(
-                    text = NumberHelper.formatNumber(10000),
+                    text = NumberHelper.formatNumber(balance),
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -241,11 +183,13 @@ private fun AssetCard(modifier: Modifier = Modifier) {
                     )
                 )
             }
+
             VerticalSpacing(Dimensions.SIZE_16)
+
             SecondaryButton(
                 verticalPadding = Dimensions.SIZE_6,
                 horizontalPadding = Dimensions.SIZE_16,
-                onClick = { },
+                onClick = onAddAccountClicked,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -280,7 +224,6 @@ private fun AccountScreenPreview() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             AccountContent(
-                isLoading = false,
                 accounts = listOf(
                     AccountByGroup(
                         groupLabel = AccountGroupType.CASH.displayName,
@@ -315,6 +258,11 @@ private fun AccountScreenPreview() {
                         )
                     )
                 ),
+                isLoading = false,
+                onNavigateToAddAccount = { },
+                balance = 1000,
+                onRefresh = {},
+                isRefreshing = false
             )
         }
     }

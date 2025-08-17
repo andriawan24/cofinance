@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import id.andriawan24.cofinance.andro.ui.presentation.addaccount.AddAccountScreen
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.AddTransactionScreen
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraScreen
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
@@ -127,8 +128,23 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
             )
         }
 
+        composable<Destinations.AddAccount> {
+            AddAccountScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onAddAccountSuccess = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("add_account_result", true)
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable<Destinations.Main> {
             MainScreen(
+                parentNavController = navController,
                 onNavigateToLogin = {
                     navController.navigate(Destinations.Login) {
                         launchSingleTop = true
@@ -139,6 +155,14 @@ fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostControll
                 },
                 onNavigateToAdd = {
                     navController.navigate(Destinations.AddNew())
+                },
+                onNavigateToAddAccount = {
+                    navController.navigate(Destinations.AddAccount) {
+                        popUpTo<Destinations.Main> {
+                            saveState = true
+                        }
+                        restoreState = true
+                    }
                 }
             )
         }

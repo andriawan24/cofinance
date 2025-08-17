@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.emptyString
@@ -17,49 +18,74 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class AddAccountUiState(
-    val category: AccountGroupType? = null,
+    val category: AccountGroupType = AccountGroupType.CASH,
     val name: String = emptyString(),
     val amount: String = emptyString(),
     val openCategoryChooser: Boolean = false,
     val isLoading: Boolean = false
 )
 
+sealed interface AddAccountEvent {
+    data object OpenCategoryChooser : AddAccountEvent
+    data object CloseCategoryChooser : AddAccountEvent
+    data class CategoryChosen(val category: AccountGroupType) : AddAccountEvent
+    data class NameChanged(val name: String) : AddAccountEvent
+    data class AmountChanged(val amount: String) : AddAccountEvent
+    data object SaveAccount : AddAccountEvent
+    data object BackClicked : AddAccountEvent
+}
+
 class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(AddAccountUiState())
     val uiState: StateFlow<AddAccountUiState> = _uiState.asStateFlow()
 
-    private val _closeBottomSheet = Channel<None>(Channel.BUFFERED)
-    val closeBottomSheet = _closeBottomSheet.receiveAsFlow()
+    private val _accountAdded = Channel<None>(Channel.BUFFERED)
+    val accountAdded = _accountAdded.receiveAsFlow()
 
     private val _showMessage = Channel<String>(Channel.BUFFERED)
     val showMessage = _showMessage.receiveAsFlow()
+
+    fun onEvent(event: AddAccountEvent) {
+        when (event) {
+            is AddAccountEvent.OpenCategoryChooser -> openCategoryChooser()
+            is AddAccountEvent.CloseCategoryChooser -> closeCategoryChooser()
+            is AddAccountEvent.CategoryChosen -> onCategorySelected(event.category)
+            is AddAccountEvent.NameChanged -> onNameChanged(event.name)
+            is AddAccountEvent.AmountChanged -> onAmountChanged(event.amount)
+            is AddAccountEvent.SaveAccount -> saveAccount()
+            is AddAccountEvent.BackClicked -> { /* no-op */
+            }
+        }
+    }
 
     fun openCategoryChooser() {
         _uiState.update { it.copy(openCategoryChooser = true) }
     }
 
-    fun closeCategoryChooser() {
+    private fun closeCategoryChooser() {
         _uiState.update { it.copy(openCategoryChooser = false) }
     }
 
-    fun onCategorySelected(category: AccountGroupType) {
+    private fun onCategorySelected(category: AccountGroupType) {
         _uiState.update { it.copy(category = category) }
     }
 
-    fun onNameChanged(name: String) {
+    private fun onNameChanged(name: String) {
         _uiState.update { it.copy(name = name) }
     }
 
-    fun onAmountChanged(amount: String) {
-        _uiState.value = _uiState.value.copy(amount = amount)
+    private fun onAmountChanged(amount: String) {
+        if (amount.isDigitsOnly() && amount.length < 13) {
+            _uiState.update { it.copy(amount = amount) }
+        }
     }
 
-    fun saveAccount() {
+    private fun saveAccount() {
         val category = _uiState.value.category
         val name = _uiState.value.name
         val amount = _uiState.value.amount
 
-        if (category != null && name.isNotBlank() && amount.isNotBlank()) {
+        if (name.isNotBlank() && amount.isNotBlank()) {
             val account = AccountParam(name = name, balance = amount.toInt(), group = category.name)
 
             viewModelScope.launch {
@@ -68,7 +94,7 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
                 addAccountUseCase.execute(account).collectLatest {
                     if (it.isSuccess) {
                         _uiState.update { state -> state.copy(isLoading = false) }
-                        _closeBottomSheet.send(None)
+                        _accountAdded.send(None)
                     }
 
                     if (it.isFailure) {
