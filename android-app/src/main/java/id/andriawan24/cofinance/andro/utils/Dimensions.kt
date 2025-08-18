@@ -54,6 +54,7 @@ object Dimensions {
     val SIZE_92 = 92.dp
     val SIZE_94 = 94.dp
     val SIZE_96 = 96.dp
+    val SIZE_120 = 120.dp
     val SIZE_200 = 200.dp
 }
 

@@ -32,32 +32,32 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices.PIXEL_2
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
-import id.andriawan24.cofinance.andro.utils.ColorHelper
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
+import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
 
 @Composable
 fun PieChart(
     modifier: Modifier = Modifier,
-    data: Map<String, Long>,
-    radiusOuter: Dp = Dimensions.SIZE_90,
+    data: Map<TransactionCategory, Long>,
+    radiusOuter: Dp = Dimensions.SIZE_120,
     chartBarWidth: Dp = Dimensions.SIZE_20,
     animationDuration: Int = 1000,
-    detailChart: @Composable ColumnScope.(data: Map<String, Long>, colors: List<Color>) -> Unit
+    detailChart: @Composable ColumnScope.(data: Map<TransactionCategory, Long>) -> Unit
 ) {
     val totalSum = data.values.sum()
-    val floatValue = mutableListOf<Float>()
-    val colors = ColorHelper.generateColorPalette(data.values.size)
+    val floatValue = mutableListOf<Pair<Color, Float>>()
     var animationPlayed by remember { mutableStateOf(false) }
     var lastValue = 0f
     val animateSize by animateFloatAsState(
-        targetValue = if (animationPlayed) radiusOuter.value * 2.5f else 0f,
+        targetValue = if (animationPlayed) radiusOuter.value + chartBarWidth.value else 0f,
         animationSpec = tween(
             durationMillis = animationDuration,
             delayMillis = 0,
@@ -73,8 +73,10 @@ fun PieChart(
         )
     )
 
-    data.values.forEachIndexed { index, values ->
-        floatValue.add(index, 360 * values.toFloat() / totalSum.toFloat())
+    data.entries.forEachIndexed { index, value ->
+        val sweepAngle = 360 * value.value / totalSum.toFloat()
+        val datum = Pair(value.key.iconColor, sweepAngle)
+        floatValue.add(index, datum)
     }
 
     LaunchedEffect(true) {
@@ -82,48 +84,58 @@ fun PieChart(
     }
 
     Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(animateSize.dp)
-                .padding(chartBarWidth / 2),
-            contentAlignment = Alignment.Center
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Canvas(
-                modifier = Modifier
-                    .size(radiusOuter * 4)
-                    .rotate(animateRotation)
+            Box(
+                modifier = Modifier.size(animateSize.dp),
+                contentAlignment = Alignment.Center
             ) {
-                floatValue.forEachIndexed { index, value ->
-                    drawArc(
-                        color = colors[index],
-                        startAngle = lastValue,
-                        sweepAngle = value,
-                        useCenter = false,
-                        style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Round)
-                    )
-                    lastValue += value
+                Canvas(
+                    modifier = Modifier
+                        .size(radiusOuter)
+                        .rotate(animateRotation)
+                ) {
+                    floatValue.forEachIndexed { index, value ->
+                        drawArc(
+                            color = value.first,
+                            startAngle = lastValue,
+                            sweepAngle = if (index == floatValue.lastIndex) value.second else value.second - 2f,
+                            useCenter = false,
+                            style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
+                        )
+                        lastValue += value.second
+                        drawArc(
+                            color = Color.White,
+                            startAngle = lastValue,
+                            sweepAngle = 2f,
+                            useCenter = false,
+                            style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
+                        )
+                    }
                 }
             }
 
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_2)
-            ) {
+            HorizontalSpacing(Dimensions.SIZE_44)
+
+            Column {
                 Text(
-                    text = "Total Income",
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = MaterialTheme.typography.labelMedium.color.copy(alpha = 0.4f),
-                        fontWeight = FontWeight.SemiBold
+                    text = "Total Expenses",
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium
                     )
                 )
+
                 Text(
-                    text = "IDR 100.000.000",
-                    style = MaterialTheme.typography.titleMedium
+                    text = NumberHelper.formatRupiah(totalSum),
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
 
-        detailChart(data, colors)
+        detailChart(data)
     }
 }
 
@@ -138,20 +150,20 @@ private fun PieChartPreview() {
             Column(modifier = Modifier.padding(Dimensions.SIZE_24)) {
                 PieChart(
                     data = mapOf(
-                        "Test" to 40000000,
-                        "Test2" to 30000000,
-                        "Test3" to 40000000,
-                        "Test4" to 60000000,
-                    ),
-                    chartBarWidth = Dimensions.SIZE_18
-                ) { data, colors ->
+                        TransactionCategory.SUBSCRIPTION to 40000000,
+                        TransactionCategory.FOOD to 40000000,
+                        TransactionCategory.ADMINISTRATION to 30000000,
+                        TransactionCategory.APPAREL to 40000000,
+                        TransactionCategory.EDUCATION to 60000000,
+                    )
+                ) { data ->
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = Dimensions.SIZE_48),
                         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
                     ) {
-                        data.entries.forEachIndexed { index, item ->
+                        data.entries.forEach { item ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
@@ -160,11 +172,11 @@ private fun PieChartPreview() {
                                     modifier = Modifier
                                         .size(Dimensions.SIZE_8)
                                         .clip(CircleShape)
-                                        .background(colors[index])
+                                        .background(item.key.iconColor)
                                 )
 
                                 Text(
-                                    text = item.key,
+                                    text = stringResource(item.key.labelRes),
                                     style = MaterialTheme.typography.labelMedium
                                 )
 

@@ -45,6 +45,8 @@ val cofinanceTypography = Typography(
     ),
     titleLarge = defaultTypography.titleLarge.copy(
         fontFamily = ManropeFontFamily,
+        fontSize = TextSizes.SIZE_20,
+        fontWeight = FontWeight.SemiBold
     ),
     titleMedium = defaultTypography.titleMedium.copy(
         fontFamily = ManropeFontFamily,

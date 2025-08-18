@@ -15,10 +15,10 @@ enum class BottomNavigationDestinations(
         labelId = R.string.label_activity,
         route = Destinations.Activity
     ),
-    BUDGET(
-        iconId = R.drawable.ic_budget,
-        labelId = R.string.label_budget,
-        route = Destinations.Budget
+    STATS(
+        iconId = R.drawable.ic_stats,
+        labelId = R.string.label_stats,
+        route = Destinations.Stats
     ),
     ACCOUNT(
         iconId = R.drawable.ic_account,

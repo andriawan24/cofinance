@@ -85,8 +85,8 @@ fun IncomeSection(
         }
 
         timePickerState.apply {
-            minute = calendar.get(Calendar.MINUTE)
-            hour = calendar.get(Calendar.HOUR_OF_DAY)
+            minute = calendar[Calendar.MINUTE]
+            hour = calendar[Calendar.HOUR_OF_DAY]
         }
     }
 
@@ -134,7 +134,7 @@ fun IncomeSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_category),
-            value = uiState.incomeCategory?.label.orEmpty(),
+            value = uiState.incomeCategory?.labelRes?.let { stringResource(it) }.orEmpty(),
             onSectionClicked = { showCategoryBottomSheet = true },
             startIcon = {
                 Icon(
@@ -230,9 +230,9 @@ fun IncomeSection(
 
                     val calendar = Calendar.getInstance().apply {
                         time = uiState.dateTime
-                        set(Calendar.YEAR, chosenCal.get(Calendar.YEAR))
-                        set(Calendar.MONTH, chosenCal.get(Calendar.MONTH))
-                        set(Calendar.DAY_OF_MONTH, chosenCal.get(Calendar.DAY_OF_MONTH))
+                        set(Calendar.YEAR, chosenCal[Calendar.YEAR])
+                        set(Calendar.MONTH, chosenCal[Calendar.MONTH])
+                        set(Calendar.DAY_OF_MONTH, chosenCal[Calendar.DAY_OF_MONTH])
                     }
                     onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {

@@ -137,7 +137,7 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(R.string.label_category),
-            value = uiState.expenseCategory?.label.orEmpty(),
+            value = uiState.expenseCategory?.labelRes?.let { stringResource(it) }.orEmpty(),
             onSectionClicked = { showCategoryBottomSheet = true },
             startIcon = {
                 Icon(

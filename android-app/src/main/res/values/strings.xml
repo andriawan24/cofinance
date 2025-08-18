@@ -18,8 +18,8 @@
     <string name="label_logout">Logout</string>
     <string name="label_activity">Activity</string>
     <string name="label_account">Account</string>
-    <string name="label_budget">Budget</string>
-    <string name="label_balance">Balance</string>
+    <string name="label_stats">Stats</string>
+    <string name="title_statistic">Statistic</string>
     <string name="label_income">Income</string>
     <string name="action_add_activity">Add Activity</string>
     <string name="title_add_activity">Add Activity</string>
@@ -53,4 +53,18 @@
     <string name="label_track_your_money">Track your money with\n</string>
     <string name="label_beneficiary_account">Beneficiary Account</string>
     <string name="label_sender_account">Sender Account</string>
+    <string name="label_category_food">Food</string>
+    <string name="label_category_transport">Transport</string>
+    <string name="label_category_housing">Housing</string>
+    <string name="label_category_apparel">Apparel</string>
+    <string name="label_category_health">Health</string>
+    <string name="label_category_education">Education</string>
+    <string name="label_category_subscription">Subscription</string>
+    <string name="label_category_internet">Internet</string>
+    <string name="label_category_debt">Debt</string>
+    <string name="label_category_gift">Gift</string>
+    <string name="label_category_administration">Administration</string>
+    <string name="label_category_others">Others</string>
+    <string name="label_category_salary">Salary</string>
+    <string name="label_category_invest">Invest</string>
 </resources>

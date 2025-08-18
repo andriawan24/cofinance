@@ -30,7 +30,7 @@ sealed class Destinations(val route: String) {
     data object Activity : Destinations(Activity::class.java.canonicalName.orEmpty())
 
     @Serializable
-    data object Budget : Destinations(Budget::class.java.canonicalName.orEmpty())
+    data object Stats : Destinations(Stats::class.java.canonicalName.orEmpty())
 
     @Serializable
     data object Account : Destinations(Account::class.java.canonicalName.orEmpty())

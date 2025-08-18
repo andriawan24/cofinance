@@ -98,14 +98,14 @@ fun TransactionCategoryBottomSheet(
                     ) {
                         Icon(
                             painter = painterResource(category.iconRes),
-                            contentDescription = category.label,
+                            contentDescription = stringResource(category.labelRes),
                             tint = Color.Unspecified
                         )
                     }
 
                     Text(
                         modifier = Modifier.weight(1f),
-                        text = category.label,
+                        text = stringResource(category.labelRes),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onBackground

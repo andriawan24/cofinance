@@ -72,7 +72,9 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
                 text = transaction.notes.ifEmpty {
                     when (transaction.type) {
                         TransactionType.TRANSFER -> stringResource(R.string.label_transfer)
-                        else -> TransactionCategory.getCategoryByName(transaction.category).label
+                        else -> stringResource(
+                            TransactionCategory.getCategoryByName(transaction.category).labelRes
+                        )
                     }
                 },
                 style = MaterialTheme.typography.labelMedium.copy(

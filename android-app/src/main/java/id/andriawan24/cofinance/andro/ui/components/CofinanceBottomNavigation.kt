@@ -134,7 +134,7 @@ private fun CofinanceBottomNavigationItemPreview() {
                 )
 
                 CofinanceBottomNavigationItem(
-                    destination = BottomNavigationDestinations.BUDGET,
+                    destination = BottomNavigationDestinations.STATS,
                     currentDestination = BottomNavigationDestinations.ACTIVITY,
                     onItemClicked = {}
                 )
