@@ -117,7 +117,7 @@ fun PieChart(
                 }
             }
 
-            HorizontalSpacing(Dimensions.SIZE_44)
+            HorizontalSpacing(Dimensions.SIZE_24)
 
             Column {
                 Text(
