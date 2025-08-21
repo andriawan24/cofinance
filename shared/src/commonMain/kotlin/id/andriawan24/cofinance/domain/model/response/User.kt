@@ -4,14 +4,14 @@ import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.serialization.json.jsonPrimitive
 
 data class User(
-    val profileUrl: String = "",
+    val avatarUrl: String = "",
     val name: String = "",
     val id: String = ""
 ) {
     companion object {
         fun from(user: UserInfo?): User {
             return User(
-                profileUrl = user?.userMetadata?.getValue("avatar_url")?.jsonPrimitive?.content.orEmpty(),
+                avatarUrl = user?.userMetadata?.getValue("avatar_url")?.jsonPrimitive?.content.orEmpty(),
                 name = user?.userMetadata?.getValue("name")?.jsonPrimitive?.content.orEmpty(),
                 id = user?.id.orEmpty()
             )

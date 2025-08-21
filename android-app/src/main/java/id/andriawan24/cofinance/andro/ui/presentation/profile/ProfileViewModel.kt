@@ -2,6 +2,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
@@ -13,10 +14,15 @@ sealed class ProfileEvent {
     data class ShowMessage(val message: String) : ProfileEvent()
 }
 
-class ProfileViewModel(private val logoutUseCase: LogoutUseCase) : ViewModel() {
+class ProfileViewModel(
+    private val getUserUseCase: GetUserUseCase,
+    private val logoutUseCase: LogoutUseCase
+) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
     val profileEvent = _profileEvent.receiveAsFlow()
+
+    val user = getUserUseCase.execute()
 
     fun logout() {
         viewModelScope.launch {

@@ -1,7 +1,7 @@
 package id.andriawan24.cofinance.andro.ui.presentation.profile
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,17 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,12 +26,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
+import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
@@ -47,7 +49,6 @@ fun ProfileScreen(
     onSignedOut: () -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
-    // val user by profileViewModel.user.collectAsStateWithLifecycle()
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
 
     profileViewModel.profileEvent.CollectAsEffect {
@@ -57,112 +58,10 @@ fun ProfileScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = Dimensions.SIZE_24),
-                text = stringResource(R.string.title_profile),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleMedium
-            )
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(vertical = Dimensions.SIZE_24),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
-
-                TextButton(
-                    onClick = {
-                        TODO("Not implemented yet")
-                    }
-                ) {
-                    Text(
-                        text = stringResource(R.string.label_edit_profile)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
-
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)
-                ) {
-                    Text(
-                        modifier = Modifier.padding(horizontal = Dimensions.SIZE_24),
-                        text = "Cash",
-                        style = MaterialTheme.typography.labelMedium
-                    )
-
-                    Spacer(modifier = Modifier.height(Dimensions.SIZE_4))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.small
-                            )
-                            .clip(shape = MaterialTheme.shapes.small)
-                            .padding(
-                                vertical = Dimensions.SIZE_12,
-                                horizontal = Dimensions.SIZE_24
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Blu by BCA",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                            )
-                        )
-
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-                            contentDescription = null
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.surface,
-                                shape = MaterialTheme.shapes.small
-                            )
-                            .clip(shape = MaterialTheme.shapes.small)
-                            .clickable(true) {
-                                showConfirmationLogoutDialog = true
-                            }
-                            .padding(
-                                vertical = Dimensions.SIZE_12,
-                                horizontal = Dimensions.SIZE_24
-                            ),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.label_logout),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
-                            )
-                        )
-                    }
-                }
-            }
-        }
-    }
+    ProfileContent(
+        name = profileViewModel.user.name,
+        imageUrl = profileViewModel.user.avatarUrl
+    )
 
     if (showConfirmationLogoutDialog) {
         Dialog(
@@ -208,6 +107,104 @@ fun ProfileScreen(
     }
 }
 
+@Composable
+fun ProfileContent(modifier: Modifier = Modifier, name: String, imageUrl: String) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Title(
+            modifier = Modifier.padding(
+                horizontal = Dimensions.SIZE_16,
+                vertical = Dimensions.SIZE_24
+            )
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16)
+                .background(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = MaterialTheme.shapes.large
+                )
+        ) {
+            Column(modifier = Modifier.padding(Dimensions.SIZE_16)) {
+                AsyncImage(
+                    modifier = Modifier
+                        .size(Dimensions.SIZE_45)
+                        .clip(CircleShape)
+                        .background(Color.White),
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .build(),
+                    placeholder = painterResource(R.drawable.img_profile_placeholder),
+                    error = painterResource(R.drawable.img_profile_placeholder),
+                    contentDescription = null
+                )
+
+                VerticalSpacing(Dimensions.SIZE_12)
+
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = name,
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = Color.White
+                    )
+                )
+
+                VerticalSpacing(Dimensions.SIZE_4)
+
+                Text(
+                    text = "andriawan2422@gmail.com",
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        color = Color.White,
+                        fontWeight = FontWeight.Medium
+                    )
+                )
+
+                VerticalSpacing(Dimensions.SIZE_12)
+
+                SecondaryButton(
+                    horizontalPadding = Dimensions.SIZE_16,
+                    verticalPadding = Dimensions.SIZE_8,
+                    onClick = {
+
+                    }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
+                    ) {
+                        Image(
+                            modifier = Modifier.size(Dimensions.SIZE_24),
+                            painter = painterResource(R.drawable.ic_edit),
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = "Edit Profile",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Title(modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = stringResource(R.string.title_profile),
+            style = MaterialTheme.typography.displaySmall
+        )
+    }
+}
+
 @Preview
 @Composable
 private fun ProfileScreenPreview() {
@@ -217,7 +214,10 @@ private fun ProfileScreenPreview() {
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            ProfileScreen(onSignedOut = { })
+            ProfileContent(
+                imageUrl = "https://someimage.com",
+                name = "Fawwaz"
+            )
         }
     }
 }
