@@ -21,8 +21,8 @@ import id.andriawan24.cofinance.andro.ui.presentation.account.AccountScreen
 import id.andriawan24.cofinance.andro.ui.presentation.account.AccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
-import id.andriawan24.cofinance.andro.ui.presentation.expenses.StatsScreen
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
+import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsScreen
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

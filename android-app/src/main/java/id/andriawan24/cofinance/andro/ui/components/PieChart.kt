@@ -22,6 +22,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,6 +44,9 @@ import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
+import kotlin.math.roundToInt
+
+typealias PieLabelType = Triple<TransactionCategory, Long, Int>
 
 @Composable
 fun PieChart(
@@ -50,12 +55,14 @@ fun PieChart(
     radiusOuter: Dp = Dimensions.SIZE_120,
     chartBarWidth: Dp = Dimensions.SIZE_20,
     animationDuration: Int = 1000,
-    detailChart: @Composable ColumnScope.(data: Map<TransactionCategory, Long>) -> Unit
+    detailChart: @Composable ColumnScope.(data: List<PieLabelType>) -> Unit
 ) {
-    val totalSum = data.values.sum()
-    val floatValue = mutableListOf<Pair<Color, Float>>()
+    val totalSum = remember { data.values.sum() }
+    val floatValue = remember { mutableStateListOf<Pair<Color, Float>>() }
     var animationPlayed by remember { mutableStateOf(false) }
-    var lastValue = 0f
+    var lastValue by remember { mutableFloatStateOf(0f) }
+    val labelData = remember { mutableStateListOf<PieLabelType>() }
+
     val animateSize by animateFloatAsState(
         targetValue = if (animationPlayed) radiusOuter.value + chartBarWidth.value else 0f,
         animationSpec = tween(
@@ -73,13 +80,20 @@ fun PieChart(
         )
     )
 
-    data.entries.forEachIndexed { index, value ->
-        val sweepAngle = 360 * value.value / totalSum.toFloat()
-        val datum = Pair(value.key.iconColor, sweepAngle)
-        floatValue.add(index, datum)
-    }
-
     LaunchedEffect(true) {
+        data.entries.forEachIndexed { index, value ->
+            val sweepAngle = 360 * value.value / totalSum.toFloat()
+            val datum = Pair(value.key.iconColor, sweepAngle)
+            labelData.add(
+                PieLabelType(
+                    first = value.key,
+                    second = value.value,
+                    third = ((sweepAngle / 360) * 100).roundToInt()
+                )
+            )
+            floatValue.add(index, datum)
+        }
+
         animationPlayed = true
     }
 
@@ -135,7 +149,7 @@ fun PieChart(
             }
         }
 
-        detailChart(data)
+        detailChart(labelData)
     }
 }
 
@@ -163,7 +177,7 @@ private fun PieChartPreview() {
                             .padding(top = Dimensions.SIZE_48),
                         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
                     ) {
-                        data.entries.forEach { item ->
+                        data.forEach { item ->
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
@@ -172,18 +186,18 @@ private fun PieChartPreview() {
                                     modifier = Modifier
                                         .size(Dimensions.SIZE_8)
                                         .clip(CircleShape)
-                                        .background(item.key.iconColor)
+                                        .background(item.first.iconColor)
                                 )
 
                                 Text(
-                                    text = stringResource(item.key.labelRes),
+                                    text = stringResource(item.first.labelRes),
                                     style = MaterialTheme.typography.labelMedium
                                 )
 
                                 Spacer(modifier = Modifier.weight(1f))
 
                                 Text(
-                                    text = NumberHelper.formatRupiah(item.value),
+                                    text = NumberHelper.formatRupiah(item.second),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
