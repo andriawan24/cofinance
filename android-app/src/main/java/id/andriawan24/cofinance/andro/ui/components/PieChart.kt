@@ -22,8 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,11 +55,22 @@ fun PieChart(
     animationDuration: Int = 1000,
     detailChart: @Composable ColumnScope.(data: List<PieLabelType>) -> Unit
 ) {
-    val totalSum = remember { data.values.sum() }
-    val floatValue = remember { mutableStateListOf<Pair<Color, Float>>() }
+    val totalSum = remember(data) { data.values.sum() }
+    val arcData = remember(data) {
+        data.entries.map { entry ->
+            val sweepAngle = 360 * entry.value / totalSum.toFloat()
+            Pair(entry.key.iconColor, sweepAngle)
+        }
+    }
+
+    val labelData = remember(data) {
+        data.entries.map { entry ->
+            val sweepAngle = 360 * entry.value / totalSum.toFloat()
+            PieLabelType(entry.key, entry.value, ((sweepAngle / 360) * 100).roundToInt())
+        }
+    }
+
     var animationPlayed by remember { mutableStateOf(false) }
-    var lastValue by remember { mutableFloatStateOf(0f) }
-    val labelData = remember { mutableStateListOf<PieLabelType>() }
 
     val animateSize by animateFloatAsState(
         targetValue = if (animationPlayed) radiusOuter.value + chartBarWidth.value else 0f,
@@ -71,6 +80,7 @@ fun PieChart(
             easing = LinearOutSlowInEasing
         )
     )
+
     val animateRotation by animateFloatAsState(
         targetValue = if (animationPlayed) 90f * 11f else 0f,
         animationSpec = tween(
@@ -81,23 +91,13 @@ fun PieChart(
     )
 
     LaunchedEffect(true) {
-        data.entries.forEachIndexed { index, value ->
-            val sweepAngle = 360 * value.value / totalSum.toFloat()
-            val datum = Pair(value.key.iconColor, sweepAngle)
-            labelData.add(
-                PieLabelType(
-                    first = value.key,
-                    second = value.value,
-                    third = ((sweepAngle / 360) * 100).roundToInt()
-                )
-            )
-            floatValue.add(index, datum)
-        }
-
         animationPlayed = true
     }
 
-    Column(modifier = modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -111,11 +111,12 @@ fun PieChart(
                         .size(radiusOuter)
                         .rotate(animateRotation)
                 ) {
-                    floatValue.forEachIndexed { index, value ->
+                    var lastValue = 0f
+                    arcData.forEach { value ->
                         drawArc(
                             color = value.first,
                             startAngle = lastValue,
-                            sweepAngle = if (index == floatValue.lastIndex) value.second else value.second - 2f,
+                            sweepAngle = if (value == arcData.last()) value.second else value.second - 2f,
                             useCenter = false,
                             style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
                         )
