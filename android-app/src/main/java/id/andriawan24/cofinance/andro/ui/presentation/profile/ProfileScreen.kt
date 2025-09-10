@@ -41,12 +41,12 @@ import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
-import io.github.aakira.napier.Napier
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ProfileScreen(
     onSignedOut: () -> Unit,
+    showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
@@ -54,21 +54,21 @@ fun ProfileScreen(
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
             is ProfileEvent.NavigateToLoginPage -> onSignedOut()
-            is ProfileEvent.ShowMessage -> Napier.e("Failed to logout ${it.message}")
+            is ProfileEvent.ShowMessage -> showMessage(it.message)
         }
     }
 
     ProfileContent(
         name = profileViewModel.user.name,
-        imageUrl = profileViewModel.user.avatarUrl
+        imageUrl = profileViewModel.user.avatarUrl,
+        email = profileViewModel.user.email,
+        onSignedOut = {
+            showConfirmationLogoutDialog = true
+        }
     )
 
     if (showConfirmationLogoutDialog) {
-        Dialog(
-            onDismissRequest = {
-                showConfirmationLogoutDialog = false
-            },
-        ) {
+        Dialog(onDismissRequest = { showConfirmationLogoutDialog = false }) {
             Column(
                 modifier = Modifier
                     .background(
@@ -77,10 +77,8 @@ fun ProfileScreen(
                     )
                     .padding(Dimensions.SIZE_24)
             ) {
-                Text("Are you sure to logout?")
-
+                Text(stringResource(R.string.label_logout_question))
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
-
                 Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)) {
                     Button(
                         colors = ButtonDefaults.buttonColors(
@@ -99,7 +97,7 @@ fun ProfileScreen(
                             showConfirmationLogoutDialog = false
                         }
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.label_cancel))
                     }
                 }
             }
@@ -108,7 +106,13 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileContent(modifier: Modifier = Modifier, name: String, imageUrl: String) {
+fun ProfileContent(
+    modifier: Modifier = Modifier,
+    name: String,
+    email: String,
+    imageUrl: String,
+    onSignedOut: () -> Unit
+) {
     Column(modifier = modifier.fillMaxSize()) {
         Title(
             modifier = Modifier.padding(
@@ -153,7 +157,7 @@ fun ProfileContent(modifier: Modifier = Modifier, name: String, imageUrl: String
                 VerticalSpacing(Dimensions.SIZE_4)
 
                 Text(
-                    text = "andriawan2422@gmail.com",
+                    text = email,
                     style = MaterialTheme.typography.labelSmall.copy(
                         color = Color.White,
                         fontWeight = FontWeight.Medium
@@ -165,9 +169,7 @@ fun ProfileContent(modifier: Modifier = Modifier, name: String, imageUrl: String
                 SecondaryButton(
                     horizontalPadding = Dimensions.SIZE_16,
                     verticalPadding = Dimensions.SIZE_8,
-                    onClick = {
-
-                    }
+                    onClick = {}
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -187,6 +189,34 @@ fun ProfileContent(modifier: Modifier = Modifier, name: String, imageUrl: String
                         )
                     }
                 }
+            }
+        }
+
+        SecondaryButton(
+            modifier = Modifier.padding(Dimensions.SIZE_16),
+            horizontalPadding = Dimensions.SIZE_16,
+            verticalPadding = Dimensions.SIZE_16,
+            containerColor = MaterialTheme.colorScheme.onPrimary,
+            contentColor = MaterialTheme.colorScheme.onBackground,
+            shape = MaterialTheme.shapes.large,
+            onClick = onSignedOut
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Image(
+                    painter = painterResource(R.drawable.ic_exit),
+                    contentDescription = null
+                )
+
+                Text(
+                    text = stringResource(R.string.label_logout),
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Medium
+                    )
+                )
             }
         }
     }
@@ -216,7 +246,11 @@ private fun ProfileScreenPreview() {
         ) {
             ProfileContent(
                 imageUrl = "https://someimage.com",
-                name = "Fawwaz"
+                name = "Fawwaz",
+                email = "andriawan2422@gmail.com",
+                onSignedOut = {
+
+                }
             )
         }
     }

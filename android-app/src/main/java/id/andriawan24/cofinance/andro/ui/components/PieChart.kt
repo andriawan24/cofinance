@@ -38,38 +38,22 @@ import androidx.compose.ui.tooling.preview.Devices.PIXEL_2
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import id.andriawan24.cofinance.andro.ui.presentation.stats.models.StatItem
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
-import kotlin.math.roundToInt
-
-typealias PieLabelType = Triple<TransactionCategory, Long, Int>
 
 @Composable
 fun PieChart(
     modifier: Modifier = Modifier,
-    data: Map<TransactionCategory, Long>,
+    totalExpenses: Long,
+    data: List<StatItem>,
     radiusOuter: Dp = Dimensions.SIZE_120,
     chartBarWidth: Dp = Dimensions.SIZE_20,
     animationDuration: Int = 1000,
-    detailChart: @Composable ColumnScope.(data: List<PieLabelType>) -> Unit
+    detailChart: @Composable ColumnScope.(data: List<StatItem>) -> Unit
 ) {
-    val totalSum = remember(data) { data.values.sum() }
-    val arcData = remember(data) {
-        data.entries.map { entry ->
-            val sweepAngle = 360 * entry.value / totalSum.toFloat()
-            Pair(entry.key.iconColor, sweepAngle)
-        }
-    }
-
-    val labelData = remember(data) {
-        data.entries.map { entry ->
-            val sweepAngle = 360 * entry.value / totalSum.toFloat()
-            PieLabelType(entry.key, entry.value, ((sweepAngle / 360) * 100).roundToInt())
-        }
-    }
-
     var animationPlayed by remember { mutableStateOf(false) }
 
     val animateSize by animateFloatAsState(
@@ -112,22 +96,24 @@ fun PieChart(
                         .rotate(animateRotation)
                 ) {
                     var lastValue = 0f
-                    arcData.forEach { value ->
+                    data.forEach { value ->
                         drawArc(
-                            color = value.first,
+                            color = value.category.iconColor,
                             startAngle = lastValue,
-                            sweepAngle = if (value == arcData.last()) value.second else value.second - 2f,
+                            sweepAngle = if (value == data.last()) value.sweepAngle else value.sweepAngle - 2f,
                             useCenter = false,
                             style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
                         )
-                        lastValue += value.second
-                        drawArc(
-                            color = Color.White,
-                            startAngle = lastValue,
-                            sweepAngle = 2f,
-                            useCenter = false,
-                            style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
-                        )
+                        lastValue += value.sweepAngle
+                        if (data.size > 1) {
+                            drawArc(
+                                color = Color.White,
+                                startAngle = lastValue,
+                                sweepAngle = 2f,
+                                useCenter = false,
+                                style = Stroke(chartBarWidth.toPx(), cap = StrokeCap.Butt)
+                            )
+                        }
                     }
                 }
             }
@@ -144,13 +130,13 @@ fun PieChart(
                 )
 
                 Text(
-                    text = NumberHelper.formatRupiah(totalSum),
+                    text = NumberHelper.formatRupiah(totalExpenses),
                     style = MaterialTheme.typography.titleLarge
                 )
             }
         }
 
-        detailChart(labelData)
+        detailChart(data)
     }
 }
 
@@ -164,12 +150,20 @@ private fun PieChartPreview() {
         ) {
             Column(modifier = Modifier.padding(Dimensions.SIZE_24)) {
                 PieChart(
-                    data = mapOf(
-                        TransactionCategory.SUBSCRIPTION to 40000000,
-                        TransactionCategory.FOOD to 40000000,
-                        TransactionCategory.ADMINISTRATION to 30000000,
-                        TransactionCategory.APPAREL to 40000000,
-                        TransactionCategory.EDUCATION to 60000000,
+                    totalExpenses = 100_000_000,
+                    data = listOf(
+                        StatItem(
+                            category = TransactionCategory.SUBSCRIPTION,
+                            amount = 100_000,
+                            percentage = 50.0f,
+                            sweepAngle = 180f,
+                        ),
+                        StatItem(
+                            category = TransactionCategory.SUBSCRIPTION,
+                            amount = 100_000,
+                            percentage = 50.0f,
+                            sweepAngle = 180f,
+                        )
                     )
                 ) { data ->
                     Column(
@@ -187,18 +181,18 @@ private fun PieChartPreview() {
                                     modifier = Modifier
                                         .size(Dimensions.SIZE_8)
                                         .clip(CircleShape)
-                                        .background(item.first.iconColor)
+                                        .background(item.category.color)
                                 )
 
                                 Text(
-                                    text = stringResource(item.first.labelRes),
+                                    text = stringResource(item.category.labelRes),
                                     style = MaterialTheme.typography.labelMedium
                                 )
 
                                 Spacer(modifier = Modifier.weight(1f))
 
                                 Text(
-                                    text = NumberHelper.formatRupiah(item.second),
+                                    text = NumberHelper.formatRupiah(item.amount),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

@@ -9,6 +9,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashViewModel
+import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -22,4 +23,5 @@ val viewModelModule = module {
     viewModelOf(::AddNewViewModel)
     viewModelOf(::AddAccountViewModel)
     viewModelOf(::AccountViewModel)
+    viewModelOf(::StatsViewModel)
 }

@@ -67,4 +67,9 @@
     <string name="label_category_others">Others</string>
     <string name="label_category_salary">Salary</string>
     <string name="label_category_invest">Invest</string>
+    <string name="label_percentage">%1$d%%</string>
+    <string name="title_no_activities">No Activities Yet</string>
+    <string name="content_description_empty_state_image">Empty state image for activity</string>
+    <string name="description_empty_activity">Start tracking your expense now</string>
+    <string name="label_logout_question">Are you sure you want to logout?</string>
 </resources>

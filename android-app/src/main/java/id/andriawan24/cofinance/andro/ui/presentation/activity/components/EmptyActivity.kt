@@ -33,13 +33,13 @@ fun EmptyActivity(modifier: Modifier = Modifier, onNavigateToAdd: () -> Unit) {
     ) {
         Image(
             painter = painterResource(R.drawable.img_empty_activity),
-            contentDescription = "Empty state image for activity"
+            contentDescription = stringResource(R.string.content_description_empty_state_image)
         )
 
         VerticalSpacing(Dimensions.SIZE_8)
 
         Text(
-            text = "No Activities Yet",
+            text = stringResource(R.string.title_no_activities),
             style = MaterialTheme.typography.titleMedium.copy(
                 color = MaterialTheme.colorScheme.onBackground
             )
@@ -48,7 +48,7 @@ fun EmptyActivity(modifier: Modifier = Modifier, onNavigateToAdd: () -> Unit) {
         VerticalSpacing(Dimensions.SIZE_4)
 
         Text(
-            text = "Start tracking your expense now",
+            text = stringResource(R.string.description_empty_activity),
             style = MaterialTheme.typography.labelSmall.copy(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

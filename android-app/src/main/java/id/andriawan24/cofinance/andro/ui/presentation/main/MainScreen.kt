@@ -75,7 +75,7 @@ fun MainScreen(
             }
 
             composable<Destinations.Stats> {
-                StatsScreen()
+                StatsScreen(onNavigateToAdd = onNavigateToAdd)
             }
 
             composable<Destinations.Account> {
@@ -104,7 +104,9 @@ fun MainScreen(
             }
 
             composable<Destinations.Profile> {
-                ProfileScreen(onSignedOut = onNavigateToLogin)
+                ProfileScreen(onSignedOut = onNavigateToLogin, showMessage = {
+                    appState.showSnackbar(it)
+                })
             }
         }
     }
