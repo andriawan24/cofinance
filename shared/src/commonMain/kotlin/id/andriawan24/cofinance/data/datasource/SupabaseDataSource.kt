@@ -23,6 +23,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlin.math.max
+import kotlin.time.ExperimentalTime
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
 
@@ -114,6 +115,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
             .decodeSingle()
     }
 
+    @OptIn(ExperimentalTime::class)
     suspend fun getTransactions(request: GetTransactionsRequest): List<TransactionResponse> {
         val month = request.month
         val year = request.year

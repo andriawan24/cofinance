@@ -53,7 +53,7 @@ fun AccountScreen(
     val uiState by accountViewModel.uiState.collectAsStateWithLifecycle()
 
     AccountContent(
-        accounts = uiState.accounts,
+        uiState = uiState,
         isLoading = uiState.isLoading,
         isRefreshing = uiState.isRefreshing,
         balance = uiState.balance,
@@ -66,7 +66,7 @@ fun AccountScreen(
 @Composable
 private fun AccountContent(
     modifier: Modifier = Modifier,
-    accounts: List<AccountByGroup>,
+    uiState: UiState,
     balance: Long,
     isLoading: Boolean,
     isRefreshing: Boolean,
@@ -113,7 +113,7 @@ private fun AccountContent(
                 if (isLoading) {
                     item { CircularProgressIndicator() }
                 } else {
-                    items(accounts) { group ->
+                    items(uiState.accounts) { group ->
                         AccountGroupCard(group = group)
                     }
                 }
@@ -187,8 +187,10 @@ private fun AssetCard(
             VerticalSpacing(Dimensions.SIZE_16)
 
             SecondaryButton(
-                verticalPadding = Dimensions.SIZE_6,
-                horizontalPadding = Dimensions.SIZE_16,
+                contentPadding = PaddingValues(
+                    vertical = Dimensions.SIZE_6,
+                    horizontal = Dimensions.SIZE_16
+                ),
                 onClick = onAddAccountClicked,
             ) {
                 Row(
@@ -224,36 +226,38 @@ private fun AccountScreenPreview() {
                 .background(MaterialTheme.colorScheme.background)
         ) {
             AccountContent(
-                accounts = listOf(
-                    AccountByGroup(
-                        groupLabel = AccountGroupType.CASH.displayName,
-                        totalAmount = 110_000,
-                        backgroundColor = Color(0xFFEEF9F8),
-                        imageRes = R.drawable.ic_money,
-                        accounts = listOf(
-                            Account(
-                                name = "BCA",
-                                balance = 10_000
-                            ),
-                            Account(
-                                name = "BSI",
-                                balance = 100_000
+                uiState = UiState(
+                    accounts = listOf(
+                        AccountByGroup(
+                            groupLabel = AccountGroupType.CASH.displayName,
+                            totalAmount = 110_000,
+                            backgroundColor = Color(0xFFEEF9F8),
+                            imageRes = R.drawable.ic_money,
+                            accounts = listOf(
+                                Account(
+                                    name = "BCA",
+                                    balance = 10_000
+                                ),
+                                Account(
+                                    name = "BSI",
+                                    balance = 100_000
+                                )
                             )
-                        )
-                    ),
-                    AccountByGroup(
-                        groupLabel = AccountGroupType.SAVINGS.displayName,
-                        totalAmount = 50_000,
-                        backgroundColor = Color(0xFFFFF4FD),
-                        imageRes = R.drawable.ic_saving,
-                        accounts = listOf(
-                            Account(
-                                name = "BCA",
-                                balance = 40_000
-                            ),
-                            Account(
-                                name = "BSI",
-                                balance = 10_000
+                        ),
+                        AccountByGroup(
+                            groupLabel = AccountGroupType.SAVINGS.displayName,
+                            totalAmount = 50_000,
+                            backgroundColor = Color(0xFFFFF4FD),
+                            imageRes = R.drawable.ic_saving,
+                            accounts = listOf(
+                                Account(
+                                    name = "BCA",
+                                    balance = 40_000
+                                ),
+                                Account(
+                                    name = "BSI",
+                                    balance = 10_000
+                                )
                             )
                         )
                     )

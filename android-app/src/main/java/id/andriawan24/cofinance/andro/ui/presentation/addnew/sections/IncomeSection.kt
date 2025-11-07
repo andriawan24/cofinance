@@ -193,7 +193,7 @@ fun IncomeSection(
     if (showCategoryBottomSheet) {
         BaseBottomSheet(
             state = categoryBottomSheetState,
-            onDismissRequest = { showCategoryBottomSheet = false }
+            onDismissRequest = { }
         ) {
             TransactionCategoryBottomSheet(
                 categories = transactionCategories,
@@ -202,13 +202,11 @@ fun IncomeSection(
                     onEvent.invoke(AddNewUiEvent.SetIncomeCategory(category))
                     scope.launch {
                         categoryBottomSheetState.hide()
-                        showCategoryBottomSheet = false
                     }
                 },
                 onCloseCategoryClicked = {
                     scope.launch {
                         categoryBottomSheetState.hide()
-                        showCategoryBottomSheet = false
                     }
                 }
             )
@@ -218,10 +216,10 @@ fun IncomeSection(
     if (showDateBottomSheet) {
         BaseBottomSheet(
             state = dateBottomSheetState,
-            onDismissRequest = { showDateBottomSheet = false }
+            onDismissRequest = { }
         ) {
             DialogDatePickerContent(
-                currentDate = uiState.dateTime,
+                currentDate = uiState.dateTime.formatToString("HH:mm z"),
                 datePickerState = datePickerState,
                 onSavedDate = {
                     val chosenCal = Calendar.getInstance().apply {
@@ -237,14 +235,12 @@ fun IncomeSection(
                     onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 },
                 onHourClicked = { showTimePickerDialog = true },
                 onCloseDate = {
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 }
             )
@@ -254,7 +250,7 @@ fun IncomeSection(
     if (showAccountBottomSheet) {
         BaseBottomSheet(
             state = accountBottomSheetState,
-            onDismissRequest = { showAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AccountBottomSheet(
                 isLoading = uiState.loadingAccount,
@@ -264,20 +260,17 @@ fun IncomeSection(
                     onEvent(AddNewUiEvent.SetAccount(account))
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 },
                 onAddAccountClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                         showAddAccountBottomSheet = true
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 }
             )
@@ -287,21 +280,18 @@ fun IncomeSection(
     if (showAddAccountBottomSheet) {
         BaseBottomSheet(
             state = addAccountBottomSheetState,
-            onDismissRequest = { showAddAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AddAccountBottomSheet(
                 onAccountSaved = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
-                        showAccountBottomSheet = true
                         onEvent.invoke(AddNewUiEvent.UpdateAccount)
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
                     }
                 }
             )
@@ -310,10 +300,10 @@ fun IncomeSection(
 
     if (showTimePickerDialog) {
         AlertDialog(
-            onDismissRequest = { showTimePickerDialog = false },
+            onDismissRequest = { },
             text = { TimePicker(state = timePickerState) },
             dismissButton = {
-                TextButton(onClick = { showTimePickerDialog = false }) {
+                TextButton(onClick = { }) {
                     Text(text = stringResource(R.string.label_cancel))
                 }
             },
@@ -327,7 +317,6 @@ fun IncomeSection(
                         }
 
                         onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
-                        showTimePickerDialog = false
                     }
                 ) {
                     Text(text = stringResource(R.string.label_ok))

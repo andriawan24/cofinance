@@ -199,10 +199,10 @@ fun TransferSection(
     if (showDateBottomSheet) {
         BaseBottomSheet(
             state = dateBottomSheetState,
-            onDismissRequest = { showDateBottomSheet = false }
+            onDismissRequest = { }
         ) {
             DialogDatePickerContent(
-                currentDate = uiState.dateTime,
+                currentDate = uiState.dateTime.formatToString("HH:mm z"),
                 datePickerState = datePickerState,
                 onSavedDate = {
                     val chosenCal = Calendar.getInstance().apply {
@@ -218,14 +218,12 @@ fun TransferSection(
                     onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 },
                 onHourClicked = { showTimePickerDialog = true },
                 onCloseDate = {
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 }
             )
@@ -235,7 +233,7 @@ fun TransferSection(
     if (showAccountBottomSheet) {
         BaseBottomSheet(
             state = accountBottomSheetState,
-            onDismissRequest = { showAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AccountBottomSheet(
                 isLoading = uiState.isLoading,
@@ -256,20 +254,17 @@ fun TransferSection(
                     }
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 },
                 onAddAccountClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                         showAddAccountBottomSheet = true
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 }
             )
@@ -279,21 +274,18 @@ fun TransferSection(
     if (showAddAccountBottomSheet) {
         BaseBottomSheet(
             state = addAccountBottomSheetState,
-            onDismissRequest = { showAddAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AddAccountBottomSheet(
                 onAccountSaved = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
-                        showAccountBottomSheet = true
                         onEvent.invoke(AddNewUiEvent.UpdateAccount)
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
                     }
                 }
             )
@@ -302,10 +294,10 @@ fun TransferSection(
 
     if (showTimePickerDialog) {
         AlertDialog(
-            onDismissRequest = { showTimePickerDialog = false },
+            onDismissRequest = { },
             text = { TimePicker(state = timePickerState) },
             dismissButton = {
-                TextButton(onClick = { showTimePickerDialog = false }) {
+                TextButton(onClick = { }) {
                     Text(text = stringResource(R.string.label_cancel))
                 }
             },
@@ -319,7 +311,6 @@ fun TransferSection(
                         }
 
                         onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
-                        showTimePickerDialog = false
                     }
                 ) {
                     Text(text = stringResource(R.string.label_ok))

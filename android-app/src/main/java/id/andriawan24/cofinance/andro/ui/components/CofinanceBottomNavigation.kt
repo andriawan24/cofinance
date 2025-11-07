@@ -33,7 +33,10 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun CofinanceBottomNavigation(appState: CofinanceAppState, onNavigateToAdd: () -> Unit) {
+fun CofinanceBottomNavigation(
+    appState: CofinanceAppState,
+    onNavigateToAdd: () -> Unit
+) {
     Box(
         modifier = Modifier
             .dropShadow(

@@ -1,6 +1,7 @@
 package id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels
 
 import android.net.Uri
+import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.None
@@ -27,23 +28,24 @@ import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import java.util.Date
 
+@Stable
 data class AddNewUiState(
-    var amount: String = emptyString(),
-    var fee: String = emptyString(),
-    var includeFee: Boolean = false,
-    var imageUri: Uri? = null,
-    var account: Account? = null,
-    var receiverAccount: Account? = null,
-    var transactionType: TransactionType = TransactionType.EXPENSE,
-    var expenseCategory: TransactionCategory? = null,
-    var incomeCategory: TransactionCategory? = null,
-    var dateTime: Date = Date(),
-    var notes: String = emptyString(),
-    var isValid: Boolean = false,
-    var accounts: List<Account> = emptyList(),
-    var loadingAccount: Boolean = false,
-    var isLoading: Boolean = false,
-    var transactionId: String? = null
+    val amount: String = emptyString(),
+    val fee: String = emptyString(),
+    val includeFee: Boolean = false,
+    val imageUri: Uri? = null,
+    val account: Account? = null,
+    val receiverAccount: Account? = null,
+    val transactionType: TransactionType = TransactionType.EXPENSE,
+    val expenseCategory: TransactionCategory? = null,
+    val incomeCategory: TransactionCategory? = null,
+    val dateTime: Date = Date(),
+    val notes: String = emptyString(),
+    val isValid: Boolean = false,
+    val accounts: List<Account> = emptyList(),
+    val loadingAccount: Boolean = false,
+    val isLoading: Boolean = false,
+    val transactionId: String? = null
 )
 
 sealed class AddNewUiEvent {

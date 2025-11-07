@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -167,8 +168,10 @@ fun ProfileContent(
                 VerticalSpacing(Dimensions.SIZE_12)
 
                 SecondaryButton(
-                    horizontalPadding = Dimensions.SIZE_16,
-                    verticalPadding = Dimensions.SIZE_8,
+                    contentPadding = PaddingValues(
+                        vertical = Dimensions.SIZE_8,
+                        horizontal = Dimensions.SIZE_16
+                    ),
                     onClick = {}
                 ) {
                     Row(
@@ -194,8 +197,10 @@ fun ProfileContent(
 
         SecondaryButton(
             modifier = Modifier.padding(Dimensions.SIZE_16),
-            horizontalPadding = Dimensions.SIZE_16,
-            verticalPadding = Dimensions.SIZE_16,
+            contentPadding = PaddingValues(
+                vertical = Dimensions.SIZE_16,
+                horizontal = Dimensions.SIZE_16
+            ),
             containerColor = MaterialTheme.colorScheme.onPrimary,
             contentColor = MaterialTheme.colorScheme.onBackground,
             shape = MaterialTheme.shapes.large,

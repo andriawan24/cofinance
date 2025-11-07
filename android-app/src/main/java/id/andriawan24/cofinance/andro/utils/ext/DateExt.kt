@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.utils.ext
 
+import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import io.github.aakira.napier.Napier
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -26,7 +27,7 @@ fun String.toDate(): Date {
 
 fun Date.formatToString(
     format: String = "dd MMM yyyy, HH:mm z",
-    locale: Locale = Locale.getDefault()
+    locale: Locale = LocaleHelper.indonesian
 ): String {
     return try {
         val formatter = SimpleDateFormat(format, locale)

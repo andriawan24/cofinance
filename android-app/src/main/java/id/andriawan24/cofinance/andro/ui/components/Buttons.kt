@@ -49,20 +49,19 @@ fun PrimaryButton(
 fun SecondaryButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    horizontalPadding: Dp = Dimensions.SIZE_24,
-    verticalPadding: Dp = Dimensions.SIZE_16,
     shape: Shape = ButtonDefaults.shape,
     containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
     contentColor: Color = MaterialTheme.colorScheme.primary,
+    contentPadding: PaddingValues = PaddingValues(
+        horizontal = Dimensions.SIZE_24,
+        vertical = Dimensions.SIZE_16
+    ),
     content: @Composable () -> Unit
 ) {
     Button(
         modifier = modifier,
         shape = shape,
-        contentPadding = PaddingValues(
-            vertical = verticalPadding,
-            horizontal = horizontalPadding
-        ),
+        contentPadding = contentPadding,
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = containerColor,
             contentColor = contentColor

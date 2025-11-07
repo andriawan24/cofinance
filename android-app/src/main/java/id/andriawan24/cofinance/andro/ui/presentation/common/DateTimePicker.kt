@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,7 +41,7 @@ import java.util.Date
 @Composable
 fun DialogDatePickerContent(
     modifier: Modifier = Modifier,
-    currentDate: Date,
+    currentDate: String,
     datePickerState: DatePickerState,
     onCloseDate: () -> Unit,
     onHourClicked: () -> Unit,
@@ -109,12 +110,14 @@ fun DialogDatePickerContent(
 
             SecondaryButton(
                 shape = MaterialTheme.shapes.medium,
-                verticalPadding = Dimensions.SIZE_6,
-                horizontalPadding = Dimensions.SIZE_12,
+                contentPadding = PaddingValues(
+                    vertical = Dimensions.SIZE_6,
+                    horizontal = Dimensions.SIZE_12
+                ),
                 onClick = onHourClicked
             ) {
                 Text(
-                    text = currentDate.formatToString("HH:mm z", locale = LocaleHelper.indonesian),
+                    text = currentDate,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Medium
                     )
@@ -128,7 +131,7 @@ fun DialogDatePickerContent(
                 .padding(horizontal = Dimensions.SIZE_16)
                 .padding(bottom = Dimensions.SIZE_24),
             onClick = {
-                onSavedDate.invoke(datePickerState.selectedDateMillis ?: currentDate.time)
+                onSavedDate.invoke(datePickerState.selectedDateMillis ?: Date().time)
             }
         ) {
             Text(
@@ -145,7 +148,7 @@ fun DialogDatePickerContent(
 private fun DatePickerPreview() {
     CofinanceTheme {
         DialogDatePickerContent(
-            currentDate = Date(),
+            currentDate = Date().formatToString("HH:mm z", locale = LocaleHelper.indonesian),
             onCloseDate = { },
             onSavedDate = { },
             onHourClicked = { },

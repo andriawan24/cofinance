@@ -3,6 +3,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,8 +59,10 @@ fun EmptyActivity(modifier: Modifier = Modifier, onNavigateToAdd: () -> Unit) {
 
         SecondaryButton(
             modifier = Modifier,
-            horizontalPadding = Dimensions.SIZE_46,
-            verticalPadding = Dimensions.SIZE_12,
+            contentPadding = PaddingValues(
+                vertical = Dimensions.SIZE_12,
+                horizontal = Dimensions.SIZE_46
+            ),
             onClick = onNavigateToAdd
         ) {
             Text(

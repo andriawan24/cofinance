@@ -86,8 +86,8 @@ fun ExpenseSection(
         }
 
         timePickerState.apply {
-            minute = calendar.get(Calendar.MINUTE)
-            hour = calendar.get(Calendar.HOUR_OF_DAY)
+            minute = calendar[Calendar.MINUTE]
+            hour = calendar[Calendar.HOUR_OF_DAY]
         }
     }
 
@@ -196,7 +196,7 @@ fun ExpenseSection(
     if (showCategoryBottomSheet) {
         BaseBottomSheet(
             state = categoryBottomSheetState,
-            onDismissRequest = { showCategoryBottomSheet = false }
+            onDismissRequest = { }
         ) {
             TransactionCategoryBottomSheet(
                 categories = transactionCategories,
@@ -205,13 +205,11 @@ fun ExpenseSection(
                     onEvent.invoke(AddNewUiEvent.SetExpenseCategory(category))
                     scope.launch {
                         categoryBottomSheetState.hide()
-                        showCategoryBottomSheet = false
                     }
                 },
                 onCloseCategoryClicked = {
                     scope.launch {
                         categoryBottomSheetState.hide()
-                        showCategoryBottomSheet = false
                     }
                 }
             )
@@ -221,10 +219,10 @@ fun ExpenseSection(
     if (showDateBottomSheet) {
         BaseBottomSheet(
             state = dateBottomSheetState,
-            onDismissRequest = { showDateBottomSheet = false }
+            onDismissRequest = { }
         ) {
             DialogDatePickerContent(
-                currentDate = uiState.dateTime,
+                currentDate = uiState.dateTime.formatToString("HH:mm z"),
                 datePickerState = datePickerState,
                 onSavedDate = {
                     val chosenCal = Calendar.getInstance().apply {
@@ -240,14 +238,12 @@ fun ExpenseSection(
                     onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 },
                 onHourClicked = { showTimePickerDialog = true },
                 onCloseDate = {
                     scope.launch {
                         dateBottomSheetState.hide()
-                        showDateBottomSheet = false
                     }
                 }
             )
@@ -257,7 +253,7 @@ fun ExpenseSection(
     if (showAccountBottomSheet) {
         BaseBottomSheet(
             state = accountBottomSheetState,
-            onDismissRequest = { showAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AccountBottomSheet(
                 isLoading = uiState.isLoading,
@@ -267,20 +263,17 @@ fun ExpenseSection(
                     onEvent(AddNewUiEvent.SetAccount(account))
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 },
                 onAddAccountClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                         showAddAccountBottomSheet = true
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         accountBottomSheetState.hide()
-                        showAccountBottomSheet = false
                     }
                 }
             )
@@ -290,21 +283,18 @@ fun ExpenseSection(
     if (showAddAccountBottomSheet) {
         BaseBottomSheet(
             state = addAccountBottomSheetState,
-            onDismissRequest = { showAddAccountBottomSheet = false }
+            onDismissRequest = { }
         ) {
             AddAccountBottomSheet(
                 onAccountSaved = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
-                        showAccountBottomSheet = true
                         onEvent.invoke(AddNewUiEvent.UpdateAccount)
                     }
                 },
                 onCloseClicked = {
                     scope.launch {
                         addAccountBottomSheetState.hide()
-                        showAddAccountBottomSheet = false
                     }
                 },
             )
@@ -313,10 +303,10 @@ fun ExpenseSection(
 
     if (showTimePickerDialog) {
         AlertDialog(
-            onDismissRequest = { showTimePickerDialog = false },
+            onDismissRequest = { },
             text = { TimePicker(state = timePickerState) },
             dismissButton = {
-                TextButton(onClick = { showTimePickerDialog = false }) {
+                TextButton(onClick = { }) {
                     Text(text = stringResource(R.string.label_cancel))
                 }
             },
@@ -330,7 +320,6 @@ fun ExpenseSection(
                         }
 
                         onEvent.invoke(AddNewUiEvent.SetDateTime(calendar.time))
-                        showTimePickerDialog = false
                     }
                 ) {
                     Text(text = stringResource(R.string.label_ok))

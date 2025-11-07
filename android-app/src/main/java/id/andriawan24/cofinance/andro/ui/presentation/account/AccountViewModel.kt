@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.presentation.account
 
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+@Stable
 data class UiState(
     val accounts: List<AccountByGroup> = listOf(),
     val isLoading: Boolean = false,
@@ -20,6 +22,7 @@ data class UiState(
     val balance: Long = 0L
 )
 
+@Stable
 class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
