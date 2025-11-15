@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.37.3"
-agp = "8.13.0"
+agp = "8.13.1"
 buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.3.0"
 coil-network-okhttp = "3.3.0"
