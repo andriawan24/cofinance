@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.utils.None
 import id.andriawan24.cofinance.andro.utils.emptyString
+import id.andriawan24.cofinance.andro.utils.enums.AccountTransferType
 import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
 import id.andriawan24.cofinance.andro.utils.ext.FORMAT_ISO_8601
 import id.andriawan24.cofinance.andro.utils.ext.formatToString
@@ -17,7 +18,6 @@ import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.utils.enums.TransactionType
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -34,7 +34,8 @@ data class AddNewUiState(
     val fee: String = emptyString(),
     val includeFee: Boolean = false,
     val imageUri: Uri? = null,
-    val account: Account? = null,
+    val accountChooserType: AccountTransferType = AccountTransferType.SENDER,
+    val senderAccount: Account? = null,
     val receiverAccount: Account? = null,
     val transactionType: TransactionType = TransactionType.EXPENSE,
     val expenseCategory: TransactionCategory? = null,
@@ -48,6 +49,23 @@ data class AddNewUiState(
     val transactionId: String? = null
 )
 
+@Stable
+data class AddNewDialogState(
+    val showCategoryBottomSheet: Boolean = false,
+    val showDateBottomSheet: Boolean = false,
+    var showAccountBottomSheet: Boolean = false,
+    var showAddAccountBottomSheet: Boolean = false,
+    var showTimePickerDialog: Boolean = false,
+)
+
+sealed class AddNewDialogEvent {
+    data class ToggleCategoryDialog(val isShow: Boolean) : AddNewDialogEvent()
+    data class ToggleDatePickerDialog(val isShow: Boolean) : AddNewDialogEvent()
+    data class ToggleTimePickerDialog(val isShow: Boolean) : AddNewDialogEvent()
+    data class ToggleAccountDialog(val isShow: Boolean) : AddNewDialogEvent()
+    data class ToggleAddAccountDialog(val isShow: Boolean) : AddNewDialogEvent()
+}
+
 sealed class AddNewUiEvent {
     data object OnBackPressed : AddNewUiEvent()
     data object OnPictureClicked : AddNewUiEvent()
@@ -56,13 +74,13 @@ sealed class AddNewUiEvent {
     data object SaveTransaction : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
-    data class SetExpenseCategory(val category: TransactionCategory) : AddNewUiEvent()
-    data class SetIncomeCategory(val category: TransactionCategory) : AddNewUiEvent()
+    data class SetCategory(val category: TransactionCategory) : AddNewUiEvent()
     data class SetAccount(val account: Account) : AddNewUiEvent()
     data class SetReceiverAccount(val account: Account) : AddNewUiEvent()
     data class SetDateTime(val dateTime: Date) : AddNewUiEvent()
     data class SetFee(val fee: String) : AddNewUiEvent()
     data class SetNote(val note: String) : AddNewUiEvent()
+    data class SetAccountChooserType(val accountTransferType: AccountTransferType) : AddNewUiEvent()
 }
 
 class AddNewViewModel(
@@ -72,6 +90,9 @@ class AddNewViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val _dialogState = MutableStateFlow(AddNewDialogState())
+    val dialogState = _dialogState.asStateFlow()
 
     private val _onSuccessSaved = Channel<None>(Channel.BUFFERED)
     val onSuccessSaved = _onSuccessSaved.receiveAsFlow()
@@ -85,7 +106,6 @@ class AddNewViewModel(
 
     private fun getAccounts() {
         _uiState.value = uiState.value.copy(loadingAccount = true)
-
         viewModelScope.launch {
             getAccountsUseCase.execute().collectLatest {
                 if (it.isSuccess) {
@@ -124,6 +144,30 @@ class AddNewViewModel(
         }
     }
 
+    fun onDialogEvent(dialogEvent: AddNewDialogEvent) {
+        when (dialogEvent) {
+            is AddNewDialogEvent.ToggleCategoryDialog -> {
+                _dialogState.update { it.copy(showCategoryBottomSheet = dialogEvent.isShow) }
+            }
+
+            is AddNewDialogEvent.ToggleDatePickerDialog -> {
+                _dialogState.update { it.copy(showDateBottomSheet = dialogEvent.isShow) }
+            }
+
+            is AddNewDialogEvent.ToggleAccountDialog -> {
+                _dialogState.update { it.copy(showAccountBottomSheet = dialogEvent.isShow) }
+            }
+
+            is AddNewDialogEvent.ToggleAddAccountDialog -> {
+                _dialogState.update { it.copy(showAddAccountBottomSheet = dialogEvent.isShow) }
+            }
+
+            is AddNewDialogEvent.ToggleTimePickerDialog -> {
+                _dialogState.update { it.copy(showTimePickerDialog = dialogEvent.isShow) }
+            }
+        }
+    }
+
     fun onEvent(event: AddNewUiEvent) {
         when (event) {
             is AddNewUiEvent.SetIncludeFee -> _uiState.update {
@@ -143,18 +187,19 @@ class AddNewViewModel(
                 validateInputs()
             }
 
-            is AddNewUiEvent.SetExpenseCategory -> {
-                _uiState.update { it.copy(expenseCategory = event.category) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetIncomeCategory -> {
-                _uiState.update { it.copy(incomeCategory = event.category) }
+            is AddNewUiEvent.SetCategory -> {
+                _uiState.update {
+                    if (it.transactionType == TransactionType.INCOME) {
+                        it.copy(incomeCategory = event.category)
+                    } else {
+                        it.copy(expenseCategory = event.category)
+                    }
+                }
                 validateInputs()
             }
 
             is AddNewUiEvent.SetAccount -> {
-                _uiState.update { it.copy(account = event.account) }
+                _uiState.update { it.copy(senderAccount = event.account) }
                 validateInputs()
             }
 
@@ -168,10 +213,13 @@ class AddNewViewModel(
                 validateInputs()
             }
 
-            is AddNewUiEvent.SetNote -> _uiState.update { it.copy(notes = event.note) }
+            is AddNewUiEvent.SetNote -> _uiState.update {
+                it.copy(notes = event.note)
+            }
+
             is AddNewUiEvent.UpdateAccount -> getAccounts()
-            is AddNewUiEvent.SetTransactionType -> {
-                _uiState.update { it.copy(transactionType = event.type) }
+            is AddNewUiEvent.SetTransactionType -> _uiState.update {
+                it.copy(transactionType = event.type)
             }
 
             is AddNewUiEvent.SaveTransaction -> viewModelScope.launch {
@@ -189,7 +237,7 @@ class AddNewViewModel(
                     date = uiState.value.dateTime.formatToString(FORMAT_ISO_8601),
                     fee = uiState.value.fee.toLongOrDefault(0),
                     notes = uiState.value.notes,
-                    accountsId = uiState.value.account?.id.orEmpty(),
+                    accountsId = uiState.value.senderAccount?.id,
                     receiverAccountsId = uiState.value.receiverAccount?.id,
                     type = uiState.value.transactionType,
                     isDraft = false
@@ -202,12 +250,14 @@ class AddNewViewModel(
                     } else {
                         _uiState.value = uiState.value.copy(isLoading = false)
                         _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                        Napier.e(it.exceptionOrNull()?.message.orEmpty())
                     }
                 }
             }
 
-            // Handled on component
+            is AddNewUiEvent.SetAccountChooserType -> _uiState.update {
+                it.copy(accountChooserType = event.accountTransferType)
+            }
+
             is AddNewUiEvent.OnBackPressed,
             is AddNewUiEvent.OnPictureClicked -> Unit
         }
@@ -215,17 +265,15 @@ class AddNewViewModel(
 
     private fun validateInputs() {
         _uiState.update { currentState ->
-            val isCategoryValid = if (currentState.transactionType == TransactionType.EXPENSE) {
-                currentState.expenseCategory != null
-            } else if (currentState.transactionType == TransactionType.INCOME) {
-                currentState.incomeCategory != null
-            } else {
-                true
+            val isCategoryValid = when (currentState.transactionType) {
+                TransactionType.EXPENSE -> currentState.expenseCategory != null
+                TransactionType.INCOME -> currentState.incomeCategory != null
+                else -> true
             }
 
             val isValid = currentState.amount.isNotBlank() &&
-                    isCategoryValid &&
-                    currentState.account != null
+                    isCategoryValid && currentState.senderAccount?.id.orEmpty().isNotBlank()
+
             currentState.copy(isValid = isValid)
         }
     }

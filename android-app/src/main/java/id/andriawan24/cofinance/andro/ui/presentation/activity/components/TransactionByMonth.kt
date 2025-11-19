@@ -19,7 +19,10 @@ import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun TransactionByMonth(modifier: Modifier = Modifier, item: TransactionByDate) {
+fun TransactionByMonth(
+    modifier: Modifier = Modifier,
+    item: TransactionByDate
+) {
     Column(
         modifier = modifier
             .dropShadow(

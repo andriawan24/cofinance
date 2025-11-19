@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +23,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,49 +42,31 @@ import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
+import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewUiState
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.domain.model.response.Account
 
+@Immutable
+data class AccountGroup(val name: String, val accounts: List<Account>)
+
 @Composable
-fun AccountBottomSheet(
-    isLoading: Boolean,
-    accounts: List<Account>,
-    selectedAccount: Account?,
+fun AccountBottomSheetContent(
+    uiState: AddNewUiState,
     onAccountSaved: (Account) -> Unit,
     onAddAccountClicked: () -> Unit,
     onCloseClicked: () -> Unit
 ) {
     var shownDropdown by remember { mutableIntStateOf(-1) }
-    var currentSelectedAccount by remember { mutableStateOf(selectedAccount) }
-    val accountByGroups = remember { accounts.groupBy { it.group }.toList() }
+    var currentSelectedAccount by remember(uiState.senderAccount) {
+        mutableStateOf(uiState.senderAccount)
+    }
+    val accountByGroups = remember(uiState.accounts) {
+        uiState.accounts.groupBy { it.group }.toList()
+    }
 
     Column {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Dimensions.SIZE_16)
-        ) {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                text = stringResource(R.string.label_account),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.labelMedium.copy(
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            )
-
-            Image(
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .clip(CircleShape)
-                    .clickable { onCloseClicked() },
-                painter = painterResource(R.drawable.ic_close),
-                contentDescription = null
-            )
-        }
+        AccountBottomSheetHeader(onCloseClicked = onCloseClicked)
 
         LazyColumn(
             modifier = Modifier
@@ -90,96 +74,66 @@ fun AccountBottomSheet(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-
-
-            itemsIndexed(accountByGroups) { index, data ->
-                val animatedRotation by animateFloatAsState(
-                    targetValue = if (shownDropdown == index) 180f else 0f,
-                    label = "animate dropdown icon"
-                )
-
-                Column {
-                    Row(
+            if (uiState.loadingAccount) {
+                item {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { shownDropdown = if (shownDropdown == index) -1 else index }
-                            .padding(all = Dimensions.SIZE_16),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+                            .padding(vertical = Dimensions.SIZE_48),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = data.first.displayName,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontWeight = FontWeight.Medium,
-                                color = MaterialTheme.colorScheme.onBackground
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+                        ) {
+                            CircularProgressIndicator()
+                            Text(
+                                text = stringResource(R.string.label_loading_accounts),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                             )
-                        )
-
-                        Icon(
-                            modifier = Modifier.rotate(animatedRotation),
-                            painter = painterResource(R.drawable.ic_dropdown),
-                            contentDescription = null,
-                            tint = Color.Unspecified
-                        )
-                    }
-
-                    AnimatedVisibility(visible = index == shownDropdown) {
-                        Column {
-                            data.second.forEach { account ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(
-                                            start = Dimensions.SIZE_32,
-                                            end = Dimensions.SIZE_20
-                                        )
-                                        .padding(vertical = Dimensions.SIZE_14),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
-                                ) {
-                                    Text(
-                                        modifier = Modifier.weight(1f),
-                                        text = account.name,
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onBackground
-                                        )
-                                    )
-
-                                    RadioButton(
-                                        selected = currentSelectedAccount == account,
-                                        colors = RadioButtonDefaults.colors(
-                                            unselectedColor = MaterialTheme.colorScheme.primary
-                                        ),
-                                        onClick = {
-                                            currentSelectedAccount = account
-                                        }
-                                    )
-                                }
-                            }
                         }
                     }
                 }
-
-                if (index != accounts.groupBy { it.group }.toList().lastIndex) {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-                        thickness = Dimensions.SIZE_1,
-                        color = MaterialTheme.colorScheme.surfaceContainerLow
-                    )
-                }
             }
 
-            item {
-                SecondaryButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = Dimensions.SIZE_24)
-                        .padding(horizontal = Dimensions.SIZE_24),
-                    onClick = onAddAccountClicked
-                ) {
-                    Text("Add new account")
+            if (!uiState.loadingAccount) {
+                itemsIndexed(accountByGroups) { index, (group, accounts) ->
+                    AccountGroupItem(
+                        accountGroup = AccountGroup(
+                            name = group.displayName,
+                            accounts = accounts
+                        ),
+                        isExpanded = index == shownDropdown,
+                        selectedAccount = currentSelectedAccount,
+                        onToggleExpanded = {
+                            shownDropdown = if (shownDropdown == index) -1 else index
+                        },
+                        onAccountSelected = { account ->
+                            currentSelectedAccount = account
+                        }
+                    )
+
+                    if (index != accountByGroups.lastIndex) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                            thickness = Dimensions.SIZE_1,
+                            color = MaterialTheme.colorScheme.surfaceContainerLow
+                        )
+                    }
+                }
+
+                item {
+                    SecondaryButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = Dimensions.SIZE_24)
+                            .padding(horizontal = Dimensions.SIZE_24),
+                        onClick = onAddAccountClicked
+                    ) {
+                        Text(text = stringResource(R.string.action_add_new_account))
+                    }
                 }
             }
         }
@@ -202,15 +156,134 @@ fun AccountBottomSheet(
     }
 }
 
+// Extracted components
+@Composable
+private fun AccountBottomSheetHeader(
+    onCloseClicked: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimensions.SIZE_16)
+    ) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center),
+            text = stringResource(R.string.label_account),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
+
+        Image(
+            modifier = Modifier
+                .align(Alignment.CenterEnd)
+                .clip(CircleShape)
+                .clickable { onCloseClicked() },
+            painter = painterResource(R.drawable.ic_close),
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+private fun AccountItem(
+    account: Account,
+    isSelected: Boolean,
+    onAccountSelected: (Account) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(
+                start = Dimensions.SIZE_32,
+                end = Dimensions.SIZE_20
+            )
+            .padding(vertical = Dimensions.SIZE_14),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+    ) {
+        Text(
+            modifier = Modifier.weight(1f),
+            text = account.name,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
+
+        RadioButton(
+            selected = isSelected,
+            colors = RadioButtonDefaults.colors(
+                unselectedColor = MaterialTheme.colorScheme.primary
+            ),
+            onClick = { onAccountSelected(account) }
+        )
+    }
+}
+
+@Composable
+private fun AccountGroupItem(
+    accountGroup: AccountGroup,
+    isExpanded: Boolean,
+    selectedAccount: Account?,
+    onToggleExpanded: () -> Unit,
+    onAccountSelected: (Account) -> Unit
+) {
+    val animatedRotation by animateFloatAsState(
+        targetValue = if (isExpanded) 180f else 0f,
+        label = "animate dropdown icon"
+    )
+
+    Column {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onToggleExpanded() }
+                .padding(all = Dimensions.SIZE_16),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = accountGroup.name,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            )
+
+            Icon(
+                modifier = Modifier.rotate(animatedRotation),
+                painter = painterResource(R.drawable.ic_dropdown),
+                contentDescription = null,
+                tint = Color.Unspecified
+            )
+        }
+
+        AnimatedVisibility(visible = isExpanded) {
+            Column {
+                accountGroup.accounts.forEach { account ->
+                    AccountItem(
+                        account = account,
+                        isSelected = selectedAccount == account,
+                        onAccountSelected = onAccountSelected
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
-private fun AccountBottomSheetPreview() {
+private fun AccountBottomSheetContentPreview() {
     CofinanceTheme {
         Surface {
-            AccountBottomSheet(
-                isLoading = false,
-                accounts = emptyList(),
-                selectedAccount = null,
+            AccountBottomSheetContent(
+                uiState = AddNewUiState(),
                 onAccountSaved = { },
                 onCloseClicked = { },
                 onAddAccountClicked = {}

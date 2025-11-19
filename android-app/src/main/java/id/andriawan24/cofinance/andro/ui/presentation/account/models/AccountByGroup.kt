@@ -8,6 +8,6 @@ data class AccountByGroup(
     val groupLabel: String,
     val totalAmount: Long,
     val backgroundColor: Color,
-    @DrawableRes val imageRes: Int,
+    @param:DrawableRes val imageRes: Int,
     val accounts: List<Account>
 )

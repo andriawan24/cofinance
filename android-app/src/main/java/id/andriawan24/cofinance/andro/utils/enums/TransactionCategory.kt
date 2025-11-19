@@ -9,8 +9,8 @@ import id.andriawan24.cofinance.andro.R
 enum class TransactionCategory(
     val color: Color,
     val iconColor: Color,
-    @DrawableRes val iconRes: Int,
-    @StringRes val labelRes: Int
+    @field:DrawableRes val iconRes: Int,
+    @field:StringRes val labelRes: Int
 ) {
     FOOD(
         color = Color(0xFFF0F3FF),

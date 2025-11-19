@@ -18,6 +18,7 @@
     <string name="label_logout">Logout</string>
     <string name="label_activity">Activity</string>
     <string name="label_account">Account</string>
+    <string name="label_loading_accounts">Loading accounts…</string>
     <string name="label_stats">Stats</string>
     <string name="title_statistic">Statistic</string>
     <string name="label_income">Income</string>
@@ -45,6 +46,7 @@
     <string name="label_fetching_information">Fetching information…</string>
     <string name="label_name">Name</string>
     <string name="label_add_account">Add Account</string>
+    <string name="action_add_new_account">Add new account</string>
     <string name="label_account_category">Account Category</string>
     <string name="label_ok">OK</string>
     <string name="label_transfer">Transfer</string>

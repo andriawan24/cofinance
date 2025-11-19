@@ -1,8 +1,10 @@
 package id.andriawan24.cofinance.andro.ui.presentation.activity.models
 
+import androidx.compose.runtime.Stable
 import id.andriawan24.cofinance.andro.utils.emptyString
 import id.andriawan24.cofinance.domain.model.response.Transaction
 
+@Stable
 data class TransactionByDate(
     val dateLabel: String = emptyString(),
     val totalAmount: Long = 0L,

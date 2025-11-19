@@ -68,13 +68,11 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
     suspend fun increaseBalance(request: UpdateBalanceRequest): AccountResponse {
         val account = supabase.from(AccountResponse.TABLE_NAME)
             .select {
-                filter {
-                    AccountResponse::id eq request.accountsId
-                }
+                filter { AccountResponse::id eq request.accountsId }
             }
             .decodeSingleOrNull<AccountResponse>()
 
-        if (account == null) {
+        requireNotNull(account) {
             throw IllegalArgumentException("Account not found")
         }
 
@@ -99,7 +97,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
             }
             .decodeSingleOrNull<AccountResponse>()
 
-        if (account == null) {
+        requireNotNull(account) {
             throw IllegalArgumentException("Account not found")
         }
 
@@ -133,10 +131,12 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                 if (month != null && year != null) {
                     val startDate = LocalDateTime(
                         year = year,
-                        monthNumber = month,
-                        dayOfMonth = 1,
+                        month = month,
+                        day = 1,
                         hour = 0,
-                        minute = 0
+                        minute = 0,
+                        second = 0,
+                        nanosecond = 0
                     ).toInstant(TimeZone.currentSystemDefault())
 
                     val nextDate = startDate.plus(

@@ -6,7 +6,12 @@ import java.util.Locale
 
 object NumberHelper {
     fun formatRupiah(number: Long): String {
-        val currencyInstance = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+        val indonesianLocale = Locale.Builder()
+            .setLanguage("id")
+            .setRegion("ID")
+            .build()
+
+        val currencyInstance = NumberFormat.getCurrencyInstance(indonesianLocale)
         currencyInstance.roundingMode = RoundingMode.DOWN
         currencyInstance.maximumFractionDigits = 0
         return currencyInstance.format(number)
@@ -14,7 +19,12 @@ object NumberHelper {
 
     fun rupiahToNumber(value: String): Long {
         try {
-            val currencyInstance = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+            val indonesianLocale = Locale.Builder()
+                .setLanguage("id")
+                .setRegion("ID")
+                .build()
+
+            val currencyInstance = NumberFormat.getCurrencyInstance(indonesianLocale)
             currencyInstance.roundingMode = RoundingMode.DOWN
             currencyInstance.maximumFractionDigits = 0
             return currencyInstance.parse(value)?.toLong() ?: 0
@@ -24,14 +34,24 @@ object NumberHelper {
     }
 
     fun formatNumber(number: Long): String {
-        val numberFormat = NumberFormat.getNumberInstance(Locale("id", "ID"))
+        val indonesianLocale = Locale.Builder()
+            .setLanguage("id")
+            .setRegion("ID")
+            .build()
+
+        val numberFormat = NumberFormat.getNumberInstance(indonesianLocale)
         numberFormat.roundingMode = RoundingMode.DOWN
         numberFormat.maximumFractionDigits = 0
         return numberFormat.format(number)
     }
 
     fun parseNumber(number: String): Long {
-        val numberFormat = NumberFormat.getNumberInstance(Locale("id", "ID"))
+        val indonesianLocale = Locale.Builder()
+            .setLanguage("id")
+            .setRegion("ID")
+            .build()
+
+        val numberFormat = NumberFormat.getNumberInstance(indonesianLocale)
         numberFormat.roundingMode = RoundingMode.DOWN
         numberFormat.maximumFractionDigits = 0
         return numberFormat.parse(number)?.toLong() ?: 0

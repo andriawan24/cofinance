@@ -72,7 +72,7 @@ fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
             HorizontalSpacing(Dimensions.SIZE_8)
             Text(
                 text = stringResource(R.string.action_sign_in_google),
-                style = MaterialTheme.typography.labelMedium.copy(
+                style = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Bold
                 )
             )

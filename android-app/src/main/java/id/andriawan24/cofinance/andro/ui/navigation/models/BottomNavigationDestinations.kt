@@ -6,8 +6,8 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
 
 enum class BottomNavigationDestinations(
-    @DrawableRes val iconId: Int,
-    @StringRes val labelId: Int,
+    @param:DrawableRes val iconId: Int,
+    @param:StringRes val labelId: Int,
     val route: Destinations
 ) {
     ACTIVITY(

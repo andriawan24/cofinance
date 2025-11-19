@@ -69,7 +69,7 @@ fun ProfileScreen(
     )
 
     if (showConfirmationLogoutDialog) {
-        Dialog(onDismissRequest = { showConfirmationLogoutDialog = false }) {
+        Dialog(onDismissRequest = { }) {
             Column(
                 modifier = Modifier
                     .background(
@@ -86,7 +86,6 @@ fun ProfileScreen(
                             containerColor = MaterialTheme.colorScheme.error
                         ),
                         onClick = {
-                            showConfirmationLogoutDialog = false
                             profileViewModel.logout()
                         }
                     ) {
@@ -94,9 +93,7 @@ fun ProfileScreen(
                     }
 
                     Button(
-                        onClick = {
-                            showConfirmationLogoutDialog = false
-                        }
+                        onClick = {}
                     ) {
                         Text(stringResource(R.string.label_cancel))
                     }

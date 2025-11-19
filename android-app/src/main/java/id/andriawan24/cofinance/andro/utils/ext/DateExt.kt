@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.Month
 import java.time.format.TextStyle
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.time.ExperimentalTime
@@ -36,6 +37,27 @@ fun Date.formatToString(
         Napier.e("Failed to fetch date", e)
         "Failed to fetch date"
     }
+}
+
+fun Date.setTime(hour: Int, minute: Int): Date {
+    return Calendar.getInstance().apply {
+        time = this@setTime
+        set(Calendar.HOUR_OF_DAY, hour)
+        set(Calendar.MINUTE, minute)
+    }.time
+}
+
+fun Date.setDate(dateMillis: Long): Date {
+    val chosenCal = Calendar.getInstance().apply {
+        time = Date(dateMillis)
+    }
+
+    return Calendar.getInstance().apply {
+        time = this@setDate
+        set(Calendar.YEAR, chosenCal[Calendar.YEAR])
+        set(Calendar.MONTH, chosenCal[Calendar.MONTH])
+        set(Calendar.DAY_OF_MONTH, chosenCal[Calendar.DAY_OF_MONTH])
+    }.time
 }
 
 fun getCurrentYear(): Int = LocalDate.now().year
