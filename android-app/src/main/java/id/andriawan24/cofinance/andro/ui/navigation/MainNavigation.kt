@@ -18,7 +18,10 @@ import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
 
 @Composable
-fun MainNavigation(modifier: Modifier = Modifier, navController: NavHostController) {
+fun MainNavigation(
+    modifier: Modifier = Modifier,
+    navController: NavHostController
+) {
     NavHost(
         modifier = modifier,
         navController = navController,

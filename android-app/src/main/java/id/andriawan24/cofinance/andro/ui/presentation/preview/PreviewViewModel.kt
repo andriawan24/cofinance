@@ -2,6 +2,7 @@ package id.andriawan24.cofinance.andro.ui.presentation.preview
 
 import android.content.ContentResolver
 import android.net.Uri
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed class PreviewUiEvent {
@@ -22,10 +24,9 @@ sealed class PreviewUiEvent {
     data class ShowMessage(val message: String) : PreviewUiEvent()
 }
 
-data class PreviewUiState(
-    var showLoading: Boolean = false
-)
+data class PreviewUiState(var showLoading: Boolean = false)
 
+@Immutable
 class PreviewViewModel(
     private val scanReceiptUseCase: ScanReceiptUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase
@@ -39,7 +40,9 @@ class PreviewViewModel(
 
     fun scanReceipt(contentResolver: ContentResolver, imageUri: Uri) {
         viewModelScope.launch {
-            _previewUiState.value = previewUiState.value.copy(showLoading = true)
+            _previewUiState.update { state ->
+                state.copy(showLoading = true)
+            }
 
             contentResolver.openInputStream(imageUri)?.use { uploadedImage ->
                 val bytes = uploadedImage.buffered().readBytes()
@@ -48,6 +51,14 @@ class PreviewViewModel(
                     if (result.isSuccess) {
                         val receiptScan = result.getOrNull() ?: ReceiptScan()
 
+                        if (receiptScan.transactionDate.isBlank()) {
+                            _previewUiState.update {
+                                it.copy(showLoading = false)
+                            }
+                            _previewUiEvent.send(PreviewUiEvent.ShowMessage("Couldn't read the receipt image, please try again"))
+                            return@collectLatest
+                        }
+
                         val input = AddTransactionParam(
                             amount = receiptScan.totalPrice,
                             date = receiptScan.transactionDate,
@@ -55,23 +66,30 @@ class PreviewViewModel(
                             isDraft = true
                         )
 
-                        createTransactionUseCase.execute(input).collectLatest {
-                            if (it.isSuccess) {
-                                _previewUiState.value =
-                                    previewUiState.value.copy(showLoading = false)
-                                _previewUiEvent.send(PreviewUiEvent.NavigateToBalance(transactionId = it.getOrNull()?.id.orEmpty()))
+                        createTransactionUseCase.execute(input).collectLatest { result ->
+                            if (result.isSuccess) {
+                                _previewUiState.update { state ->
+                                    state.copy(showLoading = false)
+                                }
+
+                                _previewUiEvent.send(PreviewUiEvent.NavigateToBalance(transactionId = result.getOrNull()?.id.orEmpty()))
                             }
 
-                            if (it.isFailure) {
-                                _previewUiState.value =
-                                    previewUiState.value.copy(showLoading = false)
-                                Napier.e { "Failed to save transaction ${it.exceptionOrNull()?.message}" }
+                            if (result.isFailure) {
+                                _previewUiState.update { state ->
+                                    state.copy(showLoading = false)
+                                }
+
+                                Napier.e { "Failed to save transaction ${result.exceptionOrNull()?.message}" }
                             }
                         }
                     }
 
                     if (result.isFailure) {
-                        _previewUiState.value = previewUiState.value.copy(showLoading = false)
+                        _previewUiState.update { state ->
+                            state.copy(showLoading = false)
+                        }
+
                         _previewUiEvent.send(PreviewUiEvent.ShowMessage(result.exceptionOrNull()?.message.orEmpty()))
                     }
                 }

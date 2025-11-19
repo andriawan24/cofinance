@@ -1,7 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.presentation.camera
 
 import android.Manifest
-import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -38,10 +37,10 @@ fun CameraScreen(
     onNavigateToPreview: (Uri) -> Unit,
     onBackPressed: () -> Unit,
     cameraViewModel: CameraViewModel = koinViewModel(),
-    context: Context = LocalContext.current
 ) {
     val cameraPermission = rememberPermissionState(permission = Manifest.permission.CAMERA)
     val uiState by cameraViewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     val imagePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
