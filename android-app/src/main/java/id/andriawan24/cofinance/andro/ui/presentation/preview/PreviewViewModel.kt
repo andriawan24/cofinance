@@ -52,10 +52,10 @@ class PreviewViewModel(
                         val receiptScan = result.getOrNull() ?: ReceiptScan()
 
                         if (receiptScan.transactionDate.isBlank()) {
-                            _previewUiState.update {
-                                it.copy(showLoading = false)
-                            }
-                            _previewUiEvent.send(PreviewUiEvent.ShowMessage("Couldn't read the receipt image, please try again"))
+                            _previewUiState.update { it.copy(showLoading = false) }
+                            _previewUiEvent.send(
+                                PreviewUiEvent.ShowMessage("Couldn't read the receipt image, please try again")
+                            )
                             return@collectLatest
                         }
 
@@ -66,33 +66,35 @@ class PreviewViewModel(
                             isDraft = true
                         )
 
-                        createTransactionUseCase.execute(input).collectLatest { result ->
-                            if (result.isSuccess) {
-                                _previewUiState.update { state ->
-                                    state.copy(showLoading = false)
-                                }
-
-                                _previewUiEvent.send(PreviewUiEvent.NavigateToBalance(transactionId = result.getOrNull()?.id.orEmpty()))
-                            }
-
-                            if (result.isFailure) {
-                                _previewUiState.update { state ->
-                                    state.copy(showLoading = false)
-                                }
-
-                                Napier.e { "Failed to save transaction ${result.exceptionOrNull()?.message}" }
-                            }
-                        }
+                        handleCreateTransaction(input)
                     }
 
                     if (result.isFailure) {
-                        _previewUiState.update { state ->
-                            state.copy(showLoading = false)
-                        }
-
-                        _previewUiEvent.send(PreviewUiEvent.ShowMessage(result.exceptionOrNull()?.message.orEmpty()))
+                        _previewUiState.update { state -> state.copy(showLoading = false) }
+                        _previewUiEvent.send(
+                            PreviewUiEvent.ShowMessage(result.exceptionOrNull()?.message.orEmpty())
+                        )
                     }
                 }
+            }
+        }
+    }
+
+    private suspend fun handleCreateTransaction(input: AddTransactionParam) {
+        createTransactionUseCase.execute(input).collectLatest { result ->
+            val transaction = result.getOrNull()
+
+            if (result.isSuccess && transaction != null) {
+                _previewUiState.update { state -> state.copy(showLoading = false) }
+                _previewUiEvent.send(
+                    PreviewUiEvent.NavigateToBalance(transactionId = transaction.id)
+                )
+            } else {
+                Napier.e(result.exceptionOrNull()) { "Failed to create new transaction" }
+                _previewUiState.update { state -> state.copy(showLoading = false) }
+                _previewUiEvent.send(
+                    PreviewUiEvent.ShowMessage(result.exceptionOrNull()?.message.orEmpty())
+                )
             }
         }
     }
