@@ -16,6 +16,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.login.LoginScreen
 import id.andriawan24.cofinance.andro.ui.presentation.main.MainScreen
 import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewScreen
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashScreen
+import id.andriawan24.cofinance.andro.ui.presentation.profile.EditProfileScreen
 
 @Composable
 fun MainNavigation(
@@ -143,6 +144,19 @@ fun MainNavigation(
                         ?.savedStateHandle
                         ?.set("add_account_result", true)
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable<Destinations.EditProfile> {
+            EditProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onProfileUpdated = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("profile_updated", true)
                 }
             )
         }

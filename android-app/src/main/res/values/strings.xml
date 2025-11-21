@@ -14,6 +14,7 @@
     <string name="label_profile">Profile</string>
     <string name="title_total_balance_this_month">Total balance in this month</string>
     <string name="label_edit_profile">Edit Profile</string>
+    <string name="title_edit_profile">Edit Profile</string>
     <string name="title_profile">Profile</string>
     <string name="label_logout">Logout</string>
     <string name="label_activity">Activity</string>
@@ -30,6 +31,7 @@
     <string name="label_category">Category</string>
     <string name="label_notes">Notes</string>
     <string name="action_save">Save</string>
+    <string name="action_save_changes">Save Changes</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancel</string>
     <string name="title_camera_permission_denied">Camera Permission Denied</string>
@@ -45,6 +47,7 @@
     <string name="label_cancel">Cancel</string>
     <string name="label_fetching_information">Fetching information…</string>
     <string name="label_name">Name</string>
+    <string name="label_email">Email</string>
     <string name="label_add_account">Add Account</string>
     <string name="action_add_new_account">Add new account</string>
     <string name="label_account_category">Account Category</string>
@@ -74,4 +77,9 @@
     <string name="content_description_empty_state_image">Empty state image for activity</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
     <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="label_change_photo">Change Photo</string>
+    <string name="label_saving">Saving…</string>
+    <string name="error_name_required">Name cannot be empty</string>
+    <string name="error_generic">Something went wrong</string>
+    <string name="message_profile_updated">Profile updated successfully</string>
 </resources>
