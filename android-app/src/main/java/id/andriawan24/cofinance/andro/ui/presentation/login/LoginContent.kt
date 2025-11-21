@@ -31,7 +31,12 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
+fun LoginContent(
+    modifier: Modifier = Modifier,
+    onContinueClicked: () -> Unit,
+    showBiometricOption: Boolean = false,
+    onBiometricClicked: () -> Unit = {}
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -51,31 +56,57 @@ fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
             contentDescription = null
         )
         OnboardingSwiper(modifier = Modifier.weight(1f))
-        PrimaryButton(
+        Column(
             modifier = Modifier
-                .dropShadow(
-                    shape = ButtonDefaults.shape,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                    blur = Dimensions.SIZE_10,
-                    offsetY = Dimensions.SIZE_4
-                )
                 .fillMaxWidth()
                 .padding(horizontal = Dimensions.SIZE_16)
                 .padding(bottom = Dimensions.SIZE_24),
-            onClick = onContinueClicked
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                painter = painterResource(R.drawable.ic_google),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary
-            )
-            HorizontalSpacing(Dimensions.SIZE_8)
-            Text(
-                text = stringResource(R.string.action_sign_in_google),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Bold
+            PrimaryButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .dropShadow(
+                        shape = ButtonDefaults.shape,
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        blur = Dimensions.SIZE_10,
+                        offsetY = Dimensions.SIZE_4
+                    ),
+                onClick = onContinueClicked
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_google),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
-            )
+                HorizontalSpacing(Dimensions.SIZE_8)
+                Text(
+                    text = stringResource(R.string.action_sign_in_google),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
+
+            if (showBiometricOption) {
+                VerticalSpacing(Dimensions.SIZE_12)
+                SecondaryButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onBiometricClicked
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_fingerprint),
+                        contentDescription = null
+                    )
+                    HorizontalSpacing(Dimensions.SIZE_8)
+                    Text(
+                        text = stringResource(R.string.action_sign_in_biometric),
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                }
+            }
         }
     }
 }
@@ -101,9 +132,9 @@ private fun LoginScreenDarkPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginContent(
-                onContinueClicked = {}
-            )
+              LoginContent(
+                  onContinueClicked = {}
+              )
         }
     }
 }

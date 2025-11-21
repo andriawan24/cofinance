@@ -77,6 +77,10 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    // Biometrics & security
+    implementation(libs.biometric)
+    implementation(libs.security.crypto)
+
     // Logging
     implementation(libs.napier)
 
@@ -86,6 +90,9 @@ dependencies {
 
     // Splash Screen
     implementation(libs.splashscreen)
+
+    // Preferences
+    implementation(libs.datastore.preferences)
 
     // Dot indicator
     implementation(libs.dotsindicator)

@@ -1,6 +1,8 @@
 [versions]
 accompanistPermissions = "0.37.3"
 agp = "8.13.1"
+biometric = "1.1.0"
+datastorePreferences = "1.1.1"
 buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.3.0"
 coil-network-okhttp = "3.3.0"
@@ -23,14 +25,17 @@ napier = "2.7.1"
 dotsindicator = "5.1.0"
 camerax = "1.5.1"
 coreKtx = "1.17.0"
+securityCrypto = "1.1.0-alpha06"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
 coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-network-okhttp" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose" }
 credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
 credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
@@ -58,6 +63,7 @@ camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cam
 camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
