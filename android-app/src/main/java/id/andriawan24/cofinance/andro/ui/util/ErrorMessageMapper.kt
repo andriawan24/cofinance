@@ -1,21 +1,19 @@
 package id.andriawan24.cofinance.andro.ui.util
 
+import androidx.annotation.StringRes
+import id.andriawan24.cofinance.andro.R
 import java.io.IOException
 import retrofit2.HttpException
 
-private const val NETWORK_ERROR_MESSAGE = "Network error. Please check your connection."
-private const val SERVER_ERROR_MESSAGE = "Server error. Please try again later."
-private const val UNKNOWN_ERROR_MESSAGE = "Unknown error occurred."
-private const val GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again."
-
+@StringRes
 fun mapErrorMessage(
     exception: Throwable?,
-    fallbackMessage: String = GENERIC_ERROR_MESSAGE
-): String {
+    @StringRes fallbackResId: Int = R.string.error_generic
+): Int {
     return when (exception) {
-        is IOException -> NETWORK_ERROR_MESSAGE
-        is HttpException -> SERVER_ERROR_MESSAGE
-        null -> UNKNOWN_ERROR_MESSAGE
-        else -> fallbackMessage
+        is IOException -> R.string.error_network
+        is HttpException -> R.string.error_server
+        null -> R.string.error_unknown
+        else -> fallbackResId
     }
 }

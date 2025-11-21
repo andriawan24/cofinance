@@ -31,7 +31,8 @@ fun LoginScreen(
         when (it) {
             LoginEvent.NavigateHomePage -> onNavigateToHome()
             is LoginEvent.ShowMessage -> scope.launch {
-                snackState.showSnackbar(it.message)
+                val message = context.getString(it.messageResId)
+                snackState.showSnackbar(message)
             }
         }
     }

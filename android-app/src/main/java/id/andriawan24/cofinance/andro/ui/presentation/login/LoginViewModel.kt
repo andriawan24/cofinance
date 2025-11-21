@@ -1,7 +1,9 @@
 package id.andriawan24.cofinance.andro.ui.presentation.login
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.util.mapErrorMessage
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
@@ -12,7 +14,7 @@ import kotlinx.coroutines.launch
 
 sealed class LoginEvent {
     data object NavigateHomePage : LoginEvent()
-    data class ShowMessage(val message: String) : LoginEvent()
+    data class ShowMessage(@StringRes val messageResId: Int) : LoginEvent()
 }
 
 class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : ViewModel() {
@@ -25,18 +27,14 @@ class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : Vie
                 when {
                     it.isSuccess -> _loginEvent.send(LoginEvent.NavigateHomePage)
                     it.isFailure -> {
-                        val message = mapErrorMessage(
+                        val messageResId = mapErrorMessage(
                             exception = it.exceptionOrNull(),
-                            fallbackMessage = AUTHENTICATION_GENERIC_ERROR_MESSAGE
+                            fallbackResId = R.string.error_authentication_generic
                         )
-                        _loginEvent.send(LoginEvent.ShowMessage(message))
+                        _loginEvent.send(LoginEvent.ShowMessage(messageResId))
                     }
                 }
             }
         }
-    }
-
-    private companion object {
-        const val AUTHENTICATION_GENERIC_ERROR_MESSAGE = "Authentication failed. Please try again."
     }
 }

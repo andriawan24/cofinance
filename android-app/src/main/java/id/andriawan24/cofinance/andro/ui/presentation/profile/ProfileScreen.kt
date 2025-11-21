@@ -50,12 +50,13 @@ fun ProfileScreen(
     showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
+    val context = LocalContext.current
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
 
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
             is ProfileEvent.NavigateToLoginPage -> onSignedOut()
-            is ProfileEvent.ShowMessage -> showMessage(it.message)
+            is ProfileEvent.ShowMessage -> showMessage(context.getString(it.messageResId))
         }
     }
 

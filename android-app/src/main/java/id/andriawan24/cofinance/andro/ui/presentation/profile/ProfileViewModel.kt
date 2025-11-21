@@ -1,7 +1,9 @@
 package id.andriawan24.cofinance.andro.ui.presentation.profile
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.util.mapErrorMessage
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
@@ -12,7 +14,7 @@ import kotlinx.coroutines.launch
 
 sealed class ProfileEvent {
     data object NavigateToLoginPage : ProfileEvent()
-    data class ShowMessage(val message: String) : ProfileEvent()
+    data class ShowMessage(@StringRes val messageResId: Int) : ProfileEvent()
 }
 
 class ProfileViewModel(
@@ -31,18 +33,14 @@ class ProfileViewModel(
                 when {
                     it.isSuccess -> _profileEvent.send(ProfileEvent.NavigateToLoginPage)
                     it.isFailure -> {
-                        val message = mapErrorMessage(
+                        val messageResId = mapErrorMessage(
                             exception = it.exceptionOrNull(),
-                            fallbackMessage = LOGOUT_GENERIC_ERROR_MESSAGE
+                            fallbackResId = R.string.error_logout_generic
                         )
-                        _profileEvent.send(ProfileEvent.ShowMessage(message))
+                        _profileEvent.send(ProfileEvent.ShowMessage(messageResId))
                     }
                 }
             }
         }
-    }
-
-    private companion object {
-        const val LOGOUT_GENERIC_ERROR_MESSAGE = "Unable to logout right now. Please try again."
     }
 }

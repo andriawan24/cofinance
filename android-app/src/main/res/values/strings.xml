@@ -74,4 +74,10 @@
     <string name="content_description_empty_state_image">Empty state image for activity</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
     <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_server">Server error. Please try again later.</string>
+    <string name="error_unknown">Unknown error occurred.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+    <string name="error_authentication_generic">Authentication failed. Please try again.</string>
+    <string name="error_logout_generic">Unable to logout right now. Please try again.</string>
 </resources>
