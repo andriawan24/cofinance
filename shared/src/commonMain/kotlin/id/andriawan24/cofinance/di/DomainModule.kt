@@ -6,6 +6,7 @@ import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
+import id.andriawan24.cofinance.domain.usecase.authentication.UpdateProfileUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.ScanReceiptUseCase
@@ -18,6 +19,7 @@ val domainModule = module {
     singleOf(::FetchUserUseCase)
     singleOf(::GetUserUseCase)
     singleOf(::LogoutUseCase)
+    singleOf(::UpdateProfileUseCase)
 
     // MARK: Transactions
     singleOf(::ScanReceiptUseCase)

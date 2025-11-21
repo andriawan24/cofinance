@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import id.andriawan24.cofinance.andro.R
@@ -48,9 +50,13 @@ import org.koin.androidx.compose.koinViewModel
 fun ProfileScreen(
     onSignedOut: () -> Unit,
     showMessage: (String) -> Unit,
+    onEditProfile: () -> Unit,
+    shouldRefreshProfile: Boolean = false,
+    onProfileRefreshed: () -> Unit = {},
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
+    val user by profileViewModel.user.collectAsStateWithLifecycle()
 
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
@@ -59,10 +65,18 @@ fun ProfileScreen(
         }
     }
 
+    LaunchedEffect(shouldRefreshProfile) {
+        if (shouldRefreshProfile) {
+            profileViewModel.refreshUser()
+            onProfileRefreshed()
+        }
+    }
+
     ProfileContent(
-        name = profileViewModel.user.name,
-        imageUrl = profileViewModel.user.avatarUrl,
-        email = profileViewModel.user.email,
+        name = user.name,
+        imageUrl = user.avatarUrl,
+        email = user.email,
+        onEditProfile = onEditProfile,
         onSignedOut = {
             showConfirmationLogoutDialog = true
         }
@@ -109,6 +123,7 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
+    onEditProfile: () -> Unit,
     onSignedOut: () -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -169,7 +184,7 @@ fun ProfileContent(
                         vertical = Dimensions.SIZE_8,
                         horizontal = Dimensions.SIZE_16
                     ),
-                    onClick = {}
+                    onClick = onEditProfile
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -181,12 +196,12 @@ fun ProfileContent(
                             contentDescription = null
                         )
 
-                        Text(
-                            text = "Edit Profile",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
+                    Text(
+                        text = stringResource(R.string.label_edit_profile),
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            color = MaterialTheme.colorScheme.onSurface
                         )
+                    )
                     }
                 }
             }
@@ -250,9 +265,8 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
-                onSignedOut = {
-
-                }
+                onEditProfile = {},
+                onSignedOut = {}
             )
         }
     }

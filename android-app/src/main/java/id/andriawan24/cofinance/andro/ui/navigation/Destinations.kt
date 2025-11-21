@@ -40,5 +40,8 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object Profile : Destinations(Profile::class.java.canonicalName.orEmpty())
+
+    @Serializable
+    data object EditProfile : Destinations(EditProfile::class.java.canonicalName.orEmpty())
 }
 
