@@ -18,11 +18,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,9 +43,15 @@ import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
+import id.andriawan24.cofinance.andro.utils.BiometricAuthHelper
+import id.andriawan24.cofinance.andro.utils.BiometricPreferenceManager
 import id.andriawan24.cofinance.andro.utils.CollectAsEffect
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.andro.utils.SecureTokenStorage
 import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ProfileScreen(
@@ -51,6 +60,11 @@ fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val biometricEnabled by BiometricPreferenceManager
+        .biometricEnabledFlow(context)
+        .collectAsState(initial = false)
 
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
@@ -65,6 +79,26 @@ fun ProfileScreen(
         email = profileViewModel.user.email,
         onSignedOut = {
             showConfirmationLogoutDialog = true
+        },
+        biometricEnabled = biometricEnabled,
+        biometricStatus = BiometricAuthHelper.getStatus(context),
+        onBiometricToggle = { enabled ->
+            scope.launch {
+                val status = BiometricAuthHelper.getStatus(context)
+                if (enabled) {
+                    if (status == BiometricAuthHelper.BiometricStatus.Available) {
+                        BiometricPreferenceManager.setBiometricEnabled(context, true)
+                        showMessage(context.getString(R.string.message_biometric_setup_requires_google))
+                    } else {
+                        showMessage(BiometricAuthHelper.statusMessage(context, status))
+                    }
+                } else {
+                    BiometricPreferenceManager.setBiometricEnabled(context, false)
+                    withContext(Dispatchers.IO) {
+                        SecureTokenStorage.clearToken(context)
+                    }
+                }
+            }
         }
     )
 
@@ -109,7 +143,10 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
-    onSignedOut: () -> Unit
+    onSignedOut: () -> Unit,
+    biometricEnabled: Boolean,
+    biometricStatus: BiometricAuthHelper.BiometricStatus,
+    onBiometricToggle: (Boolean) -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         Title(
@@ -192,6 +229,19 @@ fun ProfileContent(
             }
         }
 
+        VerticalSpacing(Dimensions.SIZE_16)
+
+        BiometricSettingCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16),
+            enabled = biometricEnabled,
+            status = biometricStatus,
+            onToggle = onBiometricToggle
+        )
+
+        VerticalSpacing(Dimensions.SIZE_8)
+
         SecondaryButton(
             modifier = Modifier.padding(Dimensions.SIZE_16),
             contentPadding = PaddingValues(
@@ -225,6 +275,57 @@ fun ProfileContent(
 }
 
 @Composable
+private fun BiometricSettingCard(
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    status: BiometricAuthHelper.BiometricStatus,
+    onToggle: (Boolean) -> Unit
+) {
+    val context = LocalContext.current
+    Column(
+        modifier = modifier
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(Dimensions.SIZE_16)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.label_enable_biometrics),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                VerticalSpacing(Dimensions.SIZE_4)
+                Text(
+                    text = stringResource(R.string.description_enable_biometrics),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+                if (status != BiometricAuthHelper.BiometricStatus.Available) {
+                    VerticalSpacing(Dimensions.SIZE_4)
+                    Text(
+                        text = BiometricAuthHelper.statusMessage(context, status),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    )
+                }
+            }
+            Switch(
+                checked = enabled,
+                onCheckedChange = onToggle
+            )
+        }
+    }
+}
+
+@Composable
 private fun Title(modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -250,9 +351,10 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
-                onSignedOut = {
-
-                }
+                onSignedOut = { },
+                biometricEnabled = true,
+                biometricStatus = BiometricAuthHelper.BiometricStatus.Available,
+                onBiometricToggle = {}
             )
         }
     }

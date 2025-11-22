@@ -74,4 +74,17 @@
     <string name="content_description_empty_state_image">Empty state image for activity</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
     <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="action_sign_in_biometric">Sign in with biometrics</string>
+    <string name="label_enable_biometrics">Enable biometrics</string>
+    <string name="description_enable_biometrics">Use your fingerprint or face to sign in faster.</string>
+    <string name="title_biometric_login">Unlock Cofinance</string>
+    <string name="description_biometric_login">Authenticate with fingerprint or face ID.</string>
+    <string name="action_use_google_instead">Use Google instead</string>
+    <string name="error_biometric_not_enrolled">No biometric data enrolled. Please add a fingerprint or face ID in system settings.</string>
+    <string name="error_biometric_no_hardware">Biometric hardware is not available on this device.</string>
+    <string name="error_biometric_unavailable">Biometric sensor is temporarily unavailable. Try again later.</string>
+    <string name="error_biometric_generic">Biometric authentication is not supported on this device.</string>
+    <string name="error_biometric_failed">Biometric authentication failed. Please try again.</string>
+    <string name="message_biometric_token_missing">We couldn&#39;t find a saved credential. Sign in with Google once to refresh it.</string>
+    <string name="message_biometric_setup_requires_google">Biometric login will be available after you sign in with Google again.</string>
 </resources>
