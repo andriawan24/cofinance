@@ -21,7 +21,7 @@ android {
         applicationId = "id.andriawan24.cofinance.andro"
         minSdk = 24
         targetSdk = 36
-        versionCode = 1
+        versionCode = 2
         versionName = "0.0.1"
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${googleClientId}\"")
@@ -43,6 +43,15 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = false
+        }
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file(System.getenv("KEYSTORE_PATH") ?: "keystore.jks")
+            storePassword = System.getenv("KEYSTORE_PASSWORD")
+            keyAlias = System.getenv("KEY_ALIAS")
+            keyPassword = System.getenv("KEY_PASSWORD")
         }
     }
 
