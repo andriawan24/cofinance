@@ -8,6 +8,11 @@ on:
 jobs:
   distribute:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./android-app
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,9 +27,11 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: '3.4.7'
+          bundler: '2.7.2'
           bundler-cache: true
 
       - name: Build and Deploy with Fastlane
+        working-directory: ./android-app
         env:
           KEYSTORE_PATH: "./keystore/cofinance.jks" # Path relative to where Gradle runs
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -32,4 +39,4 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
           bundle install
-          bundle exec fastlane deploy
+          bundle exec fastlane distribute
