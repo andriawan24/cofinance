@@ -29,6 +29,14 @@ jobs:
           ruby-version: '3.3.0'
           bundler-cache: true
 
+      - name: Create local.properties
+        run: |
+          # Append secrets
+          echo "google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}" >> local.properties
+          echo "supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}" >> local.properties
+          echo "supabase.public_api_key=${{ secrets.SUPABASE_PUBLIC_API_KEY }}" >> local.properties
+          echo "gemini.api_key=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+
       - name: Build and Deploy with Fastlane
         working-directory: ./android-app
         env:
