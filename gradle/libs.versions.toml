@@ -11,9 +11,9 @@ credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 kotlin = "2.2.21"
-compose = "1.9.4"
+compose = "1.9.5"
 compose-material3 = "1.4.0"
-compose-activity = "1.11.0"
+compose-activity = "1.12.0"
 compose-navigation = "2.9.6"
 kotlinx-serialization-json = "1.9.0"
 supabasekt = "3.2.6"
@@ -23,6 +23,8 @@ napier = "2.7.1"
 dotsindicator = "5.1.0"
 camerax = "1.5.1"
 coreKtx = "1.17.0"
+googleService = "4.4.4"
+firebase = "34.6.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -58,6 +60,8 @@ camera-compose = { module = "androidx.camera:camera-compose", version.ref = "cam
 camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -66,3 +70,4 @@ kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+googleService = { id = "com.google.gms.google-services", version.ref = "googleService" }
