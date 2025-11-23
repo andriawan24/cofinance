@@ -1,0 +1,40 @@
+name: Deploy to Firebase Distribution
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  distribute:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 23
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'coretto'
+          java-version: '23'
+
+      - name: Setup Ruby (for Fastlane)
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.7'
+          bundler-cache: true
+
+      - name: Decode Keystore & Google Play Key
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
+
+      - name: Build and Deploy with Fastlane
+        env:
+          # Pass secrets to Environment Variables for Gradle & Fastlane
+          KEYSTORE_PATH: "../app/keystore.jks" # Path relative to where Gradle runs
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          bundle install
+          bundle exec fastlane deploy
