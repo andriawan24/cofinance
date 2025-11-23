@@ -26,8 +26,7 @@ jobs:
       - name: Setup Ruby (for Fastlane)
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4.7'
-          bundler: '2.7.2'
+          ruby-version: '3.3.0'
           bundler-cache: true
 
       - name: Build and Deploy with Fastlane

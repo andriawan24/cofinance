@@ -27,8 +27,9 @@ platform :android do
   desc "Deploy a new development version to firebase distribution"
   lane :distribute do
     gradle(
-        task: "bundle",
-        build_type: "Release"
+        task: ":android-app:bundle",
+        build_type: "Release",
+        gradle_path: "../gradlew"
     )
 
     upload_to_play_store(

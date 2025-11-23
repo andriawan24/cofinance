@@ -24,13 +24,13 @@ _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
 Runs all the tests
 
-### android beta
+### android distribute
 
 ```sh
-[bundle exec] fastlane android beta
+[bundle exec] fastlane android distribute
 ```
 
-Submit a new Beta Build to Crashlytics Beta
+Deploy a new development version to firebase distribution
 
 ### android deploy
 
