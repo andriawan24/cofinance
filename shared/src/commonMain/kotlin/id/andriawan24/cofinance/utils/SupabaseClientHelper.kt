@@ -6,6 +6,7 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.realtime.Realtime
+import io.github.jan.supabase.storage.Storage
 
 object SupabaseClientHelper {
     fun createClient(
@@ -16,6 +17,7 @@ object SupabaseClientHelper {
             install(Auth.Companion)
             install(Postgrest.Companion)
             install(Realtime.Companion)
+            install(Storage.Companion)
         }
     }
 }
