@@ -30,8 +30,9 @@ object AuthHelper {
             val result = credentialManager.getCredential(request = request, context = context)
             val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(result.credential.data)
             onSignedIn(googleIdTokenCredential.idToken)
-        } catch (e: GetCredentialCancellationException) {
+        } catch (_: GetCredentialCancellationException) {
             // do nothing
+            onSignedInFailed(emptyString())
         } catch (e: NoCredentialException) {
             onSignedInFailed(e.message.orEmpty())
         } catch (e: Exception) {

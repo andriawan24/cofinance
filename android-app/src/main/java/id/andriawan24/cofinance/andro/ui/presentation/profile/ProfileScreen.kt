@@ -94,7 +94,7 @@ fun ProfileScreen(
                     }
 
                     Button(
-                        onClick = {}
+                        onClick = { showConfirmationLogoutDialog = false }
                     ) {
                         Text(stringResource(R.string.label_cancel))
                     }

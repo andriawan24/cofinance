@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.googleService)
 }
 
 val localProperties = gradleLocalProperties(rootDir, providers)
@@ -21,7 +22,7 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0.0"
+        versionName = "0.0.1"
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${googleClientId}\"")
     }
@@ -104,4 +105,8 @@ dependencies {
 
     // Core library desugaring
     coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
 }

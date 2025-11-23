@@ -10,4 +10,7 @@ local.properties
 xcuserdata
 .kotlin
 **/google-services.json
+
+# AI related
 /.claude/
+CLAUDE.md
