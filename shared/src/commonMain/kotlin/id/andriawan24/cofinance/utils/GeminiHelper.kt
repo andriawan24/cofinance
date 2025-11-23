@@ -8,7 +8,7 @@ import dev.shreyaspatil.ai.client.generativeai.type.content
 import dev.shreyaspatil.ai.client.generativeai.type.generationConfig
 
 object GeminiHelper {
-    private const val MODEL_NAME = "gemini-2.0-flash-lite-001"
+    private const val MODEL_NAME = "gemini-flash-latest"
 
     private const val JSON_MIME_TYPE = "application/json"
 
