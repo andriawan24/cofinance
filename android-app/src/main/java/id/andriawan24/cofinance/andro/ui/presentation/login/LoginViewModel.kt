@@ -14,6 +14,8 @@ sealed class LoginEvent {
     data class ShowMessage(val message: String) : LoginEvent()
 }
 
+
+@Stable
 class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : ViewModel() {
     private val _loginEvent = Channel<LoginEvent>(Channel.BUFFERED)
     val loginEvent = _loginEvent.receiveAsFlow()
