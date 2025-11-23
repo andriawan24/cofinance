@@ -4,6 +4,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,12 @@ import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
 
 @Composable
-fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
+fun LoginContent(
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
+    uiState: LoginUiState,
+    onContinueClicked: () -> Unit
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -42,7 +48,8 @@ fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
                         MaterialTheme.colorScheme.surfaceContainerLow
                     )
                 )
-            ),
+            )
+            .padding(contentPadding),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VerticalSpacing(Dimensions.SIZE_12)
@@ -62,7 +69,9 @@ fun LoginContent(modifier: Modifier = Modifier, onContinueClicked: () -> Unit) {
                 .fillMaxWidth()
                 .padding(horizontal = Dimensions.SIZE_16)
                 .padding(bottom = Dimensions.SIZE_24),
-            onClick = onContinueClicked
+            onClick = onContinueClicked,
+            verticalPadding = Dimensions.SIZE_12,
+            enabled = !uiState.isLoading
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_google),
@@ -88,12 +97,20 @@ private fun LoginScreenPreview() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginContent(onContinueClicked = {})
+            LoginContent(
+                contentPadding = PaddingValues.Zero,
+                uiState = LoginUiState(),
+                onContinueClicked = {})
         }
     }
 }
 
-@Preview(showBackground = true, device = Devices.PIXEL_4_XL, uiMode = UI_MODE_NIGHT_YES)
+@Preview(
+    showBackground = true,
+    showSystemUi = true,
+    device = Devices.PIXEL_4_XL,
+    uiMode = UI_MODE_NIGHT_YES
+)
 @Composable
 private fun LoginScreenDarkPreview() {
     CofinanceTheme {
@@ -102,7 +119,9 @@ private fun LoginScreenDarkPreview() {
             color = MaterialTheme.colorScheme.background
         ) {
             LoginContent(
-                onContinueClicked = {}
+                onContinueClicked = {},
+                contentPadding = PaddingValues.Zero,
+                uiState = LoginUiState()
             )
         }
     }

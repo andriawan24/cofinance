@@ -15,7 +15,7 @@ sealed class ProfileEvent {
 }
 
 class ProfileViewModel(
-    private val getUserUseCase: GetUserUseCase,
+    getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
 
