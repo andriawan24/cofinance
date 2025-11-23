@@ -22,6 +22,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.HorizontalSpacing
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
@@ -98,7 +99,7 @@ private fun LoginScreenPreview() {
             color = MaterialTheme.colorScheme.background
         ) {
             LoginContent(
-                contentPadding = PaddingValues.Zero,
+                contentPadding = PaddingValues(0.dp),
                 uiState = LoginUiState(),
                 onContinueClicked = {})
         }
@@ -120,7 +121,7 @@ private fun LoginScreenDarkPreview() {
         ) {
             LoginContent(
                 onContinueClicked = {},
-                contentPadding = PaddingValues.Zero,
+                contentPadding = PaddingValues(0.dp),
                 uiState = LoginUiState()
             )
         }
