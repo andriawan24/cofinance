@@ -24,14 +24,9 @@ jobs:
           ruby-version: '3.4.7'
           bundler-cache: true
 
-      - name: Decode Keystore & Google Play Key
-        run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
-
       - name: Build and Deploy with Fastlane
         env:
-          # Pass secrets to Environment Variables for Gradle & Fastlane
-          KEYSTORE_PATH: "../app/keystore.jks" # Path relative to where Gradle runs
+          KEYSTORE_PATH: "./keystore/cofinance.jks" # Path relative to where Gradle runs
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
