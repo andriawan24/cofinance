@@ -8,11 +8,6 @@ on:
 jobs:
   distribute:
     runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: ./android-app
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -31,19 +26,20 @@ jobs:
 
       - name: Create local.properties
         run: |
-          # Append secrets
+          touch local.properties
+          echo "" >> local.properties
           echo "google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}" >> local.properties
           echo "supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}" >> local.properties
           echo "supabase.public_api_key=${{ secrets.SUPABASE_PUBLIC_API_KEY }}" >> local.properties
           echo "gemini.api_key=${{ secrets.GEMINI_API_KEY }}" >> local.properties
 
       - name: Build and Deploy with Fastlane
-        working-directory: ./android-app
         env:
           KEYSTORE_PATH: "./keystore/cofinance.jks" # Path relative to where Gradle runs
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          cd android-app
           bundle install
           bundle exec fastlane distribute
