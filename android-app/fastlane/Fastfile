@@ -32,12 +32,16 @@ platform :android do
         gradle_path: "../gradlew"
     )
 
-    upload_to_play_store(
-      track: "internal",
-      aab: "./android-app/release/android-app-release.aab",
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true
+    changelog = changelog_from_git_commits(
+      pretty: "- %s", # Format each commit message with a bullet point
+      merge_commit_filtering: "exclude_merges" # Exclude merge commits for cleaner notes
+    )
+
+    firebase_app_distribution(
+      app: "cofinance-459113",
+      android_artifact_path: "android-app/build/outputs/bundle/release/app-release.aab",
+      groups: "tester",
+      release_notes: changelog
     )
   end
 
