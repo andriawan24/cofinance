@@ -27,7 +27,7 @@ platform :android do
   desc "Deploy a new development version to firebase distribution"
   lane :distribute do
     gradle(
-        task: ":android-app:bundle",
+        task: ":android-app:assemble",
         build_type: "Release",
         gradle_path: "../gradlew"
     )
@@ -39,11 +39,10 @@ platform :android do
 
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID"],
-      android_artifact_path: "./build/outputs/bundle/release/android-app-release.aab",
+      android_artifact_path: "./build/outputs/apk/release/android-app-release-unsigned.apk",
       groups: "tester",
       firebase_cli_token: ENV["FIREBASE_TOKEN"],
-      release_notes: changelog,
-      android_artifact_type: "AAB"
+      release_notes: changelog
     )
   end
 
