@@ -38,10 +38,12 @@ platform :android do
     )
 
     firebase_app_distribution(
-      app: "cofinance-459113",
+      app: ENV["FIREBASE_APP_ID"],
       android_artifact_path: "./build/outputs/bundle/release/android-app-release.aab",
       groups: "tester",
-      release_notes: changelog
+      firebase_cli_token: ENV["FIREBASE_TOKEN"],
+      release_notes: changelog,
+      android_artifact_type: "AAB"
     )
   end
 
