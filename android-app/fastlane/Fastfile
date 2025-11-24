@@ -39,7 +39,7 @@ platform :android do
 
     firebase_app_distribution(
       app: "cofinance-459113",
-      android_artifact_path: "android-app/build/outputs/bundle/release/app-release.aab",
+      android_artifact_path: "./android-app/build/outputs/bundle/release/android-app-release.aab",
       groups: "tester",
       release_notes: changelog
     )
