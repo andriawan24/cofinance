@@ -33,8 +33,9 @@ platform :android do
     )
 
     changelog = changelog_from_git_commits(
-      pretty: "- %s", # Format each commit message with a bullet point
-      merge_commit_filtering: "exclude_merges" # Exclude merge commits for cleaner notes
+      pretty: "- %s",
+      merge_commit_filtering: "exclude_merges",
+      app_path: "../"
     )
 
     firebase_app_distribution(
