@@ -26,7 +26,6 @@ jobs:
 
       - name: Create local.properties
         run: |
-          touch local.properties
           echo "" >> local.properties
           echo "google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}" >> local.properties
           echo "supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}" >> local.properties

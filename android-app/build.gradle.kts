@@ -22,7 +22,7 @@ android {
         applicationId = "id.andriawan24.cofinance.andro"
         minSdk = 24
         targetSdk = 36
-        versionCode = 4
+        versionCode = 5
         versionName = "0.0.1"
 
         buildConfigField("String", "GOOGLE_CLIENT_ID", "\"${googleClientId}\"")
