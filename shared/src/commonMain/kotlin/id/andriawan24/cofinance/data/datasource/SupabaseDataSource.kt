@@ -5,6 +5,7 @@ import id.andriawan24.cofinance.data.model.request.AddTransactionRequest
 import id.andriawan24.cofinance.data.model.request.GetTransactionsRequest
 import id.andriawan24.cofinance.data.model.request.IdTokenRequest
 import id.andriawan24.cofinance.data.model.request.UpdateBalanceRequest
+import id.andriawan24.cofinance.data.model.request.UpdateProfileRequest
 import id.andriawan24.cofinance.data.model.response.AccountResponse
 import id.andriawan24.cofinance.data.model.response.TransactionResponse
 import id.andriawan24.cofinance.utils.ext.orZero
@@ -13,15 +14,20 @@ import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
+import io.github.jan.supabase.auth.user.UserAttributes
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.storage.storage
+import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import kotlin.math.max
 import kotlin.time.ExperimentalTime
 
@@ -185,5 +191,55 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                 )
             }
             .decodeSingle<TransactionResponse>()
+    }
+
+    suspend fun updateProfile(request: UpdateProfileRequest): UserInfo {
+        val avatarUrl = when {
+            request.avatarBytes != null && request.mimeType != null -> {
+                uploadAvatar(request.avatarBytes, request.mimeType)
+            }
+            !request.currentAvatarUrl.isNullOrBlank() -> request.currentAvatarUrl
+            else -> null
+        }
+
+        val metadata = buildJsonObject {
+            put("name", request.name)
+            avatarUrl?.let { put("avatar_url", it) }
+        }
+
+        return supabase.auth.updateUser(
+            attributes = UserAttributes(
+                data = metadata
+            )
+        )
+    }
+
+    private suspend fun uploadAvatar(bytes: ByteArray, mimeType: String): String {
+        val bucket = supabase.storage.from(AVATAR_BUCKET)
+        val userId = supabase.auth.currentUserOrNull()?.id.orEmpty()
+        val extension = resolveExtension(mimeType)
+        val timestamp = Clock.System.now().toEpochMilliseconds()
+        val directory = if (userId.isNotBlank()) userId else "anonymous"
+        val path = "$directory/avatar_$timestamp.$extension"
+
+        bucket.upload(
+            path = path,
+            data = bytes,
+            upsert = true,
+            contentType = mimeType
+        )
+
+        return bucket.publicUrl(path)
+    }
+
+    private fun resolveExtension(mimeType: String): String = when (mimeType.lowercase()) {
+        "image/png" -> "png"
+        "image/jpeg", "image/jpg" -> "jpg"
+        "image/webp" -> "webp"
+        else -> mimeType.substringAfter("/", "jpg")
+    }
+
+    companion object {
+        private const val AVATAR_BUCKET = "avatars"
     }
 }

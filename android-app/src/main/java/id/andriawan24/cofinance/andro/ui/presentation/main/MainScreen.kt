@@ -10,10 +10,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
@@ -33,6 +35,7 @@ fun MainScreen(
     onNavigateToAddAccount: () -> Unit
 ) {
     val appState = rememberCofinanceAppState()
+    val context = LocalContext.current
 
     Scaffold(
         bottomBar = {
@@ -104,9 +107,32 @@ fun MainScreen(
             }
 
             composable<Destinations.Profile> {
-                ProfileScreen(onSignedOut = onNavigateToLogin, showMessage = {
-                    appState.showSnackbar(it)
-                })
+                val profileUpdatedFlow = parentNavController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.getStateFlow("profile_updated", false)
+
+                val profileUpdated by profileUpdatedFlow?.collectAsStateWithLifecycle(false)
+                    ?: remember { mutableStateOf(false) }
+
+                LaunchedEffect(profileUpdated) {
+                    if (profileUpdated) {
+                        appState.showSnackbar(context.getString(R.string.message_profile_updated))
+                    }
+                }
+
+                ProfileScreen(
+                    onSignedOut = onNavigateToLogin,
+                    showMessage = { appState.showSnackbar(it) },
+                    onEditProfile = {
+                        parentNavController.navigate(Destinations.EditProfile)
+                    },
+                    shouldRefreshProfile = profileUpdated,
+                    onProfileRefreshed = {
+                        parentNavController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.remove<Boolean>("profile_updated")
+                    }
+                )
             }
         }
     }
