@@ -27,9 +27,9 @@ fun LoginScreen(onNavigateToHome: () -> Unit, viewModel: LoginViewModel = koinVi
 
     viewModel.loginEvent.CollectAsEffect {
         when (it) {
-            LoginUiEvent.NavigateHomePage -> onNavigateToHome()
-            is LoginUiEvent.ShowMessage -> scope.launch {
-                val message = it.exception.message.orEmpty() // TODO: Create error handler
+            LoginEvent.NavigateHomePage -> onNavigateToHome()
+            is LoginEvent.ShowMessage -> scope.launch {
+                val message = context.getString(it.messageResId)
                 snackState.showSnackbar(message)
             }
         }

@@ -1,10 +1,11 @@
 package id.andriawan24.cofinance.andro.ui.presentation.login
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.NavigateHomePage
-import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.ShowMessage
+import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.util.mapErrorMessage
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.utils.ResultState
@@ -16,9 +17,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-sealed class LoginUiEvent {
-    data object NavigateHomePage : LoginUiEvent()
-    data class ShowMessage(val exception: Exception) : LoginUiEvent()
+sealed class LoginEvent {
+    data object NavigateHomePage : LoginEvent()
+    data class ShowMessage(@StringRes val messageResId: Int) : LoginEvent()
 }
 
 data class LoginUiState(
@@ -27,25 +28,29 @@ data class LoginUiState(
 
 @Stable
 class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : ViewModel() {
-    private val _loginUiEvent = Channel<LoginUiEvent>(Channel.BUFFERED)
-    val loginEvent = _loginUiEvent.receiveAsFlow()
+    private val _loginEvent = Channel<LoginEvent>(Channel.BUFFERED)
+    val loginEvent = _loginEvent.receiveAsFlow()
 
     private val _loginUiState = MutableStateFlow(LoginUiState())
     val loginUiState = _loginUiState.asStateFlow()
 
     fun signInWithIdToken(param: IdTokenParam) {
         viewModelScope.launch {
-            loginIdTokenUseCase.execute(param).collectLatest {
-                when (it) {
+            loginIdTokenUseCase.execute(param).collectLatest { result ->
+                when (result) {
                     ResultState.Loading -> setLoading(true)
                     is ResultState.Error -> {
                         setLoading(false)
-                        _loginUiEvent.send(ShowMessage(it.exception))
+                        val messageResId = mapErrorMessage(
+                            exception = result.exception,
+                            fallbackResId = R.string.error_authentication_generic
+                        )
+                        _loginEvent.send(LoginEvent.ShowMessage(messageResId))
                     }
 
                     is ResultState.Success<Boolean> -> {
                         setLoading(false)
-                        _loginUiEvent.send(NavigateHomePage)
+                        _loginEvent.send(LoginEvent.NavigateHomePage)
                     }
                 }
             }
