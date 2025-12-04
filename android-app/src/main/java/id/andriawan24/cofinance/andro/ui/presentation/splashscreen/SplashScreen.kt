@@ -1,5 +1,6 @@
 package id.andriawan24.cofinance.andro.ui.presentation.splashscreen
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan24.cofinance.andro.MainActivity
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
+import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.androidx.compose.koinViewModel
 
@@ -29,11 +32,23 @@ fun SplashScreen(
 ) {
     LaunchedEffect(true) {
         splashViewModel.fetchUser().collectLatest {
-            val user = it.getOrNull()
-            if (user != null) {
-                onNavigateToMain()
-            } else {
-                onNavigateToLogin()
+            when (it) {
+                is ResultState.Error -> {
+                    Log.d(
+                        MainActivity::class.simpleName,
+                        "SplashScreen: Not logged in ${it.exception}"
+                    )
+                    onNavigateToLogin()
+                    // TODO: Handle error
+                }
+
+                ResultState.Loading -> {
+                    /* no-op */
+                }
+
+                is ResultState.Success<*> -> {
+                    onNavigateToMain()
+                }
             }
         }
     }

@@ -2,8 +2,10 @@ package id.andriawan24.cofinance.andro.ui.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.*
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
+import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -27,10 +29,17 @@ class ProfileViewModel(
     fun logout() {
         viewModelScope.launch {
             logoutUseCase.execute().collectLatest {
-                when {
-                    it.isSuccess -> _profileEvent.send(ProfileEvent.NavigateToLoginPage)
-                    it.isFailure -> {
-                        _profileEvent.send(ProfileEvent.ShowMessage(it.exceptionOrNull()?.message.orEmpty()))
+                when (it) {
+                    ResultState.Loading -> {
+                        // Do nothing
+                    }
+
+                    is ResultState.Error -> {
+                        _profileEvent.send(ShowMessage(it.exception.message.orEmpty()))
+                    }
+
+                    is ResultState.Success<*> -> {
+                        _profileEvent.send(NavigateToLoginPage)
                     }
                 }
             }
