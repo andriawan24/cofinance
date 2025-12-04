@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
     alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.skie)
     id("com.codingfeline.buildkonfig")
 }
 
@@ -75,6 +76,12 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_URL", supabaseUrl)
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_API_KEY", supabaseApiKey)
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", geminiApiKey)
+    }
+}
+
+skie {
+    features {
+        enableFlowCombineConvertorPreview = true
     }
 }
 

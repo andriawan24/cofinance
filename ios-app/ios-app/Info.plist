@@ -16,25 +16,42 @@
 	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
+	<key>CFBundleURLSchemes</key>
+	<array>
+		<string>com.googleusercontent.apps.441243986243-gaq25a4d4nris488iuokh4pfqqtop4if</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.441243986243-gaq25a4d4nris488iuokh4pfqqtop4if</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>GIDClientID</key>
+	<string>441243986243-gaq25a4d4nris488iuokh4pfqqtop4if.apps.googleusercontent.com</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
-    <key>UIAppFonts</key>
-    <array>
-        <string>Manrope.ttf</string>
-        <string>ManropeMedium.ttf</string>
-        <string>ManropeSemibold.ttf</string>
-        <string>ManropeBold.ttf</string>
-        <string>ManropeExtraBold.ttf</string>
-    </array>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Manrope.ttf</string>
+		<string>ManropeMedium.ttf</string>
+		<string>ManropeSemibold.ttf</string>
+		<string>ManropeBold.ttf</string>
+		<string>ManropeExtraBold.ttf</string>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
 	</dict>
-    <key>UILaunchScreen</key>
-    <dict />
+	<key>UILaunchScreen</key>
+	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>
