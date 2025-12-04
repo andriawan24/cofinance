@@ -40,7 +40,7 @@ struct HomeView: View {
                             Label("Account", systemImage: "singaporedollarsign.bank.building")
                         }
                     
-                    AccountView()
+                    ProfileView()
                         .background(Color("Background"))
                         .tag("Profile")
                         .tabItem {

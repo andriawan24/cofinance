@@ -62,7 +62,6 @@ class AuthViewModel: ObservableObject {
     
     func handleIdToken(idToken: String) {
         let loginIdToken = self.loginIdTokenUseCase.execute(idTokenParam: IdTokenParam(idToken: idToken)).toPublisher()
-        
         loginIdToken
             .receive(on: DispatchQueue.main)
             .sink { [weak self] result in

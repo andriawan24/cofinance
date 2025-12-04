@@ -17,19 +17,21 @@ class AppCoordinator: ObservableObject {
     
     let authViewModel: AuthViewModel
     private let fetchUserUseCase: FetchUserUseCase
+    private let logoutUseCase: LogoutUseCase
 
     private var cancellables = Set<AnyCancellable>()
     
     init(authViewModel: AuthViewModel) {
-        self.authViewModel = authViewModel
-        
         let koinHelper = KoinHelper()
-        self.fetchUserUseCase = koinHelper.getFetchUserUseCase()
         
-        observe()
+        self.authViewModel = authViewModel
+        self.fetchUserUseCase = koinHelper.getFetchUserUseCase()
+        self.logoutUseCase = koinHelper.getLogoutUseCase()
+        
+        setupObservers()
     }
     
-    private func observe() {
+    private func setupObservers() {
         authViewModel.$isSuccessLogin.receive(on: DispatchQueue.main)
             .sink { [weak self] isLoggedIn in
                 if isLoggedIn {
@@ -71,7 +73,18 @@ class AppCoordinator: ObservableObject {
     }
     
     func logout() {
-        authViewModel.logout()
+        logoutUseCase.execute().toPublisher()
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] result in
+                switch onEnum(of: result) {
+                case .success:
+                    self?.appState = .unauthenticated
+                    self?.router.navigateToRoot()
+                default:
+                    print("")
+                }
+            }
+            .store(in: &cancellables)
     }
 }
 

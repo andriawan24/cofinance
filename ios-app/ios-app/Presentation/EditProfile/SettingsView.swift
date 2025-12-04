@@ -66,7 +66,7 @@ struct SettingsView: View {
                                 title: "Logout",
                                 role: .destructive,
                                 action: {
-                                    authViewModel.logout()
+                                    
                                 }
                             ),
                             secondaryButton: AlertButton(
