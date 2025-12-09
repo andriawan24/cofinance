@@ -11,8 +11,9 @@ plugins {
 
 val localProperties = gradleLocalProperties(rootDir, providers)
 val googleClientId: String = localProperties.getProperty("google_auth_client_id")
-
-require(googleClientId.isNotEmpty()) { "Google Client ID is empty" }
+val keystorePassword: String = localProperties.getProperty("keystore.password")
+val keystoreAlias: String = localProperties.getProperty("keystore.alias")
+val keystoreAliasPassword: String = localProperties.getProperty("keystore.alias_password")
 
 android {
     namespace = "id.andriawan24.cofinance.andro"
@@ -40,15 +41,34 @@ android {
     }
 
     signingConfigs {
+        create("dev") {
+            storeFile = file("./keystore/cofinance-debug.jks")
+            storePassword = keystorePassword
+            keyAlias = keystoreAlias
+            keyPassword = keystoreAliasPassword
+        }
+
         create("release") {
             storeFile = file("./keystore/cofinance.jks")
-            storePassword = "cofinance"
-            keyAlias = "key0"
-            keyPassword = "cofinance"
+            storePassword = keystorePassword
+            keyAlias = keystoreAlias
+            keyPassword = keystoreAliasPassword
         }
     }
 
     buildTypes {
+        debug {
+            isMinifyEnabled = false
+            isShrinkResources = false
+            isDebuggable = true
+            signingConfig = signingConfigs.getByName("dev")
+
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+
         release {
             isMinifyEnabled = true
             isShrinkResources = true

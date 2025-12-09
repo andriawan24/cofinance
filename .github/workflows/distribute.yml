@@ -31,6 +31,9 @@ jobs:
           echo "supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}" >> local.properties
           echo "supabase.public_api_key=${{ secrets.SUPABASE_PUBLIC_API_KEY }}" >> local.properties
           echo "gemini.api_key=${{ secrets.GEMINI_API_KEY }}" >> local.properties
+          echo "keystore.password=${{ secrets.KEYSTORE_PASSWORD }}" >> local.properties
+          echo "keystore.alias=${{ secrets.KEYSTORE_ALIAS }}" >> local.properties
+          echo "keystore.alias_password=${{ secrets.KEYSTORE_ALIAS_PASSWORD }}" >> local.properties
 
       - name: Retrieve google-services.json
         run: |

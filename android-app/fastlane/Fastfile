@@ -32,18 +32,14 @@ platform :android do
         gradle_path: "../gradlew"
     )
 
-    changelog = changelog_from_git_commits(
-      pretty: "- %s",
-      merge_commit_filtering: "exclude_merges",
-      app_path: "../"
-    )
+    changes = changelog_from_git_commits
 
     firebase_app_distribution(
       app: ENV["FIREBASE_APP_ID"],
       android_artifact_path: "./build/outputs/apk/debug/android-app-debug.apk",
       groups: "tester",
       firebase_cli_token: ENV["FIREBASE_TOKEN"],
-      release_notes: changelog
+      release_notes: changes
     )
   end
 
