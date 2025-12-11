@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.HorizontalSpacing
+import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.presentation.account.models.AccountByGroup
@@ -74,33 +75,18 @@ private fun AccountContent(
     onNavigateToAddAccount: () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Dimensions.SIZE_16)
-                .padding(top = Dimensions.SIZE_16),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(R.string.label_account),
-                style = MaterialTheme.typography.displaySmall
-            )
-        }
+        PageTitle(
+            modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
+            title = stringResource(R.string.label_account)
+        )
 
         AssetCard(
-            modifier = Modifier
-                .padding(horizontal = Dimensions.SIZE_16)
-                .padding(top = Dimensions.SIZE_24),
+            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             balance = balance,
             onAddAccountClicked = onNavigateToAddAccount
         )
 
-        PullToRefreshBox(
-            isRefreshing = isRefreshing,
-            onRefresh = {
-                onRefresh()
-            },
-        ) {
+        PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = onRefresh) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,7 +97,9 @@ private fun AccountContent(
                 contentPadding = PaddingValues(vertical = Dimensions.SIZE_12)
             ) {
                 if (isLoading) {
-                    item { CircularProgressIndicator() }
+                    item {
+                        CircularProgressIndicator()
+                    }
                 } else {
                     items(uiState.accounts) { group ->
                         AccountGroupCard(group = group)
@@ -146,7 +134,7 @@ private fun AssetCard(
 
         Column(modifier = Modifier.padding(Dimensions.SIZE_16)) {
             Text(
-                "Total Assets",
+                text = stringResource(R.string.label_total_assets),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     lineHeightStyle = LineHeightStyle(
@@ -160,7 +148,7 @@ private fun AssetCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Rp",
+                    text = stringResource(R.string.label_rupiah),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary,
@@ -170,7 +158,9 @@ private fun AssetCard(
                         )
                     )
                 )
+
                 HorizontalSpacing(Dimensions.SIZE_2)
+
                 Text(
                     text = NumberHelper.formatNumber(balance),
                     style = MaterialTheme.typography.displaySmall.copy(
@@ -187,10 +177,7 @@ private fun AssetCard(
             VerticalSpacing(Dimensions.SIZE_16)
 
             SecondaryButton(
-                contentPadding = PaddingValues(
-                    vertical = Dimensions.SIZE_6,
-                    horizontal = Dimensions.SIZE_16
-                ),
+                contentPadding = PaddingValues(Dimensions.SIZE_16, Dimensions.SIZE_6),
                 onClick = onAddAccountClicked,
             ) {
                 Row(
@@ -204,7 +191,7 @@ private fun AssetCard(
                     )
 
                     Text(
-                        text = "Add Account",
+                        text = stringResource(R.string.label_add_account),
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontSize = TextSizes.SIZE_12,
                             color = MaterialTheme.colorScheme.onBackground

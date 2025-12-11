@@ -54,11 +54,14 @@ fun LoginContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         VerticalSpacing(Dimensions.SIZE_12)
+
         Image(
             painter = painterResource(R.drawable.img_cofinance),
             contentDescription = null
         )
+
         OnboardingSwiper(modifier = Modifier.weight(1f))
+
         PrimaryButton(
             modifier = Modifier
                 .dropShadow(
@@ -71,7 +74,7 @@ fun LoginContent(
                 .padding(horizontal = Dimensions.SIZE_16)
                 .padding(bottom = Dimensions.SIZE_24),
             onClick = onContinueClicked,
-            verticalPadding = Dimensions.SIZE_12,
+            verticalPadding = Dimensions.SIZE_16,
             enabled = !uiState.isLoading
         ) {
             Icon(

@@ -7,6 +7,7 @@ import id.andriawan24.cofinance.data.model.request.IdTokenRequest
 import id.andriawan24.cofinance.data.model.request.UpdateBalanceRequest
 import id.andriawan24.cofinance.data.model.response.AccountResponse
 import id.andriawan24.cofinance.data.model.response.TransactionResponse
+import id.andriawan24.cofinance.utils.enums.TransactionType
 import id.andriawan24.cofinance.utils.ext.orZero
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
@@ -156,7 +157,11 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                     this@select.limit(1)
                 }
 
-                eq(column = TransactionResponse.IS_DRAFT_FIELD, value = request.isDraft)
+                if (request.isDraft) {
+                    eq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
+                } else {
+                    neq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
+                }
             }
 
             order(

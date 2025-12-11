@@ -19,9 +19,8 @@ data class TransactionResponse(
     val createdAt: String? = null,
     @SerialName(UPDATED_AT_FIELD)
     val updatedAt: String? = null,
+    @SerialName(TRANSACTION_TYPE_FIELD)
     val type: String? = null,
-    @SerialName(IS_DRAFT_FIELD)
-    val isDraft: Boolean? = null,
 
     val sender: AccountResponse? = null,
     val receiver: AccountResponse? = null,
@@ -29,11 +28,9 @@ data class TransactionResponse(
     companion object {
         const val TABLE_NAME = "transactions"
         const val ID_FIELD = "id"
-        const val ACCOUNT_FIELD = "sender"
-        const val RECEIVER_ACCOUNT_FIELD = "receiver"
         const val DATE_FIELD = "date"
         const val CREATED_AT_FIELD = "created_at"
         const val UPDATED_AT_FIELD = "updated_at"
-        const val IS_DRAFT_FIELD = "is_draft"
+        const val TRANSACTION_TYPE_FIELD = "type"
     }
 }

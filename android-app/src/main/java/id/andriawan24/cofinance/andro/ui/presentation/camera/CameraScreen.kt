@@ -75,9 +75,7 @@ fun CameraScreen(
             onBackPressed = onBackPressed,
             cameraContent = {
                 if (cameraPermission.status.isGranted) {
-                    CameraPreviewContent(
-                        cameraViewModel = cameraViewModel
-                    )
+                    CameraPreviewContent(cameraViewModel = cameraViewModel)
                 }
             },
             onOpenGalleryClicked = {

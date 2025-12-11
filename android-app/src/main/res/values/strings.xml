@@ -74,4 +74,5 @@
     <string name="content_description_empty_state_image">Empty state image for activity</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
     <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="label_total_assets">Total Assets</string>
 </resources>

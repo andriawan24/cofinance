@@ -13,8 +13,7 @@ data class AddTransactionParam(
     val accountsId: String? = null,
     val usersId: String? = null,
     val receiverAccountsId: String? = null,
-    val type: TransactionType,
-    val isDraft: Boolean
+    val type: TransactionType
 ) {
     companion object {
         fun AddTransactionParam.toRequest(): AddTransactionRequest {
@@ -28,7 +27,6 @@ data class AddTransactionParam(
                 usersId = this.usersId,
                 accountsId = this.accountsId,
                 receiverAccountsId = this.receiverAccountsId,
-                isDraft = this.isDraft,
                 type = this.type.toString()
             )
         }

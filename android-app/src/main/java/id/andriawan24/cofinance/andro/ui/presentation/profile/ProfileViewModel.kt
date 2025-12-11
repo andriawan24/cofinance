@@ -2,7 +2,8 @@ package id.andriawan24.cofinance.andro.ui.presentation.profile
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.*
+import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.NavigateToLoginPage
+import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.ShowMessage
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import id.andriawan24.cofinance.utils.ResultState

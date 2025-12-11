@@ -111,7 +111,8 @@ fun CategoryBottomSheetContent(
     val categories = remember {
         when (type) {
             TransactionType.EXPENSE,
-            TransactionType.TRANSFER -> TransactionCategory.getExpenseCategories()
+            TransactionType.TRANSFER,
+            TransactionType.DRAFT -> TransactionCategory.getExpenseCategories()
 
             TransactionType.INCOME -> TransactionCategory.getIncomeCategories()
         }

@@ -1,6 +1,5 @@
 package id.andriawan24.cofinance.andro.ui.presentation.preview
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -49,7 +48,7 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun PreviewScreen(
-    imageUri: Uri,
+    imageUrl: String,
     onNavigateToAdd: (String) -> Unit,
     onNavigateBack: () -> Unit,
     previewViewModel: PreviewViewModel = koinViewModel()
@@ -58,6 +57,7 @@ fun PreviewScreen(
     val scope = rememberCoroutineScope()
     val snackState = remember { SnackbarHostState() }
     val uiState by previewViewModel.previewUiState.collectAsStateWithLifecycle()
+    val imageUri = remember { imageUrl.toUri() }
 
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {
@@ -163,7 +163,7 @@ private fun PreviewScreenPreview() {
     CofinanceTheme {
         Surface {
             PreviewScreen(
-                imageUri = "https://google.com".toUri(),
+                imageUrl = "https://google.com",
                 onNavigateToAdd = {},
                 onNavigateBack = {}
             )

@@ -37,6 +37,7 @@ import androidx.compose.ui.window.Dialog
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
@@ -112,11 +113,9 @@ fun ProfileContent(
     onSignedOut: () -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
-        Title(
-            modifier = Modifier.padding(
-                horizontal = Dimensions.SIZE_16,
-                vertical = Dimensions.SIZE_24
-            )
+        PageTitle(
+            modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
+            title = stringResource(R.string.label_profile)
         )
 
         Box(
@@ -221,19 +220,6 @@ fun ProfileContent(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun Title(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = stringResource(R.string.title_profile),
-            style = MaterialTheme.typography.displaySmall
-        )
     }
 }
 

@@ -31,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan24.cofinance.andro.R
+import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.components.PieChart
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.EmptyActivity
@@ -49,11 +50,9 @@ fun StatsScreen(onNavigateToAdd: () -> Unit) {
     val uiState by statsViewModel.uiState.collectAsState()
 
     Column(modifier = Modifier.fillMaxSize()) {
-        Title(
-            modifier = Modifier.padding(
-                horizontal = Dimensions.SIZE_16,
-                vertical = Dimensions.SIZE_24
-            )
+        PageTitle(
+            modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
+            title = stringResource(R.string.label_stats)
         )
 
         DateSwitcher(
@@ -175,19 +174,6 @@ fun DetailPieChart(data: List<StatItem>) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun Title(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = stringResource(R.string.title_statistic),
-            style = MaterialTheme.typography.displaySmall
-        )
     }
 }
 

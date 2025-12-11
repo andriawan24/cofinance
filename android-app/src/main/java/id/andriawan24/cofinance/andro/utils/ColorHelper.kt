@@ -15,6 +15,7 @@ object ColorHelper {
     fun getColorByExpenseType(transactionType: TransactionType): Color {
         return when (transactionType) {
             TransactionType.EXPENSE -> colorResource(R.color.red)
+            TransactionType.DRAFT -> colorResource(R.color.red)
             TransactionType.INCOME -> colorResource(R.color.green)
             TransactionType.TRANSFER -> MaterialTheme.colorScheme.onBackground
         }

@@ -14,9 +14,11 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.model.response.Account
+import id.andriawan24.cofinance.domain.model.response.Transaction
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.utils.ResultState
 import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -127,10 +129,18 @@ class AddNewViewModel(
 
     fun getDraftedTransaction(id: String) {
         viewModelScope.launch {
-            getTransactionsUseCase.execute(GetTransactionsParam(transactionId = id, isDraft = true))
-                .collectLatest { response ->
-                    if (response.isSuccess) {
-                        response.getOrNull()?.firstOrNull()?.let { transaction ->
+            getTransactionsUseCase.execute(
+                GetTransactionsParam(transactionId = id, isDraft = true)
+            ).collectLatest { response ->
+                when (response) {
+                    ResultState.Loading -> {
+                        /* no-op */
+                    }
+
+                    is ResultState.Success<List<Transaction>> -> {
+                        val transactions = response.data.orEmpty()
+
+                        transactions.getOrNull(0)?.let { transaction ->
                             _uiState.update {
                                 it.copy(
                                     transactionId = transaction.id,
@@ -140,7 +150,12 @@ class AddNewViewModel(
                             }
                         }
                     }
+
+                    is ResultState.Error -> {
+                        /* no-op */
+                    }
                 }
+            }
         }
     }
 
@@ -170,96 +185,123 @@ class AddNewViewModel(
 
     fun onEvent(event: AddNewUiEvent) {
         when (event) {
-            is AddNewUiEvent.SetIncludeFee -> _uiState.update {
-                it.copy(
-                    includeFee = event.includeFee,
-                    fee = if (!event.includeFee) emptyString() else it.fee
-                )
-            }
-
-            is AddNewUiEvent.SetAmount -> {
-                _uiState.update { it.copy(amount = event.amount) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetFee -> {
-                _uiState.update { it.copy(fee = event.fee) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetCategory -> {
-                _uiState.update {
-                    if (it.transactionType == TransactionType.INCOME) {
-                        it.copy(incomeCategory = event.category)
-                    } else {
-                        it.copy(expenseCategory = event.category)
-                    }
-                }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetAccount -> {
-                _uiState.update { it.copy(senderAccount = event.account) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetReceiverAccount -> {
-                _uiState.update { it.copy(receiverAccount = event.account) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetDateTime -> {
-                _uiState.update { it.copy(dateTime = event.dateTime) }
-                validateInputs()
-            }
-
-            is AddNewUiEvent.SetNote -> _uiState.update {
-                it.copy(notes = event.note)
-            }
-
             is AddNewUiEvent.UpdateAccount -> getAccounts()
-            is AddNewUiEvent.SetTransactionType -> _uiState.update {
-                it.copy(transactionType = event.type)
-            }
-
-            is AddNewUiEvent.SaveTransaction -> viewModelScope.launch {
-                _uiState.value = uiState.value.copy(isLoading = true)
-
-                val category = when (uiState.value.transactionType) {
-                    TransactionType.EXPENSE -> uiState.value.expenseCategory?.name.orEmpty()
-                    else -> uiState.value.incomeCategory?.name.orEmpty()
-                }
-
-                val param = AddTransactionParam(
-                    id = uiState.value.transactionId,
-                    amount = uiState.value.amount.toLong(),
-                    category = category,
-                    date = uiState.value.dateTime.formatToString(FORMAT_ISO_8601),
-                    fee = uiState.value.fee.toLongOrDefault(0),
-                    notes = uiState.value.notes,
-                    accountsId = uiState.value.senderAccount?.id,
-                    receiverAccountsId = uiState.value.receiverAccount?.id,
-                    type = uiState.value.transactionType,
-                    isDraft = false
-                )
-
-                createTransactionUseCase.execute(param).collectLatest {
-                    if (it.isSuccess) {
-                        _uiState.value = uiState.value.copy(isLoading = false)
-                        _onSuccessSaved.send(None)
-                    } else {
-                        _uiState.value = uiState.value.copy(isLoading = false)
-                        _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                    }
-                }
-            }
-
-            is AddNewUiEvent.SetAccountChooserType -> _uiState.update {
-                it.copy(accountChooserType = event.accountTransferType)
-            }
+            is AddNewUiEvent.SetIncludeFee -> handleIncludeFeeChange(event.includeFee)
+            is AddNewUiEvent.SetAmount -> handleAmountChange(event.amount)
+            is AddNewUiEvent.SetFee -> handleFeeChange(event.fee)
+            is AddNewUiEvent.SetCategory -> handleCategoryChange(event.category)
+            is AddNewUiEvent.SetAccount -> handleAccountChange(event.account)
+            is AddNewUiEvent.SetReceiverAccount -> handleReceiverAccountChange(event.account)
+            is AddNewUiEvent.SetDateTime -> handleDateTimeChange(event.dateTime)
+            is AddNewUiEvent.SetNote -> handleNoteChange(event.note)
+            is AddNewUiEvent.SetTransactionType -> handleTransactionTypeChange(event.type)
+            is AddNewUiEvent.SetAccountChooserType -> handleAccountChooserTypeChange(event.accountTransferType)
+            is AddNewUiEvent.SaveTransaction -> handleSaveTransaction()
 
             is AddNewUiEvent.OnBackPressed,
             is AddNewUiEvent.OnPictureClicked -> Unit
+        }
+    }
+
+    private fun handleDateTimeChange(dateTime: Date) {
+        _uiState.update { it.copy(dateTime = dateTime) }
+        validateInputs()
+    }
+
+    private fun handleReceiverAccountChange(account: Account) {
+        _uiState.update { it.copy(receiverAccount = account) }
+        validateInputs()
+    }
+
+    private fun handleAccountChange(account: Account) {
+        _uiState.update { it.copy(senderAccount = account) }
+        validateInputs()
+    }
+
+    private fun handleCategoryChange(category: TransactionCategory) {
+        _uiState.update {
+            if (it.transactionType == TransactionType.INCOME) {
+                it.copy(incomeCategory = category)
+            } else {
+                it.copy(expenseCategory = category)
+            }
+        }
+        validateInputs()
+    }
+
+    private fun handleFeeChange(fee: String) {
+        _uiState.update { it.copy(fee = fee) }
+        validateInputs()
+    }
+
+    private fun handleAmountChange(amount: String) {
+        _uiState.update { it.copy(amount = amount) }
+        validateInputs()
+    }
+
+    private fun handleIncludeFeeChange(includeFee: Boolean) {
+        _uiState.update {
+            it.copy(
+                includeFee = includeFee,
+                fee = if (!includeFee) emptyString() else it.fee
+            )
+        }
+    }
+
+    private fun handleNoteChange(note: String) {
+        _uiState.update {
+            it.copy(notes = note)
+        }
+    }
+
+    private fun handleTransactionTypeChange(type: TransactionType) {
+        _uiState.update {
+            it.copy(transactionType = type)
+        }
+    }
+
+    private fun handleAccountChooserTypeChange(accountTransferType: AccountTransferType) {
+        _uiState.update {
+            it.copy(accountChooserType = accountTransferType)
+        }
+    }
+
+    private fun handleSaveTransaction() {
+        viewModelScope.launch {
+            val category = when (uiState.value.transactionType) {
+                TransactionType.EXPENSE -> uiState.value.expenseCategory?.name.orEmpty()
+                else -> uiState.value.incomeCategory?.name.orEmpty()
+            }
+
+            val param = AddTransactionParam(
+                id = uiState.value.transactionId,
+                amount = uiState.value.amount.toLong(),
+                category = category,
+                date = uiState.value.dateTime.formatToString(FORMAT_ISO_8601),
+                fee = uiState.value.fee.toLongOrDefault(0),
+                notes = uiState.value.notes,
+                accountsId = uiState.value.senderAccount?.id,
+                receiverAccountsId = uiState.value.receiverAccount?.id,
+                type = uiState.value.transactionType
+            )
+
+            createTransactionUseCase.execute(param).collectLatest {
+                when (it) {
+                    ResultState.Loading -> {
+                        _uiState.value = uiState.value.copy(isLoading = true)
+                    }
+
+                    is ResultState.Error -> {
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _showMessage.send(it.exception.message.orEmpty())
+                    }
+
+                    is ResultState.Success<*> -> {
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _onSuccessSaved.send(None)
+                    }
+                }
+            }
         }
     }
 

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.core.net.toUri
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -119,7 +118,7 @@ fun MainNavigation(
         composable<Destinations.Preview> {
             val params = it.toRoute<Destinations.Preview>()
             PreviewScreen(
-                imageUri = params.imageUrl.toUri(),
+                imageUrl = params.imageUrl,
                 onNavigateToAdd = {
                     navController.navigate(Destinations.AddNew(transactionId = it)) {
                         popUpTo<Destinations.AddNew> {

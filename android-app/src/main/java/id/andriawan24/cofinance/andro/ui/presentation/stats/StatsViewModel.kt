@@ -9,7 +9,9 @@ import id.andriawan24.cofinance.andro.utils.ext.getCurrentMonth
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentYear
 import id.andriawan24.cofinance.andro.utils.ext.getMonthLabel
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
+import id.andriawan24.cofinance.domain.model.response.Transaction
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -82,59 +84,60 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
                     monthString = getMonthLabel(nextMonth),
-                    year = nextYear,
-                    isLoading = true
+                    year = nextYear
                 )
 
-                fetchJob?.cancel()
-                fetchJob = viewModelScope.launch {
-                    delay(FETCH_DELAY)
-                    fetchTransaction()
-                }
+                fetchTransaction()
             }
         }
     }
 
-    private suspend fun fetchTransaction() {
-        val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+    private fun fetchTransaction() {
+        viewModelScope.launch {
+            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-        getTransactionsUseCase.execute(param = param).collectLatest { result ->
-            if (result.isSuccess) {
-                val transactions = result.getOrDefault(emptyList()).filter {
-                    TransactionCategory.getCategoryByName(it.category) in TransactionCategory.getExpenseCategories()
+            getTransactionsUseCase.execute(param = param).collectLatest { result ->
+                when (result) {
+                    ResultState.Loading -> {
+                        _uiState.value = uiState.value.copy(isLoading = true)
+                    }
+
+                    is ResultState.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            message = result.exception.message.orEmpty()
+                        )
+                    }
+
+                    is ResultState.Success<List<Transaction>> -> {
+                        val transactions = result.data.orEmpty()
+
+                        val totalSum = transactions.sumOf { transaction -> transaction.amount }
+
+                        val transactionsByCategory = transactions
+                            .groupBy { TransactionCategory.getCategoryByName(it.category) }
+                            .mapValues { (_, list) -> list.sumOf { it.amount } }
+
+                        val statItems = transactionsByCategory.map { entry ->
+                            val sweepAngle = 360 * entry.value / totalSum.toFloat()
+                            val percentage = (sweepAngle / 360) * 100
+                            StatItem(
+                                percentage = percentage,
+                                category = entry.key,
+                                sweepAngle = sweepAngle,
+                                amount = entry.value
+                            )
+                        }
+
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                totalExpenses = totalSum,
+                                stats = statItems
+                            )
+                        }
+                    }
                 }
-
-                val totalSum = transactions.sumOf { transaction -> transaction.amount }
-
-                val transactionsByCategory = transactions
-                    .groupBy { TransactionCategory.getCategoryByName(it.category) }
-                    .mapValues { (_, list) -> list.sumOf { it.amount } }
-
-                val statItems = transactionsByCategory.map { entry ->
-                    val sweepAngle = 360 * entry.value / totalSum.toFloat()
-                    val percentage = (sweepAngle / 360) * 100
-                    StatItem(
-                        percentage = percentage,
-                        category = entry.key,
-                        sweepAngle = sweepAngle,
-                        amount = entry.value
-                    )
-                }
-
-                _uiState.update { state ->
-                    state.copy(
-                        isLoading = false,
-                        totalExpenses = totalSum,
-                        stats = statItems
-                    )
-                }
-            }
-
-            if (result.isFailure) {
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    message = result.exceptionOrNull()?.message.orEmpty()
-                )
             }
         }
     }

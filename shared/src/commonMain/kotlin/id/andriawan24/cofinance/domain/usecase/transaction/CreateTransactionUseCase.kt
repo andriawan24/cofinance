@@ -5,6 +5,7 @@ import id.andriawan24.cofinance.data.repository.TransactionRepository
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.UpdateBalanceParam
 import id.andriawan24.cofinance.domain.model.response.Transaction
+import id.andriawan24.cofinance.utils.ResultState
 import id.andriawan24.cofinance.utils.enums.TransactionType
 import id.andriawan24.cofinance.utils.ext.orZero
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +18,9 @@ class CreateTransactionUseCase(
     private val transactionRepository: TransactionRepository,
     private val accountRepository: AccountRepository
 ) {
-    fun execute(params: AddTransactionParam): Flow<Result<Transaction>> = flow {
+    fun execute(params: AddTransactionParam): Flow<ResultState<Transaction>> = flow {
+        emit(ResultState.Loading)
+
         try {
             val response = transactionRepository.createTransaction(params)
 
@@ -31,7 +34,6 @@ class CreateTransactionUseCase(
                 TransactionType.INCOME -> accountRepository.increaseAmount(param = updateBalanceParam)
                 TransactionType.TRANSFER -> {
                     accountRepository.reduceAmount(param = updateBalanceParam)
-
                     params.receiverAccountsId?.let { receiverAccountId ->
                         val updateBalanceReceiverParam = UpdateBalanceParam(
                             accountsId = receiverAccountId,
@@ -40,11 +42,15 @@ class CreateTransactionUseCase(
                         accountRepository.increaseAmount(param = updateBalanceReceiverParam)
                     }
                 }
+
+                else -> {
+                    /* no-op */
+                }
             }
 
-            emit(Result.success(response))
+            emit(ResultState.Success(response))
         } catch (e: Exception) {
-            emit(Result.failure(e))
+            emit(ResultState.Error(e))
         }
     }.flowOn(Dispatchers.IO)
 }
