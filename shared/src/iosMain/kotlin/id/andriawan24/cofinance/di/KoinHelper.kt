@@ -4,14 +4,14 @@ import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
-import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 
 fun initKoin() {
     startKoin {
-        modules(dataModule, domainModule)
+        modules(mainModule)
     }
 }
 
@@ -21,7 +21,7 @@ class KoinHelper : KoinComponent {
     fun getGetUserUseCase(): GetUserUseCase = get()
     fun getFetchUserUseCase(): FetchUserUseCase = get()
 
-    fun getTransactionsUseCase(): GetTransactionsUseCase = get()
+    fun getTransactionsUseCase(): GetTransactionsGroupByMonthUseCase = get()
 
     private inline fun <reified T> get(): T {
         val instance: T by inject()

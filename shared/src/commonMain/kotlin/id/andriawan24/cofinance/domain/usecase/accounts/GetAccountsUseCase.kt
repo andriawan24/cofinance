@@ -5,6 +5,7 @@ import id.andriawan24.cofinance.domain.model.response.Account
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+
 class GetAccountsUseCase(private val accountRepository: AccountRepository) {
     fun execute(): Flow<Result<List<Account>>> = flow {
         try {

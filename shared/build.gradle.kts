@@ -48,7 +48,7 @@ kotlin {
             implementation(libs.napier)
 
             // Koin
-            implementation(libs.koin.core)
+            api(libs.koin.core)
 
             // Google gemini
             implementation(libs.generativeai.google)
@@ -59,6 +59,7 @@ kotlin {
         }
     }
 }
+
 
 buildkonfig {
     packageName = "com.andreasgift.kmpweatherapp"

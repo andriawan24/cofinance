@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 @Stable
 data class UiState(
     val accounts: List<AccountByGroup> = listOf(),
@@ -23,6 +24,7 @@ data class UiState(
 )
 
 @Stable
+
 class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()

@@ -12,10 +12,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
+
 sealed class ProfileEvent {
     data object NavigateToLoginPage : ProfileEvent()
     data class ShowMessage(val message: String) : ProfileEvent()
 }
+
 
 class ProfileViewModel(
     getUserUseCase: GetUserUseCase,

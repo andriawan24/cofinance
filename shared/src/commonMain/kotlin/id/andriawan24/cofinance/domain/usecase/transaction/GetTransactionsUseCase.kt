@@ -10,15 +10,16 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
-class GetTransactionsUseCase(private val transactionRepository: TransactionRepository) {
-    fun execute(param: GetTransactionsParam): Flow<ResultState<List<Transaction>>> = flow {
-        emit(ResultState.Loading)
 
-        try {
-            val response = transactionRepository.getTransactions(param = param)
-            emit(ResultState.Success(response))
-        } catch (e: Exception) {
-            emit(ResultState.Error(e))
-        }
-    }.flowOn(Dispatchers.IO)
+class GetTransactionsUseCase(private val transactionRepository: TransactionRepository) {
+    fun execute(param: GetTransactionsParam): Flow<ResultState<List<Transaction>>> =
+        flow {
+            emit(ResultState.Loading)
+            try {
+                val response = transactionRepository.getTransactions(param)
+                emit(ResultState.Success(response))
+            } catch (e: Exception) {
+                emit(ResultState.Error(e))
+            }
+        }.flowOn(Dispatchers.IO)
 }

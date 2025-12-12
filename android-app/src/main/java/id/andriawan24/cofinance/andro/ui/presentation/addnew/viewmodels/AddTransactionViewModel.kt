@@ -14,10 +14,10 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.model.response.Account
-import id.andriawan24.cofinance.domain.model.response.Transaction
+import id.andriawan24.cofinance.domain.model.response.TransactionByDate
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
-import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import id.andriawan24.cofinance.utils.ResultState
 import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import java.util.Date
+
 
 @Stable
 data class AddNewUiState(
@@ -85,10 +86,11 @@ sealed class AddNewUiEvent {
     data class SetAccountChooserType(val accountTransferType: AccountTransferType) : AddNewUiEvent()
 }
 
+
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
-    private val getTransactionsUseCase: GetTransactionsUseCase
+    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
@@ -129,7 +131,7 @@ class AddNewViewModel(
 
     fun getDraftedTransaction(id: String) {
         viewModelScope.launch {
-            getTransactionsUseCase.execute(
+            getTransactionsGroupByMonthUseCase.execute(
                 GetTransactionsParam(transactionId = id, isDraft = true)
             ).collectLatest { response ->
                 when (response) {
@@ -137,10 +139,9 @@ class AddNewViewModel(
                         /* no-op */
                     }
 
-                    is ResultState.Success<List<Transaction>> -> {
-                        val transactions = response.data.orEmpty()
-
-                        transactions.getOrNull(0)?.let { transaction ->
+                    is ResultState.Success<List<TransactionByDate>> -> {
+                        val transactions = response.data
+                        transactions.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
                             _uiState.update {
                                 it.copy(
                                     transactionId = transaction.id,

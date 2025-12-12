@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.util.UUID
 
+
 data class CameraUiState(
     val flashlightOn: Boolean = false,
     val shouldShowRationalDialog: Boolean = false,
@@ -35,6 +36,7 @@ sealed class CameraUiEvent {
     data class ShowError(val message: String) : CameraUiEvent()
     data class ImageCaptured(val imageUri: Uri) : CameraUiEvent()
 }
+
 
 @Immutable
 class CameraViewModel : ViewModel() {

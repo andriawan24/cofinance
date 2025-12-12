@@ -21,12 +21,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 sealed class PreviewUiEvent {
     data class NavigateToBalance(val transactionId: String) : PreviewUiEvent()
     data class ShowMessage(val message: String) : PreviewUiEvent()
 }
 
 data class PreviewUiState(var showLoading: Boolean = false)
+
 
 @Immutable
 class PreviewViewModel(

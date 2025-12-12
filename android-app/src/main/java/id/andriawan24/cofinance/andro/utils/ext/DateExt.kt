@@ -14,6 +14,7 @@ import kotlin.time.Instant
 import kotlin.time.toJavaInstant
 
 const val FORMAT_DAY_MONTH_YEAR = "EEE, dd MMMM yyyy"
+const val FORMAT_MONTH = "MMMM"
 const val FORMAT_HOUR_MINUTE = "HH:mm"
 const val FORMAT_ISO_8601 = "yyyy-MM-dd HH:mm:ssXXX"
 
@@ -24,6 +25,22 @@ fun String.toDate(): Date {
     }
     val instant = Instant.parse(this)
     return Date.from(instant.toJavaInstant())
+}
+
+fun Pair<Int, Int>.formatToString(
+    format: String = "dd MMM yyyy, HH:mm z",
+    locale: Locale = LocaleHelper.indonesian
+): String {
+    return try {
+        val calendar = Calendar.getInstance()
+        calendar[Calendar.YEAR] = this.first
+        calendar[Calendar.MONTH] = this.second
+        val formatter = SimpleDateFormat(format, locale)
+        formatter.format(calendar.time)
+    } catch (e: Exception) {
+        Napier.e("Failed to fetch date", e)
+        "Failed to fetch date"
+    }
 }
 
 fun Date.formatToString(

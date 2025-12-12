@@ -13,7 +13,13 @@ import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsViewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
-val viewModelModule = module {
+/**
+ * Android-specific Koin module using constructor DSL for compile-time safety.
+ *
+ * This approach provides compile-time verification of ViewModel constructor
+ * parameters and ensures type safety across the dependency graph.
+ */
+val androidModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::ActivityViewModel)

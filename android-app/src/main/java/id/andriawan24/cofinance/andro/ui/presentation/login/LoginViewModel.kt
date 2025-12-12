@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 sealed class LoginUiEvent {
     data object NavigateHomePage : LoginUiEvent()
     data class ShowMessage(val exception: Exception) : LoginUiEvent()
@@ -24,6 +25,7 @@ sealed class LoginUiEvent {
 data class LoginUiState(
     val isLoading: Boolean = false
 )
+
 
 @Stable
 class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : ViewModel() {

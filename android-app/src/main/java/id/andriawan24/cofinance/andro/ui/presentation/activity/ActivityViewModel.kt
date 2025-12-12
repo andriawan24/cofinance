@@ -3,27 +3,21 @@ package id.andriawan24.cofinance.andro.ui.presentation.activity
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
-import id.andriawan24.cofinance.andro.utils.LocaleHelper
 import id.andriawan24.cofinance.andro.utils.emptyString
-import id.andriawan24.cofinance.andro.utils.ext.FORMAT_DAY_MONTH_YEAR
-import id.andriawan24.cofinance.andro.utils.ext.formatToString
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentMonth
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentYear
 import id.andriawan24.cofinance.andro.utils.ext.getMonthLabel
-import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
-import id.andriawan24.cofinance.domain.model.response.Transaction
-import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.domain.model.response.TransactionByDate
+import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import id.andriawan24.cofinance.utils.ResultState
-import id.andriawan24.cofinance.utils.enums.TransactionType
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 @Stable
 data class ActivityUiState(
@@ -43,7 +37,9 @@ sealed class ActivityUiEvent {
     data object OnPreviousMonth : ActivityUiEvent()
 }
 
-class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCase) : ViewModel() {
+
+class ActivityViewModel(private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase) :
+    ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -62,8 +58,7 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
                     month = nextMonth,
                     monthString = getMonthLabel(nextMonth),
                     year = nextYear,
-                    transactions = emptyList(),
-                    isLoading = true
+                    transactions = emptyList()
                 )
 
                 fetchTransaction()
@@ -95,58 +90,20 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
             withContext(Dispatchers.IO) {
-                getTransactionsUseCase.execute(param = param).collectLatest { result ->
+                getTransactionsGroupByMonthUseCase.execute(param = param).collectLatest { result ->
                     when (result) {
                         ResultState.Loading -> {
                             _uiState.value = uiState.value.copy(isLoading = true)
                         }
 
-                        is ResultState.Success<List<Transaction>> -> {
-                            val transactionGrouped = result.data.orEmpty().groupBy {
-                                it.date.toDate()
-                                    .formatToString(
-                                        format = FORMAT_DAY_MONTH_YEAR,
-                                        locale = LocaleHelper.getCurrentLocale()
-                                    )
-                            }
-
-                            var expense = 0L
-                            var income = 0L
-                            val transactionByDate = mutableListOf<TransactionByDate>()
-
-                            transactionGrouped.forEach {
-                                val expenseThisMonth = it.value
-                                    .filter { transaction -> transaction.type == TransactionType.EXPENSE }
-                                    .sumOf { transaction -> transaction.amount }
-
-                                val incomeThisMonth = it.value
-                                    .filter { transaction -> transaction.type == TransactionType.INCOME }
-                                    .sumOf { transaction -> transaction.amount }
-
-                                expense += expenseThisMonth
-                                income += incomeThisMonth
-
-                                transactionByDate.add(
-                                    TransactionByDate(
-                                        dateLabel = it.key,
-                                        transactions = it.value,
-                                        totalAmount = expenseThisMonth + incomeThisMonth
-                                    )
-                                )
-                            }
-
+                        is ResultState.Success<List<TransactionByDate>> -> {
                             _uiState.value = uiState.value.copy(
                                 isLoading = false,
-                                transactions = transactionByDate,
-                                expense = expense,
-                                income = income,
-                                balance = income - expense
+                                transactions = result.data
                             )
                         }
 
                         is ResultState.Error -> {
-                            Napier.e { "Failed to get activities: ${result.exception.message}" }
-
                             _uiState.value = _uiState.value.copy(
                                 isLoading = false,
                                 message = result.exception.message.orEmpty()
@@ -159,7 +116,6 @@ class ActivityViewModel(private val getTransactionsUseCase: GetTransactionsUseCa
     }
 
     companion object {
-        private const val FETCH_DELAY = 500L
         private const val JANUARY = 1
         private const val DECEMBER = 12
     }

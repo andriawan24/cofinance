@@ -409,7 +409,9 @@ private fun AddAccountBottomSheetDialog(
 
     BaseBottomSheet(
         state = addAccountBottomSheetState,
-        onDismissRequest = {}
+        onDismissRequest = {
+            onDialogEvent(AddNewDialogEvent.ToggleAddAccountDialog(false))
+        }
     ) {
         AddAccountBottomSheet(
             onAccountSaved = {

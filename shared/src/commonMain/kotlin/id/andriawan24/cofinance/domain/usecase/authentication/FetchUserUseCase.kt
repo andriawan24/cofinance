@@ -6,6 +6,7 @@ import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+
 class FetchUserUseCase(private val authRepository: AuthenticationRepository) {
 
     fun execute(): Flow<ResultState<User>> = flow {
