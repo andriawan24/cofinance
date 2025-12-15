@@ -24,7 +24,7 @@ dotsindicator = "5.1.0"
 camerax = "1.5.2"
 coreKtx = "1.17.0"
 googleService = "4.4.4"
-firebase = "34.6.0"
+firebase = "34.7.0"
 skie = "0.10.8"
 
 [libraries]
