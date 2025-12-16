@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.NavigateToLoginPage
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.ShowMessage
+import id.andriawan24.cofinance.andro.ui.util.mapAuthErrorMessage
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import id.andriawan24.cofinance.utils.ResultState
@@ -53,7 +54,7 @@ class ProfileViewModel(
                     }
 
                     is ResultState.Error -> {
-                        _profileEvent.send(ShowMessage(it.exception.message.orEmpty()))
+                        _profileEvent.send(ShowMessage(mapAuthErrorMessage(it.exception)))
                     }
 
                     is ResultState.Success<*> -> {

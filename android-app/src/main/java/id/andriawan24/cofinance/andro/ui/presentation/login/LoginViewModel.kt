@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.NavigateHomePage
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.ShowMessage
+import id.andriawan24.cofinance.andro.ui.util.mapAuthErrorMessage
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.utils.ResultState
@@ -19,7 +20,7 @@ import kotlinx.coroutines.launch
 
 sealed class LoginUiEvent {
     data object NavigateHomePage : LoginUiEvent()
-    data class ShowMessage(val exception: Exception) : LoginUiEvent()
+    data class ShowMessage(val message: String) : LoginUiEvent()
 }
 
 data class LoginUiState(
@@ -42,7 +43,7 @@ class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : Vie
                     ResultState.Loading -> setLoading(true)
                     is ResultState.Error -> {
                         setLoading(false)
-                        _loginUiEvent.send(ShowMessage(it.exception))
+                        _loginUiEvent.send(ShowMessage(mapAuthErrorMessage(it.exception)))
                     }
 
                     is ResultState.Success<Boolean> -> {
