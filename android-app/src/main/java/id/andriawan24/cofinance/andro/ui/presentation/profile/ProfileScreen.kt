@@ -21,9 +21,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,6 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.window.Dialog
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import id.andriawan24.cofinance.andro.R
@@ -51,7 +49,7 @@ fun ProfileScreen(
     showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
-    var showConfirmationLogoutDialog by remember { mutableStateOf(false) }
+    val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
 
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
@@ -64,13 +62,11 @@ fun ProfileScreen(
         name = profileViewModel.user.name,
         imageUrl = profileViewModel.user.avatarUrl,
         email = profileViewModel.user.email,
-        onSignedOut = {
-            showConfirmationLogoutDialog = true
-        }
+        onSignedOut = { profileViewModel.toggleDialogLogout(true) }
     )
 
-    if (showConfirmationLogoutDialog) {
-        Dialog(onDismissRequest = { }) {
+    if (uiState.isShowDialogLogout) {
+        Dialog(onDismissRequest = { profileViewModel.toggleDialogLogout(false) }) {
             Column(
                 modifier = Modifier
                     .background(
@@ -80,7 +76,9 @@ fun ProfileScreen(
                     .padding(Dimensions.SIZE_24)
             ) {
                 Text(stringResource(R.string.label_logout_question))
+
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
+
                 Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)) {
                     Button(
                         colors = ButtonDefaults.buttonColors(
@@ -88,14 +86,13 @@ fun ProfileScreen(
                         ),
                         onClick = {
                             profileViewModel.logout()
+                            profileViewModel.toggleDialogLogout(false)
                         }
                     ) {
-                        Text("Yes")
+                        Text(stringResource(R.string.label_yes))
                     }
 
-                    Button(
-                        onClick = { showConfirmationLogoutDialog = false }
-                    ) {
+                    Button(onClick = { profileViewModel.toggleDialogLogout(false) }) {
                         Text(stringResource(R.string.label_cancel))
                     }
                 }
@@ -163,31 +160,31 @@ fun ProfileContent(
 
                 VerticalSpacing(Dimensions.SIZE_12)
 
-                SecondaryButton(
-                    contentPadding = PaddingValues(
-                        vertical = Dimensions.SIZE_8,
-                        horizontal = Dimensions.SIZE_16
-                    ),
-                    onClick = {}
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
-                    ) {
-                        Image(
-                            modifier = Modifier.size(Dimensions.SIZE_24),
-                            painter = painterResource(R.drawable.ic_edit),
-                            contentDescription = null
-                        )
-
-                        Text(
-                            text = "Edit Profile",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        )
-                    }
-                }
+//                SecondaryButton(
+//                    contentPadding = PaddingValues(
+//                        vertical = Dimensions.SIZE_8,
+//                        horizontal = Dimensions.SIZE_16
+//                    ),
+//                    onClick = {}
+//                ) {
+//                    Row(
+//                        verticalAlignment = Alignment.CenterVertically,
+//                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
+//                    ) {
+//                        Image(
+//                            modifier = Modifier.size(Dimensions.SIZE_24),
+//                            painter = painterResource(R.drawable.ic_edit),
+//                            contentDescription = null
+//                        )
+//
+//                        Text(
+//                            text = "Edit Profile",
+//                            style = MaterialTheme.typography.labelSmall.copy(
+//                                color = MaterialTheme.colorScheme.onSurface
+//                            )
+//                        )
+//                    }
+//                }
             }
         }
 
@@ -236,9 +233,7 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
-                onSignedOut = {
-
-                }
+                onSignedOut = { }
             )
         }
     }
