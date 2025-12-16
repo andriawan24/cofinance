@@ -12,6 +12,7 @@ fun ActivityScreen(onNavigateToAdd: () -> Unit) {
     val uiState by activityViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(true) {
+        activityViewModel.getBalance()
         activityViewModel.fetchTransaction()
     }
 

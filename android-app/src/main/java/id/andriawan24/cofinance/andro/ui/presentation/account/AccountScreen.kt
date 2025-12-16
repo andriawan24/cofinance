@@ -24,7 +24,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,12 +36,12 @@ import id.andriawan24.cofinance.andro.ui.components.HorizontalSpacing
 import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
-import id.andriawan24.cofinance.andro.ui.presentation.account.models.AccountByGroup
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.TextSizes
 import id.andriawan24.cofinance.domain.model.response.Account
+import id.andriawan24.cofinance.domain.model.response.AccountByGroup
 import id.andriawan24.cofinance.utils.enums.AccountGroupType
 import org.koin.androidx.compose.koinViewModel
 
@@ -55,9 +54,6 @@ fun AccountScreen(
 
     AccountContent(
         uiState = uiState,
-        isLoading = uiState.isLoading,
-        isRefreshing = uiState.isRefreshing,
-        balance = uiState.balance,
         onRefresh = { accountViewModel.refresh() },
         onNavigateToAddAccount = onNavigateToAddAccount
     )
@@ -68,25 +64,22 @@ fun AccountScreen(
 private fun AccountContent(
     modifier: Modifier = Modifier,
     uiState: UiState,
-    balance: Long,
-    isLoading: Boolean,
-    isRefreshing: Boolean,
     onRefresh: () -> Unit,
     onNavigateToAddAccount: () -> Unit,
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
-        PageTitle(
-            modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
-            title = stringResource(R.string.label_account)
-        )
+    PullToRefreshBox(isRefreshing = uiState.isRefreshing, onRefresh = onRefresh) {
+        Column(modifier = modifier.fillMaxSize()) {
+            PageTitle(
+                modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
+                title = stringResource(R.string.label_account)
+            )
 
-        AssetCard(
-            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-            balance = balance,
-            onAddAccountClicked = onNavigateToAddAccount
-        )
+            AssetCard(
+                modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                balance = uiState.balance,
+                onAddAccountClicked = onNavigateToAddAccount
+            )
 
-        PullToRefreshBox(isRefreshing = isRefreshing, onRefresh = onRefresh) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -96,7 +89,7 @@ private fun AccountContent(
                 overscrollEffect = null,
                 contentPadding = PaddingValues(vertical = Dimensions.SIZE_12)
             ) {
-                if (isLoading) {
+                if (uiState.isLoading) {
                     item {
                         CircularProgressIndicator()
                     }
@@ -218,8 +211,8 @@ private fun AccountScreenPreview() {
                         AccountByGroup(
                             groupLabel = AccountGroupType.CASH.displayName,
                             totalAmount = 110_000,
-                            backgroundColor = Color(0xFFEEF9F8),
-                            imageRes = R.drawable.ic_money,
+                            backgroundColor = 0xFFEEF9F8,
+                            accountGroupType = AccountGroupType.CASH,
                             accounts = listOf(
                                 Account(
                                     name = "BCA",
@@ -234,8 +227,8 @@ private fun AccountScreenPreview() {
                         AccountByGroup(
                             groupLabel = AccountGroupType.SAVINGS.displayName,
                             totalAmount = 50_000,
-                            backgroundColor = Color(0xFFFFF4FD),
-                            imageRes = R.drawable.ic_saving,
+                            backgroundColor = 0xFFFFF4FD,
+                            accountGroupType = AccountGroupType.CREDIT,
                             accounts = listOf(
                                 Account(
                                     name = "BCA",
@@ -249,11 +242,8 @@ private fun AccountScreenPreview() {
                         )
                     )
                 ),
-                isLoading = false,
                 onNavigateToAddAccount = { },
-                balance = 1000,
                 onRefresh = {},
-                isRefreshing = false
             )
         }
     }

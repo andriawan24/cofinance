@@ -112,24 +112,24 @@ class AddNewViewModel(
         _uiState.value = uiState.value.copy(loadingAccount = true)
         viewModelScope.launch {
             getAccountsUseCase.execute().collectLatest {
-                if (it.isSuccess) {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            accounts = it.getOrDefault(emptyList()),
-                            loadingAccount = false
-                        )
-                    }
-                }
-
-                if (it.isFailure) {
-                    _uiState.update { currentState -> currentState.copy(loadingAccount = false) }
-                    _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                }
+//                if (it.isSuccess) {
+//                    _uiState.update { currentState ->
+//                        currentState.copy(
+//                            accounts = it.getOrDefault(emptyList()),
+//                            loadingAccount = false
+//                        )
+//                    }
+//                }
+//
+//                if (it.isFailure) {
+//                    _uiState.update { currentState -> currentState.copy(loadingAccount = false) }
+//                    _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+//                }
             }
         }
     }
 
-    fun getDraftedTransaction(id: String) {
+    fun checkDraftTransaction(id: String) {
         viewModelScope.launch {
             getTransactionsGroupByMonthUseCase.execute(
                 GetTransactionsParam(transactionId = id, isDraft = true)

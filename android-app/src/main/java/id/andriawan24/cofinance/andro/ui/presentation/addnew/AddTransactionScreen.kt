@@ -79,7 +79,7 @@ fun AddTransactionScreen(
 
     LaunchedEffect(true) {
         if (transactionId != null) {
-            addNewViewModel.getDraftedTransaction(transactionId)
+            addNewViewModel.checkDraftTransaction(transactionId)
         }
     }
 

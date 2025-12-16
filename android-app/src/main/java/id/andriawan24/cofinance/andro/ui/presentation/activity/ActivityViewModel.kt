@@ -8,13 +8,16 @@ import id.andriawan24.cofinance.andro.utils.ext.getCurrentMonth
 import id.andriawan24.cofinance.andro.utils.ext.getCurrentYear
 import id.andriawan24.cofinance.andro.utils.ext.getMonthLabel
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
+import id.andriawan24.cofinance.domain.model.response.BalanceStats
 import id.andriawan24.cofinance.domain.model.response.TransactionByDate
+import id.andriawan24.cofinance.domain.usecase.transaction.GetBalanceStatsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -38,7 +41,10 @@ sealed class ActivityUiEvent {
 }
 
 
-class ActivityViewModel(private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase) :
+class ActivityViewModel(
+    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
+    private val getBalanceStateUseCase: GetBalanceStatsUseCase
+) :
     ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
@@ -61,6 +67,7 @@ class ActivityViewModel(private val getTransactionsGroupByMonthUseCase: GetTrans
                     transactions = emptyList()
                 )
 
+                getBalance()
                 fetchTransaction()
             }
 
@@ -80,7 +87,33 @@ class ActivityViewModel(private val getTransactionsGroupByMonthUseCase: GetTrans
                     transactions = emptyList()
                 )
 
+                getBalance()
                 fetchTransaction()
+            }
+        }
+    }
+
+    fun getBalance() {
+        viewModelScope.launch {
+            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+
+            getBalanceStateUseCase.execute(param).collectLatest {
+                when (it) {
+                    ResultState.Loading -> {
+                        // TODO: Handle loading
+                    }
+
+                    is ResultState.Error -> TODO()
+                    is ResultState.Success<BalanceStats> -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                balance = it.data.balance,
+                                expense = it.data.expenses,
+                                income = it.data.income
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -89,26 +122,24 @@ class ActivityViewModel(private val getTransactionsGroupByMonthUseCase: GetTrans
         viewModelScope.launch {
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-            withContext(Dispatchers.IO) {
-                getTransactionsGroupByMonthUseCase.execute(param = param).collectLatest { result ->
-                    when (result) {
-                        ResultState.Loading -> {
-                            _uiState.value = uiState.value.copy(isLoading = true)
-                        }
+            getTransactionsGroupByMonthUseCase.execute(param = param).collectLatest { result ->
+                when (result) {
+                    ResultState.Loading -> {
+                        _uiState.value = uiState.value.copy(isLoading = true)
+                    }
 
-                        is ResultState.Success<List<TransactionByDate>> -> {
-                            _uiState.value = uiState.value.copy(
-                                isLoading = false,
-                                transactions = result.data
-                            )
-                        }
+                    is ResultState.Success<List<TransactionByDate>> -> {
+                        _uiState.value = uiState.value.copy(
+                            isLoading = false,
+                            transactions = result.data
+                        )
+                    }
 
-                        is ResultState.Error -> {
-                            _uiState.value = _uiState.value.copy(
-                                isLoading = false,
-                                message = result.exception.message.orEmpty()
-                            )
-                        }
+                    is ResultState.Error -> {
+                        _uiState.value = _uiState.value.copy(
+                            isLoading = false,
+                            message = result.exception.message.orEmpty()
+                        )
                     }
                 }
             }
