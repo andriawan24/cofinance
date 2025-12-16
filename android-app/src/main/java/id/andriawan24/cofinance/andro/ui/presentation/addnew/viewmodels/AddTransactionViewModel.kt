@@ -14,10 +14,11 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.model.response.Account
-import id.andriawan24.cofinance.domain.model.response.Transaction
+import id.andriawan24.cofinance.domain.model.response.AccountByGroup
+import id.andriawan24.cofinance.domain.model.response.TransactionByDate
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
-import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsUseCase
+import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import id.andriawan24.cofinance.utils.ResultState
 import id.andriawan24.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import okhttp3.internal.toLongOrDefault
 import java.util.Date
+
 
 @Stable
 data class AddNewUiState(
@@ -45,8 +47,8 @@ data class AddNewUiState(
     val dateTime: Date = Date(),
     val notes: String = emptyString(),
     val isValid: Boolean = false,
-    val accounts: List<Account> = emptyList(),
-    val loadingAccount: Boolean = false,
+    val accounts: List<AccountByGroup> = emptyList(),
+    val isLoadingAccount: Boolean = false,
     val isLoading: Boolean = false,
     val transactionId: String? = null
 )
@@ -85,10 +87,11 @@ sealed class AddNewUiEvent {
     data class SetAccountChooserType(val accountTransferType: AccountTransferType) : AddNewUiEvent()
 }
 
+
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
-    private val getTransactionsUseCase: GetTransactionsUseCase
+    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
@@ -107,29 +110,40 @@ class AddNewViewModel(
     }
 
     private fun getAccounts() {
-        _uiState.value = uiState.value.copy(loadingAccount = true)
+        _uiState.value = uiState.value.copy(isLoadingAccount = true)
         viewModelScope.launch {
             getAccountsUseCase.execute().collectLatest {
-                if (it.isSuccess) {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            accounts = it.getOrDefault(emptyList()),
-                            loadingAccount = false
-                        )
+                when (it) {
+                    ResultState.Loading -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoadingAccount = true
+                            )
+                        }
                     }
-                }
 
-                if (it.isFailure) {
-                    _uiState.update { currentState -> currentState.copy(loadingAccount = false) }
-                    _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                    is ResultState.Error -> {
+                        _uiState.update { state ->
+                            state.copy(isLoadingAccount = false)
+                        }
+                    }
+
+                    is ResultState.Success<List<AccountByGroup>> -> {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                accounts = it.data,
+                                isLoadingAccount = false
+                            )
+                        }
+                    }
                 }
             }
         }
     }
 
-    fun getDraftedTransaction(id: String) {
+    fun checkDraftTransaction(id: String) {
         viewModelScope.launch {
-            getTransactionsUseCase.execute(
+            getTransactionsGroupByMonthUseCase.execute(
                 GetTransactionsParam(transactionId = id, isDraft = true)
             ).collectLatest { response ->
                 when (response) {
@@ -137,10 +151,9 @@ class AddNewViewModel(
                         /* no-op */
                     }
 
-                    is ResultState.Success<List<Transaction>> -> {
-                        val transactions = response.data.orEmpty()
-
-                        transactions.getOrNull(0)?.let { transaction ->
+                    is ResultState.Success<List<TransactionByDate>> -> {
+                        val transactions = response.data
+                        transactions.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
                             _uiState.update {
                                 it.copy(
                                     transactionId = transaction.id,

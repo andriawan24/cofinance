@@ -5,12 +5,14 @@ import id.andriawan24.cofinance.domain.model.request.IdTokenParam
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam.Companion.toRequest
 import id.andriawan24.cofinance.domain.model.response.User
 
+
 interface AuthenticationRepository {
     fun getUser(): User
     suspend fun fetchUser(): User
     suspend fun login(idTokenParam: IdTokenParam)
     suspend fun logout()
 }
+
 
 class AuthenticationRepositoryImpl(
     private val supabaseDataSource: SupabaseDataSource

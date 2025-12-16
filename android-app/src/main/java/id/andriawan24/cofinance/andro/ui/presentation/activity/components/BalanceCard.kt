@@ -140,7 +140,7 @@ private fun Balance(modifier: Modifier = Modifier, balance: Long) {
                 .padding(Dimensions.SIZE_16)
         ) {
             Text(
-                text = stringResource(R.string.label_stats),
+                text = stringResource(R.string.label_balance),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     lineHeightStyle = LineHeightStyle(

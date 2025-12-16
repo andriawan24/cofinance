@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 data class AddAccountUiState(
     val category: AccountGroupType = AccountGroupType.CASH,
     val name: String = emptyString(),
@@ -34,6 +35,7 @@ sealed interface AddAccountEvent {
     data object SaveAccount : AddAccountEvent
     data object BackClicked : AddAccountEvent
 }
+
 
 class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(AddAccountUiState())
@@ -81,14 +83,18 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
     }
 
     private fun saveAccount() {
-        val category = _uiState.value.category
-        val name = _uiState.value.name
-        val amount = _uiState.value.amount
+        viewModelScope.launch {
+            val category = _uiState.value.category
+            val name = _uiState.value.name
+            val amount = _uiState.value.amount.toLongOrNull() ?: 0
 
-        if (name.isNotBlank() && amount.isNotBlank()) {
-            val account = AccountParam(name = name, balance = amount.toInt(), group = category.name)
+            if (name.isNotBlank()) {
+                val account = AccountParam(
+                    name = name,
+                    balance = amount,
+                    group = category.name
+                )
 
-            viewModelScope.launch {
                 _uiState.update { it.copy(isLoading = true) }
 
                 addAccountUseCase.execute(account).collectLatest {
@@ -99,9 +105,11 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
 
                     if (it.isFailure) {
                         _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-                        _uiState.update { it.copy(isLoading = false) }
+                        _uiState.update { state -> state.copy(isLoading = false) }
                     }
                 }
+            } else {
+                _showMessage.send("Name is required")
             }
         }
     }

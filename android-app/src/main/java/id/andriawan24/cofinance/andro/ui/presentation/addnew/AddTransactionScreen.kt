@@ -79,7 +79,7 @@ fun AddTransactionScreen(
 
     LaunchedEffect(true) {
         if (transactionId != null) {
-            addNewViewModel.getDraftedTransaction(transactionId)
+            addNewViewModel.checkDraftTransaction(transactionId)
         }
     }
 
@@ -138,7 +138,6 @@ fun AddNewContent(
     AddAccountBottomSheetDialog(dialogState, onEvent, onDialogEvent)
 }
 
-// Extracted header and tabs composables
 @Composable
 private fun AddTransactionHeader(onEvent: (AddNewUiEvent) -> Unit) {
     Box(
@@ -409,7 +408,9 @@ private fun AddAccountBottomSheetDialog(
 
     BaseBottomSheet(
         state = addAccountBottomSheetState,
-        onDismissRequest = {}
+        onDismissRequest = {
+            onDialogEvent(AddNewDialogEvent.ToggleAddAccountDialog(false))
+        }
     ) {
         AddAccountBottomSheet(
             onAccountSaved = {

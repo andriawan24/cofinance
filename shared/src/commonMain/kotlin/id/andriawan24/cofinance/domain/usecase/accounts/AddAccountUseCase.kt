@@ -6,6 +6,7 @@ import id.andriawan24.cofinance.utils.None
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+
 class AddAccountUseCase(private val accountRepository: AccountRepository) {
     fun execute(param: AccountParam): Flow<Result<None>> = flow {
         try {

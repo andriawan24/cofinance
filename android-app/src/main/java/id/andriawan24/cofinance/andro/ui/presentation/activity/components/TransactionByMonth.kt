@@ -12,11 +12,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import id.andriawan24.cofinance.andro.ui.presentation.activity.models.TransactionByDate
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
+import id.andriawan24.cofinance.andro.utils.ext.FORMAT_MONTH
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
+import id.andriawan24.cofinance.andro.utils.ext.formatToString
+import id.andriawan24.cofinance.domain.model.response.TransactionByDate
 
 @Composable
 fun TransactionByMonth(
@@ -42,7 +44,7 @@ fun TransactionByMonth(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = item.dateLabel,
+                text = item.dateLabel.formatToString(format = FORMAT_MONTH),
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -76,7 +78,7 @@ private fun TransactionByMonthPreview() {
     CofinanceTheme {
         TransactionByMonth(
             modifier = Modifier.fillMaxWidth(),
-            item = TransactionByDate()
+            item = TransactionByDate(dateLabel = Pair(2025, 0))
         )
     }
 }

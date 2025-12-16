@@ -14,17 +14,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import id.andriawan24.cofinance.andro.ui.presentation.account.models.AccountByGroup
 import id.andriawan24.cofinance.andro.utils.Dimensions
 import id.andriawan24.cofinance.andro.utils.NumberHelper
 import id.andriawan24.cofinance.andro.utils.ext.dropShadow
+import id.andriawan24.cofinance.andro.utils.toDrawable
+import id.andriawan24.cofinance.domain.model.response.AccountByGroup
 
 @Composable
 internal fun AccountGroupCard(
-    group: AccountByGroup,
     modifier: Modifier = Modifier,
+    group: AccountByGroup,
 ) {
     Column(
         modifier = modifier
@@ -49,13 +51,13 @@ internal fun AccountGroupCard(
             Box(
                 modifier = Modifier
                     .background(
-                        color = group.backgroundColor,
+                        color = Color(group.backgroundColor),
                         shape = MaterialTheme.shapes.small
                     )
                     .padding(all = Dimensions.SIZE_12),
             ) {
                 Image(
-                    painter = painterResource(group.imageRes),
+                    painter = painterResource(group.accountGroupType.toDrawable()),
                     contentDescription = null
                 )
             }
@@ -83,7 +85,7 @@ internal fun AccountGroupCard(
                 Row(
                     modifier = Modifier
                         .background(
-                            color = group.backgroundColor,
+                            color = Color(group.backgroundColor),
                             shape = MaterialTheme.shapes.medium
                         )
                         .padding(all = Dimensions.SIZE_12),

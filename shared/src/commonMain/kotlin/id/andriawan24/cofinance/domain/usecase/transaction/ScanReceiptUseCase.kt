@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
+
 class ScanReceiptUseCase(private val transactionRepository: TransactionRepository) {
     fun execute(image: ByteArray): Flow<ResultState<ReceiptScan>> = flow {
         emit(ResultState.Loading)

@@ -93,6 +93,7 @@ android {
             jvmTarget.set(JvmTarget.JVM_1_8)
         }
     }
+
 }
 
 dependencies {
@@ -120,7 +121,6 @@ dependencies {
     implementation(libs.napier)
 
     // Koin dependency injection
-    implementation(libs.koin.core)
     implementation(libs.koin.android.compose)
 
     // Splash Screen

@@ -4,7 +4,7 @@ import id.andriawan24.cofinance.data.model.request.AccountRequest
 
 data class AccountParam(
     val name: String,
-    val balance: Int,
+    val balance: Long,
     val group: String
 ) {
     companion object {

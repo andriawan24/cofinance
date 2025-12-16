@@ -33,7 +33,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
@@ -233,16 +232,14 @@ private fun AddAccountBottomSheetContent(
                         modifier = Modifier.fillMaxWidth(),
                         value = uiState.amount,
                         onValueChange = {
-                            if (it.isDigitsOnly() && it.length < 13) {
-                                onEvent(AddAccountEvent.AmountChanged(it))
-                            }
+                            onEvent(AddAccountEvent.AmountChanged(it))
                         },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done,
                             keyboardType = KeyboardType.Number
                         ),
                         textStyle = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onBackground
                         ),
                         decorationBox = { innerTextField ->
                             if (uiState.amount.isBlank()) {

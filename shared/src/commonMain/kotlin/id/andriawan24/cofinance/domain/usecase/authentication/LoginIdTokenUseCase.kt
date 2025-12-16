@@ -6,6 +6,7 @@ import id.andriawan24.cofinance.utils.ResultState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
+
 class LoginIdTokenUseCase(private val repository: AuthenticationRepository) {
     fun execute(idTokenParam: IdTokenParam): Flow<ResultState<Boolean>> {
         return flow {

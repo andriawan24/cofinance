@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+
 data class StatsUiState(
     val year: Int = getCurrentYear(),
     val month: Int = getCurrentMonth(),
@@ -34,6 +35,7 @@ sealed class StatsUiEvent {
     data object OnNextMonth : StatsUiEvent()
     data object OnPreviousMonth : StatsUiEvent()
 }
+
 
 class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase) : ViewModel() {
     private val _uiState = MutableStateFlow(StatsUiState())
@@ -110,11 +112,9 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
                     }
 
                     is ResultState.Success<List<Transaction>> -> {
-                        val transactions = result.data.orEmpty()
+                        val totalSum = result.data.sumOf { transaction -> transaction.amount }
 
-                        val totalSum = transactions.sumOf { transaction -> transaction.amount }
-
-                        val transactionsByCategory = transactions
+                        val transactionsByCategory = result.data
                             .groupBy { TransactionCategory.getCategoryByName(it.category) }
                             .mapValues { (_, list) -> list.sumOf { it.amount } }
 

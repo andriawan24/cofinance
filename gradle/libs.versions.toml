@@ -1,6 +1,6 @@
 [versions]
 accompanistPermissions = "0.37.3"
-agp = "8.13.1"
+agp = "8.13.2"
 buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.3.0"
 coil-network-okhttp = "3.3.0"
@@ -24,8 +24,9 @@ dotsindicator = "5.1.0"
 camerax = "1.5.2"
 coreKtx = "1.17.0"
 googleService = "4.4.4"
-firebase = "34.6.0"
+firebase = "34.7.0"
 skie = "0.10.8"
+ksp = "2.3.2"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -73,3 +74,4 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 googleService = { id = "com.google.gms.google-services", version.ref = "googleService" }
 skie = { id = "co.touchlab.skie", version.ref = "skie" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

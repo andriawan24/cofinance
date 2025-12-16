@@ -7,12 +7,14 @@ import id.andriawan24.cofinance.domain.model.request.UpdateBalanceParam
 import id.andriawan24.cofinance.domain.model.request.UpdateBalanceParam.Companion.toRequest
 import id.andriawan24.cofinance.domain.model.response.Account
 
+
 interface AccountRepository {
     suspend fun getAccounts(): List<Account>
     suspend fun addAccount(param: AccountParam)
     suspend fun reduceAmount(param: UpdateBalanceParam)
     suspend fun increaseAmount(param: UpdateBalanceParam)
 }
+
 
 class AccountRepositoryImpl(
     private val supabaseDataSource: SupabaseDataSource
