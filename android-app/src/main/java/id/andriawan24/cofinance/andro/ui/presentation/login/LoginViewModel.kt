@@ -3,6 +3,8 @@ package id.andriawan24.cofinance.andro.ui.presentation.login
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan24.cofinance.andro.data.preferences.BiometricPreferences
+import id.andriawan24.cofinance.andro.data.security.SecureTokenStorage
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.NavigateHomePage
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginUiEvent.ShowMessage
 import id.andriawan24.cofinance.domain.model.request.IdTokenParam
@@ -23,19 +25,50 @@ sealed class LoginUiEvent {
 }
 
 data class LoginUiState(
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val isBiometricEnabled: Boolean = false,
+    val hasStoredToken: Boolean = false
 )
 
 
 @Stable
-class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : ViewModel() {
+class LoginViewModel(
+    private val loginIdTokenUseCase: LoginIdTokenUseCase,
+    private val biometricPreferences: BiometricPreferences,
+    private val secureTokenStorage: SecureTokenStorage
+) : ViewModel() {
     private val _loginUiEvent = Channel<LoginUiEvent>(Channel.BUFFERED)
     val loginEvent = _loginUiEvent.receiveAsFlow()
 
     private val _loginUiState = MutableStateFlow(LoginUiState())
     val loginUiState = _loginUiState.asStateFlow()
 
-    fun signInWithIdToken(param: IdTokenParam) {
+    init {
+        viewModelScope.launch {
+            biometricPreferences.biometricEnabled.collectLatest { enabled ->
+                _loginUiState.update { state -> state.copy(isBiometricEnabled = enabled) }
+            }
+        }
+        refreshStoredTokenState()
+    }
+
+    fun authenticateWithGoogleToken(idToken: String) {
+        secureTokenStorage.saveToken(idToken)
+        refreshStoredTokenState()
+        signInWithIdToken(IdTokenParam(idToken))
+    }
+
+    fun authenticateWithStoredToken(onTokenMissing: () -> Unit) {
+        val token = secureTokenStorage.getToken()
+        if (token.isNullOrEmpty()) {
+            _loginUiState.update { state -> state.copy(hasStoredToken = false) }
+            onTokenMissing()
+            return
+        }
+        signInWithIdToken(IdTokenParam(token))
+    }
+
+    private fun signInWithIdToken(param: IdTokenParam) {
         viewModelScope.launch {
             loginIdTokenUseCase.execute(param).collectLatest {
                 when (it) {
@@ -56,5 +89,10 @@ class LoginViewModel(private val loginIdTokenUseCase: LoginIdTokenUseCase) : Vie
 
     fun setLoading(isLoading: Boolean) {
         _loginUiState.update { state -> state.copy(isLoading = isLoading) }
+    }
+
+    private fun refreshStoredTokenState() {
+        val hasToken = !secureTokenStorage.getToken().isNullOrEmpty()
+        _loginUiState.update { state -> state.copy(hasStoredToken = hasToken) }
     }
 }

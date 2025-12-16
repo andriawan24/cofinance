@@ -1,5 +1,7 @@
 package id.andriawan24.cofinance.andro.di
 
+import id.andriawan24.cofinance.andro.data.preferences.BiometricPreferences
+import id.andriawan24.cofinance.andro.data.security.SecureTokenStorage
 import id.andriawan24.cofinance.andro.ui.presentation.account.AccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddAccountViewModel
@@ -10,6 +12,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsViewModel
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -20,6 +23,8 @@ import org.koin.dsl.module
  * parameters and ensures type safety across the dependency graph.
  */
 val androidModule = module {
+    single { BiometricPreferences(androidContext()) }
+    single { SecureTokenStorage(androidContext()) }
     viewModelOf(::LoginViewModel)
     viewModelOf(::ProfileViewModel)
     viewModelOf(::ActivityViewModel)

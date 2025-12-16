@@ -1,69 +1,75 @@
 [versions]
 accompanistPermissions = "0.37.3"
 agp = "8.13.2"
+biometric = "1.1.0"
 buildkonfigGradlePlugin = "0.17.1"
 coil-compose = "3.3.0"
 coil-network-okhttp = "3.3.0"
-desugar_jdk_libs = "2.1.5"
-generativeaiGoogle = "0.9.0-1.1.0"
-splashscreen = "1.2.0"
+camerax = "1.5.2"
+datastore = "1.1.1"
+coreKtx = "1.17.0"
 credentials = "1.5.0"
 credentialsPlayServicesAuth = "1.5.0"
+desugar_jdk_libs = "2.1.5"
+dotsindicator = "5.1.0"
+firebase = "34.7.0"
+generativeaiGoogle = "0.9.0-1.1.0"
+googleService = "4.4.4"
 googleid = "1.1.1"
+koin = "4.1.1"
 kotlin = "2.2.21"
+kotlinx-serialization-json = "1.9.0"
+ksp = "2.3.2"
+ktor = "3.3.3"
+napier = "2.7.1"
+securityCrypto = "1.1.0-alpha06"
+skie = "0.10.8"
+splashscreen = "1.2.0"
+supabasekt = "3.2.6"
 compose = "1.10.0"
 compose-material3 = "1.4.0"
 compose-activity = "1.12.1"
 compose-navigation = "2.9.6"
-kotlinx-serialization-json = "1.9.0"
-supabasekt = "3.2.6"
-ktor = "3.3.3"
-koin = "4.1.1"
-napier = "2.7.1"
-dotsindicator = "5.1.0"
-camerax = "1.5.2"
-coreKtx = "1.17.0"
-googleService = "4.4.4"
-firebase = "34.7.0"
-skie = "0.10.8"
-ksp = "2.3.2"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
+biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
 buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
-coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-network-okhttp" }
+camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
+camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
+camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil-compose" }
-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
-desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
-googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
-kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil-network-okhttp" }
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
+compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
 compose-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
 compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
 compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose" }
-compose-material3 = { module = "androidx.compose.material3:material3", version.ref = "compose-material3" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
+credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
+desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
+dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }
+generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
+googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
+koin-android-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+napier = { module = "io.github.aakira:napier", version.ref = "napier" }
+datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "securityCrypto" }
+splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
+supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
 supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
-supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
 supabasekt-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
-ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
-ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
-koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
-koin-android-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
-napier = { module = "io.github.aakira:napier", version.ref = "napier" }
-dotsindicator = { module = "com.tbuonomo:dotsindicator", version.ref = "dotsindicator" }
-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "splashscreen" }
-camera-core = { module = "androidx.camera:camera-core", version.ref = "camerax" }
-camera-compose = { module = "androidx.camera:camera-compose", version.ref = "camerax" }
-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "camerax" }
-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

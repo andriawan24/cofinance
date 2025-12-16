@@ -112,6 +112,11 @@ dependencies {
     implementation(libs.credentials)
     implementation(libs.credentials.play.services.auth)
     implementation(libs.googleid)
+    implementation(libs.biometric)
+    implementation(libs.security.crypto)
+
+    // DataStore
+    implementation(libs.datastore.preferences)
 
     // Coil image loader
     implementation(libs.coil.compose)

@@ -56,6 +56,7 @@ fun SecondaryButton(
         horizontal = Dimensions.SIZE_24,
         vertical = Dimensions.SIZE_16
     ),
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Button(
@@ -66,6 +67,7 @@ fun SecondaryButton(
             containerColor = containerColor,
             contentColor = contentColor
         ),
+        enabled = enabled,
         onClick = onClick
     ) {
         content()
