@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.supabasekt.postgrest)
             implementation(libs.supabasekt.auth)
             implementation(libs.supabasekt.realtime)
+            implementation(libs.supabasekt.storage)
 
             // KTOR
             implementation(libs.ktor.client.core)

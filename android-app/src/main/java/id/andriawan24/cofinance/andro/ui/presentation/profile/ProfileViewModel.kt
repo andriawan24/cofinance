@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.NavigateToLoginPage
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.ShowMessage
+import id.andriawan24.cofinance.domain.model.response.User
+import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import id.andriawan24.cofinance.utils.ResultState
@@ -23,25 +25,56 @@ sealed class ProfileEvent {
 }
 
 data class UiState(
-    val isShowDialogLogout: Boolean = false
+    val isShowDialogLogout: Boolean = false,
+    val user: User = User(),
+    val isRefreshingProfile: Boolean = false
 )
 
 @Stable
 class ProfileViewModel(
-    getUserUseCase: GetUserUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val getUserUseCase: GetUserUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val fetchUserUseCase: FetchUserUseCase
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
     val profileEvent = _profileEvent.receiveAsFlow()
 
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow(UiState(user = getUserUseCase.execute()))
     val uiState = _uiState.asStateFlow()
 
-    val user = getUserUseCase.execute()
+    init {
+        refreshUser()
+    }
 
     fun toggleDialogLogout(isShow: Boolean) {
         _uiState.update { state -> state.copy(isShowDialogLogout = isShow) }
+    }
+
+    fun refreshUser() {
+        viewModelScope.launch {
+            fetchUserUseCase.execute().collectLatest { result ->
+                when (result) {
+                    ResultState.Loading -> {
+                        _uiState.update { it.copy(isRefreshingProfile = true) }
+                    }
+
+                    is ResultState.Success<User> -> {
+                        _uiState.update {
+                            it.copy(
+                                user = result.data,
+                                isRefreshingProfile = false
+                            )
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        _uiState.update { it.copy(isRefreshingProfile = false) }
+                        _profileEvent.send(ShowMessage(result.exception.message.orEmpty()))
+                    }
+                }
+            }
+        }
     }
 
     fun logout() {

@@ -46,6 +46,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ProfileScreen(
     onSignedOut: () -> Unit,
+    onEditProfile: () -> Unit,
     showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
@@ -59,10 +60,11 @@ fun ProfileScreen(
     }
 
     ProfileContent(
-        name = profileViewModel.user.name,
-        imageUrl = profileViewModel.user.avatarUrl,
-        email = profileViewModel.user.email,
-        onSignedOut = { profileViewModel.toggleDialogLogout(true) }
+        name = uiState.user.name.ifBlank { stringResource(R.string.label_name) },
+        imageUrl = uiState.user.avatarUrl,
+        email = uiState.user.email,
+        onSignedOut = { profileViewModel.toggleDialogLogout(true) },
+        onEditProfile = onEditProfile
     )
 
     if (uiState.isShowDialogLogout) {
@@ -107,7 +109,8 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
-    onSignedOut: () -> Unit
+    onSignedOut: () -> Unit,
+    onEditProfile: () -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         PageTitle(
@@ -160,31 +163,31 @@ fun ProfileContent(
 
                 VerticalSpacing(Dimensions.SIZE_12)
 
-//                SecondaryButton(
-//                    contentPadding = PaddingValues(
-//                        vertical = Dimensions.SIZE_8,
-//                        horizontal = Dimensions.SIZE_16
-//                    ),
-//                    onClick = {}
-//                ) {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
-//                    ) {
-//                        Image(
-//                            modifier = Modifier.size(Dimensions.SIZE_24),
-//                            painter = painterResource(R.drawable.ic_edit),
-//                            contentDescription = null
-//                        )
-//
-//                        Text(
-//                            text = "Edit Profile",
-//                            style = MaterialTheme.typography.labelSmall.copy(
-//                                color = MaterialTheme.colorScheme.onSurface
-//                            )
-//                        )
-//                    }
-//                }
+                SecondaryButton(
+                    contentPadding = PaddingValues(
+                        vertical = Dimensions.SIZE_8,
+                        horizontal = Dimensions.SIZE_16
+                    ),
+                    onClick = onEditProfile
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
+                    ) {
+                        Image(
+                            modifier = Modifier.size(Dimensions.SIZE_24),
+                            painter = painterResource(R.drawable.ic_edit),
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = stringResource(R.string.label_edit_profile),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    }
+                }
             }
         }
 
@@ -233,7 +236,8 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
-                onSignedOut = { }
+                onSignedOut = { },
+                onEditProfile = { }
             )
         }
     }

@@ -10,10 +10,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.CofinanceBottomNavigation
 import id.andriawan24.cofinance.andro.ui.models.rememberCofinanceAppState
 import id.andriawan24.cofinance.andro.ui.navigation.Destinations
@@ -22,6 +24,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.account.AccountViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityScreen
 import id.andriawan24.cofinance.andro.ui.presentation.activity.ActivityViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileScreen
+import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsScreen
 import org.koin.androidx.compose.koinViewModel
 
@@ -104,9 +107,43 @@ fun MainScreen(
             }
 
             composable<Destinations.Profile> {
-                ProfileScreen(onSignedOut = onNavigateToLogin, showMessage = {
-                    appState.showSnackbar(it)
-                })
+                val profileViewModel: ProfileViewModel = koinViewModel()
+
+                val editProfileResultFlow = parentNavController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.getStateFlow("edit_profile_result", false)
+
+                val profileUpdated by editProfileResultFlow?.collectAsStateWithLifecycle(false)
+                    ?: remember { mutableStateOf(false) }
+
+                val defaultSuccessMessage = stringResource(R.string.message_profile_update_success)
+
+                LaunchedEffect(profileUpdated) {
+                    if (profileUpdated) {
+                        profileViewModel.refreshUser()
+                        val message = parentNavController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.get<String>("edit_profile_message")
+                            ?.takeIf { it.isNotBlank() }
+                            ?: defaultSuccessMessage
+
+                        appState.showSnackbar(message)
+
+                        parentNavController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.remove<Boolean>("edit_profile_result")
+                        parentNavController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.remove<String>("edit_profile_message")
+                    }
+                }
+
+                ProfileScreen(
+                    profileViewModel = profileViewModel,
+                    onSignedOut = onNavigateToLogin,
+                    onEditProfile = { parentNavController.navigate(Destinations.EditProfile) },
+                    showMessage = { appState.showSnackbar(it) }
+                )
             }
         }
     }
