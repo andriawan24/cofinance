@@ -14,6 +14,7 @@ import id.andriawan24.cofinance.andro.utils.ext.toDate
 import id.andriawan24.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan24.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan24.cofinance.domain.model.response.Account
+import id.andriawan24.cofinance.domain.model.response.AccountByGroup
 import id.andriawan24.cofinance.domain.model.response.TransactionByDate
 import id.andriawan24.cofinance.domain.usecase.accounts.GetAccountsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
@@ -46,8 +47,8 @@ data class AddNewUiState(
     val dateTime: Date = Date(),
     val notes: String = emptyString(),
     val isValid: Boolean = false,
-    val accounts: List<Account> = emptyList(),
-    val loadingAccount: Boolean = false,
+    val accounts: List<AccountByGroup> = emptyList(),
+    val isLoadingAccount: Boolean = false,
     val isLoading: Boolean = false,
     val transactionId: String? = null
 )
@@ -109,22 +110,33 @@ class AddNewViewModel(
     }
 
     private fun getAccounts() {
-        _uiState.value = uiState.value.copy(loadingAccount = true)
+        _uiState.value = uiState.value.copy(isLoadingAccount = true)
         viewModelScope.launch {
             getAccountsUseCase.execute().collectLatest {
-//                if (it.isSuccess) {
-//                    _uiState.update { currentState ->
-//                        currentState.copy(
-//                            accounts = it.getOrDefault(emptyList()),
-//                            loadingAccount = false
-//                        )
-//                    }
-//                }
-//
-//                if (it.isFailure) {
-//                    _uiState.update { currentState -> currentState.copy(loadingAccount = false) }
-//                    _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
-//                }
+                when (it) {
+                    ResultState.Loading -> {
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoadingAccount = true
+                            )
+                        }
+                    }
+
+                    is ResultState.Error -> {
+                        _uiState.update { state ->
+                            state.copy(isLoadingAccount = false)
+                        }
+                    }
+
+                    is ResultState.Success<List<AccountByGroup>> -> {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                accounts = it.data,
+                                isLoadingAccount = false
+                            )
+                        }
+                    }
+                }
             }
         }
     }

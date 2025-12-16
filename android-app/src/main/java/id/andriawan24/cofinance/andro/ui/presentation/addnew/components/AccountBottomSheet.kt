@@ -61,9 +61,6 @@ fun AccountBottomSheetContent(
     var currentSelectedAccount by remember(uiState.senderAccount) {
         mutableStateOf(uiState.senderAccount)
     }
-    val accountByGroups = remember(uiState.accounts) {
-        uiState.accounts.groupBy { it.group }.toList()
-    }
 
     Column {
         AccountBottomSheetHeader(onCloseClicked = onCloseClicked)
@@ -74,7 +71,7 @@ fun AccountBottomSheetContent(
                 .weight(1f),
             contentPadding = PaddingValues(vertical = Dimensions.SIZE_24)
         ) {
-            if (uiState.loadingAccount) {
+            if (uiState.isLoadingAccount) {
                 item {
                     Box(
                         modifier = Modifier
@@ -87,6 +84,7 @@ fun AccountBottomSheetContent(
                             verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
                         ) {
                             CircularProgressIndicator()
+
                             Text(
                                 text = stringResource(R.string.label_loading_accounts),
                                 style = MaterialTheme.typography.bodySmall.copy(
@@ -98,12 +96,12 @@ fun AccountBottomSheetContent(
                 }
             }
 
-            if (!uiState.loadingAccount) {
-                itemsIndexed(accountByGroups) { index, (group, accounts) ->
+            if (!uiState.isLoadingAccount) {
+                itemsIndexed(uiState.accounts) { index, group ->
                     AccountGroupItem(
                         accountGroup = AccountGroup(
-                            name = group.displayName,
-                            accounts = accounts
+                            name = group.groupLabel,
+                            accounts = group.accounts
                         ),
                         isExpanded = index == shownDropdown,
                         selectedAccount = currentSelectedAccount,
@@ -115,7 +113,7 @@ fun AccountBottomSheetContent(
                         }
                     )
 
-                    if (index != accountByGroups.lastIndex) {
+                    if (index != uiState.accounts.lastIndex) {
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
                             thickness = Dimensions.SIZE_1,
@@ -286,7 +284,7 @@ private fun AccountBottomSheetContentPreview() {
                 uiState = AddNewUiState(),
                 onAccountSaved = { },
                 onCloseClicked = { },
-                onAddAccountClicked = {}
+                onAddAccountClicked = { }
             )
         }
     }

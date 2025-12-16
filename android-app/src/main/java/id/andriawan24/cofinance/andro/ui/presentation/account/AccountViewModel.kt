@@ -42,11 +42,18 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
             getAccountsUseCase.execute().collectLatest {
                 when (it) {
                     ResultState.Loading -> {
-                        _uiState.value = _uiState.value.copy(isLoading = true)
+                        _uiState.update { state ->
+                            state.copy(isLoading = false)
+                        }
                     }
 
                     is ResultState.Error -> {
-                        _uiState.value = _uiState.value.copy(isLoading = false)
+                        _uiState.update { state ->
+                            state.copy(
+                                isLoading = false,
+                                isRefreshing = false
+                            )
+                        }
                     }
 
                     is ResultState.Success<List<AccountByGroup>> -> {

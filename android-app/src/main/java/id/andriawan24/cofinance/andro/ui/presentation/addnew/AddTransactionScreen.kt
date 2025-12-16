@@ -138,7 +138,6 @@ fun AddNewContent(
     AddAccountBottomSheetDialog(dialogState, onEvent, onDialogEvent)
 }
 
-// Extracted header and tabs composables
 @Composable
 private fun AddTransactionHeader(onEvent: (AddNewUiEvent) -> Unit) {
     Box(
