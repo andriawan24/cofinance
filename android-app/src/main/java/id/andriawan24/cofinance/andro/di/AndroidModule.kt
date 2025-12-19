@@ -7,6 +7,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.addnew.viewmodels.AddNewVi
 import id.andriawan24.cofinance.andro.ui.presentation.camera.CameraViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.login.LoginViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.preview.PreviewViewModel
+import id.andriawan24.cofinance.andro.ui.presentation.profile.EditProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.splashscreen.SplashViewModel
 import id.andriawan24.cofinance.andro.ui.presentation.stats.StatsViewModel
@@ -22,6 +23,7 @@ import org.koin.dsl.module
 val androidModule = module {
     viewModelOf(::LoginViewModel)
     viewModelOf(::ProfileViewModel)
+    viewModelOf(::EditProfileViewModel)
     viewModelOf(::ActivityViewModel)
     viewModelOf(::SplashViewModel)
     viewModelOf(::CameraViewModel)

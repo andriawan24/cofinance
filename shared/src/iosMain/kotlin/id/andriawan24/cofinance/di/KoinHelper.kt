@@ -4,6 +4,7 @@ import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
+import id.andriawan24.cofinance.domain.usecase.authentication.UpdateProfileUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -20,6 +21,7 @@ class KoinHelper : KoinComponent {
     fun getLogoutUseCase(): LogoutUseCase = get()
     fun getGetUserUseCase(): GetUserUseCase = get()
     fun getFetchUserUseCase(): FetchUserUseCase = get()
+    fun getUpdateProfileUseCase(): UpdateProfileUseCase = get()
 
     fun getTransactionsUseCase(): GetTransactionsGroupByMonthUseCase = get()
 

@@ -14,6 +14,7 @@ import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LoginIdTokenUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
+import id.andriawan24.cofinance.domain.usecase.authentication.UpdateProfileUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.CreateTransactionUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetBalanceStatsUseCase
 import id.andriawan24.cofinance.domain.usecase.transaction.GetTransactionsGroupByMonthUseCase
@@ -60,6 +61,7 @@ val mainModule = module {
     singleOf(::GetUserUseCase)
     singleOf(::LoginIdTokenUseCase)
     singleOf(::LogoutUseCase)
+    singleOf(::UpdateProfileUseCase)
     singleOf(::CreateTransactionUseCase)
     singleOf(::GetTransactionsGroupByMonthUseCase)
     singleOf(::GetTransactionsUseCase)
