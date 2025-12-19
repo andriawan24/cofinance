@@ -18,6 +18,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -62,6 +63,8 @@ fun ProfileScreen(
         name = profileViewModel.user.name,
         imageUrl = profileViewModel.user.avatarUrl,
         email = profileViewModel.user.email,
+        isBiometricEnabled = uiState.isBiometricEnabled,
+        onBiometricToggle = profileViewModel::setBiometricLoginEnabled,
         onSignedOut = { profileViewModel.toggleDialogLogout(true) }
     )
 
@@ -107,6 +110,8 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
+    isBiometricEnabled: Boolean,
+    onBiometricToggle: (Boolean) -> Unit,
     onSignedOut: () -> Unit
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -188,6 +193,44 @@ fun ProfileContent(
             }
         }
 
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16, vertical = Dimensions.SIZE_16),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(Dimensions.SIZE_16),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = stringResource(R.string.label_biometric_login),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    VerticalSpacing(Dimensions.SIZE_4)
+                    Text(
+                        text = stringResource(R.string.description_biometric_login),
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    )
+                }
+                Switch(
+                    checked = isBiometricEnabled,
+                    onCheckedChange = onBiometricToggle
+                )
+            }
+        }
+
         SecondaryButton(
             modifier = Modifier.padding(Dimensions.SIZE_16),
             contentPadding = PaddingValues(
@@ -233,6 +276,8 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
+                isBiometricEnabled = true,
+                onBiometricToggle = {},
                 onSignedOut = { }
             )
         }

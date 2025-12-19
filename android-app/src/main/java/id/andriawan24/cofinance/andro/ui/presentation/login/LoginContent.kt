@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import id.andriawan24.cofinance.andro.R
 import id.andriawan24.cofinance.andro.ui.components.HorizontalSpacing
 import id.andriawan24.cofinance.andro.ui.components.PrimaryButton
+import id.andriawan24.cofinance.andro.ui.components.SecondaryButton
 import id.andriawan24.cofinance.andro.ui.components.VerticalSpacing
 import id.andriawan24.cofinance.andro.ui.presentation.login.components.OnboardingSwiper
 import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
@@ -37,6 +38,9 @@ fun LoginContent(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     uiState: LoginUiState,
+    showBiometricButton: Boolean,
+    biometricHelperText: String?,
+    onBiometricClicked: () -> Unit,
     onContinueClicked: () -> Unit
 ) {
     Column(
@@ -61,6 +65,36 @@ fun LoginContent(
         )
 
         OnboardingSwiper(modifier = Modifier.weight(1f))
+
+        if (showBiometricButton) {
+            SecondaryButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Dimensions.SIZE_16),
+                onClick = onBiometricClicked,
+                enabled = !uiState.isLoading,
+                contentPadding = PaddingValues(
+                    vertical = Dimensions.SIZE_16,
+                    horizontal = Dimensions.SIZE_16
+                )
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_fingerprint),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                HorizontalSpacing(Dimensions.SIZE_8)
+                Text(
+                    text = stringResource(R.string.action_sign_in_biometrics),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+
+            VerticalSpacing(Dimensions.SIZE_12)
+        }
 
         PrimaryButton(
             modifier = Modifier
@@ -90,6 +124,20 @@ fun LoginContent(
                 )
             )
         }
+
+        if (biometricHelperText != null) {
+            VerticalSpacing(Dimensions.SIZE_12)
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Dimensions.SIZE_16),
+                text = biometricHelperText,
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+            VerticalSpacing(Dimensions.SIZE_24)
+        }
     }
 }
 
@@ -104,7 +152,11 @@ private fun LoginScreenPreview() {
             LoginContent(
                 contentPadding = PaddingValues(0.dp),
                 uiState = LoginUiState(),
-                onContinueClicked = {})
+                showBiometricButton = true,
+                biometricHelperText = null,
+                onBiometricClicked = {},
+                onContinueClicked = {}
+            )
         }
     }
 }
@@ -125,7 +177,10 @@ private fun LoginScreenDarkPreview() {
             LoginContent(
                 onContinueClicked = {},
                 contentPadding = PaddingValues(0.dp),
-                uiState = LoginUiState()
+                uiState = LoginUiState(),
+                showBiometricButton = true,
+                biometricHelperText = null,
+                onBiometricClicked = {}
             )
         }
     }
