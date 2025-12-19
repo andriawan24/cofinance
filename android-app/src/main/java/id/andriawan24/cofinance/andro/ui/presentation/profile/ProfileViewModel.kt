@@ -7,6 +7,7 @@ import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.Navig
 import id.andriawan24.cofinance.andro.ui.presentation.profile.ProfileEvent.ShowMessage
 import id.andriawan24.cofinance.domain.model.response.User
 import id.andriawan24.cofinance.domain.usecase.authentication.FetchUserUseCase
+import id.andriawan24.cofinance.andro.ui.util.mapAuthErrorMessage
 import id.andriawan24.cofinance.domain.usecase.authentication.GetUserUseCase
 import id.andriawan24.cofinance.domain.usecase.authentication.LogoutUseCase
 import id.andriawan24.cofinance.utils.ResultState
@@ -86,7 +87,7 @@ class ProfileViewModel(
                     }
 
                     is ResultState.Error -> {
-                        _profileEvent.send(ShowMessage(it.exception.message.orEmpty()))
+                        _profileEvent.send(ShowMessage(mapAuthErrorMessage(it.exception)))
                     }
 
                     is ResultState.Success<*> -> {

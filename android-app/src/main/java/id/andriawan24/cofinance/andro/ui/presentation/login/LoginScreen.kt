@@ -29,8 +29,7 @@ fun LoginScreen(onNavigateToHome: () -> Unit, viewModel: LoginViewModel = koinVi
         when (it) {
             LoginUiEvent.NavigateHomePage -> onNavigateToHome()
             is LoginUiEvent.ShowMessage -> scope.launch {
-                val message = it.exception.message.orEmpty() // TODO: Create error handler
-                snackState.showSnackbar(message)
+                snackState.showSnackbar(it.message)
             }
         }
     }
