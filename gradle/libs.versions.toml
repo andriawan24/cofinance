@@ -26,7 +26,7 @@ coreKtx = "1.17.0"
 googleService = "4.4.4"
 firebase = "34.7.0"
 skie = "0.10.8"
-ksp = "2.3.2"
+ksp = "2.3.4"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
