@@ -1,0 +1,15 @@
+<resources>
+    <string name="hello">Halo, saya suka Kotlin</string>
+    <string name="label_activity">Aktivitas</string>
+    <string name="label_stats">Stats</string>
+    <string name="label_account">Rekening</string>
+    <string name="label_profile">Profil</string>
+    <string name="message_fetching_information">Memeriksa pembaruan...</string>
+    <string name="en">Inggris</string>
+    <string name="id">Bahasa Indonesia</string>
+    <string name="app_language">Bahasa Aplikasi: %1$s</string>
+    <string name="change_lang">Ganti Bahasa</string>
+    <string name="label_track_your_money">Pandai mengelola keuangan dengan\n</string>
+    <string name="action_sign_in_google">Masuk dengan Google</string>
+    <string name="app_name">Cofinance</string>
+</resources>

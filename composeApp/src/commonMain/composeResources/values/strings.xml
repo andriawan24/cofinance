@@ -1,0 +1,15 @@
+<resources>
+    <string name="hello">Hello, I love Kotlin</string>
+    <string name="label_activity">Activity</string>
+    <string name="label_stats">Stats</string>
+    <string name="label_account">Account</string>
+    <string name="label_profile">Profile</string>
+    <string name="message_fetching_information">Fetching information...</string>
+    <string name="en">English</string>
+    <string name="id">Indonesian</string>
+    <string name="app_language">App Language: %1$s</string>
+    <string name="change_lang">Change Language</string>
+    <string name="label_track_your_money">Track your money with\n</string>
+    <string name="action_sign_in_google">Sign in with Google</string>
+    <string name="app_name">Cofinance</string>
+</resources>
