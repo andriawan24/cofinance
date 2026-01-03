@@ -1,63 +1,194 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web.
+# Cofinance
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+A cross-platform personal finance management application built with **Kotlin Multiplatform** and **Compose Multiplatform**. Track your finances, manage accounts, view statistics, and monitor financial activities across Android, iOS, and Web platforms.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## Features
 
-### Build and Run Android Application
+- **Multi-Platform Support** - Single codebase for Android, iOS, and Web (JS/Wasm)
+- **Authentication** - Login screen with Google Sign-in integration
+- **Multi-Language Support** - English and Indonesian localization
+- **Material Design 3** - Modern UI with Light and Dark theme support
+- **Type-Safe Navigation** - Animated screen transitions with Kotlin serialization
+- **Transaction Management** - Add and track financial transactions
+- **Account Management** - Manage multiple financial accounts
+- **Statistics Dashboard** - View financial analytics and insights
+- **Camera Integration** - Capture receipts and documents
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## Tech Stack
 
-### Build and Run Web Application
+| Technology | Version |
+|------------|---------|
+| Kotlin | 2.3.0 |
+| Compose Multiplatform | 1.9.3 |
+| Navigation Compose | 2.9.1 |
+| Android Gradle Plugin | 8.13.2 |
+| AndroidX Lifecycle | 2.9.6 |
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE's toolbar or run it directly from the terminal:
-- for the Wasm target (faster, modern browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-    ```
-- for the JS target (slower, supports older browsers):
-  - on macOS/Linux
-    ```shell
-    ./gradlew :composeApp:jsBrowserDevelopmentRun
-    ```
-  - on Windows
-    ```shell
-    .\gradlew.bat :composeApp:jsBrowserDevelopmentRun
-    ```
+### Target Platforms
 
-### Build and Run iOS Application
+- **Android**: minSdk 24, targetSdk 36
+- **iOS**: arm64 & Simulator architectures
+- **Web**: JavaScript and WebAssembly targets
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## Project Structure
 
----
+```
+Cofinance_Shared/
+├── composeApp/                     # Main multiplatform module
+│   └── src/
+│       ├── commonMain/             # Shared code for all platforms
+│       │   └── kotlin/id/andriawan/cofinance/
+│       │       ├── pages/          # Screen composables
+│       │       ├── navigations/    # Navigation setup & routes
+│       │       ├── theme/          # UI theming (colors, typography, shapes)
+│       │       ├── components/     # Reusable UI components
+│       │       ├── localization/   # Multi-language support
+│       │       └── utils/          # Utilities & extensions
+│       ├── androidMain/            # Android-specific code
+│       ├── iosMain/                # iOS-specific code
+│       ├── jsMain/                 # Web JS target
+│       └── wasmJsMain/             # Web Wasm target
+│
+├── iosApp/                         # iOS native app wrapper
+│   └── iosApp/
+│       ├── iOSApp.swift            # iOS entry point
+│       └── ContentView.swift       # SwiftUI wrapper for Compose
+│
+├── gradle/
+│   └── libs.versions.toml          # Dependency version catalog
+└── build.gradle.kts                # Root build configuration
+```
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+## Prerequisites
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+- **JDK 11** or higher
+- **Android Studio** (latest stable) or **IntelliJ IDEA**
+- **Android SDK** (API 24+)
+- **Xcode** (for iOS development, macOS only)
+- **CocoaPods** (for iOS dependencies)
+
+## Getting Started
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/cofinance.git
+cd cofinance
+```
+
+### Android
+
+```bash
+# Debug build
+./gradlew :composeApp:assembleDebug
+
+# Release build
+./gradlew :composeApp:assembleRelease
+
+# Install on connected device
+./gradlew :composeApp:installDebug
+```
+
+Or open the project in Android Studio and run the `composeApp` configuration.
+
+### iOS
+
+1. Open `iosApp/iosApp.xcodeproj` in Xcode
+2. Select your target device/simulator
+3. Build and run (Cmd + R)
+
+Or build the framework via Gradle:
+
+```bash
+./gradlew :composeApp:linkDebugFrameworkIosArm64
+```
+
+### Web (Wasm)
+
+```bash
+# Development server with hot reload
+./gradlew :composeApp:wasmJsBrowserDevelopmentRun
+
+# Production build
+./gradlew :composeApp:wasmJsBrowserProductionWebpack
+```
+
+### Web (JavaScript)
+
+```bash
+# Development server
+./gradlew :composeApp:jsBrowserDevelopmentRun
+
+# Production build
+./gradlew :composeApp:jsBrowserProductionWebpack
+```
+
+## Configuration
+
+### Gradle Properties
+
+Key build optimizations in `gradle.properties`:
+
+```properties
+kotlin.code.style=official
+org.gradle.configuration-cache=true
+org.gradle.caching=true
+org.gradle.jvmargs=-Xmx4096M
+```
+
+### Version Catalog
+
+Dependencies are managed in `gradle/libs.versions.toml` for centralized version control.
+
+## Architecture
+
+The project follows **MVVM** (Model-View-ViewModel) architecture pattern:
+
+- **Presentation Layer**: Composable screens with ViewModels
+- **Navigation**: Type-safe Kotlin serialization-based routes
+- **State Management**: StateFlow with lifecycle awareness
+- **Theme System**: Material Design 3 with Composable theming
+
+### Navigation Routes
+
+| Route | Description |
+|-------|-------------|
+| Splash | App launch screen |
+| Login | User authentication |
+| Main | Home dashboard |
+| Activity | Transaction history |
+| Stats | Financial statistics |
+| Account | Account management |
+| Profile | User profile |
+| AddNew | Add new transaction |
+| AddAccount | Create new account |
+
+## Localization
+
+The app supports multiple languages:
+
+- English (default)
+- Indonesian (Bahasa Indonesia)
+
+String resources are located in:
+- `composeApp/src/commonMain/composeResources/values/` (English)
+- `composeApp/src/commonMain/composeResources/values-id/` (Indonesian)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Resources
+
+- [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
+- [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/)
+- [Kotlin/Wasm](https://kotl.in/wasm/)
+- [Material Design 3](https://m3.material.io/)
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
