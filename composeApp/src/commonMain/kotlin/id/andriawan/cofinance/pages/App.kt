@@ -3,7 +3,6 @@ package id.andriawan.cofinance.pages
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.navigation.compose.rememberNavController
 import id.andriawan.cofinance.localization.AppLang
 import id.andriawan.cofinance.localization.rememberAppLocale
 import id.andriawan.cofinance.navigations.MainNavigation
@@ -19,8 +18,7 @@ fun App() {
 
     CompositionLocalProvider(LocalAppLocalization provides currentLanguage) {
         CofinanceTheme {
-            val navController = rememberNavController()
-            MainNavigation(navController = navController)
+            MainNavigation()
         }
     }
 }

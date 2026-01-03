@@ -3,18 +3,20 @@ package id.andriawan.cofinance.navigations
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import id.andriawan.cofinance.models.rememberCofinanceAppState
 import id.andriawan.cofinance.pages.login.LoginScreen
+import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
-fun MainNavigation(
-    modifier: Modifier = Modifier,
-    navController: NavHostController
-) {
+fun MainNavigation(modifier: Modifier = Modifier) {
+    val appState = rememberCofinanceAppState()
+    val navController = remember { appState.navController }
+
     NavHost(
         modifier = modifier,
         navController = navController,
@@ -73,6 +75,31 @@ fun MainNavigation(
                         popUpTo(0) {
                             inclusive = true
                         }
+                    }
+                }
+            )
+        }
+
+        composable<Destinations.Main> {
+            MainScreen(
+                appState = appState,
+                onNavigateToLogin = {
+                    navController.navigate(Destinations.Login) {
+                        launchSingleTop = true
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateToAdd = {
+                    navController.navigate(Destinations.AddNew())
+                },
+                onNavigateToAddAccount = {
+                    navController.navigate(Destinations.AddAccount) {
+                        popUpTo<Destinations.Main> {
+                            saveState = true
+                        }
+                        restoreState = true
                     }
                 }
             )
@@ -140,29 +167,5 @@ fun MainNavigation(
 //            )
 //        }
 //
-//        composable<Destinations.Main> {
-//            MainScreen(
-//                parentNavController = navController,
-//                onNavigateToLogin = {
-//                    navController.navigate(Destinations.Login) {
-//                        launchSingleTop = true
-//                        popUpTo(0) {
-//                            inclusive = true
-//                        }
-//                    }
-//                },
-//                onNavigateToAdd = {
-//                    navController.navigate(Destinations.AddNew())
-//                },
-//                onNavigateToAddAccount = {
-//                    navController.navigate(Destinations.AddAccount) {
-//                        popUpTo<Destinations.Main> {
-//                            saveState = true
-//                        }
-//                        restoreState = true
-//                    }
-//                }
-//            )
-//        }
     }
 }

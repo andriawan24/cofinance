@@ -1,0 +1,78 @@
+package id.andriawan.cofinance.models
+
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navOptions
+import id.andriawan.cofinance.navigations.BottomNavigationDestinations
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+
+@Composable
+fun rememberCofinanceAppState(): CofinanceAppState {
+    val coroutineScope = rememberCoroutineScope()
+    val parentNavController = rememberNavController()
+    val navController = rememberNavController()
+
+    return remember(coroutineScope, navController, parentNavController) {
+        CofinanceAppState(
+            navController = navController,
+            coroutineScope = coroutineScope,
+            parentNavController = parentNavController
+        )
+    }
+}
+
+@Stable
+class CofinanceAppState(
+    val parentNavController: NavHostController,
+    val navController: NavHostController,
+    val coroutineScope: CoroutineScope
+) {
+    val bottomNavigationDestinations = BottomNavigationDestinations.entries
+    var snackBarHostState = SnackbarHostState()
+
+    private val previousDestination = mutableStateOf<NavDestination?>(null)
+    val currentDestination: NavDestination?
+        @Composable get() {
+            val currentEntry =
+                navController.currentBackStackEntryFlow.collectAsState(initial = null)
+            return currentEntry.value?.destination.also { destination ->
+                if (destination != null) {
+                    previousDestination.value = destination
+                }
+            } ?: previousDestination.value
+        }
+
+    val currentTopBottomNavDest: BottomNavigationDestinations?
+        @Composable get() {
+            return bottomNavigationDestinations.firstOrNull { topLevelDestination ->
+                currentDestination?.hasRoute(route = topLevelDestination.route::class) == true
+            }
+        }
+
+    fun navigateToTopLevelDestination(topLevelDestination: BottomNavigationDestinations = BottomNavigationDestinations.ACTIVITY) {
+        val topLevelOption = navOptions {
+            popUpTo(BottomNavigationDestinations.entries.first().route.route) {
+                saveState = true
+            }
+            restoreState = true
+        }
+
+        navController.navigate(route = topLevelDestination.route, navOptions = topLevelOption)
+    }
+
+    fun showMessage(message: String) {
+        coroutineScope.launch {
+            snackBarHostState.showSnackbar(message)
+        }
+    }
+}
