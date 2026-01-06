@@ -1,4 +1,6 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import com.codingfeline.buildkonfig.compiler.FieldSpec
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -7,6 +9,7 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinSerialization)
+    id("com.codingfeline.buildkonfig")
 }
 
 kotlin {
@@ -55,6 +58,19 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.datetime)
+
+            // Supabase
+            implementation(project.dependencies.platform(libs.supabasekt.bom))
+            implementation(libs.supabasekt.postgrest)
+            implementation(libs.supabasekt.auth)
+            implementation(libs.supabasekt.realtime)
+
+            // KTOR
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.cio)
+
+            // Gen AI
+            implementation(libs.generativeai.google)
         }
 
         commonTest.dependencies {
@@ -65,12 +81,12 @@ kotlin {
 
 android {
     namespace = "id.andriawan.cofinance"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "id.andriawan.cofinance"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = 24
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
@@ -101,6 +117,25 @@ android {
 
     androidResources {
         generateLocaleConfig = true
+    }
+}
+
+buildkonfig {
+    packageName = "com.andriawan.cofinance"
+
+    defaultConfigs {
+        val localProperties = gradleLocalProperties(rootDir, providers)
+        val supabaseUrl = localProperties.getProperty("supabase.project_url")
+        val supabaseApiKey = localProperties.getProperty("supabase.public_api_key")
+        val geminiApiKey = localProperties.getProperty("gemini.api_key")
+
+        require(supabaseUrl.isNotEmpty()) { "Register supabase url on local.properties" }
+        require(supabaseApiKey.isNotEmpty()) { "Register supabase api key on local.properties" }
+        require(geminiApiKey.isNotEmpty()) { "Register gemini api key on local.properties" }
+
+        buildConfigField(FieldSpec.Type.STRING, "SUPABASE_URL", supabaseUrl)
+        buildConfigField(FieldSpec.Type.STRING, "SUPABASE_API_KEY", supabaseApiKey)
+        buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", geminiApiKey)
     }
 }
 

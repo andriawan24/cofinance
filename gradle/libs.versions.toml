@@ -1,8 +1,5 @@
 [versions]
 agp = "8.13.2"
-android-compileSdk = "36"
-android-minSdk = "24"
-android-targetSdk = "36"
 androidx-activity = "1.12.2"
 androidx-lifecycle = "2.9.6"
 composeMultiplatform = "1.9.3"
@@ -10,6 +7,10 @@ kotlin = "2.3.0"
 composeNavigation = "2.9.1"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.7.1"
+supabasekt = "3.2.6"
+ktor = "3.3.3"
+generativeaiGoogle = "0.9.0-1.1.0"
+buildkonfigGradlePlugin = "0.17.1"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -19,6 +20,22 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+
+# Supabase
+supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
+supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
+supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
+supabasekt-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+
+# Ktor
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+
+# Gen AI
+generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
+
+# BuildKonfig
+buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
