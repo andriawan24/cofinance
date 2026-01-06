@@ -12,4 +12,8 @@
     <string name="label_track_your_money">Track your money with\n</string>
     <string name="action_sign_in_google">Sign in with Google</string>
     <string name="app_name">Cofinance</string>
+    <string name="template_month_year">%1$s %2$s</string>
+    <string name="label_income">Income</string>
+    <string name="label_balance">Balance</string>
+    <string name="label_expenses">Expense</string>
 </resources>
