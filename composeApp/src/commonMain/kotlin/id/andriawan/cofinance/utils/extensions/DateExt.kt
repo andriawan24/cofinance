@@ -15,9 +15,24 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 const val FORMAT_DAY_MONTH_YEAR = "EEE, dd MMMM yyyy"
-const val FORMAT_MONTH = "MMMM"
 const val FORMAT_HOUR_MINUTE = "HH:mm"
 const val FORMAT_ISO_8601 = "yyyy-MM-dd HH:mm:ssXXX"
+
+val formatFull = LocalDateTime.Format {
+    day()
+    char(' ')
+    monthName(MonthNames.ENGLISH_FULL)
+    char(' ')
+    year()
+    chars(", ")
+    hour()
+    char(':')
+    minute()
+}
+
+val formatMonth = LocalDateTime.Format {
+    monthName(MonthNames.ENGLISH_FULL)
+}
 
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Instant {
@@ -28,17 +43,7 @@ fun String.toDate(): Instant {
 }
 
 fun Pair<Int, Int>.formatToString(
-    format: DateTimeFormat<LocalDateTime> = LocalDateTime.Format {
-        day()
-        char(' ')
-        monthName(MonthNames.ENGLISH_FULL)
-        char(' ')
-        year()
-        chars(", ")
-        hour()
-        char(':')
-        minute()
-    },
+    format: DateTimeFormat<LocalDateTime> = formatFull,
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): String {
     return try {
