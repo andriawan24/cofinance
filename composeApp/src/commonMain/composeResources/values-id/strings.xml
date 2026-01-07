@@ -16,4 +16,23 @@
     <string name="label_income">Pemasukan</string>
     <string name="label_balance">Saldo</string>
     <string name="label_expenses">Pengeluaran</string>
+    <string name="label_category_food">Makanan</string>
+    <string name="label_category_transport">Transportasi</string>
+    <string name="label_category_housing">Perumahan</string>
+    <string name="label_category_apparel">Pakaian</string>
+    <string name="label_category_health">Kesehatan</string>
+    <string name="label_category_education">Pendidikan</string>
+    <string name="label_category_subscription">Langganan</string>
+    <string name="label_category_internet">Internet</string>
+    <string name="label_category_debt">Hutang</string>
+    <string name="label_category_gift">Hadiah</string>
+    <string name="label_category_administration">Administrasi</string>
+    <string name="label_category_others">Lainnya</string>
+    <string name="label_category_salary">Gaji</string>
+    <string name="label_category_invest">Investasi</string>
+    <string name="content_description_empty_state_image">Gambar untuk data kosong</string>
+    <string name="title_no_activities">Belum ada aktivitas</string>
+    <string name="description_empty_activity">Mulai track pengeluaranmu sekarang</string>
+    <string name="action_add_activity">Tambah Aktivitas</string>
+
 </resources>
