@@ -9,10 +9,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
 
-class AndroidAppLocaleManager(context: Context) : AppLocaleManager {
+class AndroidAppLocaleManager(context: Context) {
     private val localManager = context.getSystemService<LocaleManager>()
 
-    override fun getLocale(): String {
+    fun getLocale(): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             val locales = localManager?.applicationLocales ?: return "en"
             if (locales.isEmpty) "en" else
