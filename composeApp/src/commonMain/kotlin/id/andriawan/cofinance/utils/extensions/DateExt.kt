@@ -42,6 +42,14 @@ fun String.toDate(): Instant {
     return Instant.parse(this)
 }
 
+@OptIn(ExperimentalTime::class)
+fun String.toInstant(): Instant {
+    if (this.isBlank()) {
+        return Clock.System.now()
+    }
+    return Instant.parse(this)
+}
+
 fun Pair<Int, Int>.formatToString(
     format: DateTimeFormat<LocalDateTime> = formatFull,
     timeZone: TimeZone = TimeZone.currentSystemDefault()

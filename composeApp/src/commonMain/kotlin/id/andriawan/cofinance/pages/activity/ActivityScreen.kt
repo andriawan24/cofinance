@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.activity
+package id.andriawan.cofinance.pages.activity
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,16 +14,26 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.label_activity
+import cofinance.composeapp.generated.resources.template_month_year
+import id.andriawan.cofinance.components.BalanceCard
+import id.andriawan.cofinance.components.EmptyView
+import id.andriawan.cofinance.components.TransactionByMonth
 import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ActivityScreen(onNavigateToAdd: () -> Unit) {
     ActivityContent(
         uiState = ActivityUiState(),
-        onEvent = { activityViewModel.onEvent(it) },
+        onEvent = {
+            // activityViewModel.onEvent(it)
+        },
         onBookmarkClicked = {
             // TODO: Handle bookmark page open
         },
@@ -41,7 +51,7 @@ fun ActivityContent(
     Column(modifier = Modifier.fillMaxSize()) {
         PageTitle(
             modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
-            title = stringResource(R.string.label_activity),
+            title = stringResource(Res.string.label_activity),
             endContent = {
 //                IconButton(
 //                    colors = IconButtonDefaults.filledIconButtonColors(
@@ -60,7 +70,7 @@ fun ActivityContent(
 
         DateSwitcher(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-            label = stringResource(R.string.template_month_year, uiState.monthString, uiState.year),
+            label = stringResource(Res.string.template_month_year, uiState.monthString, uiState.year),
             onPreviousClicked = { onEvent(ActivityUiEvent.OnPreviousMonth) },
             onNextClicked = { onEvent(ActivityUiEvent.OnNextMonth) }
         )
@@ -97,7 +107,7 @@ fun ActivityContent(
                     }
                 }
             } else {
-                EmptyActivity(
+                EmptyView(
                     modifier = Modifier.weight(1f),
                     onNavigateToAdd = onNavigateToAdd
                 )
