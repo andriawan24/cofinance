@@ -140,5 +140,5 @@ fun getCurrentMonth(
 fun getMonthLabel(
     month: Int
 ): String {
-    return Month(month).name
+    return Month(month).name.lowercase().replaceFirstChar { it.uppercaseChar() }
 }

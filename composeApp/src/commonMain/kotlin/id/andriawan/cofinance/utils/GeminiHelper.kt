@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.utils
 
-import com.andreasgift.kmpweatherapp.BuildKonfig
+import com.andriawan.cofinance.BuildKonfig
 import dev.shreyaspatil.ai.client.generativeai.GenerativeModel
 import dev.shreyaspatil.ai.client.generativeai.type.FunctionType
 import dev.shreyaspatil.ai.client.generativeai.type.Schema
