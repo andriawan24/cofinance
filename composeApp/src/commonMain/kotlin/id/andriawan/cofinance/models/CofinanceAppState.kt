@@ -19,21 +19,18 @@ import kotlinx.coroutines.launch
 @Composable
 fun rememberCofinanceAppState(): CofinanceAppState {
     val coroutineScope = rememberCoroutineScope()
-    val parentNavController = rememberNavController()
     val navController = rememberNavController()
 
-    return remember(coroutineScope, navController, parentNavController) {
+    return remember(coroutineScope, navController) {
         CofinanceAppState(
             navController = navController,
             coroutineScope = coroutineScope,
-            parentNavController = parentNavController
         )
     }
 }
 
 @Stable
 class CofinanceAppState(
-    val parentNavController: NavHostController,
     val navController: NavHostController,
     val coroutineScope: CoroutineScope
 ) {

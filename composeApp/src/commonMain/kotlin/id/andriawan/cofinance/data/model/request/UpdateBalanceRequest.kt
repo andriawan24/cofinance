@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class UpdateBalanceRequest(
     val amount: Long,
     @SerialName("id")
-    val accountsId: String,
+    val accountsId: String = "",
     @SerialName("users_id")
     val usersId: String = ""
 )

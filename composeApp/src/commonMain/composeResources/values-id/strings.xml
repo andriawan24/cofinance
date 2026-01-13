@@ -34,5 +34,6 @@
     <string name="title_no_activities">Belum ada aktivitas</string>
     <string name="description_empty_activity">Mulai track pengeluaranmu sekarang</string>
     <string name="action_add_activity">Tambah Aktivitas</string>
-
+    <string name="label_transfer">Transfer</string>
+    <string name="template_dot">%1$s · %2$s</string>
 </resources>

@@ -15,21 +15,39 @@ import androidx.compose.ui.Modifier
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.img_splash_screen
 import cofinance.composeapp.generated.resources.message_fetching_information
-import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.theme.CofinanceTheme
-import kotlinx.coroutines.delay
+import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.ResultState
+import kotlinx.coroutines.flow.collectLatest
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun SplashScreen(
     onNavigateToMain: () -> Unit,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    splashViewModel: SplashViewModel = koinViewModel()
 ) {
     LaunchedEffect(true) {
-        delay(2000L)
-        onNavigateToLogin()
+        splashViewModel.fetchUser().collectLatest {
+            when (it) {
+                is ResultState.Error -> {
+                    println("SplashScreen: Not logged in ${it.exception}")
+                    onNavigateToLogin()
+                    // TODO: Handle error
+                }
+
+                ResultState.Loading -> {
+                    /* no-op */
+                }
+
+                is ResultState.Success<*> -> {
+                    onNavigateToMain()
+                }
+            }
+        }
     }
 
     Scaffold { contentPadding ->

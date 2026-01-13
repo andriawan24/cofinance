@@ -18,7 +18,6 @@ data class LoginUiState(
     val isLoading: Boolean = false
 )
 
-
 @Stable
 class LoginViewModel() : ViewModel() {
     private val _loginUiEvent = Channel<LoginUiEvent>(Channel.BUFFERED)

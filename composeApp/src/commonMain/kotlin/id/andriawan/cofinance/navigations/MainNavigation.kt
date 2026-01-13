@@ -3,10 +3,10 @@ package id.andriawan.cofinance.navigations
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import id.andriawan.cofinance.models.rememberCofinanceAppState
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
@@ -14,8 +14,7 @@ import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier) {
-    val appState = rememberCofinanceAppState()
-    val navController = remember { appState.navController }
+    val navController = rememberNavController()
 
     NavHost(
         modifier = modifier,
@@ -82,7 +81,6 @@ fun MainNavigation(modifier: Modifier = Modifier) {
 
         composable<Destinations.Main> {
             MainScreen(
-                appState = appState,
                 onNavigateToLogin = {
                     navController.navigate(Destinations.Login) {
                         launchSingleTop = true

@@ -14,29 +14,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
-import androidx.compose.ui.tooling.preview.Preview
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.ic_transfer
+import cofinance.composeapp.generated.resources.label_transfer
+import cofinance.composeapp.generated.resources.template_dot
+import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.Transaction
+import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.utils.ColorHelper
 import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.NumberHelper
+import id.andriawan.cofinance.utils.emptyString
+import id.andriawan.cofinance.utils.enums.TransactionCategory
 import id.andriawan.cofinance.utils.enums.TransactionType
-import id.andriawan24.cofinance.andro.R
-import id.andriawan24.cofinance.andro.ui.theme.CofinanceTheme
-import id.andriawan24.cofinance.andro.utils.ColorHelper
-import id.andriawan24.cofinance.andro.utils.Dimensions
-import id.andriawan24.cofinance.andro.utils.LocaleHelper
-import id.andriawan24.cofinance.andro.utils.NumberHelper
-import id.andriawan24.cofinance.andro.utils.emptyString
-import id.andriawan24.cofinance.andro.utils.enums.TransactionCategory
-import id.andriawan24.cofinance.andro.utils.ext.FORMAT_HOUR_MINUTE
-import id.andriawan24.cofinance.andro.utils.ext.formatToString
-import id.andriawan24.cofinance.andro.utils.ext.toDate
-import id.andriawan24.cofinance.domain.model.response.Account
-import id.andriawan24.cofinance.domain.model.response.Transaction
-import id.andriawan24.cofinance.utils.enums.TransactionType
-import java.util.UUID
+import id.andriawan.cofinance.utils.extensions.formatToString
+import id.andriawan.cofinance.utils.extensions.toDate
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
@@ -53,17 +52,15 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
                         else -> TransactionCategory.getCategoryByName(transaction.category).color
                     },
                     shape = MaterialTheme.shapes.small
-                )
-                .padding(all = Dimensions.SIZE_12)
+                ).padding(all = Dimensions.SIZE_12)
         ) {
             Image(
                 painter = painterResource(
                     when (transaction.type) {
-                        TransactionType.TRANSFER -> R.drawable.ic_transfer
-                        else -> TransactionCategory.getCategoryByName(transaction.category).iconRes
+                        TransactionType.TRANSFER -> Res.drawable.ic_transfer
+                        else -> TransactionCategory.getCategoryByName(transaction.category).icon
                     }
-                ),
-                contentDescription = null
+                ), contentDescription = null
             )
         }
 
@@ -74,10 +71,8 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
             Text(
                 text = transaction.notes.ifEmpty {
                     when (transaction.type) {
-                        TransactionType.TRANSFER -> stringResource(R.string.label_transfer)
-                        else -> stringResource(
-                            TransactionCategory.getCategoryByName(transaction.category).labelRes
-                        )
+                        TransactionType.TRANSFER -> stringResource(Res.string.label_transfer)
+                        else -> stringResource(TransactionCategory.getCategoryByName(transaction.category).label)
                     }
                 },
                 style = MaterialTheme.typography.labelMedium.copy(
@@ -88,11 +83,8 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
 
             Text(
                 text = stringResource(
-                    id = R.string.template_dot,
-                    transaction.date.toDate().formatToString(
-                        format = FORMAT_HOUR_MINUTE,
-                        locale = LocaleHelper.getCurrentLocale()
-                    ),
+                    Res.string.template_dot,
+                    transaction.date.toDate().formatToString(),
                     transaction.account.name.plus(
                         if (transaction.receiverAccount.name.isNotEmpty()) {
                             " → ${transaction.receiverAccount.name}"
@@ -119,6 +111,7 @@ fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
     }
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @Preview
 @Composable
 private fun TransactionItemPreview() {
@@ -133,7 +126,7 @@ private fun TransactionItemPreview() {
                     notes = emptyString(),
                     account = Account(name = "Test Account"),
                     type = TransactionType.EXPENSE,
-                    id = UUID.randomUUID().toString()
+                    id = Uuid.generateV4().toString()
                 )
             )
         }

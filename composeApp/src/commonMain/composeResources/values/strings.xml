@@ -34,4 +34,6 @@
     <string name="title_no_activities">No Activities Yet</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
     <string name="action_add_activity">Add Activity</string>
+    <string name="label_transfer">Transfer</string>
+    <string name="template_dot">%1$s · %2$s</string>
 </resources>
