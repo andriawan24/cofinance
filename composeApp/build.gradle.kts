@@ -45,6 +45,16 @@ kotlin {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)
+            implementation(libs.ktor.client.okhttp)
+
+            // androidMain build.gradle
+            implementation(libs.androidx.credentials)
+            implementation(libs.androidx.credentials.play.services.auth)
+            implementation(libs.googleid)
+        }
+
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
 
         commonMain.dependencies {
@@ -63,6 +73,8 @@ kotlin {
             implementation(project.dependencies.platform(libs.supabasekt.bom))
             implementation(libs.supabasekt.postgrest)
             implementation(libs.supabasekt.auth)
+            implementation(libs.supabasekt.compose.auth)
+            implementation(libs.supabasekt.compose.auth.ui)
             implementation(libs.supabasekt.realtime)
 
             // KTOR
@@ -71,6 +83,13 @@ kotlin {
 
             // Gen AI
             implementation(libs.generativeai.google)
+
+            // Koin
+            implementation(project.dependencies.platform(libs.koin.bom))
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
+            implementation(libs.koin.compose.viewmodel.navigation)
         }
 
         commonTest.dependencies {
@@ -128,14 +147,17 @@ buildkonfig {
         val supabaseUrl = localProperties.getProperty("supabase.project_url")
         val supabaseApiKey = localProperties.getProperty("supabase.public_api_key")
         val geminiApiKey = localProperties.getProperty("gemini.api_key")
+        val googleAuthApiKey = localProperties.getProperty("google_auth_client_id")
 
         require(supabaseUrl.isNotEmpty()) { "Register supabase url on local.properties" }
         require(supabaseApiKey.isNotEmpty()) { "Register supabase api key on local.properties" }
         require(geminiApiKey.isNotEmpty()) { "Register gemini api key on local.properties" }
+        require(googleAuthApiKey.isNotEmpty()) { "Register google auth api key on local.properties" }
 
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_URL", supabaseUrl)
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_API_KEY", supabaseApiKey)
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", geminiApiKey)
+        buildConfigField(FieldSpec.Type.STRING, "GOOGLE_AUTH_API_KEY", googleAuthApiKey)
     }
 }
 
