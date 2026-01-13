@@ -1,6 +1,7 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import com.codingfeline.buildkonfig.compiler.FieldSpec
+import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -29,6 +30,8 @@ kotlin {
         }
     }
 
+    jvm("desktop")
+
     js {
         browser()
         binaries.executable()
@@ -41,6 +44,8 @@ kotlin {
     }
 
     sourceSets {
+        val desktopMain by getting
+
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
@@ -55,6 +60,10 @@ kotlin {
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+        }
+
+        desktopMain.dependencies {
+            implementation(compose.desktop.currentOs)
         }
 
         commonMain.dependencies {
@@ -163,5 +172,30 @@ buildkonfig {
 
 dependencies {
     debugImplementation(compose.uiTooling)
+}
+
+compose.desktop {
+    application {
+        mainClass = "MainKt"
+
+        nativeDistributions {
+            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            packageName = "Cofinance"
+            packageVersion = "1.0.0"
+
+            macOS {
+                bundleID = "com.andriawan.cofinance"
+            }
+
+            windows {
+                menuGroup = "Cofinance"
+                upgradeUuid = "YOUR-UNIQUE-UUID"
+            }
+
+            linux {
+                packageName = "cofinance"
+            }
+        }
+    }
 }
 
