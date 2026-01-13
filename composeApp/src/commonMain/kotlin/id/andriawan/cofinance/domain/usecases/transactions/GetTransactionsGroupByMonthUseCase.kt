@@ -5,7 +5,7 @@ import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.enums.TransactionType
-import id.andriawan.cofinance.utils.extensions.toInstant
+import id.andriawan.cofinance.utils.extensions.toDate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.TimeZone
@@ -20,7 +20,7 @@ class GetTransactionsGroupByMonthUseCase(private val transactionRepository: Tran
             try {
                 val response = transactionRepository.getTransactions(param = param)
                 val transactionGrouped = response.groupBy {
-                    val date = it.date.toInstant().toLocalDateTime(TimeZone.currentSystemDefault())
+                    val date = it.date.toDate().toLocalDateTime(TimeZone.currentSystemDefault())
                     date.year to date.month.ordinal
                 }
 

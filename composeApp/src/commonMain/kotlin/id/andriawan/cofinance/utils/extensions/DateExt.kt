@@ -8,6 +8,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.format.DateTimeFormat
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
+import kotlinx.datetime.number
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.Clock
@@ -36,14 +37,6 @@ val formatMonth = LocalDateTime.Format {
 
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Instant {
-    if (this.isBlank()) {
-        return Clock.System.now()
-    }
-    return Instant.parse(this)
-}
-
-@OptIn(ExperimentalTime::class)
-fun String.toInstant(): Instant {
     if (this.isBlank()) {
         return Clock.System.now()
     }
@@ -135,7 +128,7 @@ fun getCurrentYear(
 fun getCurrentMonth(
     timeZone: TimeZone = TimeZone.currentSystemDefault()
 ): Int =
-    Clock.System.now().toLocalDateTime(timeZone).monthNumber
+    Clock.System.now().toLocalDateTime(timeZone).month.number
 
 fun getMonthLabel(
     month: Int
