@@ -9,6 +9,7 @@ kotlin = "2.3.0"
 composeNavigation = "2.9.1"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.7.1"
+logging = "2.1.0"
 supabasekt = "3.3.0"
 ktor = "3.3.3"
 generativeaiGoogle = "0.9.0-1.1.0"
@@ -28,6 +29,7 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 # Supabase
+logging = { module = "com.diamondedge:logging", version.ref = "logging" }
 supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
 supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
