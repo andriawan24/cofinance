@@ -147,7 +147,7 @@ class ActivityViewModel(
     companion object {
         private const val JANUARY = 1
         private const val DECEMBER = 12
-        
+
         val log = logging(ActivityViewModel::class.simpleName)
     }
 }

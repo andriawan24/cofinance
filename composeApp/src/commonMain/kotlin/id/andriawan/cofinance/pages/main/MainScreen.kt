@@ -13,6 +13,7 @@ import id.andriawan.cofinance.components.CofinanceBottomNavigation
 import id.andriawan.cofinance.models.rememberCofinanceAppState
 import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.activity.ActivityScreen
+import id.andriawan.cofinance.pages.stats.StatsScreen
 
 @Composable
 fun MainScreen(
@@ -43,8 +44,7 @@ fun MainScreen(
             }
 
             composable<Destinations.Stats> {
-                // StatsScreen(onNavigateToAdd = onNavigateToAdd)
-                Text("Hello World")
+                StatsScreen(onNavigateToAdd = onNavigateToAdd)
             }
 
             composable<Destinations.Account> {
