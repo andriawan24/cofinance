@@ -1,4 +1,4 @@
-package id.andriawan.cofinance.navigations
+package id.andriawan.cofinance.navigations.destinations
 
 import kotlinx.serialization.Serializable
 

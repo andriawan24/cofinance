@@ -1,7 +1,6 @@
-package id.andriawan.cofinance.navigations
+package id.andriawan.cofinance.navigations.destinations
 
 import cofinance.composeapp.generated.resources.Res
-import cofinance.composeapp.generated.resources.hello
 import cofinance.composeapp.generated.resources.ic_account
 import cofinance.composeapp.generated.resources.ic_activity
 import cofinance.composeapp.generated.resources.ic_profile

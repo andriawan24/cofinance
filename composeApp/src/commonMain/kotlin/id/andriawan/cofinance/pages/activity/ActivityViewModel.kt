@@ -3,6 +3,7 @@ package id.andriawan.cofinance.pages.activity
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.diamondedge.logging.logging
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.BalanceStats
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
@@ -38,12 +39,11 @@ sealed class ActivityUiEvent {
     data object OnPreviousMonth : ActivityUiEvent()
 }
 
-
+@Stable
 class ActivityViewModel(
     private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
     private val getBalanceStateUseCase: GetBalanceStatsUseCase
-) :
-    ViewModel() {
+) : ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -53,7 +53,6 @@ class ActivityViewModel(
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
                 val nextMonth = if (currentMonth == DECEMBER) {
-                    // Move to the next year started from January
                     nextYear++
                     JANUARY
                 } else currentMonth + 1
@@ -73,7 +72,6 @@ class ActivityViewModel(
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
                 val nextMonth = if (currentMonth == JANUARY) {
-                    // Move to the previous year started from December
                     nextYear--
                     DECEMBER
                 } else currentMonth - 1
@@ -95,19 +93,22 @@ class ActivityViewModel(
         viewModelScope.launch {
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-            getBalanceStateUseCase.execute(param).collectLatest {
-                when (it) {
+            getBalanceStateUseCase.execute(param).collectLatest { result ->
+                when (result) {
                     ResultState.Loading -> {
-                        // TODO: Handle loading
+                        /* no-op */
                     }
 
-                    is ResultState.Error -> TODO()
+                    is ResultState.Error -> {
+                        log.error { "Error getting transaction: ${result.exception.message}" }
+                    }
+
                     is ResultState.Success<BalanceStats> -> {
                         _uiState.update { state ->
                             state.copy(
-                                balance = it.data.balance,
-                                expense = it.data.expenses,
-                                income = it.data.income
+                                balance = result.data.balance,
+                                expense = result.data.expenses,
+                                income = result.data.income
                             )
                         }
                     }
@@ -122,9 +123,7 @@ class ActivityViewModel(
 
             getTransactionsGroupByMonthUseCase.execute(param = param).collectLatest { result ->
                 when (result) {
-                    ResultState.Loading -> {
-                        _uiState.value = uiState.value.copy(isLoading = true)
-                    }
+                    ResultState.Loading -> _uiState.value = uiState.value.copy(isLoading = true)
 
                     is ResultState.Success<List<TransactionByDate>> -> {
                         _uiState.value = uiState.value.copy(
@@ -134,6 +133,7 @@ class ActivityViewModel(
                     }
 
                     is ResultState.Error -> {
+                        log.error { "Error getting transaction: ${result.exception.message}" }
                         _uiState.value = _uiState.value.copy(
                             isLoading = false,
                             message = result.exception.message.orEmpty()
@@ -147,5 +147,7 @@ class ActivityViewModel(
     companion object {
         private const val JANUARY = 1
         private const val DECEMBER = 12
+        
+        val log = logging(ActivityViewModel::class.simpleName)
     }
 }

@@ -6,18 +6,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import id.andriawan.cofinance.components.CofinanceBottomNavigation
-import id.andriawan.cofinance.models.CofinanceAppState
 import id.andriawan.cofinance.models.rememberCofinanceAppState
-import id.andriawan.cofinance.navigations.Destinations
+import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.activity.ActivityScreen
 
 @Composable

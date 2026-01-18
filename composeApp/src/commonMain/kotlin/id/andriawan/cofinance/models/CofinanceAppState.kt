@@ -12,7 +12,7 @@ import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import id.andriawan.cofinance.navigations.BottomNavigationDestinations
+import id.andriawan.cofinance.navigations.destinations.BottomNavigationDestinations
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 

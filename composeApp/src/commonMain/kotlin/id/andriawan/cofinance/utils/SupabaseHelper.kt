@@ -6,6 +6,8 @@ import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.compose.auth.ComposeAuth
 import io.github.jan.supabase.compose.auth.googleNativeLogin
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.logging.LogLevel
+import io.github.jan.supabase.postgrest.Postgrest
 
 object SupabaseHelper {
     fun createClient(): SupabaseClient {
@@ -13,8 +15,10 @@ object SupabaseHelper {
             supabaseUrl = BuildKonfig.SUPABASE_URL,
             supabaseKey = BuildKonfig.SUPABASE_API_KEY
         ) {
-            install(Auth) {}
+            defaultLogLevel = LogLevel.DEBUG
 
+            install(Auth)
+            install(Postgrest)
             install(ComposeAuth) {
                 googleNativeLogin(serverClientId = BuildKonfig.GOOGLE_AUTH_API_KEY)
             }

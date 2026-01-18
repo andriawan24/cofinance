@@ -12,8 +12,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.label_activity
 import cofinance.composeapp.generated.resources.template_month_year
@@ -26,13 +29,24 @@ import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun ActivityScreen(onNavigateToAdd: () -> Unit) {
+fun ActivityScreen(
+    onNavigateToAdd: () -> Unit,
+    activityViewModel: ActivityViewModel = koinViewModel()
+) {
+    val uiState by activityViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(true) {
+        activityViewModel.getBalance()
+        activityViewModel.fetchTransaction()
+    }
+
     ActivityContent(
-        uiState = ActivityUiState(),
+        uiState = uiState,
         onEvent = {
-            // activityViewModel.onEvent(it)
+            activityViewModel.onEvent(it)
         },
         onBookmarkClicked = {
             // TODO: Handle bookmark page open
@@ -70,7 +84,11 @@ fun ActivityContent(
 
         DateSwitcher(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-            label = stringResource(Res.string.template_month_year, uiState.monthString, uiState.year),
+            label = stringResource(
+                Res.string.template_month_year,
+                uiState.monthString,
+                uiState.year
+            ),
             onPreviousClicked = { onEvent(ActivityUiEvent.OnPreviousMonth) },
             onNextClicked = { onEvent(ActivityUiEvent.OnNextMonth) }
         )

@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import id.andriawan.cofinance.models.rememberCofinanceAppState
+import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen

@@ -10,29 +10,28 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
 import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
 import io.github.jan.supabase.compose.auth.composeAuth
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
 @Composable
-fun LoginScreen(onNavigateToHome: () -> Unit, supabase: SupabaseClient = koinInject()) {
+fun LoginScreen(onNavigateToHome: () -> Unit) {
     val scope = rememberCoroutineScope()
+    val supabase = koinInject<SupabaseClient>()
+
     val snackState = remember { SnackbarHostState() }
     val authState = supabase.composeAuth.rememberSignInWithGoogle(
         onResult = { result ->
             when (result) {
-                NativeSignInResult.ClosedByUser -> {
-                    println("Closed by user ${result}")
-                }
-
                 is NativeSignInResult.Error -> {
-                    println("Error ${result.message}")
+                    scope.launch {
+                        snackState.showSnackbar(result.message)
+                    }
                 }
 
-                is NativeSignInResult.NetworkError -> {
-                    println("Network Error: ${result.message}")
-                }
+                NativeSignInResult.Success -> onNavigateToHome()
 
-                NativeSignInResult.Success -> {
-                    println("Success sign in: $result")
+                else -> {
+                    /* no-op */
                 }
             }
         }

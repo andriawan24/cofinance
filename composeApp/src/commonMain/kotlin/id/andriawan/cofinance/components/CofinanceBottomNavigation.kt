@@ -28,7 +28,7 @@ import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.ic_add
 import id.andriawan.cofinance.models.CofinanceAppState
 import id.andriawan.cofinance.models.rememberCofinanceAppState
-import id.andriawan.cofinance.navigations.BottomNavigationDestinations
+import id.andriawan.cofinance.navigations.destinations.BottomNavigationDestinations
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.painterResource
