@@ -37,4 +37,11 @@
     <string name="label_transfer">Transfer</string>
     <string name="template_dot">%1$s · %2$s</string>
     <string name="label_percentage">%1$d%%</string>
+    <string name="label_total_assets">Total Assets</string>
+    <string name="label_rupiah">IDR</string>
+    <string name="label_add_account">Add Account</string>
+    <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="label_yes">Yes</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_logout">Logout</string>
 </resources>

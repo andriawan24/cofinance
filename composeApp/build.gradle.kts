@@ -102,6 +102,9 @@ kotlin {
 
             // Logging
             api(libs.logging)
+
+            // Coil Image
+            implementation(libs.coil.compose)
         }
 
         commonTest.dependencies {

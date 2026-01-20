@@ -37,4 +37,11 @@
     <string name="label_transfer">Transfer</string>
     <string name="template_dot">%1$s · %2$s</string>
     <string name="label_percentage">%1$d%%</string>
+    <string name="label_total_assets">Total Aset</string>
+    <string name="label_rupiah">Rp</string>
+    <string name="label_add_account">Tambah Akun</string>
+    <string name="label_logout_question">Apakah kamu yakin ingin logout dari akunmu?</string>
+    <string name="label_yes">Ya</string>
+    <string name="label_cancel">Batalkan</string>
+    <string name="label_logout">Keluar Akun</string>
 </resources>

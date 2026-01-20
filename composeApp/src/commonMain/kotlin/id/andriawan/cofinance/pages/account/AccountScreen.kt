@@ -1,0 +1,254 @@
+package id.andriawan.cofinance.pages.account
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.ic_add
+import cofinance.composeapp.generated.resources.img_account_bg
+import cofinance.composeapp.generated.resources.label_account
+import cofinance.composeapp.generated.resources.label_add_account
+import cofinance.composeapp.generated.resources.label_rupiah
+import cofinance.composeapp.generated.resources.label_total_assets
+import id.andriawan.cofinance.components.SecondaryButton
+import id.andriawan.cofinance.domain.model.response.Account
+import id.andriawan.cofinance.domain.model.response.AccountByGroup
+import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.NumberHelper
+import id.andriawan.cofinance.utils.TextSizes
+import id.andriawan.cofinance.utils.enums.AccountGroupType
+import id.andriawan24.cofinance.andro.ui.components.PageTitle
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
+
+@Composable
+fun AccountScreen(
+    accountViewModel: AccountViewModel = koinViewModel(),
+    onNavigateToAddAccount: () -> Unit
+) {
+    val uiState by accountViewModel.uiState.collectAsStateWithLifecycle()
+
+    AccountContent(
+        uiState = uiState,
+        onRefresh = { accountViewModel.refresh() },
+        onNavigateToAddAccount = onNavigateToAddAccount
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AccountContent(
+    modifier: Modifier = Modifier,
+    uiState: UiState,
+    onRefresh: () -> Unit,
+    onNavigateToAddAccount: () -> Unit,
+) {
+    PullToRefreshBox(isRefreshing = uiState.isRefreshing, onRefresh = onRefresh) {
+        Column(modifier = modifier.fillMaxSize()) {
+            PageTitle(
+                modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
+                title = stringResource(Res.string.label_account)
+            )
+
+            AssetCard(
+                modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                balance = uiState.balance,
+                onAddAccountClicked = onNavigateToAddAccount
+            )
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = Dimensions.SIZE_12),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                overscrollEffect = null,
+                contentPadding = PaddingValues(vertical = Dimensions.SIZE_12)
+            ) {
+                if (uiState.isLoading) {
+                    item {
+                        CircularProgressIndicator()
+                    }
+                } else {
+                    items(uiState.accounts) { group ->
+                        AccountGroupCard(group = group)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AssetCard(
+    modifier: Modifier = Modifier,
+    balance: Long,
+    onAddAccountClicked: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.primary,
+                shape = MaterialTheme.shapes.large
+            )
+    ) {
+        Image(
+            modifier = Modifier
+                .padding(end = Dimensions.SIZE_8)
+                .align(alignment = Alignment.BottomEnd),
+            painter = painterResource(Res.drawable.img_account_bg),
+            contentDescription = null
+        )
+
+        Column(modifier = Modifier.padding(Dimensions.SIZE_16)) {
+            Text(
+                text = stringResource(Res.string.label_total_assets),
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    lineHeightStyle = LineHeightStyle(
+                        LineHeightStyle.Alignment.Center,
+                        LineHeightStyle.Trim.Both
+                    )
+                )
+            )
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_8))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(Res.string.label_rupiah),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        lineHeightStyle = LineHeightStyle(
+                            LineHeightStyle.Alignment.Center,
+                            LineHeightStyle.Trim.Both
+                        )
+                    )
+                )
+
+                Spacer(modifier = Modifier.width(Dimensions.SIZE_2))
+
+                Text(
+                    text = NumberHelper.formatNumber(balance),
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        lineHeightStyle = LineHeightStyle(
+                            LineHeightStyle.Alignment.Center,
+                            LineHeightStyle.Trim.Both
+                        )
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
+
+            SecondaryButton(
+                contentPadding = PaddingValues(Dimensions.SIZE_16, Dimensions.SIZE_6),
+                onClick = onAddAccountClicked,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_add),
+                        contentDescription = null,
+                        modifier = Modifier.size(Dimensions.SIZE_16)
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.label_add_account),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = TextSizes.SIZE_12,
+                            color = MaterialTheme.colorScheme.onBackground
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountScreenPreview() {
+    CofinanceTheme {
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            AccountContent(
+                uiState = UiState(
+                    accounts = listOf(
+                        AccountByGroup(
+                            groupLabel = AccountGroupType.CASH.displayName,
+                            totalAmount = 110_000,
+                            backgroundColor = 0xFFEEF9F8,
+                            accountGroupType = AccountGroupType.CASH,
+                            accounts = listOf(
+                                Account(
+                                    name = "BCA",
+                                    balance = 10_000
+                                ),
+                                Account(
+                                    name = "BSI",
+                                    balance = 100_000
+                                )
+                            )
+                        ),
+                        AccountByGroup(
+                            groupLabel = AccountGroupType.SAVINGS.displayName,
+                            totalAmount = 50_000,
+                            backgroundColor = 0xFFFFF4FD,
+                            accountGroupType = AccountGroupType.CREDIT,
+                            accounts = listOf(
+                                Account(
+                                    name = "BCA",
+                                    balance = 40_000
+                                ),
+                                Account(
+                                    name = "BSI",
+                                    balance = 10_000
+                                )
+                            )
+                        )
+                    )
+                ),
+                onNavigateToAddAccount = { },
+                onRefresh = {},
+            )
+        }
+    }
+}

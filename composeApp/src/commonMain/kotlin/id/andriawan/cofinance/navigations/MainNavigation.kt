@@ -81,6 +81,7 @@ fun MainNavigation(modifier: Modifier = Modifier) {
 
         composable<Destinations.Main> {
             MainScreen(
+                parentNavController = navController,
                 onNavigateToLogin = {
                     navController.navigate(Destinations.Login) {
                         launchSingleTop = true
