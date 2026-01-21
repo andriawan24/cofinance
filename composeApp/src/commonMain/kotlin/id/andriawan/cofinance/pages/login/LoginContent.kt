@@ -60,7 +60,8 @@ fun LoginContent(
             .padding(
                 top = contentPadding.calculateTopPadding(),
                 start = contentPadding.calculateStartPadding(LayoutDirection.Ltr),
-                end = contentPadding.calculateEndPadding(LayoutDirection.Ltr)
+                end = contentPadding.calculateEndPadding(LayoutDirection.Ltr),
+                bottom = contentPadding.calculateBottomPadding()
             ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
