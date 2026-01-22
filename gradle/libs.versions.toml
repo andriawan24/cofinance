@@ -3,20 +3,24 @@ agp = "9.0.0"
 androidx-activity = "1.12.2"
 androidx-lifecycle = "2.9.6"
 coil = "3.3.0"
+componentsResources = "1.10.0"
 composeMultiplatform = "1.10.0"
 credentials = "1.5.0"
+foundation = "1.10.0"
 googleid = "1.1.1"
 kotlin = "2.3.0"
 composeNavigation = "2.9.1"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.7.1"
 logging = "2.1.0"
+material3 = "1.9.0"
 runtime = "1.10.0"
 supabasekt = "3.3.0"
 ktor = "3.3.3"
 generativeaiGoogle = "0.9.0-1.1.0"
 buildkonfigGradlePlugin = "0.17.1"
 koin-bom = "4.1.1"
+ui = "1.10.0"
 uiToolingPreview = "1.10.0"
 
 [libraries]
@@ -35,6 +39,10 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 # Compose
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
+compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "ui" }
 
 # Supabase
 logging = { module = "com.diamondedge:logging", version.ref = "logging" }
