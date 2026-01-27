@@ -11,7 +11,7 @@ import id.andriawan.cofinance.localization.AppLang
 import id.andriawan.cofinance.localization.rememberAppLocale
 import id.andriawan.cofinance.navigations.MainNavigation
 import id.andriawan.cofinance.theme.CofinanceTheme
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinApplication
 
 val LocalAppLocalization = compositionLocalOf { AppLang.English }

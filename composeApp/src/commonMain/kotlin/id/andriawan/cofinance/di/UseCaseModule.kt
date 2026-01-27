@@ -4,6 +4,7 @@ import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.FetchUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
+import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetBalanceStatsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsUseCase
@@ -17,4 +18,5 @@ val useCaseModule = module {
     single { GetAccountsUseCase(get()) }
     single { GetUserUseCase(get()) }
     single { LogoutUseCase(get()) }
+    single { CreateTransactionUseCase(get(), get()) }
 }

@@ -7,7 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import id.andriawan.cofinance.navigations.destinations.Destinations
+import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
@@ -104,26 +106,26 @@ fun MainNavigation(modifier: Modifier = Modifier) {
             )
         }
 
-//        composable<Destinations.AddNew> {
-//            val route = it.toRoute<Destinations.AddNew>()
-//
-//            AddTransactionScreen(
-//                transactionId = route.transactionId,
-//                onBackPressed = {
-//                    navController.navigateUp()
-//                },
-//                onInputPictureClicked = {
-//                    navController.navigate(Destinations.Camera)
-//                },
-//                onSuccessSave = {
-//                    navController.previousBackStackEntry
-//                        ?.savedStateHandle
-//                        ?.set("add_activity_result", true)
-//                    navController.navigateUp()
-//                }
-//            )
-//        }
-//
+        composable<Destinations.AddNew> {
+            val route = it.toRoute<Destinations.AddNew>()
+
+            AddTransactionScreen(
+                transactionId = route.transactionId,
+                onBackPressed = {
+                    navController.navigateUp()
+                },
+                onInputPictureClicked = {
+                    navController.navigate(Destinations.Camera)
+                },
+                onSuccessSave = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("add_activity_result", true)
+                    navController.navigateUp()
+                }
+            )
+        }
+
 //        composable<Destinations.Camera> {
 //            CameraScreen(
 //                onBackPressed = {

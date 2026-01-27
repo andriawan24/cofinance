@@ -3,6 +3,9 @@
     <string name="label_activity">Aktivitas</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Rekening</string>
+    <string name="label_category">Kategori</string>
+    <string name="label_dates">Tanggal</string>
+    <string name="action_save">Simpan</string>
     <string name="label_profile">Profil</string>
     <string name="message_fetching_information">Memeriksa pembaruan...</string>
     <string name="en">Inggris</string>
@@ -44,4 +47,20 @@
     <string name="label_yes">Ya</string>
     <string name="label_cancel">Batalkan</string>
     <string name="label_logout">Keluar Akun</string>
+    <string name="label_loading_accounts">Sedang memuat akun...</string>
+    <string name="label_beneficiary_account">Akun Pengirim</string>
+    <string name="action_add_new_account">Tambah Akun Baru</string>
+    <string name="title_add_activity">Tambah Transaksi</string>
+    <string name="label_date">Tanggal</string>
+    <string name="label_time">Waktu</string>
+    <string name="action_choose_date">Waktu</string>
+    <string name="label_account_category">Kategori Akun</string>
+    <string name="label_name">Nama</string>
+    <string name="label_zero">0</string>
+    <string name="label_sender_account">Akun Pengirim</string>
+    <string name="label_ok">Oke</string>
+    <string name="label_fee">Fee</string>
+    <string name="label_notes">Catatan</string>
+    <string name="title_auto_fill_photo">Isi Otomatis Menggunakan Foto Nota</string>
+    <string name="description_auto_fill_photo">Unggah bukti pembelian Kamu dan kami akan mengisinya!</string>
 </resources>

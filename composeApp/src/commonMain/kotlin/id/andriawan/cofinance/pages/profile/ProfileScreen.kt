@@ -46,7 +46,7 @@ import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import id.andriawan24.cofinance.andro.ui.components.PageTitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable

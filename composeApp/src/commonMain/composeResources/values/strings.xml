@@ -3,6 +3,11 @@
     <string name="label_activity">Activity</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Account</string>
+    <string name="label_category">Category</string>
+    <string name="label_dates">Dates</string>
+    <string name="action_save">Save</string>
+    <string name="label_beneficiary_account">Beneficiary Account</string>
+    <string name="action_add_new_account">Add New Account</string>
     <string name="label_profile">Profile</string>
     <string name="message_fetching_information">Fetching information...</string>
     <string name="en">English</string>
@@ -44,4 +49,17 @@
     <string name="label_yes">Yes</string>
     <string name="label_cancel">Cancel</string>
     <string name="label_logout">Logout</string>
+    <string name="label_loading_accounts">Loading account...</string>
+    <string name="title_add_activity">Add Transaction</string>
+    <string name="label_date">Date</string>
+    <string name="label_time">Time</string>
+    <string name="label_account_category">Account Category</string>
+    <string name="label_name">Name</string>
+    <string name="label_zero">0</string>
+    <string name="label_sender_account">Sender Account</string>
+    <string name="label_ok">OK</string>
+    <string name="label_fee">Fee</string>
+    <string name="label_notes">Notes</string>
+    <string name="title_auto_fill_photo">Auto-Fill with Receipt Photo</string>
+    <string name="description_auto_fill_photo">Upload your receipt and we’ll fill it in!</string>
 </resources>

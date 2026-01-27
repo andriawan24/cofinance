@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.ic_expense
@@ -37,7 +38,6 @@ import id.andriawan.cofinance.utils.NumberHelper
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun BalanceCard(modifier: Modifier = Modifier, balance: Long, income: Long, expense: Long) {

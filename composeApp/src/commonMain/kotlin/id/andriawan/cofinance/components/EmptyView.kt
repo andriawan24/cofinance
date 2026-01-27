@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_add_activity
 import cofinance.composeapp.generated.resources.content_description_empty_state_image
@@ -26,7 +27,6 @@ import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun EmptyView(modifier: Modifier = Modifier, onNavigateToAdd: () -> Unit) {

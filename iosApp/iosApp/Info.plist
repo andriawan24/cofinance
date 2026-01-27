@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
-    "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
     <dict>
         <key>CADisableMinimumFrameDurationOnPhone</key>
@@ -8,6 +8,17 @@
         <array>
             <string>en</string>
             <string>id</string>
+        </array>
+        <key>CFBundleURLTypes</key>
+        <array>
+            <dict>
+                <key>CFBundleURLSchemes</key>
+                <array>
+                    <string>
+                        com.googleusercontent.apps.441243986243-ks2t66rum6ee4nq1k62mnn68gauth5q1
+                    </string>
+                </array>
+            </dict>
         </array>
     </dict>
 </plist>

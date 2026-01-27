@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.theme.CofinanceTheme
@@ -21,7 +22,6 @@ import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberHelper
 import id.andriawan.cofinance.utils.extensions.formatMonth
 import id.andriawan.cofinance.utils.extensions.formatToString
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun TransactionByMonth(
