@@ -55,155 +55,226 @@ fun InputAmount(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
-        Box(
-            modifier = Modifier
-                .background(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    shape = MaterialTheme.shapes.large
-                )
-                .padding(all = Dimensions.SIZE_16)
-        ) {
-            Row {
-                Text(
-                    text = stringResource(Res.string.label_rupiah),
-                    style = MaterialTheme.typography.displayMedium.copy(
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                )
-
-                BasicTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = amount,
-                    onValueChange = {
-                        if (it.isDigitOnly() && it.length < 13) {
-                            onAmountChanged(it)
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    ),
-                    textStyle = MaterialTheme.typography.displayMedium.copy(
-                        color = MaterialTheme.colorScheme.onBackground
-                    ),
-                    decorationBox = { innerTextField ->
-                        if (amount.isBlank()) {
-                            Text(
-                                text = stringResource(Res.string.label_zero),
-                                style = MaterialTheme.typography.displayMedium.copy(
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            )
-                        }
-                        innerTextField()
-                    },
-                    visualTransformation = NumberFormatTransformation()
-                )
-            }
-
-            if (enableFee && !includeFee) {
-                OutlinedButton(
-                    modifier = Modifier.align(Alignment.CenterEnd),
-                    contentPadding = PaddingValues(
-                        horizontal = Dimensions.SIZE_16,
-                        vertical = Dimensions.SIZE_4
-                    ),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onBackground
-                    ),
-                    border = BorderStroke(
-                        width = Dimensions.SIZE_1,
-                        color = MaterialTheme.colorScheme.primary
-                    ),
-                    onClick = {
-                        onIncludeFeeChanged(true)
-                    }
-                ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Image(
-                            painter = painterResource(Res.drawable.ic_plus),
-                            contentDescription = null
-                        )
-
-                        Text(
-                            text = stringResource(Res.string.label_fee),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-        }
+        AmountInputSection(
+            amount = amount,
+            showAddFeeButton = enableFee && !includeFee,
+            onAmountChanged = onAmountChanged,
+            onAddFeeClick = { onIncludeFeeChanged(true) }
+        )
 
         if (includeFee) {
-            Row(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        shape = MaterialTheme.shapes.large
-                    )
-                    .padding(all = Dimensions.SIZE_16),
-                horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.ic_two_coins),
-                    contentDescription = null
-                )
-
-                Row(modifier = Modifier.weight(1f)) {
-                    if (fee.isNotBlank()) {
-                        Text(
-                            text = stringResource(Res.string.label_rupiah),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = MaterialTheme.colorScheme.onBackground
-                            )
-                        )
-                    }
-
-                    BasicTextField(
-                        modifier = Modifier.weight(1f),
-                        value = fee,
-                        onValueChange = {
-                            if (it.isDigitOnly() && it.length < 13) {
-                                onFeeChanged.invoke(it)
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Next,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        textStyle = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.onBackground
-                        ),
-                        decorationBox = { innerTextField ->
-                            if (fee.isBlank()) {
-                                Text(
-                                    text = stringResource(Res.string.label_fee),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        },
-                        visualTransformation = NumberFormatTransformation()
-                    )
-                }
-
-                Image(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .clickable { onIncludeFeeChanged(false) },
-                    painter = painterResource(Res.drawable.ic_close),
-                    contentDescription = null
-                )
-            }
+            FeeInputSection(
+                fee = fee,
+                onFeeChanged = onFeeChanged,
+                onRemoveFeeClick = { onIncludeFeeChanged(false) }
+            )
         }
+    }
+}
+
+@Composable
+private fun AmountInputSection(
+    amount: String,
+    showAddFeeButton: Boolean,
+    onAmountChanged: (String) -> Unit,
+    onAddFeeClick: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(all = Dimensions.SIZE_16)
+    ) {
+        AmountTextField(
+            amount = amount,
+            onAmountChanged = onAmountChanged
+        )
+
+        if (showAddFeeButton) {
+            AddFeeButton(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                onClick = onAddFeeClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun AmountTextField(
+    amount: String,
+    onAmountChanged: (String) -> Unit
+) {
+    Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)) {
+        Text(
+            text = stringResource(Res.string.label_rupiah),
+            style = MaterialTheme.typography.displayMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground
+            )
+        )
+
+        BasicTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = amount,
+            onValueChange = { newValue ->
+                if ((newValue.isBlank() || newValue.isDigitOnly()) && newValue.length < 13) {
+                    onAmountChanged(newValue)
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Number
+            ),
+            textStyle = MaterialTheme.typography.displayMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground
+            ),
+            decorationBox = { innerTextField ->
+                AmountPlaceholder(showPlaceholder = amount.isBlank())
+                innerTextField()
+            },
+            visualTransformation = NumberFormatTransformation()
+        )
+    }
+}
+
+@Composable
+private fun AmountPlaceholder(showPlaceholder: Boolean) {
+    if (showPlaceholder) {
+        Text(
+            text = stringResource(Res.string.label_zero),
+            style = MaterialTheme.typography.displayMedium.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
+    }
+}
+
+@Composable
+private fun AddFeeButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    OutlinedButton(
+        modifier = modifier,
+        contentPadding = PaddingValues(
+            horizontal = Dimensions.SIZE_16,
+            vertical = Dimensions.SIZE_4
+        ),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onBackground
+        ),
+        border = BorderStroke(
+            width = Dimensions.SIZE_1,
+            color = MaterialTheme.colorScheme.primary
+        ),
+        onClick = onClick
+    ) {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(Res.drawable.ic_plus),
+                contentDescription = null
+            )
+
+            Text(
+                text = stringResource(Res.string.label_fee),
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+    }
+}
+
+@Composable
+private fun FeeInputSection(
+    fee: String,
+    onFeeChanged: (String) -> Unit,
+    onRemoveFeeClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .background(
+                color = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(all = Dimensions.SIZE_16),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(Res.drawable.ic_two_coins),
+            contentDescription = null
+        )
+
+        FeeTextField(
+            modifier = Modifier.weight(1f),
+            fee = fee,
+            onFeeChanged = onFeeChanged
+        )
+
+        Image(
+            modifier = Modifier
+                .clip(CircleShape)
+                .clickable { onRemoveFeeClick() },
+            painter = painterResource(Res.drawable.ic_close),
+            contentDescription = null
+        )
+    }
+}
+
+@Composable
+private fun FeeTextField(
+    modifier: Modifier = Modifier,
+    fee: String,
+    onFeeChanged: (String) -> Unit
+) {
+    Row(modifier = modifier) {
+        if (fee.isNotBlank()) {
+            Text(
+                text = stringResource(Res.string.label_rupiah),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            )
+        }
+
+        BasicTextField(
+            modifier = Modifier.weight(1f),
+            value = fee,
+            onValueChange = { newValue ->
+                if ((newValue.isBlank() || newValue.isDigitOnly()) && newValue.length < 13) {
+                    onFeeChanged(newValue)
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Number
+            ),
+            textStyle = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground
+            ),
+            decorationBox = { innerTextField ->
+                FeePlaceholder(showPlaceholder = fee.isBlank())
+                innerTextField()
+            },
+            visualTransformation = NumberFormatTransformation()
+        )
+    }
+}
+
+@Composable
+private fun FeePlaceholder(showPlaceholder: Boolean) {
+    if (showPlaceholder) {
+        Text(
+            text = stringResource(Res.string.label_fee),
+            style = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium
+            )
+        )
     }
 }
 
