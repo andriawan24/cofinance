@@ -25,7 +25,7 @@ import id.andriawan.cofinance.components.EmptyView
 import id.andriawan.cofinance.components.TransactionByMonth
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
-import id.andriawan24.cofinance.andro.ui.components.PageTitle
+import id.andriawan.cofinance.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview

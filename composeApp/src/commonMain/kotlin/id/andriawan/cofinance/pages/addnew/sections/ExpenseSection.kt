@@ -36,8 +36,8 @@ import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.enums.AccountTransferType
 import id.andriawan.cofinance.utils.extensions.formatToString
 import id.andriawan.cofinance.components.AddNewSection
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputAmount
-import id.andriawan24.cofinance.andro.ui.presentation.addnew.components.InputNote
+import id.andriawan.cofinance.components.InputAmount
+import id.andriawan.cofinance.components.InputNote
 import id.andriawan.cofinance.components.UploadPhotoCardButton
 import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.painterResource

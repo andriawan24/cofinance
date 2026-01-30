@@ -40,7 +40,7 @@ import id.andriawan.cofinance.components.PieChart
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberHelper
-import id.andriawan24.cofinance.andro.ui.components.PageTitle
+import id.andriawan.cofinance.components.PageTitle
 import id.andriawan24.cofinance.andro.ui.presentation.activity.components.DateSwitcher
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview

@@ -45,7 +45,7 @@ import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberHelper
 import id.andriawan.cofinance.utils.TextSizes
 import id.andriawan.cofinance.utils.enums.AccountGroupType
-import id.andriawan24.cofinance.andro.ui.components.PageTitle
+import id.andriawan.cofinance.components.PageTitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel

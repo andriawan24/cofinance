@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.components
+package id.andriawan.cofinance.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -18,6 +18,7 @@ fun PageTitle(
 ) {
     Box(modifier = modifier.fillMaxWidth()) {
         Text(text = title, style = MaterialTheme.typography.displaySmall)
+
         Row(modifier = Modifier.align(Alignment.CenterEnd)) {
             if (endContent != null) {
                 endContent()

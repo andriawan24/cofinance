@@ -43,7 +43,7 @@ import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
-import id.andriawan24.cofinance.andro.ui.components.PageTitle
+import id.andriawan.cofinance.components.PageTitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview

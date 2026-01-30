@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addnew.components
+package id.andriawan.cofinance.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -84,7 +84,7 @@ fun InputNote(modifier: Modifier = Modifier, note: String, onNoteChanged: (Strin
 private fun InputNotePreview() {
     CofinanceTheme {
         var note by remember { mutableStateOf(emptyString()) }
-        
+
         InputNote(note = note) {
             note = it
         }

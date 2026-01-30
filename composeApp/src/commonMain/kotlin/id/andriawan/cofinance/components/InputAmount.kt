@@ -1,4 +1,4 @@
-package id.andriawan24.cofinance.andro.ui.presentation.addnew.components
+package id.andriawan.cofinance.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
