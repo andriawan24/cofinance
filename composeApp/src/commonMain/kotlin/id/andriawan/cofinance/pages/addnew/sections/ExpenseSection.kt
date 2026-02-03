@@ -27,7 +27,11 @@ import cofinance.composeapp.generated.resources.ic_chevron_right
 import cofinance.composeapp.generated.resources.label_account
 import cofinance.composeapp.generated.resources.label_category
 import cofinance.composeapp.generated.resources.label_dates
+import id.andriawan.cofinance.components.AddNewSection
+import id.andriawan.cofinance.components.InputAmount
+import id.andriawan.cofinance.components.InputNote
 import id.andriawan.cofinance.components.PrimaryButton
+import id.andriawan.cofinance.components.UploadPhotoCardButton
 import id.andriawan.cofinance.pages.addnew.AddNewDialogEvent
 import id.andriawan.cofinance.pages.addnew.AddNewUiEvent
 import id.andriawan.cofinance.pages.addnew.AddNewUiState
@@ -35,11 +39,6 @@ import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.enums.AccountTransferType
 import id.andriawan.cofinance.utils.extensions.formatToString
-import id.andriawan.cofinance.components.AddNewSection
-import id.andriawan.cofinance.components.InputAmount
-import id.andriawan.cofinance.components.InputNote
-import id.andriawan.cofinance.components.UploadPhotoCardButton
-import kotlinx.datetime.TimeZone
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -103,9 +102,7 @@ fun ExpenseSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(Res.string.label_category),
             value = uiState.expenseCategory?.label?.let { stringResource(it) }.orEmpty(),
-            onSectionClicked = {
-                onDialogEvent.invoke(AddNewDialogEvent.ToggleCategoryDialog(true))
-            },
+            onSectionClicked = { onDialogEvent.invoke(AddNewDialogEvent.ToggleCategoryDialog(true)) },
             startIcon = {
                 Icon(
                     painter = painterResource(Res.drawable.ic_category),
@@ -125,10 +122,8 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(Res.string.label_dates),
-            value = uiState.dateTime.formatToString(timeZone = TimeZone.of("Asia/Jakarta")),
-            onSectionClicked = {
-                onDialogEvent.invoke(AddNewDialogEvent.ToggleDatePickerDialog(true))
-            },
+            value = uiState.dateTime.formatToString(),
+            onSectionClicked = { onDialogEvent.invoke(AddNewDialogEvent.ToggleDatePickerDialog(true)) },
             startIcon = {
                 Icon(
                     painter = painterResource(Res.drawable.ic_calendar),

@@ -14,11 +14,17 @@
             <dict>
                 <key>CFBundleURLSchemes</key>
                 <array>
-                    <string>
-                        com.googleusercontent.apps.441243986243-ks2t66rum6ee4nq1k62mnn68gauth5q1
-                    </string>
+                    <string>com.googleusercontent.apps.441243986243-gaq25a4d4nris488iuokh4pfqqtop4if</string>
                 </array>
             </dict>
         </array>
+        <key>CFBundleVersion</key>
+        <string>1</string>
+        <key>GIDClientID</key>
+        <string>441243986243-gaq25a4d4nris488iuokh4pfqqtop4if.apps.googleusercontent.com</string>
+        <key>NSCameraUsageDescription</key>
+        <string>Camera access required for taking photos</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>Photo library access required for saving images</string>
     </dict>
 </plist>

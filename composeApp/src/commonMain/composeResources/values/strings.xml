@@ -62,4 +62,6 @@
     <string name="label_notes">Notes</string>
     <string name="title_auto_fill_photo">Auto-Fill with Receipt Photo</string>
     <string name="description_auto_fill_photo">Upload your receipt and we’ll fill it in!</string>
+    <string name="title_camera_permission_denied">Camera Permission Denied</string>
+    <string name="description_camera_permission_denied">The camera permission is required in order to used this feature. Please grant the permission.</string>
 </resources>
