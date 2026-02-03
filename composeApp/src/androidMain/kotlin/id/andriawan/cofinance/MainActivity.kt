@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import id.andriawan.cofinance.auth.AndroidContextHolder
 import id.andriawan.cofinance.pages.App
 
 class MainActivity : ComponentActivity() {
@@ -13,8 +14,26 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
+        // Set context holder for Google Sign-In
+        AndroidContextHolder.applicationContext = applicationContext
+        AndroidContextHolder.currentActivity = this
+
         setContent {
             App()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Update activity reference when resumed
+        AndroidContextHolder.currentActivity = this
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        // Clear activity reference when destroyed
+        if (AndroidContextHolder.currentActivity == this) {
+            AndroidContextHolder.currentActivity = null
         }
     }
 }
