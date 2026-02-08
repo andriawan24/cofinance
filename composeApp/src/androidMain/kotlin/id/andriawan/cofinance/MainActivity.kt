@@ -14,10 +14,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
-        // Set context holder for Google Sign-In
-        AndroidContextHolder.applicationContext = applicationContext
-        AndroidContextHolder.currentActivity = this
-
         setContent {
             App()
         }

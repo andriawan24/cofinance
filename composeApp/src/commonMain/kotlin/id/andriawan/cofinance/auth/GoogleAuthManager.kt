@@ -1,5 +1,7 @@
 package id.andriawan.cofinance.auth
 
+import coil3.PlatformContext
+
 /**
  * Result of Google Sign-In operation
  */
@@ -18,7 +20,7 @@ expect class GoogleAuthManager() {
      * Initiates the Google Sign-In flow
      * @return GoogleAuthResult indicating success, cancellation, or error
      */
-    suspend fun signIn(): GoogleAuthResult
+    suspend fun signIn(context: PlatformContext): GoogleAuthResult
 
     /**
      * Signs out from Google

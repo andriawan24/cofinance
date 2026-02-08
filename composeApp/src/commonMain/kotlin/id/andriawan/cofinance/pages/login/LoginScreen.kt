@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import coil3.compose.LocalPlatformContext
 import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.auth.GoogleAuthResult
 import io.github.jan.supabase.SupabaseClient
@@ -26,6 +27,7 @@ fun LoginScreen(onNavigateToHome: () -> Unit) {
 
     val snackState = remember { SnackbarHostState() }
     var isLoading by remember { mutableStateOf(false) }
+    val context = LocalPlatformContext.current
 
     Scaffold(snackbarHost = { SnackbarHost(snackState) }) {
         LoginContent(
@@ -33,7 +35,7 @@ fun LoginScreen(onNavigateToHome: () -> Unit) {
             uiState = LoginUiState(isLoading = isLoading),
             onContinueClicked = {
                 scope.launch {
-                    when (val result = googleAuthManager.signIn()) {
+                    when (val result = googleAuthManager.signIn(context)) {
                         is GoogleAuthResult.Success -> {
                             try {
                                 supabase.auth.signInWith(IDToken) {

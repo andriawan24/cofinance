@@ -1,5 +1,6 @@
 package id.andriawan.cofinance.auth
 
+import coil3.PlatformContext
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UIKit.UIApplication
@@ -21,7 +22,11 @@ interface GoogleSignInCallback {
  * Interface to be implemented by Swift GoogleSignInBridge
  */
 interface GoogleSignInBridge {
-    fun signIn(presentingViewController: platform.UIKit.UIViewController, callback: GoogleSignInCallback)
+    fun signIn(
+        presentingViewController: UIViewController,
+        callback: GoogleSignInCallback
+    )
+
     fun signOut()
 }
 
@@ -36,43 +41,44 @@ object GoogleSignInBridgeHolder {
 @OptIn(ExperimentalForeignApi::class)
 actual class GoogleAuthManager {
 
-    actual suspend fun signIn(): GoogleAuthResult = suspendCancellableCoroutine { continuation ->
-        val bridge = GoogleSignInBridgeHolder.bridge
-        if (bridge == null) {
-            continuation.resume(
-                GoogleAuthResult.Error("Google Sign-In not configured. Please initialize GoogleSignInBridge.")
-            )
-            return@suspendCancellableCoroutine
+    actual suspend fun signIn(context: PlatformContext): GoogleAuthResult =
+        suspendCancellableCoroutine { continuation ->
+            val bridge = GoogleSignInBridgeHolder.bridge
+            if (bridge == null) {
+                continuation.resume(
+                    GoogleAuthResult.Error("Google Sign-In not configured. Please initialize GoogleSignInBridge.")
+                )
+                return@suspendCancellableCoroutine
+            }
+
+            val rootViewController = getRootViewController()
+            if (rootViewController == null) {
+                continuation.resume(
+                    GoogleAuthResult.Error("Unable to find root view controller")
+                )
+                return@suspendCancellableCoroutine
+            }
+
+            bridge.signIn(rootViewController, object : GoogleSignInCallback {
+                override fun onSuccess(idToken: String, email: String?) {
+                    if (continuation.isActive) {
+                        continuation.resume(GoogleAuthResult.Success(idToken, email))
+                    }
+                }
+
+                override fun onError(message: String) {
+                    if (continuation.isActive) {
+                        continuation.resume(GoogleAuthResult.Error(message))
+                    }
+                }
+
+                override fun onCancelled() {
+                    if (continuation.isActive) {
+                        continuation.resume(GoogleAuthResult.Cancelled)
+                    }
+                }
+            })
         }
-
-        val rootViewController = getRootViewController()
-        if (rootViewController == null) {
-            continuation.resume(
-                GoogleAuthResult.Error("Unable to find root view controller")
-            )
-            return@suspendCancellableCoroutine
-        }
-
-        bridge.signIn(rootViewController, object : GoogleSignInCallback {
-            override fun onSuccess(idToken: String, email: String?) {
-                if (continuation.isActive) {
-                    continuation.resume(GoogleAuthResult.Success(idToken, email))
-                }
-            }
-
-            override fun onError(message: String) {
-                if (continuation.isActive) {
-                    continuation.resume(GoogleAuthResult.Error(message))
-                }
-            }
-
-            override fun onCancelled() {
-                if (continuation.isActive) {
-                    continuation.resume(GoogleAuthResult.Cancelled)
-                }
-            }
-        })
-    }
 
     actual fun signOut() {
         GoogleSignInBridgeHolder.bridge?.signOut()

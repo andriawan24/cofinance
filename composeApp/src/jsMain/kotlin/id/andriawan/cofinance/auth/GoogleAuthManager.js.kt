@@ -1,14 +1,14 @@
 package id.andriawan.cofinance.auth
 
+import coil3.PlatformContext
+
 /**
  * JavaScript implementation of GoogleAuthManager
  * Currently not supported - returns error
  */
 actual class GoogleAuthManager {
 
-    actual suspend fun signIn(): GoogleAuthResult {
-        // JS doesn't support native Google Sign-In
-        // Could implement OAuth browser flow in the future
+    actual suspend fun signIn(context: PlatformContext): GoogleAuthResult {
         return GoogleAuthResult.Error("Google Sign-In is not supported on Web")
     }
 
