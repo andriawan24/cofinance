@@ -18,6 +18,14 @@ import io.github.jan.supabase.auth.providers.builtin.IDToken
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
+/**
+ * Displays the login UI and manages the Google sign-in flow.
+ *
+ * Initiates Google sign-in when the user continues, exchanges the returned ID token with Supabase to authenticate,
+ * navigates to the home screen on successful authentication, and shows error messages in a snackbar on failure.
+ *
+ * @param onNavigateToHome Callback invoked after a successful Supabase sign-in to navigate to the home screen.
+ */
 @Composable
 fun LoginScreen(onNavigateToHome: () -> Unit) {
     val scope = rememberCoroutineScope()

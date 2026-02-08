@@ -42,6 +42,16 @@ import id.andriawan.cofinance.utils.extensions.formatToString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Renders the expense entry section of the "Add New" screen, including photo upload, amount and fee inputs,
+ * account/category/date selectors, note input, and the save button.
+ *
+ * @param uiState Current state of the add-new form used to populate displayed values.
+ * @param onEvent Callback invoked for user-driven UI events (amount/fee changes, include-fee toggle, note changes,
+ * picture action, save action, account chooser type changes, etc.).
+ * @param onDialogEvent Callback invoked to show or hide auxiliary dialogs (account chooser, category picker, date picker).
+ * @param modifier Modifier applied to the root container.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseSection(

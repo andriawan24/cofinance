@@ -17,6 +17,15 @@ import id.andriawan.cofinance.createCameraPermissionHandler
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import org.koin.compose.viewmodel.koinViewModel
 
+/**
+ * Hosts the camera screen UI, manages camera permission flow, and renders camera content.
+ *
+ * When camera permission is granted, the preview UI is displayed; otherwise the screen requests
+ * permission and waits for the result before showing the preview.
+ *
+ * @param onNavigateToPreview Callback invoked with the image `Uri` when navigation to the preview screen is required.
+ * @param onBackPressed Callback invoked when the user requests to navigate back from the camera screen.
+ */
 @Composable
 fun CameraScreen(
     onNavigateToPreview: (Uri) -> Unit,

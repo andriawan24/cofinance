@@ -15,13 +15,14 @@ sealed class GoogleAuthResult {
  */
 expect class GoogleAuthManager() {
     /**
-     * Initiates the Google Sign-In flow
-     * @return GoogleAuthResult indicating success, cancellation, or error
-     */
+ * Starts the Google Sign-In flow.
+ *
+ * @return A [GoogleAuthResult] representing either a successful sign-in with an ID token and optional email, a cancellation by the user, or an error with a message and optional exception.
+ */
     suspend fun signIn(): GoogleAuthResult
 
     /**
-     * Signs out from Google
-     */
+ * Signs the current user out of Google for this manager.
+ */
     fun signOut()
 }

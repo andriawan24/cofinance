@@ -26,6 +26,13 @@ object AndroidContextHolder {
 
 actual class GoogleAuthManager {
 
+    /**
+     * Initiates a Google sign-in using the Android Credential Manager and maps the outcome to a `GoogleAuthResult`.
+     *
+     * Attempts to obtain the current activity from `AndroidContextHolder` and request Google ID credentials. On a successful credential response the result will be parsed and returned as `GoogleAuthResult.Success`. If the user cancels the flow the result will be `GoogleAuthResult.Cancelled`. Any failures produce `GoogleAuthResult.Error` with a descriptive message and, when available, the underlying exception.
+     *
+     * @return `GoogleAuthResult.Success` with `idToken` and `email` on success, `GoogleAuthResult.Cancelled` if the credential flow was cancelled, or `GoogleAuthResult.Error` with a message and optional exception for other failures.
+     */
     actual suspend fun signIn(): GoogleAuthResult = withContext(Dispatchers.Main) {
         val activity = AndroidContextHolder.currentActivity
         if (activity == null) {
@@ -59,6 +66,12 @@ actual class GoogleAuthManager {
         }
     }
 
+    /**
+     * Convert a Credential Manager response into a GoogleAuthResult by extracting and validating a Google ID token credential.
+     *
+     * @param result The credential response returned by the Credential Manager.
+     * @return `GoogleAuthResult.Success` containing `idToken` and `email` when a valid Google ID token credential is present; `GoogleAuthResult.Error` when the credential type is unexpected or the ID token cannot be parsed.
+     */
     private fun handleSignInResult(result: GetCredentialResponse): GoogleAuthResult {
         return when (val credential = result.credential) {
             is CustomCredential -> {
@@ -80,6 +93,11 @@ actual class GoogleAuthManager {
         }
     }
 
+    /**
+     * No-op placeholder for signing out of Google authentication on Android.
+     *
+     * Credential Manager does not provide a sign-out operation; actual sign-out is performed by Supabase Auth.
+     */
     actual fun signOut() {
         // Google Sign-In via Credential Manager doesn't have a sign-out method
         // Sign-out is handled by Supabase Auth

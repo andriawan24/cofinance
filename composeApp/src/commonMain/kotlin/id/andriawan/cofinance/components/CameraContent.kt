@@ -30,6 +30,17 @@ import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.painterResource
 
+/**
+ * Displays a full-screen camera UI with a composable preview slot, a back button, gallery and flash controls, and a central shutter button.
+ *
+ * @param modifier Modifier applied to the inner container of the camera UI.
+ * @param isFlashOn Indicates whether flash is currently enabled; this affects which flash icon is shown.
+ * @param onBackPressed Invoked when the back button is pressed.
+ * @param onOpenGalleryClicked Invoked when the gallery button is pressed.
+ * @param onFlashClicked Invoked when the flash toggle button is pressed.
+ * @param cameraContent Composable slot used to render the camera preview or other content behind the UI chrome.
+ * @param onTakePictureClicked Invoked when the shutter (capture) button is pressed.
+ */
 @Composable
 fun CameraContent(
     modifier: Modifier = Modifier,
@@ -124,6 +135,11 @@ fun CameraContent(
     }
 }
 
+/**
+ * Preview of CameraContent rendered inside CofinanceTheme for IDE previews.
+ *
+ * Renders CameraContent with the flash disabled and all callbacks as no-ops to provide a visual snapshot for design tooling.
+ */
 @Preview
 @Composable
 private fun CameraContentPreview() {

@@ -7,11 +7,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.await
 import kotlinx.coroutines.launch
 
+/**
+ * Does nothing on JavaScript targets.
+ *
+ * On web platforms there is no supported way to open the host device's system settings, so this implementation is intentionally a no-op.
+ */
 actual fun PlatformContext.goToSystemSettings() {
     /* no-op */
 }
 
 class WebCameraPermissionHandler : PermissionHandler {
+    /**
+     * Requests camera access from the user via the browser and reports whether access was granted.
+     *
+     * This will prompt the browser's camera permission flow; if a media stream is obtained it
+     * will be immediately stopped before reporting success.
+     *
+     * @param onResult Callback invoked with `true` if camera access was granted, `false` otherwise.
+     */
     override fun askPermission(context: PlatformContext, onResult: (Boolean) -> Unit) {
         CoroutineScope(Dispatchers.Main).launch {
             try {
@@ -28,11 +41,23 @@ class WebCameraPermissionHandler : PermissionHandler {
         }
     }
 
+    /**
+     * Indicates the current camera permission state on web.
+     *
+     * Always returns `PermissionStatus.NOT_DETERMINED`.
+     *
+     * @return `PermissionStatus.NOT_DETERMINED`.
+     */
     override fun checkPermission(context: PlatformContext): PermissionStatus {
         return PermissionStatus.NOT_DETERMINED
     }
 }
 
+/**
+ * Creates a camera permission handler for the web platform.
+ *
+ * @return A PermissionHandler that requests camera access using the browser's mediaDevices API.
+ */
 actual fun createCameraPermissionHandler(): PermissionHandler {
     return WebCameraPermissionHandler()
 }

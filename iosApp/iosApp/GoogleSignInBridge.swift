@@ -13,7 +13,8 @@ import ComposeApp
         super.init()
     }
 
-    /// Initialize Google Sign-In and register the bridge with Kotlin
+    /// Configures Google Sign-In for the app using the `GIDClientID` value from Info.plist.
+    /// Reads the `GIDClientID` key from the main bundle; if present, initializes and assigns the Google Sign-In configuration and registers this bridge with the Kotlin bridge holder. If the key is missing, logs an error and does not configure Google Sign-In.
     public static func configure() {
         // Get client ID from Info.plist
         guard let clientID = Bundle.main.object(forInfoDictionaryKey: "GIDClientID") as? String else {
@@ -31,12 +32,23 @@ import ComposeApp
         print("GoogleSignIn: Configured successfully with client ID")
     }
 
-    /// Handle URL callback from Google Sign-In
+    /// Forwards an incoming URL to Google Sign-In for handling.
+    /// - Parameters:
+    ///   - url: The URL to be processed (typically received by the app from an external callback).
+    /// - Returns: `true` if Google Sign-In handled the URL, `false` otherwise.
     public static func handleURL(_ url: URL) -> Bool {
         return GIDSignIn.sharedInstance.handle(url)
     }
 
-    // MARK: - GoogleSignInBridge Protocol
+    /// Initiates the Google Sign-In flow using the provided view controller.
+    /// 
+    /// Attempts to sign the user in with Google and reports the outcome through the callback:
+    /// - On success: delivers the user's ID token and optional email via `callback.onSuccess`.
+    /// - On cancellation: invokes `callback.onCancelled`.
+    /// - On failure: invokes `callback.onError` with a descriptive message.
+    /// - Parameters:
+    ///   - presentingViewController: The view controller used to present the Google Sign-In UI.
+    ///   - callback: The callback to receive success, cancellation, or error events.
 
     public func signIn(presentingViewController: UIViewController, callback: any GoogleSignInCallback) {
         // Check if configuration exists
@@ -71,6 +83,7 @@ import ComposeApp
         }
     }
 
+    /// Signs out the currently authenticated Google user and clears the local Google Sign-In state.
     public func signOut() {
         GIDSignIn.sharedInstance.signOut()
     }
@@ -79,7 +92,8 @@ import ComposeApp
 /// Extension to restore previous sign-in on app launch
 extension GoogleSignInBridgeImpl {
 
-    /// Attempt to restore previous sign-in session
+    /// Attempts to restore a previously authenticated Google Sign-In session.
+    /// - Parameter completion: Called with `true` if a previous session was successfully restored; called with `false` if no previous session exists or restoration failed.
     public func restorePreviousSignIn(completion: @escaping (Bool) -> Void) {
         GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
             if let error = error {

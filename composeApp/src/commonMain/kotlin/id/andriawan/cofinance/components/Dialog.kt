@@ -14,6 +14,11 @@ import coil3.compose.LocalPlatformContext
 import id.andriawan.cofinance.goToSystemSettings
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Shows an alert dialog informing the user that camera permission was denied and offering to open system settings.
+ *
+ * @param onDialogDismissed Called when the dialog is dismissed by any user action (cancel, outside tap, or after confirming).
+ */
 @Composable
 fun RationalPermissionDialog(onDialogDismissed: () -> Unit) {
     val context = LocalPlatformContext.current

@@ -15,6 +15,14 @@ import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
 
+/**
+ * Declares the app's composable navigation graph and wiring between screens with animated slide transitions.
+ *
+ * Sets up a NavHost (start at Splash) and provides navigation callbacks for Splash, Login, Main, AddNew, and Camera destinations,
+ * including state preservation for certain navigations and a uniform slide animation for enter/exit and pop transitions.
+ *
+ * @param modifier Modifier applied to the NavHost container.
+ */
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
