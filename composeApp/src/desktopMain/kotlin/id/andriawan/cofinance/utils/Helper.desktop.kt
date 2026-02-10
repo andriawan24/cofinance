@@ -14,3 +14,11 @@ actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
         null
     }
 }
+
+actual fun deleteFile(fileUri: String) {
+    try {
+        File(URI(fileUri)).delete()
+    } catch (_: Exception) {
+        // Ignore deletion errors
+    }
+}
