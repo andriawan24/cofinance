@@ -16,7 +16,7 @@ import id.andriawan.cofinance.components.CameraPreviewContent
 
 @Composable
 fun CameraScreen(
-    onNavigateToPreview: (Uri) -> Unit,
+    onNavigateToPreview: (String) -> Unit,
     onBackPressed: () -> Unit
 ) {
     var isFlashOn by remember { mutableStateOf(false) }
@@ -30,7 +30,8 @@ fun CameraScreen(
             cameraContent = {
                 CameraPreviewContent(
                     onCaptureImage = { filePath ->
-                        onNavigateToPreview(filePath.toUri())
+                        println("Image File $filePath")
+                        onNavigateToPreview(filePath)
                     },
                     onFlashToggled = { flashOn ->
                         isFlashOn = flashOn

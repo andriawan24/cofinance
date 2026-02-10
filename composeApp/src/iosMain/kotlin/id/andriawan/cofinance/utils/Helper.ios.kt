@@ -7,16 +7,26 @@ import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
 import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
+import platform.Foundation.dataWithContentsOfFile
 import platform.Foundation.dataWithContentsOfURL
+import platform.Photos.PHAsset
+import platform.Photos.PHImageManager
+import platform.Photos.PHImageRequestOptions
+import platform.Photos.PHImageRequestOptionsVersionCurrent
 import platform.posix.memcpy
 
 actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
-    val nsUrl = NSURL.URLWithString(fileUri) ?: return null
+    if (fileUri.startsWith("ph://")) {
+        return readFromPhotosLibrary(fileUri)
+    }
+
+    val nsUrl = NSURL.URLWithString(fileUri)
+        ?: NSURL.fileURLWithPath(fileUri)
 
     val accessed = nsUrl.startAccessingSecurityScopedResource()
 
     return try {
-        val data = NSData.dataWithContentsOfURL(nsUrl) ?: return null
+        val data = NSData.dataWithContentsOfFile(fileUri) ?: return null
         data.toByteArray()
     } finally {
         if (accessed) {
@@ -25,8 +35,40 @@ actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
     }
 }
 
+private fun readFromPhotosLibrary(phUri: String): ByteArray? {
+    val localIdentifier = phUri.removePrefix("ph://")
+
+    val fetchResult = PHAsset.fetchAssetsWithLocalIdentifiers(
+        listOf(localIdentifier),
+        null
+    )
+
+    val asset = fetchResult.firstObject as? PHAsset ?: return null
+
+    val options = PHImageRequestOptions().apply {
+        synchronous = true
+        networkAccessAllowed = true
+        version = PHImageRequestOptionsVersionCurrent
+    }
+
+    var resultData: NSData? = null
+
+    PHImageManager.defaultManager().requestImageDataAndOrientationForAsset(
+        asset,
+        options
+    ) { data, _, _, _ ->
+        resultData = data
+    }
+
+    return resultData?.toByteArray()
+}
+
+@OptIn(ExperimentalForeignApi::class)
 actual fun deleteFile(fileUri: String) {
-    val nsUrl = NSURL.URLWithString(fileUri) ?: return
+    if (fileUri.startsWith("ph://")) return
+
+    val nsUrl = NSURL.URLWithString(fileUri)
+        ?: NSURL.fileURLWithPath(fileUri)
     val path = nsUrl.path ?: return
     NSFileManager.defaultManager.removeItemAtPath(path, null)
 }
