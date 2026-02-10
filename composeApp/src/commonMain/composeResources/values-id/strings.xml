@@ -63,4 +63,8 @@
     <string name="label_notes">Catatan</string>
     <string name="title_auto_fill_photo">Isi Otomatis Menggunakan Foto Nota</string>
     <string name="description_auto_fill_photo">Unggah bukti pembelian Kamu dan kami akan mengisinya!</string>
+    <string name="title_camera_permission_denied">Izin Kamera Ditolak</string>
+    <string name="description_camera_permission_denied">Izin kamera diperlukan untuk menggunakan fitur ini. Silakan berikan izin tersebut.</string>
+    <string name="action_use_photo">Gunakan Foto Ini</string>
+    <string name="action_retake_photo">Ambil ulang gambar</string>
 </resources>

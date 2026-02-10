@@ -4,12 +4,18 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import coil3.compose.LocalPlatformContext
+import id.andriawan.cofinance.auth.GoogleAuthManager
+import id.andriawan.cofinance.auth.GoogleAuthResult
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.compose.auth.composable.NativeSignInResult
-import io.github.jan.supabase.compose.auth.composable.rememberSignInWithGoogle
-import io.github.jan.supabase.compose.auth.composeAuth
+import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.auth.providers.Google
+import io.github.jan.supabase.auth.providers.builtin.IDToken
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 
@@ -17,49 +23,42 @@ import org.koin.compose.koinInject
 fun LoginScreen(onNavigateToHome: () -> Unit) {
     val scope = rememberCoroutineScope()
     val supabase = koinInject<SupabaseClient>()
+    val googleAuthManager = remember { GoogleAuthManager() }
 
     val snackState = remember { SnackbarHostState() }
-    val authState = supabase.composeAuth.rememberSignInWithGoogle(
-        onResult = { result ->
-            when (result) {
-                is NativeSignInResult.Error -> {
-                    scope.launch {
-                        snackState.showSnackbar(result.message)
-                    }
-                }
-
-                NativeSignInResult.Success -> onNavigateToHome()
-
-                else -> {
-                    /* no-op */
-                }
-            }
-        }
-    )
+    var isLoading by remember { mutableStateOf(false) }
+    val context = LocalPlatformContext.current
 
     Scaffold(snackbarHost = { SnackbarHost(snackState) }) {
         LoginContent(
             contentPadding = it,
-            uiState = LoginUiState(),
+            uiState = LoginUiState(isLoading = isLoading),
             onContinueClicked = {
-                authState.startFlow()
-                // TODO: Implement google sign in
-//                viewModel.setLoading(true)
-//                scope.launch {
-//                    AuthHelper.signInGoogle(
-//                        context = context,
-//                        credentialManager = credentialManager,
-//                        onSignedIn = { idToken -> viewModel.signInWithIdToken(IdTokenParam(idToken)) },
-//                        onSignedInFailed = { message ->
-//                            viewModel.setLoading(false)
-//                            if (message.isNotBlank()) {
-//                                scope.launch {
-//                                    snackState.showSnackbar(message)
-//                                }
-//                            }
-//                        }
-//                    )
-//                }
+                scope.launch {
+                    when (val result = googleAuthManager.signIn(context)) {
+                        is GoogleAuthResult.Success -> {
+                            try {
+                                supabase.auth.signInWith(IDToken) {
+                                    idToken = result.idToken
+                                    provider = Google
+                                }
+                                onNavigateToHome()
+                            } catch (e: Exception) {
+                                snackState.showSnackbar(
+                                    e.message ?: "Failed to sign in. Please try again."
+                                )
+                            }
+                        }
+
+                        is GoogleAuthResult.Error -> {
+                            snackState.showSnackbar(result.message)
+                        }
+
+                        is GoogleAuthResult.Cancelled -> {
+                            // User cancelled, no action needed
+                        }
+                    }
+                }
             }
         )
     }
