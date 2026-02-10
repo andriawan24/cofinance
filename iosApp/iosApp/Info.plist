@@ -9,16 +9,5 @@
             <string>en</string>
             <string>id</string>
         </array>
-        <key>CFBundleURLTypes</key>
-        <array>
-            <dict>
-                <key>CFBundleURLSchemes</key>
-                <array>
-                    <string>
-                        com.googleusercontent.apps.441243986243-ks2t66rum6ee4nq1k62mnn68gauth5q1
-                    </string>
-                </array>
-            </dict>
-        </array>
     </dict>
 </plist>

@@ -8,7 +8,7 @@ import dev.shreyaspatil.ai.client.generativeai.type.content
 import dev.shreyaspatil.ai.client.generativeai.type.generationConfig
 
 object GeminiHelper {
-    private const val MODEL_NAME = "gemini-flash-latest"
+    private const val MODEL_NAME = "gemini-3-flash-preview"
     private const val JSON_MIME_TYPE = "application/json"
 
     const val TOTAL_PRICE_FIELD = "total_price"

@@ -56,14 +56,23 @@ kotlin {
             implementation(libs.androidx.credentials)
             implementation(libs.androidx.credentials.play.services.auth)
             implementation(libs.googleid)
+
+            // CameraK
+            implementation(libs.camerak)
         }
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+
+            // CameraK
+            implementation(libs.camerak)
         }
 
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)
+
+            // CameraK
+            implementation(libs.camerak)
         }
 
         commonMain.dependencies {
