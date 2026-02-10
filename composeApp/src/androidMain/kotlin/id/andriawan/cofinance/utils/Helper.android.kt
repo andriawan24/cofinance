@@ -14,3 +14,9 @@ actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
 
     return context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
 }
+
+actual fun deleteFile(fileUri: String) {
+    val uri = fileUri.toUri()
+    val path = uri.path ?: return
+    File(path).delete()
+}

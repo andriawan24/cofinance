@@ -21,6 +21,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -45,6 +46,7 @@ import coil3.request.crossfade
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.deleteFile
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import id.andriawan.cofinance.utils.readFromFile
 import kotlinx.coroutines.launch
@@ -64,6 +66,10 @@ fun PreviewScreen(
     val snackState = remember { SnackbarHostState() }
     val uiState by previewViewModel.previewUiState.collectAsStateWithLifecycle()
     val imageFile = remember { readFromFile(context, imageUrl) }
+
+    DisposableEffect(imageUrl) {
+        onDispose { deleteFile(imageUrl) }
+    }
 
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {

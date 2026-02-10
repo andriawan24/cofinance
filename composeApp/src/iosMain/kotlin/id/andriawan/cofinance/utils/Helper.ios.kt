@@ -5,6 +5,7 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.usePinned
 import platform.Foundation.NSData
+import platform.Foundation.NSFileManager
 import platform.Foundation.NSURL
 import platform.Foundation.dataWithContentsOfURL
 import platform.posix.memcpy
@@ -22,6 +23,12 @@ actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
             nsUrl.stopAccessingSecurityScopedResource()
         }
     }
+}
+
+actual fun deleteFile(fileUri: String) {
+    val nsUrl = NSURL.URLWithString(fileUri) ?: return
+    val path = nsUrl.path ?: return
+    NSFileManager.defaultManager.removeItemAtPath(path, null)
 }
 
 @OptIn(ExperimentalForeignApi::class)
