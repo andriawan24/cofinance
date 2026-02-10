@@ -77,7 +77,7 @@ class CameraViewModel : ViewModel() {
 //                    }
 //                }
 //            )
-//        }
+//        sdsSD}
 //    }
 //
 //    fun toggleFlashlight() {

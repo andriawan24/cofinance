@@ -14,6 +14,7 @@ import id.andriawan.cofinance.pages.camera.CameraScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
+import id.andriawan.cofinance.pages.preview.PreviewScreen
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier) {
@@ -138,23 +139,24 @@ fun MainNavigation(modifier: Modifier = Modifier) {
             )
         }
 
-//        composable<Destinations.Preview> {
-//            val params = it.toRoute<Destinations.Preview>()
-//            PreviewScreen(
-//                imageUrl = params.imageUrl,
-//                onNavigateToAdd = {
-//                    navController.navigate(Destinations.AddNew(transactionId = it)) {
-//                        popUpTo<Destinations.AddNew> {
-//                            inclusive = true
-//                        }
-//                    }
-//                },
-//                onNavigateBack = {
-//                    navController.navigateUp()
-//                }
-//            )
-//        }
-//
+        composable<Destinations.Preview> {
+            val params = it.toRoute<Destinations.Preview>()
+
+            PreviewScreen(
+                imageUrl = params.imageUrl,
+                onNavigateToAdd = {
+                    navController.navigate(Destinations.AddNew(transactionId = it)) {
+                        popUpTo<Destinations.AddNew> {
+                            inclusive = true
+                        }
+                    }
+                },
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
+            )
+        }
+
 //        composable<Destinations.AddAccount> {
 //            AddAccountScreen(
 //                onBackClicked = {

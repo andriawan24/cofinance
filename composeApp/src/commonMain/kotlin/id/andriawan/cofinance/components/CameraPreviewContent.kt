@@ -1,13 +1,27 @@
 package id.andriawan.cofinance.components
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import coil3.compose.LocalPlatformContext
+import androidx.compose.runtime.Stable
+import androidx.compose.ui.Modifier
 
 @Composable
-fun CameraPreviewContent() {
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val context = LocalPlatformContext.current
+expect fun CameraPreviewContent(
+    modifier: Modifier = Modifier,
+    onCaptureImage: (filePath: String) -> Unit = {},
+    onFlashToggled: (isFlashOn: Boolean) -> Unit = {},
+    cameraActions: CameraActions? = null
+)
 
+@Stable
+class CameraActions {
+    internal var captureAction: (() -> Unit)? = null
+    internal var flashToggleAction: (() -> Unit)? = null
 
+    fun capture() {
+        captureAction?.invoke()
+    }
+
+    fun toggleFlash() {
+        flashToggleAction?.invoke()
+    }
 }

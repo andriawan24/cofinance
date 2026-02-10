@@ -2,6 +2,7 @@
 agp = "9.0.0"
 androidx-activity = "1.12.3"
 androidx-lifecycle = "2.9.6"
+camerak = "0.2.0"
 coil = "3.3.0"
 componentsResources = "1.10.0"
 composeMultiplatform = "1.10.0"
@@ -26,6 +27,7 @@ uiToolingPreview = "1.10.0"
 [libraries]
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
+camerak = { module = "io.github.kashif-mehmood-km:camerak", version.ref = "camerak" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
