@@ -8,16 +8,20 @@ plugins {
     alias(libs.plugins.kmp)
     alias(libs.plugins.cmp)
     alias(libs.plugins.composeCompiler)
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.kotlinSerialization)
     id("com.codingfeline.buildkonfig")
 }
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "id.andriawan.cofinance.shared"
+        compileSdk = 36
+        minSdk = 24
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+        androidResources.enable = true
     }
 
     listOf(
@@ -48,8 +52,6 @@ kotlin {
 
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.androidx.appcompat)
             implementation(libs.ktor.client.okhttp)
 
             // androidMain build.gradle
@@ -122,47 +124,6 @@ kotlin {
     }
 }
 
-android {
-    namespace = "id.andriawan.cofinance"
-    compileSdk = 36
-
-    defaultConfig {
-        applicationId = "id.andriawan.cofinance"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-    }
-
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            isDebuggable = false
-
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    androidResources {
-        generateLocaleConfig = true
-    }
-}
-
 buildkonfig {
     packageName = "com.andriawan.cofinance"
 
@@ -183,10 +144,6 @@ buildkonfig {
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", geminiApiKey)
         buildConfigField(FieldSpec.Type.STRING, "GOOGLE_AUTH_API_KEY", googleAuthApiKey)
     }
-}
-
-dependencies {
-    debugImplementation(compose.uiTooling)
 }
 
 compose.desktop {

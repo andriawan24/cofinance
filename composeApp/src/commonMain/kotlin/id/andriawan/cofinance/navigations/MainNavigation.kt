@@ -134,7 +134,8 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                     navController.navigateUp()
                 },
                 onNavigateToPreview = { imageUri ->
-                    navController.navigate(route = Destinations.Preview(imageUrl = imageUri.toString()))
+                    println("Image URI $imageUri")
+                    navController.navigate(route = Destinations.Preview(imageUrl = imageUri))
                 }
             )
         }
