@@ -6,6 +6,10 @@ actual fun deleteFile(fileUri: String) {
     // No-op: web has no local file system to clean up
 }
 
+actual fun compressImage(imageBytes: ByteArray, maxDimension: Int, quality: Int): ByteArray {
+    return imageBytes
+}
+
 actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
     return null
 //    return try {
