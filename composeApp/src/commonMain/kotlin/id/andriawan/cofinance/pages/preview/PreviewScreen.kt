@@ -69,10 +69,6 @@ fun PreviewScreen(
     val uiState by previewViewModel.previewUiState.collectAsStateWithLifecycle()
     val imageFile = remember { readFromFile(context, imageUrl) }
 
-    LaunchedEffect(imageUrl) {
-        println("Image File $imageFile")
-    }
-
     DisposableEffect(imageUrl) {
         onDispose { deleteFile(imageUrl) }
     }
