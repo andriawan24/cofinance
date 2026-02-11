@@ -9,6 +9,7 @@ import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.ScanReceiptUseCase
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.compressImage
 import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,8 @@ class PreviewViewModel(
                 return@launch
             }
 
-            scanReceiptUseCase.execute(file).collectLatest { result ->
+            val compressed = compressImage(file)
+            scanReceiptUseCase.execute(compressed).collectLatest { result ->
                 when (result) {
                     ResultState.Loading -> {
                         /* no-op */
