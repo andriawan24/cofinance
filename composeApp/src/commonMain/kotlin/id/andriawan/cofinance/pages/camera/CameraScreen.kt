@@ -8,11 +8,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import coil3.Uri
-import coil3.toUri
 import id.andriawan.cofinance.components.CameraActions
 import id.andriawan.cofinance.components.CameraContent
 import id.andriawan.cofinance.components.CameraPreviewContent
+import id.andriawan.cofinance.components.rememberGalleryLauncher
 
 @Composable
 fun CameraScreen(
@@ -21,6 +20,7 @@ fun CameraScreen(
 ) {
     var isFlashOn by remember { mutableStateOf(false) }
     val cameraActions = remember { CameraActions() }
+    val openGallery = rememberGalleryLauncher { imageUri -> onNavigateToPreview(imageUri) }
 
     Scaffold { contentPadding ->
         CameraContent(
@@ -29,19 +29,12 @@ fun CameraScreen(
             onBackPressed = onBackPressed,
             cameraContent = {
                 CameraPreviewContent(
-                    onCaptureImage = { filePath ->
-                        println("Image File $filePath")
-                        onNavigateToPreview(filePath)
-                    },
-                    onFlashToggled = { flashOn ->
-                        isFlashOn = flashOn
-                    },
+                    onCaptureImage = { filePath -> onNavigateToPreview(filePath) },
+                    onFlashToggled = { },
                     cameraActions = cameraActions
                 )
             },
-            onOpenGalleryClicked = {
-                // TODO: Implement open gallery later
-            },
+            onOpenGalleryClicked = openGallery,
             onFlashClicked = {
                 cameraActions.toggleFlash()
             },
