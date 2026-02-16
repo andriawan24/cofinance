@@ -1,6 +1,5 @@
 package id.andriawan.cofinance.pages.preview
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -29,7 +28,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +38,7 @@ import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_retake_photo
 import cofinance.composeapp.generated.resources.action_use_photo
 import cofinance.composeapp.generated.resources.ic_arrow_left
+import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -108,13 +107,12 @@ fun PreviewScreen(
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
                 AsyncImage(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.Black),
+                    modifier = Modifier.fillMaxWidth(),
                     model = ImageRequest.Builder(context)
                         .data(imageFile)
                         .crossfade(200)
                         .build(),
+                    contentScale = ContentScale.FillWidth,
                     contentDescription = null
                 )
 
