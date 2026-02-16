@@ -27,8 +27,6 @@ import ComposeApp
 
         // Register bridge with Kotlin
         GoogleSignInBridgeHolder.shared.bridge = shared
-
-        print("GoogleSignIn: Configured successfully with client ID")
     }
 
     /// Handle URL callback from Google Sign-In
