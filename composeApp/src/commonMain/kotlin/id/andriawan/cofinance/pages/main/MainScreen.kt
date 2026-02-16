@@ -1,5 +1,8 @@
 package id.andriawan.cofinance.pages.main
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -48,7 +51,11 @@ fun MainScreen(
                 .fillMaxSize()
                 .padding(contentPadding),
             navController = state.navController,
-            startDestination = Destinations.Activity
+            startDestination = Destinations.Activity,
+            enterTransition = { fadeIn(animationSpec = tween(200)) },
+            exitTransition = { fadeOut(animationSpec = tween(200)) },
+            popEnterTransition = { fadeIn(animationSpec = tween(200)) },
+            popExitTransition = { fadeOut(animationSpec = tween(200)) }
         ) {
             composable<Destinations.Activity> {
                 ActivityScreen(onNavigateToAdd = onNavigateToAdd)
