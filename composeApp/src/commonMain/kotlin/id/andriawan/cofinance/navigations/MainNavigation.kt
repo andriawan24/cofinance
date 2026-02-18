@@ -9,12 +9,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import id.andriawan.cofinance.navigations.destinations.Destinations
+import id.andriawan.cofinance.pages.addaccount.AddAccountScreen
 import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
 import id.andriawan.cofinance.pages.camera.CameraScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
-import id.andriawan.cofinance.pages.splash.SplashScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
+import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier) {
@@ -158,19 +159,18 @@ fun MainNavigation(modifier: Modifier = Modifier) {
             )
         }
 
-//        composable<Destinations.AddAccount> {
-//            AddAccountScreen(
-//                onBackClicked = {
-//                    navController.popBackStack()
-//                },
-//                onAddAccountSuccess = {
-//                    navController.previousBackStackEntry
-//                        ?.savedStateHandle
-//                        ?.set("add_account_result", true)
-//                    navController.popBackStack()
-//                }
-//            )
-//        }
-//
+        composable<Destinations.AddAccount> {
+            AddAccountScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onAddAccountSuccess = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("add_account_result", true)
+                    navController.popBackStack()
+                }
+            )
+        }
     }
 }
