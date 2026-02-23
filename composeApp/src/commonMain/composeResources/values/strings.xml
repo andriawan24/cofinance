@@ -66,4 +66,5 @@
     <string name="description_camera_permission_denied">The camera permission is required in order to used this feature. Please grant the permission.</string>
     <string name="action_use_photo">Use this photo</string>
     <string name="action_retake_photo">Retake photo</string>
+    <string name="label_edit_profile">Edit Profile</string>
 </resources>
