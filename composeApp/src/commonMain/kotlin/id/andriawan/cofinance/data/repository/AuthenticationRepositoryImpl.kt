@@ -1,9 +1,11 @@
 package id.andriawan.cofinance.data.repository
 
+import com.diamondedge.logging.logging
 import id.andriawan.cofinance.data.datasource.SupabaseDataSource
 import id.andriawan.cofinance.domain.model.request.IdTokenParam
 import id.andriawan.cofinance.domain.model.request.IdTokenParam.Companion.toRequest
 import id.andriawan.cofinance.domain.model.response.User
+import id.andriawan.cofinance.pages.activity.ActivityViewModel
 
 
 interface AuthenticationRepository {
@@ -11,6 +13,7 @@ interface AuthenticationRepository {
     suspend fun fetchUser(): User
     suspend fun login(idTokenParam: IdTokenParam)
     suspend fun logout()
+    suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User
 }
 
 
@@ -31,5 +34,19 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun logout() {
         supabaseDataSource.logout()
+    }
+
+    override suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User {
+        var avatarUrl: String? = null
+        if (avatarBytes != null) {
+            val userId = supabaseDataSource.getUser()?.id.orEmpty()
+            avatarUrl = supabaseDataSource.uploadAvatar(userId, avatarBytes)
+        }
+        val userInfo = supabaseDataSource.updateUserMetadata(name, avatarUrl)
+        return User.from(userInfo)
+    }
+
+    companion object {
+        val log = logging(AuthenticationRepositoryImpl::class.simpleName)
     }
 }
