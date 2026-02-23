@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,8 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.ic_edit
 import cofinance.composeapp.generated.resources.ic_exit
 import cofinance.composeapp.generated.resources.img_profile_placeholder
+import cofinance.composeapp.generated.resources.label_edit_profile
 import cofinance.composeapp.generated.resources.label_cancel
 import cofinance.composeapp.generated.resources.label_logout
 import cofinance.composeapp.generated.resources.label_logout_question
@@ -47,11 +50,13 @@ import id.andriawan.cofinance.components.PageTitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.diamondedge.logging.logging
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun ProfileScreen(
     onSignedOut: () -> Unit,
+    onNavigateToEditProfile: () -> Unit,
     showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
@@ -68,7 +73,8 @@ fun ProfileScreen(
         name = profileViewModel.user.name,
         imageUrl = profileViewModel.user.avatarUrl,
         email = profileViewModel.user.email,
-        onSignedOut = { profileViewModel.toggleDialogLogout(true) }
+        onSignedOut = { profileViewModel.toggleDialogLogout(true) },
+        onEditProfile = onNavigateToEditProfile
     )
 
     if (uiState.isShowDialogLogout) {
@@ -113,7 +119,8 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
-    onSignedOut: () -> Unit
+    onSignedOut: () -> Unit,
+    onEditProfile: () -> Unit = {}
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         PageTitle(
@@ -166,31 +173,31 @@ fun ProfileContent(
 
                 Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
 
-//                SecondaryButton(
-//                    contentPadding = PaddingValues(
-//                        vertical = Dimensions.SIZE_8,
-//                        horizontal = Dimensions.SIZE_16
-//                    ),
-//                    onClick = {}
-//                ) {
-//                    Row(
-//                        verticalAlignment = Alignment.CenterVertically,
-//                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
-//                    ) {
-//                        Image(
-//                            modifier = Modifier.size(Dimensions.SIZE_24),
-//                            painter = painterResource(R.drawable.ic_edit),
-//                            contentDescription = null
-//                        )
-//
-//                        Text(
-//                            text = "Edit Profile",
-//                            style = MaterialTheme.typography.labelSmall.copy(
-//                                color = MaterialTheme.colorScheme.onSurface
-//                            )
-//                        )
-//                    }
-//                }
+                SecondaryButton(
+                    contentPadding = PaddingValues(
+                        vertical = Dimensions.SIZE_8,
+                        horizontal = Dimensions.SIZE_16
+                    ),
+                    onClick = onEditProfile
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)
+                    ) {
+                        Image(
+                            modifier = Modifier.size(Dimensions.SIZE_24),
+                            painter = painterResource(Res.drawable.ic_edit),
+                            contentDescription = null
+                        )
+
+                        Text(
+                            text = stringResource(Res.string.label_edit_profile),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        )
+                    }
+                }
             }
         }
 

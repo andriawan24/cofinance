@@ -5,6 +5,7 @@ import id.andriawan.cofinance.pages.activity.ActivityViewModel
 import id.andriawan.cofinance.pages.addnew.AddAccountViewModel
 import id.andriawan.cofinance.pages.addnew.AddNewViewModel
 import id.andriawan.cofinance.pages.camera.CameraViewModel
+import id.andriawan.cofinance.pages.editprofile.EditProfileViewModel
 import id.andriawan.cofinance.pages.preview.PreviewViewModel
 import id.andriawan.cofinance.pages.profile.ProfileViewModel
 import id.andriawan.cofinance.pages.splash.SplashViewModel
@@ -22,4 +23,5 @@ val viewModelModule = module {
     viewModelOf(::CameraViewModel)
     viewModelOf(::PreviewViewModel)
     viewModelOf(::AddAccountViewModel)
+    viewModelOf(::EditProfileViewModel)
 }

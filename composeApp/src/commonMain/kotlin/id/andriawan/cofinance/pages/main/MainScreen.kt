@@ -33,7 +33,8 @@ fun MainScreen(
     parentNavController: NavHostController,
     onNavigateToLogin: () -> Unit,
     onNavigateToAdd: () -> Unit,
-    onNavigateToAddAccount: () -> Unit
+    onNavigateToAddAccount: () -> Unit,
+    onNavigateToEditProfile: () -> Unit
 ) {
     val state = rememberCofinanceAppState()
 
@@ -91,13 +92,30 @@ fun MainScreen(
             }
 
             composable<Destinations.Profile> {
+                val resultFlow = parentNavController.currentBackStackEntry
+                    ?.savedStateHandle
+                    ?.getStateFlow("edit_profile_result", false)
+
+                val editProfileSucceeded by resultFlow?.collectAsStateWithLifecycle(false)
+                    ?: remember { mutableStateOf(false) }
+
+                LaunchedEffect(editProfileSucceeded) {
+                    if (editProfileSucceeded) {
+                        state.showMessage("Profile updated successfully")
+
+                        parentNavController.currentBackStackEntry
+                            ?.savedStateHandle
+                            ?.remove<Boolean>("edit_profile_result")
+                    }
+                }
+
                 ProfileScreen(
                     onSignedOut = onNavigateToLogin,
+                    onNavigateToEditProfile = onNavigateToEditProfile,
                     showMessage = {
                         state.showMessage(it)
                     }
                 )
-
             }
         }
     }

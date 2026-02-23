@@ -12,6 +12,7 @@ import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.addaccount.AddAccountScreen
 import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
 import id.andriawan.cofinance.pages.camera.CameraScreen
+import id.andriawan.cofinance.pages.editprofile.EditProfileScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
@@ -105,6 +106,14 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                         }
                         restoreState = true
                     }
+                },
+                onNavigateToEditProfile = {
+                    navController.navigate(Destinations.EditProfile) {
+                        popUpTo<Destinations.Main> {
+                            saveState = true
+                        }
+                        restoreState = true
+                    }
                 }
             )
         }
@@ -170,6 +179,21 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                         ?.set("add_account_result", true)
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable<Destinations.EditProfile> {
+            EditProfileScreen(
+                onBackClicked = {
+                    navController.popBackStack()
+                },
+                onProfileUpdated = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set("edit_profile_result", true)
+                    navController.popBackStack()
+                },
+                showMessage = { }
             )
         }
     }
