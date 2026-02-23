@@ -94,9 +94,8 @@ kotlin {
             implementation(project.dependencies.platform(libs.supabasekt.bom))
             implementation(libs.supabasekt.postgrest)
             implementation(libs.supabasekt.auth)
-            implementation(libs.supabasekt.compose.auth)
-            implementation(libs.supabasekt.compose.auth.ui)
             implementation(libs.supabasekt.realtime)
+            implementation(libs.supabasekt.storage)
 
             // KTOR
             implementation(libs.ktor.client.core)

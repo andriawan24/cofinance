@@ -16,14 +16,7 @@ sealed class GoogleAuthResult {
  * Implementations handle native Google Sign-In flows for each platform
  */
 expect class GoogleAuthManager() {
-    /**
-     * Initiates the Google Sign-In flow
-     * @return GoogleAuthResult indicating success, cancellation, or error
-     */
     suspend fun signIn(context: PlatformContext): GoogleAuthResult
 
-    /**
-     * Signs out from Google
-     */
     fun signOut()
 }

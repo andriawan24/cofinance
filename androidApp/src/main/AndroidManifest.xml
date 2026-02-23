@@ -17,21 +17,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-                android:name="io.github.jan.supabase.compose.auth.ComposeAuthHandler"
-                android:exported="true">
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                        android:scheme="https"
-                        android:host="jxufescyhwtoocyvnerp.supabase.co"
-                        android:path="/auth/v1/callback" />
-            </intent-filter>
-        </activity>
     </application>
 
 </manifest>
