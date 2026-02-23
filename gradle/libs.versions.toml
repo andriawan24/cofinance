@@ -51,9 +51,8 @@ logging = { module = "com.diamondedge:logging", version.ref = "logging" }
 supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
 supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
 supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
-supabasekt-compose-auth = { module = "io.github.jan-tennert.supabase:compose-auth" }
-supabasekt-compose-auth-ui = { module = "io.github.jan-tennert.supabase:compose-auth-ui" }
 supabasekt-realtime = { module = "io.github.jan-tennert.supabase:realtime-kt" }
+supabasekt-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
 
 # Ktor
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
