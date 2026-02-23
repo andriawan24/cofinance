@@ -15,9 +15,12 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
+import io.github.jan.supabase.auth.user.UserUpdateBuilder
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.storage.storage
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -172,6 +175,24 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         }
 
         return transactions.decodeList<TransactionResponse>()
+    }
+
+    suspend fun uploadAvatar(userId: String, bytes: ByteArray): String {
+        val bucket = supabase.storage.from("avatars")
+        val path = "$userId/avatar.jpg"
+        bucket.upload(path, bytes) { upsert = true }
+        return bucket.publicUrl(path)
+    }
+
+    suspend fun updateUserMetadata(name: String, avatarUrl: String?): UserInfo {
+        return supabase.auth.updateUser {
+            data {
+                put("name", JsonPrimitive(name))
+                if (avatarUrl != null) {
+                    put("avatar_url", JsonPrimitive(avatarUrl))
+                }
+            }
+        }
     }
 
     suspend fun createTransaction(request: AddTransactionRequest): TransactionResponse {
