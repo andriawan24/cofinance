@@ -1,37 +1,48 @@
 package id.andriawan.cofinance.data.repository
 
-import id.andriawan.cofinance.data.datasource.SupabaseDataSource
+import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.model.request.AccountParam
-import id.andriawan.cofinance.domain.model.request.AccountParam.Companion.toRequest
-import id.andriawan.cofinance.domain.model.request.UpdateBalanceParam
-import id.andriawan.cofinance.domain.model.request.UpdateBalanceParam.Companion.toRequest
 import id.andriawan.cofinance.domain.model.response.Account
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 
 interface AccountRepository {
     suspend fun getAccounts(): List<Account>
+    fun watchAccounts(): Flow<List<Account>>
     suspend fun addAccount(param: AccountParam)
-    suspend fun reduceAmount(param: UpdateBalanceParam)
-    suspend fun increaseAmount(param: UpdateBalanceParam)
 }
 
 
 class AccountRepositoryImpl(
-    private val supabaseDataSource: SupabaseDataSource
+    private val database: CofinanceDatabase,
+    private val supabaseClient: SupabaseClient
 ) : AccountRepository {
+
+    private fun getUserId(): String = supabaseClient.auth.currentUserOrNull()?.id.orEmpty()
+
     override suspend fun getAccounts(): List<Account> {
-        return supabaseDataSource.getAccounts().map { Account.from(it) }
+        return database.getAccounts(getUserId()).map { Account.from(it) }
     }
 
+    override fun watchAccounts(): Flow<List<Account>> {
+        return database.watchAccounts(getUserId()).map { accounts ->
+            accounts.map { Account.from(it) }
+        }
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
     override suspend fun addAccount(param: AccountParam) {
-        supabaseDataSource.addAccount(param.toRequest())
-    }
-
-    override suspend fun reduceAmount(param: UpdateBalanceParam) {
-        supabaseDataSource.reduceBalance(param.toRequest())
-    }
-
-    override suspend fun increaseAmount(param: UpdateBalanceParam) {
-        supabaseDataSource.increaseBalance(param.toRequest())
+        database.insertAccount(
+            id = Uuid.random().toString(),
+            name = param.name,
+            group = param.group,
+            balance = param.balance,
+            userId = getUserId()
+        )
     }
 }
