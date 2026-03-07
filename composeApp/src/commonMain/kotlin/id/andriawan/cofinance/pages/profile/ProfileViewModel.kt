@@ -3,6 +3,7 @@ package id.andriawan.cofinance.pages.profile
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
 import id.andriawan.cofinance.pages.profile.ProfileEvent.NavigateToLoginPage
@@ -30,7 +31,8 @@ data class UiState(
 @Stable
 class ProfileViewModel(
     getUserUseCase: GetUserUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
+    private val database: CofinanceDatabase
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
@@ -47,6 +49,13 @@ class ProfileViewModel(
 
     fun logout() {
         viewModelScope.launch {
+            // Disconnect and clear PowerSync data
+            try {
+                database.disconnectAndClearSync()
+            } catch (_: Exception) {
+                // Non-fatal - proceed with logout anyway
+            }
+
             logoutUseCase.execute().collectLatest {
                 when (it) {
                     ResultState.Loading -> {

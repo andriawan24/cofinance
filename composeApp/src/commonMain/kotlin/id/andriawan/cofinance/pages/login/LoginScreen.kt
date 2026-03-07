@@ -10,8 +10,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import coil3.compose.LocalPlatformContext
+import com.andriawan.cofinance.BuildKonfig
 import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.auth.GoogleAuthResult
+import id.andriawan.cofinance.data.local.CofinanceDatabase
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -23,6 +25,7 @@ import org.koin.compose.koinInject
 fun LoginScreen(onNavigateToHome: () -> Unit) {
     val scope = rememberCoroutineScope()
     val supabase = koinInject<SupabaseClient>()
+    val database = koinInject<CofinanceDatabase>()
     val googleAuthManager = remember { GoogleAuthManager() }
 
     val snackState = remember { SnackbarHostState() }
@@ -42,6 +45,8 @@ fun LoginScreen(onNavigateToHome: () -> Unit) {
                                     idToken = result.idToken
                                     provider = Google
                                 }
+                                // Connect PowerSync after successful authentication
+                                database.connectSync(supabase, BuildKonfig.POWERSYNC_URL)
                                 onNavigateToHome()
                             } catch (e: Exception) {
                                 snackState.showSnackbar(
