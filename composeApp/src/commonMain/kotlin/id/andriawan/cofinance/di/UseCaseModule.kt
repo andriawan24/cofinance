@@ -21,7 +21,7 @@ val useCaseModule = module {
     single { GetAccountsUseCase(get()) }
     single { GetUserUseCase(get()) }
     single { LogoutUseCase(get()) }
-    single { CreateTransactionUseCase(get(), get()) }
+    single { CreateTransactionUseCase(get()) }
     single { ScanReceiptUseCase(get()) }
     single { AddAccountUseCase(get()) }
     single { UpdateProfileUseCase(get()) }
