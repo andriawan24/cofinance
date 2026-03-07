@@ -3,6 +3,9 @@ package id.andriawan.cofinance.pages
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
+import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.data.local.rememberCofinanceDatabase
+import id.andriawan.cofinance.di.databaseModule
 import id.andriawan.cofinance.di.networkModule
 import id.andriawan.cofinance.di.repositoryModule
 import id.andriawan.cofinance.di.useCaseModule
@@ -19,9 +22,12 @@ val LocalAppLocalization = compositionLocalOf { AppLang.English }
 @Composable
 @Preview
 fun App() {
+    val database = rememberCofinanceDatabase()
+
     KoinApplication(application = {
         modules(
             networkModule,
+            databaseModule(database),
             repositoryModule,
             useCaseModule,
             viewModelModule
