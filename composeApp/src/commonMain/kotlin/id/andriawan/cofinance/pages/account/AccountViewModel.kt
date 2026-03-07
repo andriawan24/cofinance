@@ -3,6 +3,7 @@ package id.andriawan.cofinance.pages.account
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.diamondedge.logging.logging
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.utils.ResultState
@@ -26,24 +27,14 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
     val uiState = _uiState.asStateFlow()
 
     init {
-        getAccounts()
-    }
-
-    fun refresh() {
-        _uiState.update {
-            it.copy(isRefreshing = true)
-        }
-
-        getAccounts()
-    }
-
-    fun getAccounts() {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
             getAccountsUseCase.execute().collectLatest {
                 when (it) {
                     ResultState.Loading -> {
                         _uiState.update { state ->
-                            state.copy(isLoading = false)
+                            state.copy(isLoading = true)
                         }
                     }
 
