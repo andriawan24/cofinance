@@ -59,5 +59,7 @@ interface CofinanceDatabase {
     suspend fun connectSync(supabaseClient: SupabaseClient, powerSyncUrl: String)
     suspend fun disconnectSync()
     suspend fun disconnectAndClearSync()
+    suspend fun pauseSync()
+    suspend fun resumeSync()
 
 }
