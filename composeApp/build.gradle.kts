@@ -58,6 +58,13 @@ kotlin {
         iosMain.get().dependsOn(nonWebMain)
         desktopMain.dependsOn(nonWebMain)
 
+        // Intermediate source set for web platforms (JS, WasmJS)
+        val webMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jsMain.get().dependsOn(webMain)
+        wasmJsMain.get().dependsOn(webMain)
+
         nonWebMain.dependencies {
             api(libs.powersync.core)
             implementation(libs.powersync.compose)

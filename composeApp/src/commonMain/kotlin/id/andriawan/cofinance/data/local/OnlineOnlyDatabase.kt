@@ -107,4 +107,12 @@ class OnlineOnlyDatabase(
         // No-op for online-only
     }
 
+    override suspend fun pauseSync() {
+        // No-op for online-only
+    }
+
+    override suspend fun resumeSync() {
+        // No-op for online-only
+    }
+
 }
