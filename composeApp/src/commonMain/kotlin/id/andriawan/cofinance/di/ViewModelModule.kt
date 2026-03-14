@@ -1,5 +1,6 @@
 package id.andriawan.cofinance.di
 
+import id.andriawan.cofinance.pages.login.LoginViewModel
 import id.andriawan.cofinance.pages.account.AccountViewModel
 import id.andriawan.cofinance.pages.activity.ActivityViewModel
 import id.andriawan.cofinance.pages.addnew.AddAccountViewModel
@@ -24,4 +25,5 @@ val viewModelModule = module {
     viewModelOf(::PreviewViewModel)
     viewModelOf(::AddAccountViewModel)
     viewModelOf(::EditProfileViewModel)
+    viewModelOf(::LoginViewModel)
 }
