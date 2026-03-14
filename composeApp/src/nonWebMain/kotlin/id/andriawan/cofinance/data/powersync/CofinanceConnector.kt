@@ -62,7 +62,6 @@ class CofinanceConnector(
                 val type = data["type"]
 
                 if (type == "TRANSFER") {
-                    // Use atomic execute_transfer RPC
                     supabaseClient.postgrest.rpc(
                         function = "execute_transfer",
                         parameters = buildJsonObject {
@@ -82,6 +81,7 @@ class CofinanceConnector(
                         put("id", JsonPrimitive(entry.id))
                         entry.opData?.jsonValues?.let { putAll(it) }
                     }
+
                     supabaseClient.from("transactions").upsert(insertData)
 
                     val accountsId = data["accounts_id"]
@@ -94,6 +94,7 @@ class CofinanceConnector(
                             "INCOME" -> amount
                             else -> 0L
                         }
+
                         if (delta != 0L) {
                             supabaseClient.postgrest.rpc(
                                 function = "adjust_balance",
@@ -176,7 +177,6 @@ class CofinanceConnector(
 
     private fun isNonRetryableError(e: Exception): Boolean {
         val message = e.message ?: return false
-        // HTTP 4xx errors (except 429 Too Many Requests) are non-retryable
         return message.contains("40") && !message.contains("429")
     }
 }

@@ -242,6 +242,15 @@ class PowerSyncCofinanceDatabase(
         connector = null
     }
 
+    override suspend fun pauseSync() {
+        database.disconnect()
+    }
+
+    override suspend fun resumeSync() {
+        val conn = connector ?: return
+        database.connect(conn)
+    }
+
     // endregion
 
 }
