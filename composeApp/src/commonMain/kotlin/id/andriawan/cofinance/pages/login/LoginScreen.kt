@@ -4,67 +4,34 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import coil3.compose.LocalPlatformContext
-import com.andriawan.cofinance.BuildKonfig
-import id.andriawan.cofinance.auth.GoogleAuthManager
-import id.andriawan.cofinance.auth.GoogleAuthResult
-import id.andriawan.cofinance.data.local.CofinanceDatabase
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Google
-import io.github.jan.supabase.auth.providers.builtin.IDToken
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(onNavigateToHome: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val supabase = koinInject<SupabaseClient>()
-    val database = koinInject<CofinanceDatabase>()
-    val googleAuthManager = remember { GoogleAuthManager() }
-
+    val viewModel = koinViewModel<LoginViewModel>()
+    val uiState by viewModel.loginUiState.collectAsState()
     val snackState = remember { SnackbarHostState() }
-    var isLoading by remember { mutableStateOf(false) }
     val context = LocalPlatformContext.current
+
+    LaunchedEffect(Unit) {
+        viewModel.loginEvent.collect { event ->
+            when (event) {
+                is LoginUiEvent.NavigateHomePage -> onNavigateToHome()
+                is LoginUiEvent.ShowMessage -> snackState.showSnackbar(event.message)
+            }
+        }
+    }
 
     Scaffold(snackbarHost = { SnackbarHost(snackState) }) {
         LoginContent(
             contentPadding = it,
-            uiState = LoginUiState(isLoading = isLoading),
-            onContinueClicked = {
-                scope.launch {
-                    when (val result = googleAuthManager.signIn(context)) {
-                        is GoogleAuthResult.Success -> {
-                            try {
-                                supabase.auth.signInWith(IDToken) {
-                                    idToken = result.idToken
-                                    provider = Google
-                                }
-                                // Connect PowerSync after successful authentication
-                                database.connectSync(supabase, BuildKonfig.POWERSYNC_URL)
-                                onNavigateToHome()
-                            } catch (e: Exception) {
-                                snackState.showSnackbar(
-                                    e.message ?: "Failed to sign in. Please try again."
-                                )
-                            }
-                        }
-
-                        is GoogleAuthResult.Error -> {
-                            snackState.showSnackbar(result.message)
-                        }
-
-                        is GoogleAuthResult.Cancelled -> {
-                            // User cancelled, no action needed
-                        }
-                    }
-                }
-            }
+            uiState = uiState,
+            onContinueClicked = { viewModel.signInWithIdToken(context) }
         )
     }
 }
