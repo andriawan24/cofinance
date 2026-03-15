@@ -22,10 +22,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -42,8 +46,10 @@ import cofinance.composeapp.generated.resources.label_yes
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import id.andriawan.cofinance.components.ErrorBottomSheet
 import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import id.andriawan.cofinance.components.PageTitle
@@ -61,18 +67,20 @@ fun ProfileScreen(
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
+    val user by profileViewModel.user.collectAsStateWithLifecycle()
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
     profileViewModel.profileEvent.CollectAsEffect {
         when (it) {
             is ProfileEvent.NavigateToLoginPage -> onSignedOut()
-            is ProfileEvent.ShowMessage -> showMessage(it.message)
+            is ProfileEvent.ShowMessage -> errorUiText = it.message
         }
     }
 
     ProfileContent(
-        name = profileViewModel.user.name,
-        imageUrl = profileViewModel.user.avatarUrl,
-        email = profileViewModel.user.email,
+        name = user.name,
+        imageUrl = user.avatarUrl,
+        email = user.email,
         onSignedOut = { profileViewModel.toggleDialogLogout(true) },
         onEditProfile = onNavigateToEditProfile
     )
@@ -111,6 +119,11 @@ fun ProfileScreen(
             }
         }
     }
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
+    )
 }
 
 @Composable
@@ -148,6 +161,7 @@ fun ProfileContent(
                         .build(),
                     placeholder = painterResource(Res.drawable.img_profile_placeholder),
                     error = painterResource(Res.drawable.img_profile_placeholder),
+                    contentScale = ContentScale.Crop,
                     contentDescription = null
                 )
 

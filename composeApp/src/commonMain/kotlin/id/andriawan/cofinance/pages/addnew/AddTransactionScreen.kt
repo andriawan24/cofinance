@@ -16,8 +16,6 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -28,8 +26,10 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +43,8 @@ import cofinance.composeapp.generated.resources.title_add_activity
 import id.andriawan.cofinance.components.AccountBottomSheetContent
 import id.andriawan.cofinance.components.AddAccountBottomSheet
 import id.andriawan.cofinance.components.BaseBottomSheet
+import id.andriawan.cofinance.components.ErrorBottomSheet
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.components.DialogDatePickerContent
 import id.andriawan.cofinance.components.FancyTabIndicator
 import id.andriawan.cofinance.pages.addnew.sections.ExpenseSection
@@ -76,8 +78,7 @@ fun AddTransactionScreen(
     val addNewViewModel: AddNewViewModel = koinViewModel()
     val uiState by addNewViewModel.uiState.collectAsStateWithLifecycle()
     val dialogState by addNewViewModel.dialogState.collectAsStateWithLifecycle()
-    val snackState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
     LaunchedEffect(true) {
         if (transactionId != null) {
@@ -90,10 +91,10 @@ fun AddTransactionScreen(
     }
 
     addNewViewModel.showMessage.CollectAsEffect {
-        scope.launch { snackState.showSnackbar(it) }
+        errorUiText = it
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->
+    Scaffold { contentPadding ->
         AddNewContent(
             modifier = Modifier.padding(contentPadding),
             uiState = uiState,
@@ -108,6 +109,11 @@ fun AddTransactionScreen(
             onDialogEvent = { addNewViewModel.onDialogEvent(it) }
         )
     }
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
+    )
 }
 
 @Composable

@@ -3,12 +3,16 @@ package id.andriawan.cofinance.pages.preview
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_generic
+import cofinance.composeapp.generated.resources.error_receipt_scan_failed
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.ScanReceiptUseCase
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.compressImage
 import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
@@ -22,7 +26,7 @@ import kotlinx.coroutines.launch
 
 sealed class PreviewUiEvent {
     data class NavigateToBalance(val transactionId: String) : PreviewUiEvent()
-    data class ShowMessage(val message: String) : PreviewUiEvent()
+    data class ShowMessage(val message: UiText) : PreviewUiEvent()
 }
 
 data class PreviewUiState(var showLoading: Boolean = false)
@@ -59,13 +63,15 @@ class PreviewViewModel(
                         if (result.data.transactionDate.isBlank()) {
                             _previewUiState.update { it.copy(showLoading = false) }
                             _previewUiEvent.send(
-                                PreviewUiEvent.ShowMessage("Couldn't read the receipt image, please try again")
+                                PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_receipt_scan_failed))
                             )
                             return@collectLatest
                         }
 
                         val input = AddTransactionParam(
                             amount = result.data.totalPrice,
+                            category = result.data.category.ifBlank { null },
+                            fee = if (result.data.fee > 0) result.data.fee else null,
                             date = result.data.transactionDate,
                             type = TransactionType.DRAFT
                         )
@@ -76,7 +82,10 @@ class PreviewViewModel(
                     is ResultState.Error -> {
                         _previewUiState.update { state -> state.copy(showLoading = false) }
                         _previewUiEvent.send(
-                            PreviewUiEvent.ShowMessage(result.exception.message.orEmpty())
+                            PreviewUiEvent.ShowMessage(
+                                result.exception.message?.let { UiText.Raw(it) }
+                                    ?: UiText.Res(Res.string.error_generic)
+                            )
                         )
                     }
                 }
@@ -101,7 +110,10 @@ class PreviewViewModel(
                 is ResultState.Error -> {
                     _previewUiState.update { state -> state.copy(showLoading = false) }
                     _previewUiEvent.send(
-                        PreviewUiEvent.ShowMessage(result.exception.message.orEmpty())
+                        PreviewUiEvent.ShowMessage(
+                            result.exception.message?.let { UiText.Raw(it) }
+                                ?: UiText.Res(Res.string.error_generic)
+                        )
                     )
                 }
             }

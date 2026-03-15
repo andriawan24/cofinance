@@ -12,8 +12,11 @@ import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_generic
 import id.andriawan.cofinance.utils.None
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.emptyString
 import id.andriawan.cofinance.utils.enums.AccountTransferType
 import id.andriawan.cofinance.utils.enums.TransactionCategory
@@ -99,7 +102,7 @@ class AddNewViewModel(
     private val _onSuccessSaved = Channel<None>(Channel.BUFFERED)
     val onSuccessSaved = _onSuccessSaved.receiveAsFlow()
 
-    private val _showMessage = Channel<String>(Channel.BUFFERED)
+    private val _showMessage = Channel<UiText>(Channel.BUFFERED)
     val showMessage = _showMessage.receiveAsFlow()
 
     init {
@@ -149,11 +152,17 @@ class AddNewViewModel(
                     is ResultState.Success<List<TransactionByDate>> -> {
                         val transactions = response.data
                         transactions.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
+                            val category = transaction.category.takeIf { it.isNotBlank() }
+                                ?.let { TransactionCategory.getCategoryByName(it) }
+
                             _uiState.update {
                                 it.copy(
                                     transactionId = transaction.id,
                                     amount = it.amount.ifBlank { transaction.amount.toString() },
-                                    dateTime = transaction.date.toDate()
+                                    dateTime = transaction.date.toDate(),
+                                    expenseCategory = category,
+                                    fee = if (transaction.fee > 0) transaction.fee.toString() else it.fee,
+                                    includeFee = transaction.fee > 0
                                 )
                             }
                         }
@@ -301,7 +310,10 @@ class AddNewViewModel(
 
                     is ResultState.Error -> {
                         _uiState.value = uiState.value.copy(isLoading = false)
-                        _showMessage.send(it.exception.message.orEmpty())
+                        _showMessage.send(
+                            it.exception.message?.let { msg -> UiText.Raw(msg) }
+                                ?: UiText.Res(Res.string.error_generic)
+                        )
                     }
 
                     is ResultState.Success<*> -> {
