@@ -7,6 +7,7 @@ import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.FetchUserUseCase
 import id.andriawan.cofinance.utils.ResultState
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -20,10 +21,12 @@ class SplashViewModel(
     fun fetchUser(): Flow<ResultState<Boolean>> = flow {
         emit(ResultState.Loading)
 
-        try {
-            database.connectSync(supabaseClient, BuildKonfig.POWERSYNC_URL)
-        } catch (_: Exception) {
-            // Sync connection failure is non-fatal
+        if (supabaseClient.auth.currentSessionOrNull() != null) {
+            try {
+                database.connectSync(supabaseClient, BuildKonfig.POWERSYNC_URL)
+            } catch (_: Exception) {
+                // Sync connection failure is non-fatal
+            }
         }
 
         try {

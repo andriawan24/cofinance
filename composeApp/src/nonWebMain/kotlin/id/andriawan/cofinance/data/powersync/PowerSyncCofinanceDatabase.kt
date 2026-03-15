@@ -10,8 +10,12 @@ import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
 import io.github.jan.supabase.SupabaseClient
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
 class PowerSyncCofinanceDatabase(
@@ -19,6 +23,8 @@ class PowerSyncCofinanceDatabase(
 ) : CofinanceDatabase {
 
     private var connector: CofinanceConnector? = null
+    private var statusObserverJob: Job? = null
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     // region Account reads
 
@@ -213,7 +219,7 @@ class PowerSyncCofinanceDatabase(
         val now = Clock.System.now().toString()
         database.execute(
             sql = """
-                INSERT INTO transactions (id, amount, category, date, fee, notes, accounts_id, receiver_accounts_id, type, users_id, created_at, updated_at)
+                INSERT OR REPLACE INTO transactions (id, amount, category, date, fee, notes, accounts_id, receiver_accounts_id, type, users_id, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             parameters = listOf(
