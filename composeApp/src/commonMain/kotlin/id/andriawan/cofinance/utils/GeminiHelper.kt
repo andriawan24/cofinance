@@ -23,9 +23,16 @@ object GeminiHelper {
     private const val SYSTEM_INSTRUCTION =
         """
             You are an expert financial planner who helped the user to track their money
-            Extract information from the receipt image provided by the user. 
-            For date and time, please make it ISO 8601 compatible with complete time, date, and timezone. 
+            Extract information from the receipt image provided by the user.
+            For date and time, please make it ISO 8601 compatible with complete time, date, and timezone.
             If there are any missing field, just return null, don't return any empty value just null
+
+            Categories: FOOD (restaurants, groceries, cafes, food delivery), TRANSPORT (ride-hailing, fuel, parking, tolls, public transit),
+            HOUSING (rent, mortgage, utilities), APPAREL (clothing, shoes, accessories), HEALTH (medical, pharmacy, fitness),
+            EDUCATION (courses, books, tuition), SUBSCRIPTION (streaming, software subscriptions), INTERNET (internet service, phone bills),
+            DEBT (loan payments, credit card), GIFT (gifts, donations), ADMINISTRATION (government fees, legal, banking fees),
+            SALARY (salary, wages - income), INVEST (investments, dividends - income), OTHERS (anything else).
+            Classify the transaction into one of these categories based on the merchant, receiver, or description.
         """
 
     private val transactionSchema = Schema(
@@ -67,9 +74,14 @@ object GeminiHelper {
             ),
             "category" to Schema(
                 name = "category",
-                description = "Transaction category, it could be based on the receiver name or any description. This one is non nullable so just return Others if there's no category",
+                description = "Transaction category based on the merchant, receiver, or transaction description",
                 type = FunctionType.STRING,
-                nullable = false
+                nullable = true,
+                enum = listOf(
+                    "FOOD", "TRANSPORT", "HOUSING", "APPAREL", "HEALTH",
+                    "EDUCATION", "SUBSCRIPTION", "INTERNET", "DEBT", "GIFT",
+                    "ADMINISTRATION", "SALARY", "INVEST", "OTHERS"
+                )
             ),
             "sender" to Schema(
                 name = "sender",
