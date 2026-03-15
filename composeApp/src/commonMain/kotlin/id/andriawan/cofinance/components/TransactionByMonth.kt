@@ -20,8 +20,9 @@ import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberHelper
-import id.andriawan.cofinance.utils.extensions.formatMonth
+import id.andriawan.cofinance.utils.extensions.formatDayMonthYear
 import id.andriawan.cofinance.utils.extensions.formatToString
+import id.andriawan.cofinance.utils.extensions.toDate
 
 @Composable
 fun TransactionByMonth(
@@ -50,7 +51,7 @@ fun TransactionByMonth(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = item.dateLabel.formatToString(format = formatMonth),
+                text = item.dateLabel.toDate().formatToString(format = formatDayMonthYear),
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -84,7 +85,7 @@ private fun TransactionByMonthPreview() {
     CofinanceTheme {
         TransactionByMonth(
             modifier = Modifier.fillMaxWidth(),
-            item = TransactionByDate(dateLabel = Pair(2025, 0))
+            item = TransactionByDate(dateLabel = "2025-05-15T00:00:00Z")
         )
     }
 }
