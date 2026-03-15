@@ -1,5 +1,6 @@
 package id.andriawan.cofinance.data.powersync
 
+import com.diamondedge.logging.logging
 import com.powersync.PowerSyncDatabase
 import com.powersync.connectors.PowerSyncBackendConnector
 import com.powersync.connectors.PowerSyncCredentials
@@ -19,9 +20,21 @@ class CofinanceConnector(
     private val powerSyncUrl: String
 ) : PowerSyncBackendConnector() {
 
+    private val log = logging("PowerSyncConnector")
+
     override suspend fun fetchCredentials(): PowerSyncCredentials {
         val session = supabaseClient.auth.currentSessionOrNull()
-            ?: error("No active Supabase session")
+
+        if (session == null) {
+            log.error { "fetchCredentials: No active Supabase session" }
+            error("No active Supabase session")
+        }
+
+        log.info {
+            "fetchCredentials: endpoint=$powerSyncUrl, " +
+                "tokenLength=${session.accessToken.length}, " +
+                "userId=${session.user?.id}"
+        }
 
         return PowerSyncCredentials(
             endpoint = powerSyncUrl,
@@ -32,13 +45,18 @@ class CofinanceConnector(
     override suspend fun uploadData(database: PowerSyncDatabase) {
         val transaction = database.getNextCrudTransaction() ?: return
 
+        log.info { "uploadData: ${transaction.crud.size} entries to upload" }
+
         try {
             for (entry in transaction.crud) {
+                log.info { "uploadData: ${entry.op} ${entry.table} id=${entry.id}" }
                 uploadCrudEntry(entry)
             }
 
             transaction.complete(null)
+            log.info { "uploadData: completed successfully" }
         } catch (e: Exception) {
+            log.error { "uploadData error: ${e.message}" }
             if (isNonRetryableError(e)) {
                 transaction.complete(null)
             } else {
