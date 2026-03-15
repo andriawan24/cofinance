@@ -21,22 +21,22 @@ class GetTransactionsGroupByMonthUseCase(private val transactionRepository: Tran
             .map { response ->
                 val transactionGrouped = response.groupBy {
                     val date = it.date.toDate().toLocalDateTime(TimeZone.currentSystemDefault())
-                    date.year to date.month.ordinal
+                    "${date.year}-${date.month}-${date.day}"
                 }
 
                 val transactionByDate: List<TransactionByDate> = transactionGrouped.map {
-                    val expenseThisMonth = it.value
+                    val expenses = it.value
                         .filter { transaction -> transaction.type == TransactionType.EXPENSE }
                         .sumOf { transaction -> transaction.amount }
 
-                    val incomeThisMonth = it.value
+                    val income = it.value
                         .filter { transaction -> transaction.type == TransactionType.INCOME }
                         .sumOf { transaction -> transaction.amount }
 
                     TransactionByDate(
-                        dateLabel = it.key,
+                        dateLabel = it.value.first().date,
                         transactions = it.value,
-                        totalAmount = expenseThisMonth + incomeThisMonth
+                        totalAmount = expenses + income
                     )
                 }
 
