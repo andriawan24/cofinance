@@ -36,7 +36,9 @@ class GetAccountsUseCase(private val accountRepository: AccountRepository) {
 
                 ResultState.Success(accountsGroup)
             }
-            .catch { e -> ResultState.Error(Exception(e)) }
+            .catch { e ->
+                ResultState.Error(Exception(e))
+            }
 //        emit(ResultState.Loading)
 //
 //        try {
