@@ -62,8 +62,9 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         return supabase.auth.updateUser {
             data {
                 put("name", JsonPrimitive(name))
+                put("custom_name", JsonPrimitive(name))
                 if (avatarUrl != null) {
-                    put("avatar_url", JsonPrimitive(avatarUrl))
+                    put("custom_avatar_url", JsonPrimitive(avatarUrl))
                 }
             }
         }

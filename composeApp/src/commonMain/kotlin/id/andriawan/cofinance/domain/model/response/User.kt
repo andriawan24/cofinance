@@ -11,9 +11,14 @@ data class User(
 ) {
     companion object {
         fun from(user: UserInfo?): User {
+            val metadata = user?.userMetadata
+            val customName = metadata?.get("custom_name")?.jsonPrimitive?.content
+            val customAvatar = metadata?.get("custom_avatar_url")?.jsonPrimitive?.content
+            val googleAvatar = metadata?.get("avatar_url")?.jsonPrimitive?.content
+
             return User(
-                avatarUrl = user?.userMetadata?.getValue("avatar_url")?.jsonPrimitive?.content.orEmpty(),
-                name = user?.userMetadata?.getValue("name")?.jsonPrimitive?.content.orEmpty(),
+                avatarUrl = customAvatar?.ifBlank { null } ?: googleAvatar.orEmpty(),
+                name = customName.orEmpty(),
                 email = user?.email.orEmpty(),
                 id = user?.id.orEmpty()
             )
