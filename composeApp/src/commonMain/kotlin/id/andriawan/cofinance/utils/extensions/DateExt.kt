@@ -8,6 +8,7 @@ import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.datetime.format.DateTimeFormat
+import kotlinx.datetime.format.DayOfWeekNames
 import kotlinx.datetime.format.MonthNames
 import kotlinx.datetime.format.char
 import kotlinx.datetime.number
@@ -37,6 +38,18 @@ val formatMonth = LocalDateTime.Format {
     monthName(MonthNames.ENGLISH_FULL)
 }
 
+val formatDayMonthYear = LocalDateTime.Format {
+    day()
+    char(' ')
+    monthName(MonthNames.ENGLISH_FULL)
+    char(' ')
+    year()
+}
+
+val formatDayOfWeek = LocalDateTime.Format {
+    dayOfWeek(DayOfWeekNames.ENGLISH_ABBREVIATED)
+}
+
 @OptIn(ExperimentalTime::class)
 fun String.toDate(): Instant {
     if (this.isBlank()) {
@@ -52,7 +65,7 @@ fun Pair<Int, Int>.formatToString(
     return try {
         val dateTime = LocalDate(
             year = first,
-            month = second,
+            month = second + 1,
             day = 1
         ).atStartOfDayIn(timeZone)
 
