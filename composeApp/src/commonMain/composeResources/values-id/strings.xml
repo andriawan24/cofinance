@@ -1,24 +1,39 @@
 <resources>
+    <!-- App -->
+    <string name="app_name">Cofinance</string>
     <string name="hello">Halo, saya suka Kotlin</string>
+
+    <!-- Auth / Login -->
+    <string name="label_track_your_money">Pandai mengelola keuangan dengan\n</string>
+    <string name="action_sign_in_google">Masuk dengan Google</string>
+
+    <!-- Navigation / Tabs -->
     <string name="label_activity">Aktivitas</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Rekening</string>
-    <string name="label_category">Kategori</string>
-    <string name="label_dates">Tanggal</string>
-    <string name="action_save">Simpan</string>
     <string name="label_profile">Profil</string>
-    <string name="message_fetching_information">Memeriksa pembaruan...</string>
+
+    <!-- Language -->
     <string name="en">Inggris</string>
     <string name="id">Bahasa Indonesia</string>
     <string name="app_language">Bahasa Aplikasi: %1$s</string>
     <string name="change_lang">Ganti Bahasa</string>
-    <string name="label_track_your_money">Pandai mengelola keuangan dengan\n</string>
-    <string name="action_sign_in_google">Masuk dengan Google</string>
-    <string name="app_name">Cofinance</string>
-    <string name="template_month_year">%1$s %2$s</string>
+
+    <!-- Balance / Finance Overview -->
     <string name="label_income">Pemasukan</string>
     <string name="label_balance">Saldo</string>
     <string name="label_expenses">Pengeluaran</string>
+    <string name="label_transfer">Transfer</string>
+    <string name="label_total_assets">Total Aset</string>
+    <string name="label_total_expenses">Total Pengeluaran</string>
+    <string name="label_rupiah">Rp</string>
+    <string name="label_currency_symbol">Rp</string>
+    <string name="label_percentage">%1$d%%</string>
+    <string name="template_month_year">%1$s %2$s</string>
+    <string name="template_dot">%1$s · %2$s</string>
+
+    <!-- Categories -->
+    <string name="label_category">Kategori</string>
     <string name="label_category_food">Makanan</string>
     <string name="label_category_transport">Transportasi</string>
     <string name="label_category_housing">Perumahan</string>
@@ -33,38 +48,64 @@
     <string name="label_category_others">Lainnya</string>
     <string name="label_category_salary">Gaji</string>
     <string name="label_category_invest">Investasi</string>
-    <string name="content_description_empty_state_image">Gambar untuk data kosong</string>
-    <string name="title_no_activities">Belum ada aktivitas</string>
-    <string name="description_empty_activity">Mulai track pengeluaranmu sekarang</string>
-    <string name="action_add_activity">Tambah Aktivitas</string>
-    <string name="label_transfer">Transfer</string>
-    <string name="template_dot">%1$s · %2$s</string>
-    <string name="label_percentage">%1$d%%</string>
-    <string name="label_total_assets">Total Aset</string>
-    <string name="label_rupiah">Rp</string>
-    <string name="label_add_account">Tambah Akun</string>
-    <string name="label_logout_question">Apakah kamu yakin ingin logout dari akunmu?</string>
-    <string name="label_yes">Ya</string>
-    <string name="label_cancel">Batalkan</string>
-    <string name="label_logout">Keluar Akun</string>
-    <string name="label_loading_accounts">Sedang memuat akun...</string>
-    <string name="label_beneficiary_account">Akun Pengirim</string>
-    <string name="action_add_new_account">Tambah Akun Baru</string>
+
+    <!-- Add Transaction -->
     <string name="title_add_activity">Tambah Transaksi</string>
+    <string name="action_add_activity">Tambah Aktivitas</string>
+    <string name="action_save">Simpan</string>
+    <string name="label_dates">Tanggal</string>
     <string name="label_date">Tanggal</string>
     <string name="label_time">Waktu</string>
     <string name="action_choose_date">Waktu</string>
-    <string name="label_account_category">Kategori Akun</string>
-    <string name="label_name">Nama</string>
-    <string name="label_zero">0</string>
-    <string name="label_sender_account">Akun Pengirim</string>
-    <string name="label_ok">Oke</string>
     <string name="label_fee">Fee</string>
     <string name="label_notes">Catatan</string>
+    <string name="label_zero">0</string>
+    <string name="label_sender_account">Akun Pengirim</string>
+    <string name="label_beneficiary_account">Akun Pengirim</string>
+
+    <!-- Accounts -->
+    <string name="label_add_account">Tambah Akun</string>
+    <string name="action_add_new_account">Tambah Akun Baru</string>
+    <string name="label_account_category">Kategori Akun</string>
+    <string name="label_name">Nama</string>
+    <string name="label_loading_accounts">Sedang memuat akun...</string>
+
+    <!-- Receipt Scan / Camera -->
     <string name="title_auto_fill_photo">Isi Otomatis Menggunakan Foto Nota</string>
     <string name="description_auto_fill_photo">Unggah bukti pembelian Kamu dan kami akan mengisinya!</string>
     <string name="title_camera_permission_denied">Izin Kamera Ditolak</string>
     <string name="description_camera_permission_denied">Izin kamera diperlukan untuk menggunakan fitur ini. Silakan berikan izin tersebut.</string>
     <string name="action_use_photo">Gunakan Foto Ini</string>
     <string name="action_retake_photo">Ambil ulang gambar</string>
+
+    <!-- Profile -->
+    <string name="label_edit_profile">Edit Profil</string>
+    <string name="label_logout">Keluar Akun</string>
+    <string name="label_logout_question">Apakah kamu yakin ingin logout dari akunmu?</string>
+
+    <!-- Empty States -->
+    <string name="content_description_empty_state_image">Gambar untuk data kosong</string>
+    <string name="title_no_activities">Belum ada aktivitas</string>
+    <string name="description_empty_activity">Mulai track pengeluaranmu sekarang</string>
+
+    <!-- Common Actions / Labels -->
+    <string name="label_yes">Ya</string>
+    <string name="label_cancel">Batalkan</string>
+    <string name="label_ok">Oke</string>
+    <string name="label_error">Kesalahan</string>
+    <string name="action_dismiss">Tutup</string>
+
+    <!-- Messages -->
+    <string name="message_fetching_information">Memeriksa pembaruan...</string>
+    <string name="message_account_added">Berhasil menambahkan akun.</string>
+    <string name="message_profile_updated">Profil berhasil diperbarui.</string>
+
+    <!-- Errors -->
+    <string name="error_sign_in_failed">Gagal masuk. Silakan coba lagi.</string>
+    <string name="error_network">Kesalahan jaringan. Silakan periksa koneksi Anda.</string>
+    <string name="error_unknown">Terjadi kesalahan yang tidak diketahui.</string>
+    <string name="error_auth_failed">Autentikasi gagal. Silakan coba lagi.</string>
+    <string name="error_name_required">Nama wajib diisi.</string>
+    <string name="error_receipt_scan_failed">Tidak dapat membaca gambar struk, silakan coba lagi.</string>
+    <string name="error_generic">Terjadi kesalahan. Silakan coba lagi.</string>
 </resources>
