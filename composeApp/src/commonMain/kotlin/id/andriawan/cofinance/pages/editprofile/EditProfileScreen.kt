@@ -21,12 +21,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,8 +46,10 @@ import cofinance.composeapp.generated.resources.label_name
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import id.andriawan.cofinance.components.ErrorBottomSheet
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.components.rememberGalleryLauncher
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.compressImage
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
@@ -64,8 +66,8 @@ fun EditProfileScreen(
     editProfileViewModel: EditProfileViewModel = koinViewModel()
 ) {
     val uiState by editProfileViewModel.uiState.collectAsStateWithLifecycle()
-    val snackState = remember { SnackbarHostState() }
     val context = LocalPlatformContext.current
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
     val openGallery = rememberGalleryLauncher { uri ->
         val bytes = readFromFile(context, uri)
@@ -78,11 +80,11 @@ fun EditProfileScreen(
     editProfileViewModel.event.CollectAsEffect {
         when (it) {
             is EditProfileEvent.ProfileUpdated -> onProfileUpdated()
-            is EditProfileEvent.ShowError -> showMessage(it.message)
+            is EditProfileEvent.ShowError -> errorUiText = it.message
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->
+    Scaffold { contentPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -229,4 +231,9 @@ fun EditProfileScreen(
             }
         }
     }
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
+    )
 }

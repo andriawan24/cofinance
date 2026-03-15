@@ -30,6 +30,7 @@ import cofinance.composeapp.generated.resources.ic_expense
 import cofinance.composeapp.generated.resources.ic_income
 import cofinance.composeapp.generated.resources.img_balance_bg
 import cofinance.composeapp.generated.resources.label_balance
+import cofinance.composeapp.generated.resources.label_currency_symbol
 import cofinance.composeapp.generated.resources.label_expenses
 import cofinance.composeapp.generated.resources.label_income
 import id.andriawan.cofinance.theme.CofinanceTheme
@@ -166,7 +167,7 @@ private fun Balance(modifier: Modifier = Modifier, balance: Long) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "Rp",
+                    text = stringResource(Res.string.label_currency_symbol),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimary,

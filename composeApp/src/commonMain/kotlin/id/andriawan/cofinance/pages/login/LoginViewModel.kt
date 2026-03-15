@@ -3,11 +3,14 @@ package id.andriawan.cofinance.pages.login
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_sign_in_failed
 import coil3.PlatformContext
 import com.andriawan.cofinance.BuildKonfig
 import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.auth.GoogleAuthResult
 import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.utils.UiText
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -22,7 +25,7 @@ import kotlinx.coroutines.launch
 
 sealed class LoginUiEvent {
     data object NavigateHomePage : LoginUiEvent()
-    data class ShowMessage(val message: String) : LoginUiEvent()
+    data class ShowMessage(val message: UiText) : LoginUiEvent()
 }
 
 data class LoginUiState(
@@ -52,19 +55,21 @@ class LoginViewModel(
                             idToken = result.idToken
                             provider = Google
                         }
+
                         database.connectSync(supabase, BuildKonfig.POWERSYNC_URL)
                         _loginUiEvent.send(LoginUiEvent.NavigateHomePage)
                     } catch (e: Exception) {
                         _loginUiEvent.send(
                             LoginUiEvent.ShowMessage(
-                                e.message ?: "Failed to sign in. Please try again."
+                                e.message?.let { UiText.Raw(it) }
+                                    ?: UiText.Res(Res.string.error_sign_in_failed)
                             )
                         )
                     }
                 }
 
                 is GoogleAuthResult.Error -> {
-                    _loginUiEvent.send(LoginUiEvent.ShowMessage(result.message))
+                    _loginUiEvent.send(LoginUiEvent.ShowMessage(UiText.Raw(result.message)))
                 }
 
                 is GoogleAuthResult.Cancelled -> {

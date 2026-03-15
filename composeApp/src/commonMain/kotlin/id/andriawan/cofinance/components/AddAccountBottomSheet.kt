@@ -23,6 +23,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,6 +53,7 @@ import id.andriawan.cofinance.pages.addnew.AddAccountViewModel
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberFormatTransformation
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import org.jetbrains.compose.resources.painterResource
@@ -60,9 +64,14 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit) {
     val addAccountViewModel: AddAccountViewModel = koinViewModel()
     val uiState by addAccountViewModel.uiState.collectAsStateWithLifecycle()
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
     addAccountViewModel.accountAdded.CollectAsEffect {
         onAccountSaved()
+    }
+
+    addAccountViewModel.showMessage.CollectAsEffect {
+        errorUiText = it
     }
 
     AddAccountBottomSheetContent(
@@ -73,6 +82,11 @@ fun AddAccountBottomSheet(onAccountSaved: () -> Unit, onCloseClicked: () -> Unit
                 else -> addAccountViewModel.onEvent(event)
             }
         }
+    )
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
     )
 }
 
