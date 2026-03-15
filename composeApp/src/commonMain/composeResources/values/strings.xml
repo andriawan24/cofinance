@@ -1,26 +1,39 @@
 <resources>
+    <!-- App -->
+    <string name="app_name">Cofinance</string>
     <string name="hello">Hello, I love Kotlin</string>
+
+    <!-- Auth / Login -->
+    <string name="label_track_your_money">Track your money with\n</string>
+    <string name="action_sign_in_google">Sign in with Google</string>
+
+    <!-- Navigation / Tabs -->
     <string name="label_activity">Activity</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Account</string>
-    <string name="label_category">Category</string>
-    <string name="label_dates">Dates</string>
-    <string name="action_save">Save</string>
-    <string name="label_beneficiary_account">Beneficiary Account</string>
-    <string name="action_add_new_account">Add New Account</string>
     <string name="label_profile">Profile</string>
-    <string name="message_fetching_information">Fetching information...</string>
+
+    <!-- Language -->
     <string name="en">English</string>
     <string name="id">Indonesian</string>
     <string name="app_language">App Language: %1$s</string>
     <string name="change_lang">Change Language</string>
-    <string name="label_track_your_money">Track your money with\n</string>
-    <string name="action_sign_in_google">Sign in with Google</string>
-    <string name="app_name">Cofinance</string>
-    <string name="template_month_year">%1$s %2$s</string>
+
+    <!-- Balance / Finance Overview -->
     <string name="label_income">Income</string>
     <string name="label_balance">Balance</string>
     <string name="label_expenses">Expense</string>
+    <string name="label_transfer">Transfer</string>
+    <string name="label_total_assets">Total Assets</string>
+    <string name="label_total_expenses">Total Expenses</string>
+    <string name="label_rupiah">IDR</string>
+    <string name="label_currency_symbol">Rp</string>
+    <string name="label_percentage">%1$d%%</string>
+    <string name="template_month_year">%1$s %2$s</string>
+    <string name="template_dot">%1$s · %2$s</string>
+
+    <!-- Categories -->
+    <string name="label_category">Category</string>
     <string name="label_category_food">Food</string>
     <string name="label_category_transport">Transport</string>
     <string name="label_category_housing">Housing</string>
@@ -35,36 +48,64 @@
     <string name="label_category_others">Others</string>
     <string name="label_category_salary">Salary</string>
     <string name="label_category_invest">Invest</string>
-    <string name="content_description_empty_state_image">Empty state image for activity</string>
-    <string name="title_no_activities">No Activities Yet</string>
-    <string name="description_empty_activity">Start tracking your expense now</string>
-    <string name="action_add_activity">Add Activity</string>
-    <string name="label_transfer">Transfer</string>
-    <string name="template_dot">%1$s · %2$s</string>
-    <string name="label_percentage">%1$d%%</string>
-    <string name="label_total_assets">Total Assets</string>
-    <string name="label_rupiah">IDR</string>
-    <string name="label_add_account">Add Account</string>
-    <string name="label_logout_question">Are you sure you want to logout?</string>
-    <string name="label_yes">Yes</string>
-    <string name="label_cancel">Cancel</string>
-    <string name="label_logout">Logout</string>
-    <string name="label_loading_accounts">Loading account...</string>
+
+    <!-- Add Transaction -->
     <string name="title_add_activity">Add Transaction</string>
+    <string name="action_add_activity">Add Activity</string>
+    <string name="action_save">Save</string>
+    <string name="label_dates">Dates</string>
     <string name="label_date">Date</string>
     <string name="label_time">Time</string>
-    <string name="label_account_category">Account Category</string>
-    <string name="label_name">Name</string>
-    <string name="label_zero">0</string>
-    <string name="label_sender_account">Sender Account</string>
-    <string name="label_ok">OK</string>
+    <string name="action_choose_date">Date</string>
     <string name="label_fee">Fee</string>
     <string name="label_notes">Notes</string>
+    <string name="label_zero">0</string>
+    <string name="label_sender_account">Sender Account</string>
+    <string name="label_beneficiary_account">Beneficiary Account</string>
+
+    <!-- Accounts -->
+    <string name="label_add_account">Add Account</string>
+    <string name="action_add_new_account">Add New Account</string>
+    <string name="label_account_category">Account Category</string>
+    <string name="label_name">Name</string>
+    <string name="label_loading_accounts">Loading account...</string>
+
+    <!-- Receipt Scan / Camera -->
     <string name="title_auto_fill_photo">Auto-Fill with Receipt Photo</string>
-    <string name="description_auto_fill_photo">Upload your receipt and we’ll fill it in!</string>
+    <string name="description_auto_fill_photo">Upload your receipt and we'll fill it in!</string>
     <string name="title_camera_permission_denied">Camera Permission Denied</string>
     <string name="description_camera_permission_denied">The camera permission is required in order to used this feature. Please grant the permission.</string>
     <string name="action_use_photo">Use this photo</string>
     <string name="action_retake_photo">Retake photo</string>
+
+    <!-- Profile -->
     <string name="label_edit_profile">Edit Profile</string>
+    <string name="label_logout">Logout</string>
+    <string name="label_logout_question">Are you sure you want to logout?</string>
+
+    <!-- Empty States -->
+    <string name="content_description_empty_state_image">Empty state image for activity</string>
+    <string name="title_no_activities">No Activities Yet</string>
+    <string name="description_empty_activity">Start tracking your expense now</string>
+
+    <!-- Common Actions / Labels -->
+    <string name="label_yes">Yes</string>
+    <string name="label_cancel">Cancel</string>
+    <string name="label_ok">OK</string>
+    <string name="label_error">Error</string>
+    <string name="action_dismiss">Dismiss</string>
+
+    <!-- Messages -->
+    <string name="message_fetching_information">Fetching information...</string>
+    <string name="message_account_added">Successfully added account.</string>
+    <string name="message_profile_updated">Profile updated successfully.</string>
+
+    <!-- Errors -->
+    <string name="error_sign_in_failed">Failed to sign in. Please try again.</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_unknown">Unknown error occurred.</string>
+    <string name="error_auth_failed">Authentication failed. Please try again.</string>
+    <string name="error_name_required">Name is required.</string>
+    <string name="error_receipt_scan_failed">Couldn\'t read the receipt image, please try again.</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
 </resources>
