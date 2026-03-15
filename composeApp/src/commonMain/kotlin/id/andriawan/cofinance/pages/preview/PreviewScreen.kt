@@ -14,8 +14,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -23,8 +21,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
@@ -44,13 +43,14 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.diamondedge.logging.logging
+import id.andriawan.cofinance.components.ErrorBottomSheet
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.deleteFile
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import id.andriawan.cofinance.utils.readFromFile
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -63,10 +63,9 @@ fun PreviewScreen(
     previewViewModel: PreviewViewModel = koinViewModel()
 ) {
     val context = LocalPlatformContext.current
-    val scope = rememberCoroutineScope()
-    val snackState = remember { SnackbarHostState() }
     val uiState by previewViewModel.previewUiState.collectAsStateWithLifecycle()
     val imageFile = remember { readFromFile(context, imageUrl) }
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
     DisposableEffect(imageUrl) {
         onDispose { deleteFile(imageUrl) }
@@ -75,13 +74,11 @@ fun PreviewScreen(
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {
             is PreviewUiEvent.NavigateToBalance -> onNavigateToAdd(it.transactionId)
-            is PreviewUiEvent.ShowMessage -> scope.launch {
-                snackState.showSnackbar(it.message)
-            }
+            is PreviewUiEvent.ShowMessage -> errorUiText = it.message
         }
     }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->
+    Scaffold { contentPadding ->
         Column(
             modifier = Modifier
                 .padding(contentPadding)
@@ -167,6 +164,11 @@ fun PreviewScreen(
             }
         }
     }
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
+    )
 }
 
 @Preview
