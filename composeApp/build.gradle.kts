@@ -54,8 +54,14 @@ kotlin {
         val nonWebMain by creating {
             dependsOn(commonMain.get())
         }
-        androidMain.get().dependsOn(nonWebMain)
-        iosMain.get().dependsOn(nonWebMain)
+
+        // Intermediate source set for mobile platforms (Android, iOS) - Cactus on-device AI
+        val mobileMain by creating {
+            dependsOn(nonWebMain)
+        }
+
+        androidMain.get().dependsOn(mobileMain)
+        iosMain.get().dependsOn(mobileMain)
         desktopMain.dependsOn(nonWebMain)
 
         // Intermediate source set for web platforms (JS, WasmJS)
@@ -68,6 +74,10 @@ kotlin {
         nonWebMain.dependencies {
             api(libs.powersync.core)
             implementation(libs.powersync.compose)
+        }
+
+        mobileMain.dependencies {
+            implementation(libs.cactus.sdk)
         }
 
         androidMain.dependencies {
@@ -150,13 +160,12 @@ buildkonfig {
         val localProperties = gradleLocalProperties(rootDir, providers)
         val supabaseUrl = localProperties.getProperty("supabase.project_url")
         val supabaseApiKey = localProperties.getProperty("supabase.public_api_key")
-        val geminiApiKey = localProperties.getProperty("gemini.api_key")
+        val geminiApiKey = localProperties.getProperty("gemini.api_key").orEmpty()
         val googleAuthApiKey = localProperties.getProperty("google_auth_client_id")
         val powerSyncUrl = localProperties.getProperty("powersync.url")
 
         require(supabaseUrl.isNotEmpty()) { "Register supabase url on local.properties" }
         require(supabaseApiKey.isNotEmpty()) { "Register supabase api key on local.properties" }
-        require(geminiApiKey.isNotEmpty()) { "Register gemini api key on local.properties" }
         require(googleAuthApiKey.isNotEmpty()) { "Register google auth api key on local.properties" }
         require(powerSyncUrl.isNotEmpty()) { "Register powersync url on local.properties" }
 

@@ -1,9 +1,9 @@
 package id.andriawan.cofinance.di
 
 import id.andriawan.cofinance.auth.GoogleAuthManager
-import id.andriawan.cofinance.data.datasource.GeminiDataSource
+import id.andriawan.cofinance.data.datasource.ReceiptScannerService
 import id.andriawan.cofinance.data.datasource.SupabaseDataSource
-import id.andriawan.cofinance.utils.GeminiHelper
+import id.andriawan.cofinance.data.datasource.createReceiptScanner
 import id.andriawan.cofinance.utils.SupabaseHelper
 import kotlinx.serialization.json.Json
 import org.koin.core.module.dsl.singleOf
@@ -18,7 +18,7 @@ val networkModule = module {
             encodeDefaults = true
         }
     }
-    single<GeminiDataSource> { GeminiDataSource(GeminiHelper.createModel(), get()) }
+    single<ReceiptScannerService> { createReceiptScanner() }
     singleOf(::SupabaseDataSource)
     singleOf(::GoogleAuthManager)
 }

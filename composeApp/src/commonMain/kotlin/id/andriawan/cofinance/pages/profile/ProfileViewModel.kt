@@ -3,6 +3,9 @@ package id.andriawan.cofinance.pages.profile
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.diamondedge.logging.logging
+import id.andriawan.cofinance.data.datasource.ModelStatus
+import id.andriawan.cofinance.data.datasource.ReceiptScannerService
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
@@ -26,14 +29,16 @@ sealed class ProfileEvent {
 }
 
 data class UiState(
-    val isShowDialogLogout: Boolean = false
+    val isShowDialogLogout: Boolean = false,
+    val isShowDeleteModelDialog: Boolean = false
 )
 
 @Stable
 class ProfileViewModel(
     private val getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val database: CofinanceDatabase
+    private val database: CofinanceDatabase,
+    private val receiptScanner: ReceiptScannerService
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
@@ -45,6 +50,8 @@ class ProfileViewModel(
     private val _user = MutableStateFlow(getUserUseCase.execute())
     val user = _user.asStateFlow()
 
+    val modelStatus = receiptScanner.getModelStatus()
+
     fun refreshUser() {
         _user.value = getUserUseCase.execute()
     }
@@ -53,23 +60,32 @@ class ProfileViewModel(
         _uiState.update { state -> state.copy(isShowDialogLogout = isShow) }
     }
 
+    fun downloadModel() {
+        viewModelScope.launch {
+            try {
+                receiptScanner.downloadModel()
+            } catch (e: Exception) {
+                _profileEvent.send(ShowMessage(UiText.Raw(e.message ?: "Download failed")))
+            }
+        }
+    }
+
+    fun toggleDeleteModelDialog(isShow: Boolean) {
+        _uiState.update { it.copy(isShowDeleteModelDialog = isShow) }
+    }
+
     fun logout() {
         viewModelScope.launch {
-            // Disconnect PowerSync sync but keep local data intact.
-            // The SQL queries filter by users_id, so a different user won't
-            // see stale data. Keeping local data avoids losing pending CRUD
-            // entries and lets the same user see their accounts immediately
-            // on re-login while sync catches up.
             try {
                 database.disconnectSync()
             } catch (_: Exception) {
-                // Non-fatal - proceed with logout anyway
+                /* no-op */
             }
 
             logoutUseCase.execute().collectLatest {
                 when (it) {
                     ResultState.Loading -> {
-                        // Do nothing
+                        /* no-op */
                     }
 
                     is ResultState.Error -> {

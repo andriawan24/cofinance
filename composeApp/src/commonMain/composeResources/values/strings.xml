@@ -100,6 +100,23 @@
     <string name="message_account_added">Successfully added account.</string>
     <string name="message_profile_updated">Profile updated successfully.</string>
 
+    <!-- AI Model -->
+    <string name="label_ai_model">AI Receipt Scanner</string>
+    <string name="label_ai_model_description">Download the AI model to scan receipts offline. Your data never leaves your device.</string>
+    <string name="label_ai_model_ready">Model downloaded</string>
+    <string name="label_ai_model_not_downloaded">Model not downloaded</string>
+    <string name="label_ai_model_size">~850 MB</string>
+    <string name="action_download_model">Download Model</string>
+    <string name="action_delete_model">Delete Model</string>
+    <string name="action_download">Download</string>
+    <string name="action_later">Later</string>
+    <string name="label_downloading_model">Downloading AI model… %1$d%%</string>
+    <string name="label_loading_model">Loading AI model…</string>
+    <string name="label_analyzing_receipt">Analyzing receipt…</string>
+    <string name="title_download_required">Download Required</string>
+    <string name="description_download_required">To scan receipts offline, download the AI model (~850 MB). This only needs to be done once. Wi-Fi recommended.</string>
+    <string name="label_delete_model_question">Delete the AI model? You can re-download it later.</string>
+
     <!-- Errors -->
     <string name="error_sign_in_failed">Failed to sign in. Please try again.</string>
     <string name="error_network">Network error. Please check your connection.</string>

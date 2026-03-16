@@ -2,6 +2,7 @@ package id.andriawan.cofinance.pages
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.lifecycle.Lifecycle
@@ -19,14 +20,24 @@ import id.andriawan.cofinance.localization.rememberAppLocale
 import id.andriawan.cofinance.navigations.MainNavigation
 import id.andriawan.cofinance.theme.CofinanceTheme
 import androidx.compose.ui.tooling.preview.Preview
+import coil3.PlatformContext
+import coil3.compose.LocalPlatformContext
 import org.koin.compose.KoinApplication
 
 val LocalAppLocalization = compositionLocalOf { AppLang.English }
+
+expect fun initializeCactus(context: PlatformContext)
 
 @Composable
 @Preview
 fun App() {
     val database = rememberCofinanceDatabase()
+
+    val context = LocalPlatformContext.current
+
+    LaunchedEffect(true) {
+        initializeCactus(context)
+    }
 
     KoinApplication(application = {
         modules(

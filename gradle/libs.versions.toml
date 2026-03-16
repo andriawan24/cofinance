@@ -20,6 +20,7 @@ runtime = "1.10.0"
 supabasekt = "3.3.0"
 ktor = "3.4.0"
 generativeaiGoogle = "0.9.0-1.1.0"
+cactus = "1.4.1-beta"
 buildkonfigGradlePlugin = "0.17.1"
 koin-bom = "4.1.1"
 ui = "1.10.0"
@@ -70,6 +71,9 @@ koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-view
 
 # Gen AI
 generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
+
+# Cactus On-Device AI
+cactus-sdk = { module = "com.cactuscompute:cactus", version.ref = "cactus" }
 
 # PowerSync
 powersync-core = { module = "com.powersync:core", version.ref = "powersync" }

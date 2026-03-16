@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.error_generic
 import cofinance.composeapp.generated.resources.error_receipt_scan_failed
+import id.andriawan.cofinance.data.datasource.ReceiptScannerService
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
@@ -29,13 +30,19 @@ sealed class PreviewUiEvent {
     data class ShowMessage(val message: UiText) : PreviewUiEvent()
 }
 
-data class PreviewUiState(var showLoading: Boolean = false)
+data class PreviewUiState(
+    val showLoading: Boolean = false,
+    val showDownloadPrompt: Boolean = false,
+    val downloadProgress: Float? = null,
+    val loadingMessage: String? = null
+)
 
 
 @Immutable
 class PreviewViewModel(
     private val scanReceiptUseCase: ScanReceiptUseCase,
-    private val createTransactionUseCase: CreateTransactionUseCase
+    private val createTransactionUseCase: CreateTransactionUseCase,
+    private val receiptScanner: ReceiptScannerService
 ) : ViewModel() {
 
     private val _previewUiState = MutableStateFlow(PreviewUiState())
@@ -44,50 +51,97 @@ class PreviewViewModel(
     private val _previewUiEvent = Channel<PreviewUiEvent>(Channel.BUFFERED)
     val previewUiEvent = _previewUiEvent.receiveAsFlow()
 
+    private var pendingFile: ByteArray? = null
+
     fun scanReceipt(file: ByteArray?) {
         viewModelScope.launch {
-            _previewUiState.update { state -> state.copy(showLoading = true) }
-
             if (file == null) {
+                _previewUiEvent.send(
+                    PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_generic))
+                )
                 return@launch
             }
 
-            val compressed = compressImage(file)
-            scanReceiptUseCase.execute(compressed).collectLatest { result ->
-                when (result) {
-                    ResultState.Loading -> {
-                        /* no-op */
-                    }
+            if (!receiptScanner.isModelReady()) {
+                pendingFile = file
+                _previewUiState.update { it.copy(showDownloadPrompt = true) }
+                return@launch
+            }
 
-                    is ResultState.Success<ReceiptScan> -> {
-                        if (result.data.transactionDate.isBlank()) {
-                            _previewUiState.update { it.copy(showLoading = false) }
-                            _previewUiEvent.send(
-                                PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_receipt_scan_failed))
-                            )
-                            return@collectLatest
-                        }
+            performScan(file)
+        }
+    }
 
-                        val input = AddTransactionParam(
-                            amount = result.data.totalPrice,
-                            category = result.data.category.ifBlank { null },
-                            fee = if (result.data.fee > 0) result.data.fee else null,
-                            date = result.data.transactionDate,
-                            type = TransactionType.DRAFT
-                        )
+    fun dismissDownloadPrompt() {
+        pendingFile = null
+        _previewUiState.update { it.copy(showDownloadPrompt = false) }
+    }
 
-                        handleCreateTransaction(input)
-                    }
+    fun startDownloadAndScan() {
+        viewModelScope.launch {
+            _previewUiState.update {
+                it.copy(showDownloadPrompt = false, showLoading = true, downloadProgress = 0f)
+            }
 
-                    is ResultState.Error -> {
-                        _previewUiState.update { state -> state.copy(showLoading = false) }
+            try {
+                receiptScanner.downloadModel { progress ->
+                    _previewUiState.update { it.copy(downloadProgress = progress) }
+                }
+
+                // Download complete, now scan
+                _previewUiState.update { it.copy(downloadProgress = null) }
+                pendingFile?.let { performScan(it) }
+            } catch (e: Exception) {
+                _previewUiState.update { it.copy(showLoading = false, downloadProgress = null) }
+                _previewUiEvent.send(
+                    PreviewUiEvent.ShowMessage(
+                        UiText.Raw(e.message ?: "Download failed")
+                    )
+                )
+            } finally {
+                pendingFile = null
+            }
+        }
+    }
+
+    private suspend fun performScan(file: ByteArray) {
+        _previewUiState.update { it.copy(showLoading = true) }
+
+        val compressed = compressImage(file)
+        scanReceiptUseCase.execute(compressed).collectLatest { result ->
+            when (result) {
+                ResultState.Loading -> {
+                    /* no-op */
+                }
+
+                is ResultState.Success<ReceiptScan> -> {
+                    if (result.data.transactionDate.isBlank()) {
+                        _previewUiState.update { it.copy(showLoading = false) }
                         _previewUiEvent.send(
-                            PreviewUiEvent.ShowMessage(
-                                result.exception.message?.let { UiText.Raw(it) }
-                                    ?: UiText.Res(Res.string.error_generic)
-                            )
+                            PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_receipt_scan_failed))
                         )
+                        return@collectLatest
                     }
+
+                    val input = AddTransactionParam(
+                        amount = result.data.totalPrice,
+                        category = result.data.category.ifBlank { null },
+                        fee = if (result.data.fee > 0) result.data.fee else null,
+                        date = result.data.transactionDate,
+                        type = TransactionType.DRAFT
+                    )
+
+                    handleCreateTransaction(input)
+                }
+
+                is ResultState.Error -> {
+                    _previewUiState.update { state -> state.copy(showLoading = false) }
+                    _previewUiEvent.send(
+                        PreviewUiEvent.ShowMessage(
+                            result.exception.message?.let { UiText.Raw(it) }
+                                ?: UiText.Res(Res.string.error_generic)
+                        )
+                    )
                 }
             }
         }

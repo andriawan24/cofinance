@@ -100,6 +100,23 @@
     <string name="message_account_added">Berhasil menambahkan akun.</string>
     <string name="message_profile_updated">Profil berhasil diperbarui.</string>
 
+    <!-- AI Model -->
+    <string name="label_ai_model">AI Pemindai Struk</string>
+    <string name="label_ai_model_description">Unduh model AI untuk memindai struk secara offline. Data Anda tidak pernah meninggalkan perangkat.</string>
+    <string name="label_ai_model_ready">Model sudah diunduh</string>
+    <string name="label_ai_model_not_downloaded">Model belum diunduh</string>
+    <string name="label_ai_model_size">~850 MB</string>
+    <string name="action_download_model">Unduh Model</string>
+    <string name="action_delete_model">Hapus Model</string>
+    <string name="action_download">Unduh</string>
+    <string name="action_later">Nanti</string>
+    <string name="label_downloading_model">Mengunduh model AI… %1$d%%</string>
+    <string name="label_loading_model">Memuat model AI…</string>
+    <string name="label_analyzing_receipt">Menganalisis struk…</string>
+    <string name="title_download_required">Perlu Mengunduh</string>
+    <string name="description_download_required">Untuk memindai struk secara offline, unduh model AI (~850 MB). Hanya perlu dilakukan sekali. Disarankan menggunakan Wi-Fi.</string>
+    <string name="label_delete_model_question">Hapus model AI? Anda dapat mengunduhnya kembali nanti.</string>
+
     <!-- Errors -->
     <string name="error_sign_in_failed">Gagal masuk. Silakan coba lagi.</string>
     <string name="error_network">Kesalahan jaringan. Silakan periksa koneksi Anda.</string>

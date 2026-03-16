@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.repository
 
-import id.andriawan.cofinance.data.datasource.GeminiDataSource
+import id.andriawan.cofinance.data.datasource.ReceiptScannerService
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
@@ -23,7 +23,7 @@ interface TransactionRepository {
 
 
 class TransactionRepositoryImpl(
-    private val geminiDataSource: GeminiDataSource,
+    private val receiptScanner: ReceiptScannerService,
     private val database: CofinanceDatabase,
     private val supabaseClient: SupabaseClient
 ) : TransactionRepository {
@@ -32,7 +32,7 @@ class TransactionRepositoryImpl(
         supabaseClient.auth.currentUserOrNull()?.id.orEmpty()
 
     override suspend fun scanReceipt(image: ByteArray): ReceiptScan {
-        val response = geminiDataSource.scanReceipt(image)
+        val response = receiptScanner.scanReceipt(image)
         return ReceiptScan.from(response)
     }
 
