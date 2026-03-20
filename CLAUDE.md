@@ -28,13 +28,13 @@ A `local.properties` file is required with:
 - `gemini.api_key`
 - `google_auth_client_id`
 
-These are injected at build time via BuildKonfig.
+These are **secrets** injected at build time via BuildKonfig and must never be committed (including into forks), included in screenshots, or printed to CI logs. `local.properties` is already in `.gitignore` — do not remove it. To share keys across machines or CI, use environment variables or a secret manager rather than checking the file in.
 
 ## Architecture
 
 **MVVM + Clean Architecture** with Koin dependency injection.
 
-```
+```text
 Presentation (pages/, components/)  →  Domain (usecases/, model/)  →  Data (repository/, datasource/)
 ```
 
@@ -85,7 +85,7 @@ Platform-specific code uses `expect`/`actual` for: permissions, Google auth, cam
 - **Ktor** 3.4.0 — HTTP client
 - **Koin** 4.1.1 — Dependency injection
 - **Coil** 3.3.0 — Image loading
-- **Google Generative AI** 0.9.0 — Gemini for receipt scanning
+- **Google Generative AI** 0.9.0-1.1.0 — Gemini for receipt scanning
 - **CameraK** 0.2.0 — Multiplatform camera
 - **Kotlin Datetime** 0.7.1 — Date/time handling
 
