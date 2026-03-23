@@ -14,6 +14,7 @@ val CofinanceSchema = Schema(
                 Column.text("name"),
                 Column.text("group"),
                 Column.integer("balance"),
+                Column.text("account_type"),
                 Column.text("users_id"),
                 Column.text("created_at")
             ),

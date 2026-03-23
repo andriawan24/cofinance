@@ -15,6 +15,8 @@ interface AccountRepository {
     suspend fun getAccounts(): List<Account>
     fun watchAccounts(): Flow<List<Account>>
     suspend fun addAccount(param: AccountParam)
+    suspend fun updateAccountBalance(accountId: String, delta: Long)
+    suspend fun updateAccountType(accountId: String, accountType: String)
 }
 
 
@@ -42,7 +44,16 @@ class AccountRepositoryImpl(
             name = param.name,
             group = param.group,
             balance = param.balance,
+            accountType = param.accountType,
             userId = getUserId()
         )
+    }
+
+    override suspend fun updateAccountBalance(accountId: String, delta: Long) {
+        database.updateAccountBalance(accountId, delta)
+    }
+
+    override suspend fun updateAccountType(accountId: String, accountType: String) {
+        database.updateAccountType(accountId, accountType)
     }
 }
