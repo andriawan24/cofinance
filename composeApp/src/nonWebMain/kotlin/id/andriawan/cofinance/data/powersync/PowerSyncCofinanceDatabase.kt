@@ -32,6 +32,7 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
                 name = cursor.getStringOptional("name"),
                 group = cursor.getStringOptional("group"),
                 balance = cursor.getLongOptional("balance"),
+                accountType = cursor.getStringOptional("account_type"),
                 createdAt = cursor.getStringOptional("created_at")
             )
         }.map { accounts ->
@@ -50,6 +51,7 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
                 name = cursor.getStringOptional("name"),
                 group = cursor.getStringOptional("group"),
                 balance = cursor.getLongOptional("balance"),
+                accountType = cursor.getStringOptional("account_type"),
                 createdAt = cursor.getStringOptional("created_at")
             )
         }
@@ -64,17 +66,32 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
         name: String,
         group: String,
         balance: Long,
+        accountType: String,
         userId: String
     ) {
         logging("PowerSyncDB").info { "insertAccount: id=$id, name=$name, group=$group, userId=$userId" }
         database.execute(
             sql = """
-                INSERT INTO accounts (id, name, "group", balance, users_id, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO accounts (id, name, "group", balance, account_type, users_id, created_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """.trimIndent(),
-            parameters = listOf(id, name, group, balance, userId, Clock.System.now().toString())
+            parameters = listOf(id, name, group, balance, accountType, userId, Clock.System.now().toString())
         )
         logging("PowerSyncDB").info { "insertAccount completed successfully" }
+    }
+
+    override suspend fun updateAccountBalance(accountId: String, delta: Long) {
+        database.execute(
+            sql = "UPDATE accounts SET balance = balance + ? WHERE id = ?",
+            parameters = listOf(delta, accountId)
+        )
+    }
+
+    override suspend fun updateAccountType(accountId: String, accountType: String) {
+        database.execute(
+            sql = """UPDATE accounts SET account_type = ? WHERE id = ?""",
+            parameters = listOf(accountType, accountId)
+        )
     }
 
     // endregion
@@ -147,7 +164,7 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
         if (isDraft) {
             conditions.add("t.type = 'DRAFT'")
         } else {
-            conditions.add("t.type != 'DRAFT'")
+            conditions.add("t.type NOT IN ('DRAFT', 'CYCLE_RESET')")
         }
 
         val whereClause = conditions.joinToString(" AND ")
@@ -155,8 +172,8 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
 
         val sql = """
             SELECT t.*,
-                sa.name as sender_name, sa."group" as sender_group, sa.balance as sender_balance, sa.created_at as sender_created_at,
-                ra.name as receiver_name, ra."group" as receiver_group, ra.balance as receiver_balance, ra.created_at as receiver_created_at
+                sa.name as sender_name, sa."group" as sender_group, sa.balance as sender_balance, sa.account_type as sender_account_type, sa.created_at as sender_created_at,
+                ra.name as receiver_name, ra."group" as receiver_group, ra.balance as receiver_balance, ra.account_type as receiver_account_type, ra.created_at as receiver_created_at
             FROM transactions t
             LEFT JOIN accounts sa ON t.accounts_id = sa.id
             LEFT JOIN accounts ra ON t.receiver_accounts_id = ra.id
@@ -186,6 +203,7 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
                 name = cursor.getStringOptional("sender_name"),
                 group = cursor.getStringOptional("sender_group"),
                 balance = cursor.getLongOptional("sender_balance"),
+                accountType = cursor.getStringOptional("sender_account_type"),
                 createdAt = cursor.getStringOptional("sender_created_at")
             ),
             receiver = AccountResponse(
@@ -193,6 +211,7 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
                 name = cursor.getStringOptional("receiver_name"),
                 group = cursor.getStringOptional("receiver_group"),
                 balance = cursor.getLongOptional("receiver_balance"),
+                accountType = cursor.getStringOptional("receiver_account_type"),
                 createdAt = cursor.getStringOptional("receiver_created_at")
             )
         )
