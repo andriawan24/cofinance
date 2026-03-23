@@ -6,6 +6,7 @@ import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
+import id.andriawan.cofinance.utils.enums.TransactionType
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import kotlinx.coroutines.flow.Flow
@@ -76,6 +77,31 @@ class TransactionRepositoryImpl(
             type = params.type.name,
             userId = userId
         )
+
+        // Optimistically update account balances locally
+        val amount = params.amount ?: 0L
+        val fee = params.fee ?: 0L
+        when (params.type) {
+            TransactionType.INCOME -> {
+                if (!params.accountsId.isNullOrEmpty()) {
+                    database.updateAccountBalance(params.accountsId, amount)
+                }
+            }
+            TransactionType.EXPENSE -> {
+                if (!params.accountsId.isNullOrEmpty()) {
+                    database.updateAccountBalance(params.accountsId, -(amount + fee))
+                }
+            }
+            TransactionType.TRANSFER -> {
+                if (!params.accountsId.isNullOrEmpty()) {
+                    database.updateAccountBalance(params.accountsId, -(amount + fee))
+                }
+                if (!params.receiverAccountsId.isNullOrEmpty()) {
+                    database.updateAccountBalance(params.receiverAccountsId, amount)
+                }
+            }
+            else -> { /* DRAFT, CYCLE_RESET — no balance change */ }
+        }
 
         // Get the inserted transaction back from local database
         val inserted = database.getTransactions(

@@ -31,6 +31,7 @@ class OnlineOnlyDatabase(
         name: String,
         group: String,
         balance: Long,
+        accountType: String,
         userId: String
     ) {
         supabaseDataSource.addAccount(
@@ -38,9 +39,18 @@ class OnlineOnlyDatabase(
                 name = name,
                 balance = balance,
                 group = group,
+                accountType = accountType,
                 usersId = userId
             )
         )
+    }
+
+    override suspend fun updateAccountBalance(accountId: String, delta: Long) {
+        // No-op: server-side RPCs handle balance updates for online-only targets
+    }
+
+    override suspend fun updateAccountType(accountId: String, accountType: String) {
+        // No-op: handled via Supabase directly for online-only targets
     }
 
     override fun watchTransactions(
