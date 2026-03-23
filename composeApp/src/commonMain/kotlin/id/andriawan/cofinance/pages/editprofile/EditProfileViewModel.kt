@@ -11,7 +11,7 @@ import id.andriawan.cofinance.utils.mapAuthErrorMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -59,23 +59,19 @@ class EditProfileViewModel(
     fun saveProfile() {
         viewModelScope.launch {
             val state = _uiState.value
-            updateProfileUseCase.execute(state.name, state.imageBytes).collectLatest {
-                when (it) {
-                    ResultState.Loading -> {
-                        _uiState.update { s -> s.copy(isLoading = true) }
-                    }
-
-                    is ResultState.Success -> {
-                        _uiState.update { s -> s.copy(isLoading = false) }
-                        _event.send(EditProfileEvent.ProfileUpdated)
-                    }
-
-                    is ResultState.Error -> {
-                        _uiState.update { s -> s.copy(isLoading = false) }
-                        _event.send(EditProfileEvent.ShowError(mapAuthErrorMessage(it.exception)))
-                    }
+            updateProfileUseCase.execute(state.name, state.imageBytes).collectResult(
+                onLoading = {
+                    _uiState.update { s -> s.copy(isLoading = true) }
+                },
+                onSuccess = {
+                    _uiState.update { s -> s.copy(isLoading = false) }
+                    _event.send(EditProfileEvent.ProfileUpdated)
+                },
+                onError = { exception ->
+                    _uiState.update { s -> s.copy(isLoading = false) }
+                    _event.send(EditProfileEvent.ShowError(mapAuthErrorMessage(exception)))
                 }
-            }
+            )
         }
     }
 }

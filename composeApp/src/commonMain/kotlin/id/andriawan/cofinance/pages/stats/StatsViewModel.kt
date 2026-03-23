@@ -17,7 +17,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -106,48 +106,44 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
         viewModelScope.launch {
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-            getTransactionsUseCase.execute(param = param).collectLatest { result ->
-                when (result) {
-                    ResultState.Loading -> {
-                        _uiState.value = uiState.value.copy(isLoading = true)
-                    }
+            getTransactionsUseCase.execute(param = param).collectResult(
+                onLoading = {
+                    _uiState.value = uiState.value.copy(isLoading = true)
+                },
+                onError = { exception ->
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = exception.message.orEmpty()
+                    )
+                },
+                onSuccess = { data ->
+                    val totalSum = data.sumOf { transaction -> transaction.amount }
 
-                    is ResultState.Error -> {
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            message = result.exception.message.orEmpty()
+                    val transactionsByCategory = data
+                        .groupBy { TransactionCategory.getCategoryByName(it.category) }
+                        .mapValues { (_, list) -> list.sumOf { it.amount } }
+
+                    val statItems = transactionsByCategory.map { entry ->
+                        val sweepAngle = 360 * entry.value / totalSum.toFloat()
+                        val percentage = (sweepAngle / 360) * 100
+
+                        StatItem(
+                            percentage = percentage,
+                            category = entry.key,
+                            sweepAngle = sweepAngle,
+                            amount = entry.value
                         )
                     }
 
-                    is ResultState.Success<List<Transaction>> -> {
-                        val totalSum = result.data.sumOf { transaction -> transaction.amount }
-
-                        val transactionsByCategory = result.data
-                            .groupBy { TransactionCategory.getCategoryByName(it.category) }
-                            .mapValues { (_, list) -> list.sumOf { it.amount } }
-
-                        val statItems = transactionsByCategory.map { entry ->
-                            val sweepAngle = 360 * entry.value / totalSum.toFloat()
-                            val percentage = (sweepAngle / 360) * 100
-
-                            StatItem(
-                                percentage = percentage,
-                                category = entry.key,
-                                sweepAngle = sweepAngle,
-                                amount = entry.value
-                            )
-                        }
-
-                        _uiState.update { state ->
-                            state.copy(
-                                isLoading = false,
-                                totalExpenses = totalSum,
-                                stats = statItems
-                            )
-                        }
+                    _uiState.update { state ->
+                        state.copy(
+                            isLoading = false,
+                            totalExpenses = totalSum,
+                            stats = statItems
+                        )
                     }
                 }
-            }
+            )
         }
     }
 

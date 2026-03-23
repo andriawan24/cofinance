@@ -18,7 +18,7 @@ import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -53,70 +53,56 @@ class PreviewViewModel(
             }
 
             val compressed = compressImage(file)
-            scanReceiptUseCase.execute(compressed).collectLatest { result ->
-                when (result) {
-                    ResultState.Loading -> {
-                        /* no-op */
-                    }
-
-                    is ResultState.Success<ReceiptScan> -> {
-                        if (result.data.transactionDate.isBlank()) {
-                            _previewUiState.update { it.copy(showLoading = false) }
-                            _previewUiEvent.send(
-                                PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_receipt_scan_failed))
-                            )
-                            return@collectLatest
-                        }
-
-                        val input = AddTransactionParam(
-                            amount = result.data.totalPrice,
-                            category = result.data.category.ifBlank { null },
-                            fee = if (result.data.fee > 0) result.data.fee else null,
-                            date = result.data.transactionDate,
-                            type = TransactionType.DRAFT
-                        )
-
-                        handleCreateTransaction(input)
-                    }
-
-                    is ResultState.Error -> {
-                        _previewUiState.update { state -> state.copy(showLoading = false) }
+            scanReceiptUseCase.execute(compressed).collectResult(
+                onSuccess = { data ->
+                    if (data.transactionDate.isBlank()) {
+                        _previewUiState.update { it.copy(showLoading = false) }
                         _previewUiEvent.send(
-                            PreviewUiEvent.ShowMessage(
-                                result.exception.message?.let { UiText.Raw(it) }
-                                    ?: UiText.Res(Res.string.error_generic)
-                            )
+                            PreviewUiEvent.ShowMessage(UiText.Res(Res.string.error_receipt_scan_failed))
                         )
+                        return@collectResult
                     }
-                }
-            }
-        }
-    }
 
-    private suspend fun handleCreateTransaction(input: AddTransactionParam) {
-        createTransactionUseCase.execute(input).collectLatest { result ->
-            when (result) {
-                ResultState.Loading -> {
-                    /* no-op */
-                }
-
-                is ResultState.Success<Transaction> -> {
-                    _previewUiState.update { state -> state.copy(showLoading = false) }
-                    _previewUiEvent.send(
-                        PreviewUiEvent.NavigateToBalance(transactionId = result.data.id)
+                    val input = AddTransactionParam(
+                        amount = data.totalPrice,
+                        category = data.category.ifBlank { null },
+                        fee = if (data.fee > 0) data.fee else null,
+                        date = data.transactionDate,
+                        type = TransactionType.DRAFT
                     )
-                }
 
-                is ResultState.Error -> {
+                    handleCreateTransaction(input)
+                },
+                onError = { exception ->
                     _previewUiState.update { state -> state.copy(showLoading = false) }
                     _previewUiEvent.send(
                         PreviewUiEvent.ShowMessage(
-                            result.exception.message?.let { UiText.Raw(it) }
+                            exception.message?.let { UiText.Raw(it) }
                                 ?: UiText.Res(Res.string.error_generic)
                         )
                     )
                 }
-            }
+            )
         }
+    }
+
+    private suspend fun handleCreateTransaction(input: AddTransactionParam) {
+        createTransactionUseCase.execute(input).collectResult(
+            onSuccess = { data ->
+                _previewUiState.update { state -> state.copy(showLoading = false) }
+                _previewUiEvent.send(
+                    PreviewUiEvent.NavigateToBalance(transactionId = data.id)
+                )
+            },
+            onError = { exception ->
+                _previewUiState.update { state -> state.copy(showLoading = false) }
+                _previewUiEvent.send(
+                    PreviewUiEvent.ShowMessage(
+                        exception.message?.let { UiText.Raw(it) }
+                            ?: UiText.Res(Res.string.error_generic)
+                    )
+                )
+            }
+        )
     }
 }

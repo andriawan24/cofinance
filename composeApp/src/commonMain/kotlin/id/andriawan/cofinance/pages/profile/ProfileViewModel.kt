@@ -14,7 +14,7 @@ import id.andriawan.cofinance.utils.mapAuthErrorMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -55,32 +55,16 @@ class ProfileViewModel(
 
     fun logout() {
         viewModelScope.launch {
-            // Disconnect PowerSync sync but keep local data intact.
-            // The SQL queries filter by users_id, so a different user won't
-            // see stale data. Keeping local data avoids losing pending CRUD
-            // entries and lets the same user see their accounts immediately
-            // on re-login while sync catches up.
             try {
                 database.disconnectSync()
             } catch (_: Exception) {
                 // Non-fatal - proceed with logout anyway
             }
 
-            logoutUseCase.execute().collectLatest {
-                when (it) {
-                    ResultState.Loading -> {
-                        // Do nothing
-                    }
-
-                    is ResultState.Error -> {
-                        _profileEvent.send(ShowMessage(mapAuthErrorMessage(it.exception)))
-                    }
-
-                    is ResultState.Success<*> -> {
-                        _profileEvent.send(NavigateToLoginPage)
-                    }
-                }
-            }
+            logoutUseCase.execute().collectResult(
+                onError = { _profileEvent.send(ShowMessage(mapAuthErrorMessage(it))) },
+                onSuccess = { _profileEvent.send(NavigateToLoginPage) }
+            )
         }
     }
 }
