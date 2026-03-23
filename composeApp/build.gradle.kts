@@ -50,6 +50,26 @@ kotlin {
     sourceSets {
         val desktopMain by getting
 
+        // Intermediate source set for platforms that support PowerSync (Android, iOS, Desktop)
+        val nonWebMain by creating {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(nonWebMain)
+        iosMain.get().dependsOn(nonWebMain)
+        desktopMain.dependsOn(nonWebMain)
+
+        // Intermediate source set for web platforms (JS, WasmJS)
+        val webMain by creating {
+            dependsOn(commonMain.get())
+        }
+        jsMain.get().dependsOn(webMain)
+        wasmJsMain.get().dependsOn(webMain)
+
+        nonWebMain.dependencies {
+            api(libs.powersync.core)
+            implementation(libs.powersync.compose)
+        }
+
         androidMain.dependencies {
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
@@ -94,7 +114,6 @@ kotlin {
             implementation(project.dependencies.platform(libs.supabasekt.bom))
             implementation(libs.supabasekt.postgrest)
             implementation(libs.supabasekt.auth)
-            implementation(libs.supabasekt.realtime)
             implementation(libs.supabasekt.storage)
 
             // KTOR
@@ -133,16 +152,19 @@ buildkonfig {
         val supabaseApiKey = localProperties.getProperty("supabase.public_api_key")
         val geminiApiKey = localProperties.getProperty("gemini.api_key")
         val googleAuthApiKey = localProperties.getProperty("google_auth_client_id")
+        val powerSyncUrl = localProperties.getProperty("powersync.url")
 
         require(supabaseUrl.isNotEmpty()) { "Register supabase url on local.properties" }
         require(supabaseApiKey.isNotEmpty()) { "Register supabase api key on local.properties" }
         require(geminiApiKey.isNotEmpty()) { "Register gemini api key on local.properties" }
         require(googleAuthApiKey.isNotEmpty()) { "Register google auth api key on local.properties" }
+        require(powerSyncUrl.isNotEmpty()) { "Register powersync url on local.properties" }
 
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_URL", supabaseUrl)
         buildConfigField(FieldSpec.Type.STRING, "SUPABASE_API_KEY", supabaseApiKey)
         buildConfigField(FieldSpec.Type.STRING, "GEMINI_API_KEY", geminiApiKey)
         buildConfigField(FieldSpec.Type.STRING, "GOOGLE_AUTH_API_KEY", googleAuthApiKey)
+        buildConfigField(FieldSpec.Type.STRING, "POWERSYNC_URL", powerSyncUrl)
     }
 }
 

@@ -4,18 +4,15 @@ import id.andriawan.cofinance.data.model.request.AccountRequest
 import id.andriawan.cofinance.data.model.request.AddTransactionRequest
 import id.andriawan.cofinance.data.model.request.GetTransactionsRequest
 import id.andriawan.cofinance.data.model.request.IdTokenRequest
-import id.andriawan.cofinance.data.model.request.UpdateBalanceRequest
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
 import id.andriawan.cofinance.utils.enums.TransactionType
-import id.andriawan.cofinance.utils.extensions.orZero
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
-import io.github.jan.supabase.auth.user.UserUpdateBuilder
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
@@ -26,17 +23,17 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
-import kotlin.math.max
 import kotlin.time.ExperimentalTime
 
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
 
+    // region Auth
+
     fun getUser(): UserInfo? = supabase.auth.currentUserOrNull()
 
     suspend fun fetchUser(): UserInfo {
-        val userInfo = supabase.auth.retrieveUserForCurrentSession(updateSession = true)
-        return userInfo
+        return supabase.auth.retrieveUserForCurrentSession(updateSession = true)
     }
 
     suspend fun login(idTokenRequest: IdTokenRequest) {
@@ -49,6 +46,33 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
     suspend fun logout() {
         supabase.auth.signOut(scope = SignOutScope.GLOBAL)
     }
+
+    // endregion
+
+    // region Storage
+
+    suspend fun uploadAvatar(userId: String, bytes: ByteArray): String {
+        val bucket = supabase.storage.from("avatars")
+        val path = "$userId/avatar.jpg"
+        bucket.upload(path, bytes) { upsert = true }
+        return bucket.publicUrl(path)
+    }
+
+    suspend fun updateUserMetadata(name: String, avatarUrl: String?): UserInfo {
+        return supabase.auth.updateUser {
+            data {
+                put("name", JsonPrimitive(name))
+                put("custom_name", JsonPrimitive(name))
+                if (avatarUrl != null) {
+                    put("custom_avatar_url", JsonPrimitive(avatarUrl))
+                }
+            }
+        }
+    }
+
+    // endregion
+
+    // region Data (used by OnlineOnlyDatabase for web targets)
 
     suspend fun getAccounts(): List<AccountResponse> {
         return supabase.from(AccountResponse.TABLE_NAME)
@@ -67,54 +91,6 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
 
         return supabase.from(AccountResponse.TABLE_NAME)
             .insert(newRequest) { select() }
-            .decodeSingle()
-    }
-
-    suspend fun increaseBalance(request: UpdateBalanceRequest): AccountResponse {
-        val account = supabase.from(AccountResponse.TABLE_NAME)
-            .select {
-                filter { AccountResponse::id eq request.accountsId }
-            }
-            .decodeSingleOrNull<AccountResponse>()
-
-        requireNotNull(account) {
-            throw IllegalArgumentException("Account not found")
-        }
-
-        val balance = max(0, account.balance.orZero().plus(request.amount))
-
-        return supabase.from(AccountResponse.TABLE_NAME)
-            .update(update = { AccountResponse::balance setTo balance }) {
-                select()
-                filter {
-                    AccountResponse::id eq request.accountsId
-                }
-            }
-            .decodeSingle()
-    }
-
-    suspend fun reduceBalance(request: UpdateBalanceRequest): AccountResponse {
-        val account = supabase.from(AccountResponse.TABLE_NAME)
-            .select {
-                filter {
-                    AccountResponse::id eq request.accountsId
-                }
-            }
-            .decodeSingleOrNull<AccountResponse>()
-
-        requireNotNull(account) {
-            throw IllegalArgumentException("Account not found")
-        }
-
-        val balance = max(0, account.balance.orZero().minus(request.amount))
-
-        return supabase.from(AccountResponse.TABLE_NAME)
-            .update(update = { AccountResponse::balance setTo balance }) {
-                select()
-                filter {
-                    AccountResponse::id eq request.accountsId
-                }
-            }
             .decodeSingle()
     }
 
@@ -177,24 +153,6 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         return transactions.decodeList<TransactionResponse>()
     }
 
-    suspend fun uploadAvatar(userId: String, bytes: ByteArray): String {
-        val bucket = supabase.storage.from("avatars")
-        val path = "$userId/avatar.jpg"
-        bucket.upload(path, bytes) { upsert = true }
-        return bucket.publicUrl(path)
-    }
-
-    suspend fun updateUserMetadata(name: String, avatarUrl: String?): UserInfo {
-        return supabase.auth.updateUser {
-            data {
-                put("name", JsonPrimitive(name))
-                if (avatarUrl != null) {
-                    put("avatar_url", JsonPrimitive(avatarUrl))
-                }
-            }
-        }
-    }
-
     suspend fun createTransaction(request: AddTransactionRequest): TransactionResponse {
         val userId = supabase.auth.currentUserOrNull()?.id.orEmpty()
         val newRequest = request.copy(usersId = userId)
@@ -213,4 +171,6 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
             }
             .decodeSingle<TransactionResponse>()
     }
+
+    // endregion
 }

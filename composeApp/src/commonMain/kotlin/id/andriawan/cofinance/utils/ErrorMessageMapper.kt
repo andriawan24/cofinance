@@ -1,22 +1,18 @@
 package id.andriawan.cofinance.utils
 
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_auth_failed
+import cofinance.composeapp.generated.resources.error_network
+import cofinance.composeapp.generated.resources.error_unknown
 import kotlinx.io.IOException
 
-private const val NETWORK_ERROR_MESSAGE = "Network error. Please check your connection."
-private const val UNKNOWN_ERROR_MESSAGE = "Unknown error occurred."
-private const val GENERIC_ERROR_MESSAGE = "Authentication failed. Please try again."
-
-/**
- * Maps low-level exceptions coming from authentication layers into user-friendly messages
- * that can safely be shown in the UI.
- */
 fun mapAuthErrorMessage(
     exception: Throwable?,
-    fallbackMessage: String = GENERIC_ERROR_MESSAGE
-): String {
+    fallback: UiText = UiText.Res(Res.string.error_auth_failed)
+): UiText {
     return when (exception) {
-        is IOException -> NETWORK_ERROR_MESSAGE
-        null -> UNKNOWN_ERROR_MESSAGE
-        else -> exception.message?.takeIf { it.isNotBlank() } ?: fallbackMessage
+        is IOException -> UiText.Res(Res.string.error_network)
+        null -> UiText.Res(Res.string.error_unknown)
+        else -> exception.message?.takeIf { it.isNotBlank() }?.let { UiText.Raw(it) } ?: fallback
     }
 }

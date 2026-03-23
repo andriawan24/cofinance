@@ -1,65 +1,44 @@
 package id.andriawan.cofinance.pages.login
 
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import coil3.compose.LocalPlatformContext
-import id.andriawan.cofinance.auth.GoogleAuthManager
-import id.andriawan.cofinance.auth.GoogleAuthResult
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Google
-import io.github.jan.supabase.auth.providers.builtin.IDToken
-import kotlinx.coroutines.launch
-import org.koin.compose.koinInject
+import id.andriawan.cofinance.components.ErrorBottomSheet
+import id.andriawan.cofinance.utils.UiText
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun LoginScreen(onNavigateToHome: () -> Unit) {
-    val scope = rememberCoroutineScope()
-    val supabase = koinInject<SupabaseClient>()
-    val googleAuthManager = remember { GoogleAuthManager() }
-
-    val snackState = remember { SnackbarHostState() }
-    var isLoading by remember { mutableStateOf(false) }
+    val viewModel = koinViewModel<LoginViewModel>()
+    val uiState by viewModel.loginUiState.collectAsState()
     val context = LocalPlatformContext.current
+    var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
-    Scaffold(snackbarHost = { SnackbarHost(snackState) }) {
-        LoginContent(
-            contentPadding = it,
-            uiState = LoginUiState(isLoading = isLoading),
-            onContinueClicked = {
-                scope.launch {
-                    when (val result = googleAuthManager.signIn(context)) {
-                        is GoogleAuthResult.Success -> {
-                            try {
-                                supabase.auth.signInWith(IDToken) {
-                                    idToken = result.idToken
-                                    provider = Google
-                                }
-                                onNavigateToHome()
-                            } catch (e: Exception) {
-                                snackState.showSnackbar(
-                                    e.message ?: "Failed to sign in. Please try again."
-                                )
-                            }
-                        }
-
-                        is GoogleAuthResult.Error -> {
-                            snackState.showSnackbar(result.message)
-                        }
-
-                        is GoogleAuthResult.Cancelled -> {
-                            // User cancelled, no action needed
-                        }
-                    }
-                }
+    LaunchedEffect(Unit) {
+        viewModel.loginEvent.collect { event ->
+            when (event) {
+                is LoginUiEvent.NavigateHomePage -> onNavigateToHome()
+                is LoginUiEvent.ShowMessage -> errorUiText = event.message
             }
+        }
+    }
+
+    Scaffold { contentPadding ->
+        LoginContent(
+            contentPadding = contentPadding,
+            uiState = uiState,
+            onContinueClicked = { viewModel.signInWithIdToken(context) }
         )
     }
+
+    ErrorBottomSheet(
+        message = errorUiText?.asString(),
+        onDismiss = { errorUiText = null }
+    )
 }

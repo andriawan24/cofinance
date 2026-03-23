@@ -70,16 +70,16 @@ class ActivityViewModel(
 
             ActivityUiEvent.OnPreviousMonth -> {
                 val currentMonth = uiState.value.month
-                var nextYear = uiState.value.year
-                val nextMonth = if (currentMonth == JANUARY) {
-                    nextYear--
+                var previousYear = uiState.value.year
+                val previousMonth = if (currentMonth == JANUARY) {
+                    previousYear--
                     DECEMBER
                 } else currentMonth - 1
 
                 _uiState.value = uiState.value.copy(
-                    month = nextMonth,
-                    monthString = getMonthLabel(nextMonth),
-                    year = nextYear,
+                    month = previousMonth,
+                    monthString = getMonthLabel(previousMonth),
+                    year = previousYear,
                     transactions = emptyList()
                 )
 

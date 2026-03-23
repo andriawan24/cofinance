@@ -40,6 +40,8 @@ import id.andriawan.cofinance.pages.stats.StatItem
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberHelper
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.label_total_expenses
 import id.andriawan.cofinance.utils.enums.TransactionCategory
 import org.jetbrains.compose.resources.stringResource
 
@@ -121,7 +123,7 @@ fun PieChart(
 
             Column {
                 Text(
-                    text = "Total Expenses",
+                    text = stringResource(Res.string.label_total_expenses),
                     style = MaterialTheme.typography.bodySmall.copy(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontWeight = FontWeight.Medium

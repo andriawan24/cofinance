@@ -2,9 +2,13 @@ package id.andriawan.cofinance.pages.addnew
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_generic
+import cofinance.composeapp.generated.resources.error_name_required
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.usecases.accounts.AddAccountUseCase
 import id.andriawan.cofinance.utils.None
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.emptyString
 import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.extensions.isDigitOnly
@@ -43,7 +47,7 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
     private val _accountAdded = Channel<None>(Channel.BUFFERED)
     val accountAdded = _accountAdded.receiveAsFlow()
 
-    private val _showMessage = Channel<String>(Channel.BUFFERED)
+    private val _showMessage = Channel<UiText>(Channel.BUFFERED)
     val showMessage = _showMessage.receiveAsFlow()
 
     fun onEvent(event: AddAccountEvent) {
@@ -103,12 +107,15 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
                     }
 
                     if (it.isFailure) {
-                        _showMessage.send(it.exceptionOrNull()?.message.orEmpty())
+                        _showMessage.send(
+                            it.exceptionOrNull()?.message?.let { msg -> UiText.Raw(msg) }
+                                ?: UiText.Res(Res.string.error_generic)
+                        )
                         _uiState.update { state -> state.copy(isLoading = false) }
                     }
                 }
             } else {
-                _showMessage.send("Name is required")
+                _showMessage.send(UiText.Res(Res.string.error_name_required))
             }
         }
     }

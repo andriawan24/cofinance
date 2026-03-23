@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -22,10 +22,14 @@ import id.andriawan.cofinance.components.CofinanceBottomNavigation
 import id.andriawan.cofinance.models.rememberCofinanceAppState
 import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.account.AccountScreen
-import id.andriawan.cofinance.pages.account.AccountViewModel
 import id.andriawan.cofinance.pages.activity.ActivityScreen
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.message_account_added
+import cofinance.composeapp.generated.resources.message_profile_updated
 import id.andriawan.cofinance.pages.profile.ProfileScreen
+import id.andriawan.cofinance.pages.profile.ProfileViewModel
 import id.andriawan.cofinance.pages.stats.StatsScreen
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -37,6 +41,8 @@ fun MainScreen(
     onNavigateToEditProfile: () -> Unit
 ) {
     val state = rememberCofinanceAppState()
+    val accountAddedMessage = stringResource(Res.string.message_account_added)
+    val profileUpdatedMessage = stringResource(Res.string.message_profile_updated)
 
     Scaffold(
         snackbarHost = { SnackbarHost(state.snackBarHostState) },
@@ -67,8 +73,6 @@ fun MainScreen(
             }
 
             composable<Destinations.Account> {
-                val accountViewModel: AccountViewModel = koinViewModel()
-
                 val resultFlow = parentNavController.currentBackStackEntry
                     ?.savedStateHandle
                     ?.getStateFlow("add_account_result", false)
@@ -78,9 +82,10 @@ fun MainScreen(
 
                 LaunchedEffect(addAccountSucceeded) {
                     if (addAccountSucceeded) {
-                        state.showMessage("Successfully add account")
+                        state.showMessage(accountAddedMessage)
 
-                        accountViewModel.getAccounts()
+                        // No need to manually call getAccounts() — the PowerSync
+                        // watch flow automatically re-emits on local DB changes.
 
                         parentNavController.currentBackStackEntry
                             ?.savedStateHandle
@@ -92,6 +97,8 @@ fun MainScreen(
             }
 
             composable<Destinations.Profile> {
+                val profileViewModel = koinViewModel<ProfileViewModel>()
+
                 val resultFlow = parentNavController.currentBackStackEntry
                     ?.savedStateHandle
                     ?.getStateFlow("edit_profile_result", false)
@@ -101,7 +108,8 @@ fun MainScreen(
 
                 LaunchedEffect(editProfileSucceeded) {
                     if (editProfileSucceeded) {
-                        state.showMessage("Profile updated successfully")
+                        profileViewModel.refreshUser()
+                        state.showMessage(profileUpdatedMessage)
 
                         parentNavController.currentBackStackEntry
                             ?.savedStateHandle
@@ -114,7 +122,8 @@ fun MainScreen(
                     onNavigateToEditProfile = onNavigateToEditProfile,
                     showMessage = {
                         state.showMessage(it)
-                    }
+                    },
+                    profileViewModel = profileViewModel
                 )
             }
         }
