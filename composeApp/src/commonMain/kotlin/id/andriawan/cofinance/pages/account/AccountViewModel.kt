@@ -9,7 +9,7 @@ import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.utils.ResultState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -30,39 +30,30 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
 
-            getAccountsUseCase.execute().collectLatest {
-                when (it) {
-                    ResultState.Loading -> {
-                        _uiState.update { state ->
-                            state.copy(isLoading = true)
-                        }
+            getAccountsUseCase.execute().collectResult(
+                onLoading = {
+                    _uiState.update { state -> state.copy(isLoading = true) }
+                },
+                onError = {
+                    _uiState.update { state ->
+                        state.copy(isLoading = false, isRefreshing = false)
+                    }
+                },
+                onSuccess = { data ->
+                    val totalAssets = data.sumOf { group ->
+                        group.accounts.sumOf { account -> account.balance }
                     }
 
-                    is ResultState.Error -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                isLoading = false,
-                                isRefreshing = false
-                            )
-                        }
-                    }
-
-                    is ResultState.Success<List<AccountByGroup>> -> {
-                        val totalAssets = it.data.sumOf { data ->
-                            data.accounts.sumOf { account -> account.balance }
-                        }
-
-                        _uiState.update { state ->
-                            state.copy(
-                                accounts = it.data,
-                                isLoading = false,
-                                isRefreshing = false,
-                                balance = totalAssets
-                            )
-                        }
+                    _uiState.update { state ->
+                        state.copy(
+                            accounts = data,
+                            isLoading = false,
+                            isRefreshing = false,
+                            balance = totalAssets
+                        )
                     }
                 }
-            }
+            )
         }
     }
 }

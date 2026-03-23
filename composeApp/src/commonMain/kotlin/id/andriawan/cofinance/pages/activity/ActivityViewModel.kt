@@ -16,7 +16,7 @@ import id.andriawan.cofinance.utils.extensions.getCurrentYear
 import id.andriawan.cofinance.utils.extensions.getMonthLabel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -93,27 +93,20 @@ class ActivityViewModel(
         viewModelScope.launch {
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-            getBalanceStateUseCase.execute(param).collectLatest { result ->
-                when (result) {
-                    ResultState.Loading -> {
-                        /* no-op */
-                    }
-
-                    is ResultState.Error -> {
-                        log.error { "Error getting transaction: ${result.exception.message}" }
-                    }
-
-                    is ResultState.Success<BalanceStats> -> {
-                        _uiState.update { state ->
-                            state.copy(
-                                balance = result.data.balance,
-                                expense = result.data.expenses,
-                                income = result.data.income
-                            )
-                        }
+            getBalanceStateUseCase.execute(param).collectResult(
+                onError = { exception ->
+                    log.error { "Error getting transaction: ${exception.message}" }
+                },
+                onSuccess = { data ->
+                    _uiState.update { state ->
+                        state.copy(
+                            balance = data.balance,
+                            expense = data.expenses,
+                            income = data.income
+                        )
                     }
                 }
-            }
+            )
         }
     }
 
@@ -121,26 +114,24 @@ class ActivityViewModel(
         viewModelScope.launch {
             val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
 
-            getTransactionsGroupByMonthUseCase.execute(param = param).collectLatest { result ->
-                when (result) {
-                    ResultState.Loading -> _uiState.value = uiState.value.copy(isLoading = true)
-
-                    is ResultState.Success<List<TransactionByDate>> -> {
-                        _uiState.value = uiState.value.copy(
-                            isLoading = false,
-                            transactions = result.data
-                        )
-                    }
-
-                    is ResultState.Error -> {
-                        log.error { "Error getting transaction: ${result.exception.message}" }
-                        _uiState.value = _uiState.value.copy(
-                            isLoading = false,
-                            message = result.exception.message.orEmpty()
-                        )
-                    }
+            getTransactionsGroupByMonthUseCase.execute(param = param).collectResult(
+                onLoading = {
+                    _uiState.value = uiState.value.copy(isLoading = true)
+                },
+                onSuccess = { data ->
+                    _uiState.value = uiState.value.copy(
+                        isLoading = false,
+                        transactions = data
+                    )
+                },
+                onError = { exception ->
+                    log.error { "Error getting transaction: ${exception.message}" }
+                    _uiState.value = _uiState.value.copy(
+                        isLoading = false,
+                        message = exception.message.orEmpty()
+                    )
                 }
-            }
+            )
         }
     }
 

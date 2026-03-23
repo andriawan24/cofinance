@@ -25,7 +25,7 @@ import id.andriawan.cofinance.utils.extensions.toDate
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
+import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -112,30 +112,19 @@ class AddNewViewModel(
     private fun getAccounts() {
         _uiState.value = uiState.value.copy(isLoadingAccount = true)
         viewModelScope.launch {
-            getAccountsUseCase.execute().collectLatest {
-                when (it) {
-                    ResultState.Loading -> {
-                        _uiState.update { state ->
-                            state.copy(isLoadingAccount = true)
-                        }
-                    }
-
-                    is ResultState.Error -> {
-                        _uiState.update { state ->
-                            state.copy(isLoadingAccount = false)
-                        }
-                    }
-
-                    is ResultState.Success<List<AccountByGroup>> -> {
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                accounts = it.data,
-                                isLoadingAccount = false
-                            )
-                        }
+            getAccountsUseCase.execute().collectResult(
+                onLoading = {
+                    _uiState.update { state -> state.copy(isLoadingAccount = true) }
+                },
+                onError = {
+                    _uiState.update { state -> state.copy(isLoadingAccount = false) }
+                },
+                onSuccess = { data ->
+                    _uiState.update { currentState ->
+                        currentState.copy(accounts = data, isLoadingAccount = false)
                     }
                 }
-            }
+            )
         }
     }
 
@@ -143,36 +132,25 @@ class AddNewViewModel(
         viewModelScope.launch {
             getTransactionsGroupByMonthUseCase.execute(
                 GetTransactionsParam(transactionId = id, isDraft = true)
-            ).collectLatest { response ->
-                when (response) {
-                    ResultState.Loading -> {
-                        /* no-op */
-                    }
+            ).collectResult(
+                onSuccess = { data ->
+                    data.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
+                        val category = transaction.category.takeIf { it.isNotBlank() }
+                            ?.let { TransactionCategory.getCategoryByName(it) }
 
-                    is ResultState.Success<List<TransactionByDate>> -> {
-                        val transactions = response.data
-                        transactions.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
-                            val category = transaction.category.takeIf { it.isNotBlank() }
-                                ?.let { TransactionCategory.getCategoryByName(it) }
-
-                            _uiState.update {
-                                it.copy(
-                                    transactionId = transaction.id,
-                                    amount = it.amount.ifBlank { transaction.amount.toString() },
-                                    dateTime = transaction.date.toDate(),
-                                    expenseCategory = category,
-                                    fee = if (transaction.fee > 0) transaction.fee.toString() else it.fee,
-                                    includeFee = transaction.fee > 0
-                                )
-                            }
+                        _uiState.update {
+                            it.copy(
+                                transactionId = transaction.id,
+                                amount = it.amount.ifBlank { transaction.amount.toString() },
+                                dateTime = transaction.date.toDate(),
+                                expenseCategory = category,
+                                fee = if (transaction.fee > 0) transaction.fee.toString() else it.fee,
+                                includeFee = transaction.fee > 0
+                            )
                         }
                     }
-
-                    is ResultState.Error -> {
-                        /* no-op */
-                    }
                 }
-            }
+            )
         }
     }
 
@@ -302,26 +280,22 @@ class AddNewViewModel(
                 type = uiState.value.transactionType
             )
 
-            createTransactionUseCase.execute(param).collectLatest {
-                when (it) {
-                    ResultState.Loading -> {
-                        _uiState.value = uiState.value.copy(isLoading = true)
-                    }
-
-                    is ResultState.Error -> {
-                        _uiState.value = uiState.value.copy(isLoading = false)
-                        _showMessage.send(
-                            it.exception.message?.let { msg -> UiText.Raw(msg) }
-                                ?: UiText.Res(Res.string.error_generic)
-                        )
-                    }
-
-                    is ResultState.Success<*> -> {
-                        _uiState.value = uiState.value.copy(isLoading = false)
-                        _onSuccessSaved.send(None)
-                    }
+            createTransactionUseCase.execute(param).collectResult(
+                onLoading = {
+                    _uiState.value = uiState.value.copy(isLoading = true)
+                },
+                onError = { exception ->
+                    _uiState.value = uiState.value.copy(isLoading = false)
+                    _showMessage.send(
+                        exception.message?.let { msg -> UiText.Raw(msg) }
+                            ?: UiText.Res(Res.string.error_generic)
+                    )
+                },
+                onSuccess = {
+                    _uiState.value = uiState.value.copy(isLoading = false)
+                    _onSuccessSaved.send(None)
                 }
-            }
+            )
         }
     }
 
