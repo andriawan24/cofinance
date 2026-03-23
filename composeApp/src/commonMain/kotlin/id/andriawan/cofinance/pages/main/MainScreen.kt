@@ -38,7 +38,8 @@ fun MainScreen(
     onNavigateToLogin: () -> Unit,
     onNavigateToAdd: () -> Unit,
     onNavigateToAddAccount: () -> Unit,
-    onNavigateToEditProfile: () -> Unit
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToCycleReview: () -> Unit = {}
 ) {
     val state = rememberCofinanceAppState()
     val accountAddedMessage = stringResource(Res.string.message_account_added)
@@ -65,7 +66,10 @@ fun MainScreen(
             popExitTransition = { fadeOut(animationSpec = tween(200)) }
         ) {
             composable<Destinations.Activity> {
-                ActivityScreen(onNavigateToAdd = onNavigateToAdd)
+                ActivityScreen(
+                    onNavigateToAdd = onNavigateToAdd,
+                    onNavigateToCycleReview = onNavigateToCycleReview
+                )
             }
 
             composable<Destinations.Stats> {

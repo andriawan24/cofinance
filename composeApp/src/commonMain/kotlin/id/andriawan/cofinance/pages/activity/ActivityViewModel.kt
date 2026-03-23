@@ -9,9 +9,12 @@ import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetBalanceStatsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
+import id.andriawan.cofinance.data.repository.AccountRepository
 import id.andriawan.cofinance.utils.emptyString
+import id.andriawan.cofinance.utils.enums.AccountType
 import id.andriawan.cofinance.utils.extensions.computeCycleDateRange
 import id.andriawan.cofinance.utils.extensions.getCurrentCycleMonth
+import id.andriawan.cofinance.utils.extensions.isCycleBoundaryPassed
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import id.andriawan.cofinance.utils.collectResult
@@ -30,7 +33,8 @@ data class ActivityUiState(
     val expense: Long = 0,
     val transactions: List<TransactionByDate> = emptyList(),
     var isLoading: Boolean = true,
-    var message: String = emptyString()
+    var message: String = emptyString(),
+    val shouldShowCycleReview: Boolean = false
 )
 
 sealed class ActivityUiEvent {
@@ -42,7 +46,8 @@ sealed class ActivityUiEvent {
 class ActivityViewModel(
     private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
     private val getBalanceStateUseCase: GetBalanceStatsUseCase,
-    private val getUserUseCase: GetUserUseCase
+    private val getUserUseCase: GetUserUseCase,
+    private val accountRepository: AccountRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
@@ -169,6 +174,34 @@ class ActivityViewModel(
                 }
             )
         }
+    }
+
+    fun checkCycleBoundary() {
+        viewModelScope.launch {
+            try {
+                val user = getUserUseCase.execute()
+                val cycleStartDay = user.cycleStartDay
+                val lastResetDate = user.lastCycleResetDate
+
+                if (isCycleBoundaryPassed(lastResetDate, cycleStartDay)) {
+                    // Check if there are any Regular Balance accounts with non-zero balance
+                    val accounts = accountRepository.getAccounts()
+                    val regularAccountsWithBalance = accounts.filter {
+                        it.accountType == AccountType.REGULAR_BALANCE && it.balance != 0L
+                    }
+
+                    if (regularAccountsWithBalance.isNotEmpty()) {
+                        _uiState.update { it.copy(shouldShowCycleReview = true) }
+                    }
+                }
+            } catch (e: Exception) {
+                log.error { "Error checking cycle boundary: ${e.message}" }
+            }
+        }
+    }
+
+    fun onCycleReviewNavigated() {
+        _uiState.update { it.copy(shouldShowCycleReview = false) }
     }
 
     companion object {

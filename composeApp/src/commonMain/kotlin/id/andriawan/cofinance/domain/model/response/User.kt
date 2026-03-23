@@ -1,6 +1,7 @@
 package id.andriawan.cofinance.domain.model.response
 
 import io.github.jan.supabase.auth.user.UserInfo
+import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
@@ -9,7 +10,8 @@ data class User(
     val name: String = "",
     val email: String = "",
     val id: String = "",
-    val cycleStartDay: Int = 1
+    val cycleStartDay: Int = 1,
+    val lastCycleResetDate: String? = null
 ) {
     companion object {
         fun from(user: UserInfo?): User {
@@ -18,13 +20,15 @@ data class User(
             val customAvatar = metadata?.get("custom_avatar_url")?.jsonPrimitive?.content
             val googleAvatar = metadata?.get("avatar_url")?.jsonPrimitive?.content
             val cycleStartDay = metadata?.get("cycle_start_day")?.jsonPrimitive?.intOrNull ?: 1
+            val lastCycleResetDate = metadata?.get("last_cycle_reset_date")?.jsonPrimitive?.contentOrNull
 
             return User(
                 avatarUrl = customAvatar?.ifBlank { null } ?: googleAvatar.orEmpty(),
                 name = customName.orEmpty(),
                 email = user?.email.orEmpty(),
                 id = user?.id.orEmpty(),
-                cycleStartDay = cycleStartDay.coerceIn(1, 28)
+                cycleStartDay = cycleStartDay.coerceIn(1, 28),
+                lastCycleResetDate = lastCycleResetDate
             )
         }
     }
