@@ -55,6 +55,7 @@ import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberFormatTransformation
 import id.andriawan.cofinance.utils.enums.AccountGroupType
+import id.andriawan.cofinance.utils.enums.AccountType
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -167,6 +168,42 @@ fun AddAccountContent(
                             onEvent(AddAccountEvent.CategoryChosen(option))
                             onEvent(AddAccountEvent.CloseCategoryChooser)
                         }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
+
+        // Account Type selector (Asset / Regular Balance)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16),
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10)
+        ) {
+            AccountType.entries.forEach { type ->
+                val isSelected = uiState.accountType == type
+                Surface(
+                    modifier = Modifier.weight(1f),
+                    onClick = { onEvent(AddAccountEvent.AccountTypeChanged(type)) },
+                    shape = MaterialTheme.shapes.large,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onPrimary,
+                    border = androidx.compose.foundation.BorderStroke(
+                        width = Dimensions.SIZE_2,
+                        color = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.surfaceContainerLow
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.padding(all = Dimensions.SIZE_16),
+                        text = type.displayName,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onBackground
+                        ),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
                 }
             }

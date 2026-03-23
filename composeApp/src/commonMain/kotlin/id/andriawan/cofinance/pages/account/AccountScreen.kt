@@ -37,6 +37,8 @@ import cofinance.composeapp.generated.resources.label_account
 import cofinance.composeapp.generated.resources.label_add_account
 import cofinance.composeapp.generated.resources.label_rupiah
 import cofinance.composeapp.generated.resources.label_total_assets
+import cofinance.composeapp.generated.resources.label_account_type_asset
+import cofinance.composeapp.generated.resources.label_account_type_regular
 import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
@@ -101,8 +103,47 @@ private fun AccountContent(
                         CircularProgressIndicator()
                     }
                 } else {
-                    items(uiState.accounts) { group ->
-                        AccountGroupCard(group = group)
+                    if (uiState.assetAccounts.isNotEmpty()) {
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = Dimensions.SIZE_16),
+                                text = stringResource(Res.string.label_account_type_asset),
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            )
+                        }
+                        items(uiState.assetAccounts) { group ->
+                            AccountGroupCard(group = group)
+                        }
+                    }
+
+                    if (uiState.regularAccounts.isNotEmpty()) {
+                        item {
+                            Text(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = Dimensions.SIZE_16),
+                                text = stringResource(Res.string.label_account_type_regular),
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onBackground
+                                )
+                            )
+                        }
+                        items(uiState.regularAccounts) { group ->
+                            AccountGroupCard(group = group)
+                        }
+                    }
+
+                    // Fallback: show ungrouped if no type info
+                    if (uiState.assetAccounts.isEmpty() && uiState.regularAccounts.isEmpty()) {
+                        items(uiState.accounts) { group ->
+                            AccountGroupCard(group = group)
+                        }
                     }
                 }
             }
