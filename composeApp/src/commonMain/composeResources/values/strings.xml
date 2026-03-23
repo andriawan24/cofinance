@@ -82,6 +82,8 @@
     <string name="label_edit_profile">Edit Profile</string>
     <string name="label_logout">Logout</string>
     <string name="label_logout_question">Are you sure you want to logout?</string>
+    <string name="label_cycle_start_day">Cycle start day</string>
+    <string name="label_cycle_start_day_description">Transactions are grouped from this day each month</string>
 
     <!-- Empty States -->
     <string name="content_description_empty_state_image">Empty state image for activity</string>

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
+import id.andriawan.cofinance.domain.usecases.authentications.UpdateCycleStartDayUseCase
 import id.andriawan.cofinance.pages.profile.ProfileEvent.NavigateToLoginPage
 import id.andriawan.cofinance.pages.profile.ProfileEvent.ShowMessage
 import id.andriawan.cofinance.utils.ResultState
@@ -26,13 +27,15 @@ sealed class ProfileEvent {
 }
 
 data class UiState(
-    val isShowDialogLogout: Boolean = false
+    val isShowDialogLogout: Boolean = false,
+    val isUpdatingCycle: Boolean = false
 )
 
 @Stable
 class ProfileViewModel(
     private val getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase,
+    private val updateCycleStartDayUseCase: UpdateCycleStartDayUseCase,
     private val database: CofinanceDatabase
 ) : ViewModel() {
 
@@ -51,6 +54,24 @@ class ProfileViewModel(
 
     fun toggleDialogLogout(isShow: Boolean) {
         _uiState.update { state -> state.copy(isShowDialogLogout = isShow) }
+    }
+
+    fun updateCycleStartDay(day: Int) {
+        viewModelScope.launch {
+            updateCycleStartDayUseCase.execute(day).collectResult(
+                onLoading = {
+                    _uiState.update { it.copy(isUpdatingCycle = true) }
+                },
+                onSuccess = { user ->
+                    _user.value = user
+                    _uiState.update { it.copy(isUpdatingCycle = false) }
+                },
+                onError = { exception ->
+                    _uiState.update { it.copy(isUpdatingCycle = false) }
+                    _profileEvent.send(ShowMessage(mapAuthErrorMessage(exception)))
+                }
+            )
+        }
     }
 
     fun logout() {

@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.label_activity
-import cofinance.composeapp.generated.resources.template_month_year
 import id.andriawan.cofinance.components.BalanceCard
 import id.andriawan.cofinance.components.EmptyView
 import id.andriawan.cofinance.components.TransactionByMonth
@@ -84,11 +83,7 @@ fun ActivityContent(
 
         DateSwitcher(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-            label = stringResource(
-                Res.string.template_month_year,
-                uiState.monthString,
-                uiState.year
-            ),
+            label = uiState.dateLabel,
             onPreviousClicked = { onEvent(ActivityUiEvent.OnPreviousMonth) },
             onNextClicked = { onEvent(ActivityUiEvent.OnNextMonth) }
         )

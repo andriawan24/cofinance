@@ -39,8 +39,8 @@ class TransactionRepositoryImpl(
     override suspend fun getTransactions(param: GetTransactionsParam): List<Transaction> {
         val response = database.getTransactions(
             userId = getUserId(),
-            month = param.month,
-            year = param.year,
+            startDate = param.startDate,
+            endDate = param.endDate,
             isDraft = param.isDraft,
             transactionId = param.transactionId
         )
@@ -50,8 +50,8 @@ class TransactionRepositoryImpl(
     override fun watchTransactions(param: GetTransactionsParam): Flow<List<Transaction>> {
         return database.watchTransactions(
             userId = getUserId(),
-            month = param.month,
-            year = param.year,
+            startDate = param.startDate,
+            endDate = param.endDate,
             isDraft = param.isDraft,
             transactionId = param.transactionId
         ).map { transactions ->

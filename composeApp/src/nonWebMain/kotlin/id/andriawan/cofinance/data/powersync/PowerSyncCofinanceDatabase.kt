@@ -92,12 +92,12 @@ class PowerSyncCofinanceDatabase(
 
     override fun watchTransactions(
         userId: String,
-        month: Int?,
-        year: Int?,
+        startDate: String?,
+        endDate: String?,
         isDraft: Boolean,
         transactionId: String?
     ): Flow<List<TransactionResponse>> {
-        val (sql, params) = buildTransactionQuery(userId, month, year, isDraft, transactionId)
+        val (sql, params) = buildTransactionQuery(userId, startDate, endDate, isDraft, transactionId)
         return database.watch(sql = sql, parameters = params) { cursor ->
             mapTransactionRow(cursor)
         }
@@ -105,12 +105,12 @@ class PowerSyncCofinanceDatabase(
 
     override suspend fun getTransactions(
         userId: String,
-        month: Int?,
-        year: Int?,
+        startDate: String?,
+        endDate: String?,
         isDraft: Boolean,
         transactionId: String?
     ): List<TransactionResponse> {
-        val (sql, params) = buildTransactionQuery(userId, month, year, isDraft, transactionId)
+        val (sql, params) = buildTransactionQuery(userId, startDate, endDate, isDraft, transactionId)
         return database.getAll(sql = sql, parameters = params) { cursor ->
             mapTransactionRow(cursor)
         }
@@ -118,8 +118,8 @@ class PowerSyncCofinanceDatabase(
 
     private fun buildTransactionQuery(
         userId: String,
-        month: Int?,
-        year: Int?,
+        startDate: String?,
+        endDate: String?,
         isDraft: Boolean,
         transactionId: String?
     ): Pair<String, List<Any?>> {
@@ -129,12 +129,7 @@ class PowerSyncCofinanceDatabase(
         conditions.add("t.users_id = ?")
         params.add(userId)
 
-        if (month != null && year != null) {
-            // Filter by month/year using date string comparison
-            val startDate = "%04d-%02d-01".format(year, month)
-            val endMonth = if (month == 12) 1 else month + 1
-            val endYear = if (month == 12) year + 1 else year
-            val endDate = "%04d-%02d-01".format(endYear, endMonth)
+        if (startDate != null && endDate != null) {
             conditions.add("t.date >= ?")
             params.add(startDate)
             conditions.add("t.date < ?")

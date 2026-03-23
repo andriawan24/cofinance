@@ -5,14 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
-import id.andriawan.cofinance.domain.model.response.Transaction
+import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsUseCase
-import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.emptyString
 import id.andriawan.cofinance.utils.enums.TransactionCategory
-import id.andriawan.cofinance.utils.extensions.getCurrentMonth
-import id.andriawan.cofinance.utils.extensions.getCurrentYear
-import id.andriawan.cofinance.utils.extensions.getMonthLabel
+import id.andriawan.cofinance.utils.extensions.computeCycleDateRange
+import id.andriawan.cofinance.utils.extensions.getCurrentCycleMonth
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,9 +28,10 @@ data class StatItem(
 )
 
 data class StatsUiState(
-    val year: Int = getCurrentYear(),
-    val month: Int = getCurrentMonth(),
-    val monthString: String = getMonthLabel(month),
+    val year: Int = 0,
+    val month: Int = 0,
+    val cycleStartDay: Int = 1,
+    val dateLabel: String = "",
     var isLoading: Boolean = true,
     var message: String = emptyString(),
     var totalExpenses: Long = 0L,
@@ -45,13 +44,28 @@ sealed class StatsUiEvent {
 }
 
 
-class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase) : ViewModel() {
+class StatsViewModel(
+    private val getTransactionsUseCase: GetTransactionsUseCase,
+    private val getUserUseCase: GetUserUseCase
+) : ViewModel() {
     private val _uiState = MutableStateFlow(StatsUiState())
     val uiState = _uiState.asStateFlow()
 
     private var fetchJob: Job? = null
 
     init {
+        val user = getUserUseCase.execute()
+        val cycleStartDay = user.cycleStartDay
+        val (month, year) = getCurrentCycleMonth(cycleStartDay)
+        val range = computeCycleDateRange(month, year, cycleStartDay)
+
+        _uiState.value = StatsUiState(
+            year = year,
+            month = month,
+            cycleStartDay = cycleStartDay,
+            dateLabel = range.label
+        )
+
         viewModelScope.launch {
             fetchTransaction()
         }
@@ -63,15 +77,15 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
                 val nextMonth = if (currentMonth == DECEMBER) {
-                    // Move to the next year started from January
                     nextYear++
                     JANUARY
                 } else currentMonth + 1
 
+                val range = computeCycleDateRange(nextMonth, nextYear, uiState.value.cycleStartDay)
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
-                    monthString = getMonthLabel(nextMonth),
                     year = nextYear,
+                    dateLabel = range.label,
                     isLoading = true
                 )
 
@@ -86,15 +100,15 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
                 val currentMonth = uiState.value.month
                 var nextYear = uiState.value.year
                 val nextMonth = if (currentMonth == JANUARY) {
-                    // Move to the previous year started from December
                     nextYear--
                     DECEMBER
                 } else currentMonth - 1
 
+                val range = computeCycleDateRange(nextMonth, nextYear, uiState.value.cycleStartDay)
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
-                    monthString = getMonthLabel(nextMonth),
-                    year = nextYear
+                    year = nextYear,
+                    dateLabel = range.label
                 )
 
                 fetchTransaction()
@@ -104,7 +118,8 @@ class StatsViewModel(private val getTransactionsUseCase: GetTransactionsUseCase)
 
     private fun fetchTransaction() {
         viewModelScope.launch {
-            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+            val range = computeCycleDateRange(uiState.value.month, uiState.value.year, uiState.value.cycleStartDay)
+            val param = GetTransactionsParam(startDate = range.startDate, endDate = range.endDate)
 
             getTransactionsUseCase.execute(param = param).collectResult(
                 onLoading = {

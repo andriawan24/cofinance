@@ -27,16 +27,16 @@ interface CofinanceDatabase {
     // Transaction reads
     fun watchTransactions(
         userId: String,
-        month: Int? = null,
-        year: Int? = null,
+        startDate: String? = null,
+        endDate: String? = null,
         isDraft: Boolean = false,
         transactionId: String? = null
     ): Flow<List<TransactionResponse>>
 
     suspend fun getTransactions(
         userId: String,
-        month: Int? = null,
-        year: Int? = null,
+        startDate: String? = null,
+        endDate: String? = null,
         isDraft: Boolean = false,
         transactionId: String? = null
     ): List<TransactionResponse>

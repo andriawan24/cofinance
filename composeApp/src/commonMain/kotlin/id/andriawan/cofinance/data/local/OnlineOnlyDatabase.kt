@@ -45,25 +45,25 @@ class OnlineOnlyDatabase(
 
     override fun watchTransactions(
         userId: String,
-        month: Int?,
-        year: Int?,
+        startDate: String?,
+        endDate: String?,
         isDraft: Boolean,
         transactionId: String?
     ): Flow<List<TransactionResponse>> = flow {
         emit(supabaseDataSource.getTransactions(
-            GetTransactionsRequest(month = month, year = year, isDraft = isDraft, transactionId = transactionId)
+            GetTransactionsRequest(startDate = startDate, endDate = endDate, isDraft = isDraft, transactionId = transactionId)
         ))
     }
 
     override suspend fun getTransactions(
         userId: String,
-        month: Int?,
-        year: Int?,
+        startDate: String?,
+        endDate: String?,
         isDraft: Boolean,
         transactionId: String?
     ): List<TransactionResponse> {
         return supabaseDataSource.getTransactions(
-            GetTransactionsRequest(month = month, year = year, isDraft = isDraft, transactionId = transactionId)
+            GetTransactionsRequest(startDate = startDate, endDate = endDate, isDraft = isDraft, transactionId = transactionId)
         )
     }
 

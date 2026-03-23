@@ -5,15 +5,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
-import id.andriawan.cofinance.domain.model.response.BalanceStats
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
+import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetBalanceStatsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
-import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.emptyString
-import id.andriawan.cofinance.utils.extensions.getCurrentMonth
-import id.andriawan.cofinance.utils.extensions.getCurrentYear
-import id.andriawan.cofinance.utils.extensions.getMonthLabel
+import id.andriawan.cofinance.utils.extensions.computeCycleDateRange
+import id.andriawan.cofinance.utils.extensions.getCurrentCycleMonth
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import id.andriawan.cofinance.utils.collectResult
@@ -23,9 +21,10 @@ import kotlinx.coroutines.launch
 
 @Stable
 data class ActivityUiState(
-    val year: Int = getCurrentYear(),
-    val month: Int = getCurrentMonth(),
-    val monthString: String = getMonthLabel(month),
+    val year: Int = 0,
+    val month: Int = 0,
+    val cycleStartDay: Int = 1,
+    val dateLabel: String = "",
     val balance: Long = 0,
     val income: Long = 0,
     val expense: Long = 0,
@@ -42,10 +41,25 @@ sealed class ActivityUiEvent {
 @Stable
 class ActivityViewModel(
     private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
-    private val getBalanceStateUseCase: GetBalanceStatsUseCase
+    private val getBalanceStateUseCase: GetBalanceStatsUseCase,
+    private val getUserUseCase: GetUserUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
+
+    init {
+        val user = getUserUseCase.execute()
+        val cycleStartDay = user.cycleStartDay
+        val (month, year) = getCurrentCycleMonth(cycleStartDay)
+        val range = computeCycleDateRange(month, year, cycleStartDay)
+
+        _uiState.value = ActivityUiState(
+            year = year,
+            month = month,
+            cycleStartDay = cycleStartDay,
+            dateLabel = range.label
+        )
+    }
 
     fun onEvent(event: ActivityUiEvent) {
         when (event) {
@@ -57,10 +71,11 @@ class ActivityViewModel(
                     JANUARY
                 } else currentMonth + 1
 
+                val range = computeCycleDateRange(nextMonth, nextYear, uiState.value.cycleStartDay)
                 _uiState.value = uiState.value.copy(
                     month = nextMonth,
-                    monthString = getMonthLabel(nextMonth),
                     year = nextYear,
+                    dateLabel = range.label,
                     transactions = emptyList()
                 )
 
@@ -76,10 +91,11 @@ class ActivityViewModel(
                     DECEMBER
                 } else currentMonth - 1
 
+                val range = computeCycleDateRange(previousMonth, previousYear, uiState.value.cycleStartDay)
                 _uiState.value = uiState.value.copy(
                     month = previousMonth,
-                    monthString = getMonthLabel(previousMonth),
                     year = previousYear,
+                    dateLabel = range.label,
                     transactions = emptyList()
                 )
 
@@ -89,9 +105,28 @@ class ActivityViewModel(
         }
     }
 
+    fun refreshCycleSettings() {
+        val user = getUserUseCase.execute()
+        val cycleStartDay = user.cycleStartDay
+        val (month, year) = getCurrentCycleMonth(cycleStartDay)
+        val range = computeCycleDateRange(month, year, cycleStartDay)
+
+        _uiState.value = uiState.value.copy(
+            month = month,
+            year = year,
+            cycleStartDay = cycleStartDay,
+            dateLabel = range.label,
+            transactions = emptyList()
+        )
+
+        getBalance()
+        fetchTransaction()
+    }
+
     fun getBalance() {
         viewModelScope.launch {
-            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+            val range = computeCycleDateRange(uiState.value.month, uiState.value.year, uiState.value.cycleStartDay)
+            val param = GetTransactionsParam(startDate = range.startDate, endDate = range.endDate)
 
             getBalanceStateUseCase.execute(param).collectResult(
                 onError = { exception ->
@@ -112,7 +147,8 @@ class ActivityViewModel(
 
     fun fetchTransaction() {
         viewModelScope.launch {
-            val param = GetTransactionsParam(month = uiState.value.month, year = uiState.value.year)
+            val range = computeCycleDateRange(uiState.value.month, uiState.value.year, uiState.value.cycleStartDay)
+            val param = GetTransactionsParam(startDate = range.startDate, endDate = range.endDate)
 
             getTransactionsGroupByMonthUseCase.execute(param = param).collectResult(
                 onLoading = {

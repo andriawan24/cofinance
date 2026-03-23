@@ -14,6 +14,7 @@ interface AuthenticationRepository {
     suspend fun login(idTokenParam: IdTokenParam)
     suspend fun logout()
     suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User
+    suspend fun updateCycleStartDay(day: Int): User
 }
 
 
@@ -43,6 +44,11 @@ class AuthenticationRepositoryImpl(
             avatarUrl = supabaseDataSource.uploadAvatar(userId, avatarBytes)
         }
         val userInfo = supabaseDataSource.updateUserMetadata(name, avatarUrl)
+        return User.from(userInfo)
+    }
+
+    override suspend fun updateCycleStartDay(day: Int): User {
+        val userInfo = supabaseDataSource.updateCycleStartDay(day)
         return User.from(userInfo)
     }
 
