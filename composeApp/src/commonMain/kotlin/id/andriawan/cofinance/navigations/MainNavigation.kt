@@ -16,6 +16,7 @@ import id.andriawan.cofinance.pages.editprofile.EditProfileScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
+import id.andriawan.cofinance.pages.cyclereview.CycleReviewScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
@@ -114,6 +115,9 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                         }
                         restoreState = true
                     }
+                },
+                onNavigateToCycleReview = {
+                    navController.navigate(Destinations.CycleReview)
                 }
             )
         }
@@ -177,6 +181,14 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
                         ?.set("add_account_result", true)
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable<Destinations.CycleReview> {
+            CycleReviewScreen(
+                onCompleted = {
                     navController.popBackStack()
                 }
             )

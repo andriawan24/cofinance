@@ -33,6 +33,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ActivityScreen(
     onNavigateToAdd: () -> Unit,
+    onNavigateToCycleReview: () -> Unit = {},
     activityViewModel: ActivityViewModel = koinViewModel()
 ) {
     val uiState by activityViewModel.uiState.collectAsStateWithLifecycle()
@@ -40,6 +41,14 @@ fun ActivityScreen(
     LaunchedEffect(true) {
         activityViewModel.getBalance()
         activityViewModel.fetchTransaction()
+        activityViewModel.checkCycleBoundary()
+    }
+
+    LaunchedEffect(uiState.shouldShowCycleReview) {
+        if (uiState.shouldShowCycleReview) {
+            onNavigateToCycleReview()
+            activityViewModel.onCycleReviewNavigated()
+        }
     }
 
     ActivityContent(
