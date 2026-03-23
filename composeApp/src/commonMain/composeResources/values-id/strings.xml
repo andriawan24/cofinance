@@ -28,7 +28,7 @@
     <string name="label_total_expenses">Total Pengeluaran</string>
     <string name="label_rupiah">Rp</string>
     <string name="label_currency_symbol">Rp</string>
-    <string name="label_percentage">%1$d%%</string>
+    <string name="label_percentage">%1$d%</string>
     <string name="template_month_year">%1$s %2$s</string>
     <string name="template_dot">%1$s · %2$s</string>
 

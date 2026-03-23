@@ -4,27 +4,18 @@ import com.diamondedge.logging.logging
 import com.powersync.PowerSyncDatabase
 import com.powersync.db.getString
 import com.powersync.db.getStringOptional
-import com.powersync.db.getLong
 import com.powersync.db.getLongOptional
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
 import io.github.jan.supabase.SupabaseClient
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlin.time.Clock
 
-class PowerSyncCofinanceDatabase(
-    private val database: PowerSyncDatabase
-) : CofinanceDatabase {
+class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : CofinanceDatabase {
 
     private var connector: CofinanceConnector? = null
-    private var statusObserverJob: Job? = null
-    private val scope = CoroutineScope(Dispatchers.Default)
 
     // region Account reads
 
@@ -97,7 +88,13 @@ class PowerSyncCofinanceDatabase(
         isDraft: Boolean,
         transactionId: String?
     ): Flow<List<TransactionResponse>> {
-        val (sql, params) = buildTransactionQuery(userId, startDate, endDate, isDraft, transactionId)
+        val (sql, params) = buildTransactionQuery(
+            userId,
+            startDate,
+            endDate,
+            isDraft,
+            transactionId
+        )
         return database.watch(sql = sql, parameters = params) { cursor ->
             mapTransactionRow(cursor)
         }
@@ -110,7 +107,13 @@ class PowerSyncCofinanceDatabase(
         isDraft: Boolean,
         transactionId: String?
     ): List<TransactionResponse> {
-        val (sql, params) = buildTransactionQuery(userId, startDate, endDate, isDraft, transactionId)
+        val (sql, params) = buildTransactionQuery(
+            userId,
+            startDate,
+            endDate,
+            isDraft,
+            transactionId
+        )
         return database.getAll(sql = sql, parameters = params) { cursor ->
             mapTransactionRow(cursor)
         }
