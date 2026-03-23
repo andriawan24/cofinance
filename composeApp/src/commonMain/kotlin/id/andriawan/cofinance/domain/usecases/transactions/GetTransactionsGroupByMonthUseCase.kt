@@ -7,47 +7,42 @@ import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.enums.TransactionType
 import id.andriawan.cofinance.utils.extensions.toDate
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 
 class GetTransactionsGroupByMonthUseCase(private val transactionRepository: TransactionRepository) {
     @OptIn(ExperimentalTime::class)
-    fun execute(param: GetTransactionsParam): Flow<ResultState<List<TransactionByDate>>> =
-        flow {
-            emit(ResultState.Loading)
-            try {
-                val response = transactionRepository.getTransactions(param = param)
+    fun execute(param: GetTransactionsParam): Flow<ResultState<List<TransactionByDate>>> {
+        return transactionRepository.watchTransactions(param)
+            .map { response ->
                 val transactionGrouped = response.groupBy {
                     val date = it.date.toDate().toLocalDateTime(TimeZone.currentSystemDefault())
-                    date.year to date.month.ordinal
+                    "${date.year}-${date.month}-${date.day}"
                 }
 
-                var expense = 0L
-                var income = 0L
                 val transactionByDate: List<TransactionByDate> = transactionGrouped.map {
-                    val expenseThisMonth = it.value
+                    val expenses = it.value
                         .filter { transaction -> transaction.type == TransactionType.EXPENSE }
                         .sumOf { transaction -> transaction.amount }
 
-                    val incomeThisMonth = it.value
+                    val income = it.value
                         .filter { transaction -> transaction.type == TransactionType.INCOME }
                         .sumOf { transaction -> transaction.amount }
 
-                    expense += expenseThisMonth
-                    income += incomeThisMonth
-
                     TransactionByDate(
-                        dateLabel = it.key,
+                        dateLabel = it.value.first().date,
                         transactions = it.value,
-                        totalAmount = expenseThisMonth + incomeThisMonth
+                        totalAmount = expenses + income
                     )
                 }
 
-                emit(ResultState.Success(transactionByDate))
-            } catch (e: Exception) {
-                emit(ResultState.Error(e))
+                ResultState.Success(transactionByDate) as ResultState<List<TransactionByDate>>
             }
-        }
+            .onStart { emit(ResultState.Loading) }
+            .catch { emit(ResultState.Error(it as Exception)) }
+    }
 }

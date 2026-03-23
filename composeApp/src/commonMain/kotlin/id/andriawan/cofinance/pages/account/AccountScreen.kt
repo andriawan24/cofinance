@@ -59,7 +59,9 @@ fun AccountScreen(
 
     AccountContent(
         uiState = uiState,
-        onRefresh = { accountViewModel.refresh() },
+        onRefresh = {
+            /* no-op */
+        },
         onNavigateToAddAccount = onNavigateToAddAccount
     )
 }
@@ -252,3 +254,4 @@ private fun AccountScreenPreview() {
         }
     }
 }
+

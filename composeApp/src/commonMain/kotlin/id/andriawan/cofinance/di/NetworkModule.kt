@@ -1,5 +1,6 @@
 package id.andriawan.cofinance.di
 
+import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.data.datasource.GeminiDataSource
 import id.andriawan.cofinance.data.datasource.SupabaseDataSource
 import id.andriawan.cofinance.utils.GeminiHelper
@@ -19,4 +20,5 @@ val networkModule = module {
     }
     single<GeminiDataSource> { GeminiDataSource(GeminiHelper.createModel(), get()) }
     singleOf(::SupabaseDataSource)
+    singleOf(::GoogleAuthManager)
 }

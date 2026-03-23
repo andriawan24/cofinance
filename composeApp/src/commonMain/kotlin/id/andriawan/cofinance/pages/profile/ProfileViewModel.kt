@@ -3,11 +3,13 @@ package id.andriawan.cofinance.pages.profile
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
 import id.andriawan.cofinance.pages.profile.ProfileEvent.NavigateToLoginPage
 import id.andriawan.cofinance.pages.profile.ProfileEvent.ShowMessage
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.mapAuthErrorMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +22,7 @@ import kotlinx.coroutines.launch
 
 sealed class ProfileEvent {
     data object NavigateToLoginPage : ProfileEvent()
-    data class ShowMessage(val message: String) : ProfileEvent()
+    data class ShowMessage(val message: UiText) : ProfileEvent()
 }
 
 data class UiState(
@@ -29,8 +31,9 @@ data class UiState(
 
 @Stable
 class ProfileViewModel(
-    getUserUseCase: GetUserUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val getUserUseCase: GetUserUseCase,
+    private val logoutUseCase: LogoutUseCase,
+    private val database: CofinanceDatabase
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
@@ -39,7 +42,12 @@ class ProfileViewModel(
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
-    val user = getUserUseCase.execute()
+    private val _user = MutableStateFlow(getUserUseCase.execute())
+    val user = _user.asStateFlow()
+
+    fun refreshUser() {
+        _user.value = getUserUseCase.execute()
+    }
 
     fun toggleDialogLogout(isShow: Boolean) {
         _uiState.update { state -> state.copy(isShowDialogLogout = isShow) }
@@ -47,6 +55,17 @@ class ProfileViewModel(
 
     fun logout() {
         viewModelScope.launch {
+            // Disconnect PowerSync sync but keep local data intact.
+            // The SQL queries filter by users_id, so a different user won't
+            // see stale data. Keeping local data avoids losing pending CRUD
+            // entries and lets the same user see their accounts immediately
+            // on re-login while sync catches up.
+            try {
+                database.disconnectSync()
+            } catch (_: Exception) {
+                // Non-fatal - proceed with logout anyway
+            }
+
             logoutUseCase.execute().collectLatest {
                 when (it) {
                     ResultState.Loading -> {

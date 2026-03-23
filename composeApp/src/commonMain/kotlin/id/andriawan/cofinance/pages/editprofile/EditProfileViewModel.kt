@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.UpdateProfileUseCase
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.mapAuthErrorMessage
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,7 @@ import kotlinx.coroutines.launch
 
 sealed class EditProfileEvent {
     data object ProfileUpdated : EditProfileEvent()
-    data class ShowError(val message: String) : EditProfileEvent()
+    data class ShowError(val message: UiText) : EditProfileEvent()
 }
 
 data class EditProfileUiState(
