@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.DpOffset
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.label_percentage
 import cofinance.composeapp.generated.resources.label_stats
-import cofinance.composeapp.generated.resources.template_month_year
 import id.andriawan.cofinance.components.EmptyView
 import id.andriawan.cofinance.components.PieChart
 import id.andriawan.cofinance.theme.CofinanceTheme
@@ -61,11 +60,7 @@ fun StatsScreen(onNavigateToAdd: () -> Unit) {
 
         DateSwitcher(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-            label = stringResource(
-                Res.string.template_month_year,
-                uiState.monthString,
-                uiState.year
-            ),
+            label = uiState.dateLabel,
             onPreviousClicked = { statsViewModel.onEvent(event = StatsUiEvent.OnPreviousMonth) },
             onNextClicked = { statsViewModel.onEvent(event = StatsUiEvent.OnNextMonth) }
         )

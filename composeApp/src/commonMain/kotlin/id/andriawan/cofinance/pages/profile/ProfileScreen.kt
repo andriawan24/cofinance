@@ -2,26 +2,32 @@ package id.andriawan.cofinance.pages.profile
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -31,14 +37,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.ic_calendar
 import cofinance.composeapp.generated.resources.ic_edit
 import cofinance.composeapp.generated.resources.ic_exit
 import cofinance.composeapp.generated.resources.img_profile_placeholder
-import cofinance.composeapp.generated.resources.label_edit_profile
 import cofinance.composeapp.generated.resources.label_cancel
+import cofinance.composeapp.generated.resources.label_cycle_start_day
+import cofinance.composeapp.generated.resources.label_cycle_start_day_description
+import cofinance.composeapp.generated.resources.label_edit_profile
 import cofinance.composeapp.generated.resources.label_logout
 import cofinance.composeapp.generated.resources.label_logout_question
 import cofinance.composeapp.generated.resources.label_profile
@@ -56,7 +66,6 @@ import id.andriawan.cofinance.components.PageTitle
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import com.diamondedge.logging.logging
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -81,8 +90,10 @@ fun ProfileScreen(
         name = user.name,
         imageUrl = user.avatarUrl,
         email = user.email,
+        cycleStartDay = user.cycleStartDay,
         onSignedOut = { profileViewModel.toggleDialogLogout(true) },
-        onEditProfile = onNavigateToEditProfile
+        onEditProfile = onNavigateToEditProfile,
+        onCycleStartDayChanged = { profileViewModel.updateCycleStartDay(it) }
     )
 
     if (uiState.isShowDialogLogout) {
@@ -132,8 +143,10 @@ fun ProfileContent(
     name: String,
     email: String,
     imageUrl: String,
+    cycleStartDay: Int = 1,
     onSignedOut: () -> Unit,
-    onEditProfile: () -> Unit = {}
+    onEditProfile: () -> Unit = {},
+    onCycleStartDayChanged: (Int) -> Unit = {}
 ) {
     Column(modifier = modifier.fillMaxSize()) {
         PageTitle(
@@ -215,8 +228,15 @@ fun ProfileContent(
             }
         }
 
-        SecondaryButton(
+        // Cycle start day setting
+        CycleStartDaySetting(
             modifier = Modifier.padding(Dimensions.SIZE_16),
+            cycleStartDay = cycleStartDay,
+            onDaySelected = onCycleStartDayChanged
+        )
+
+        SecondaryButton(
+            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             contentPadding = PaddingValues(
                 vertical = Dimensions.SIZE_16,
                 horizontal = Dimensions.SIZE_16
@@ -247,6 +267,210 @@ fun ProfileContent(
     }
 }
 
+@Composable
+private fun CycleStartDaySetting(
+    modifier: Modifier = Modifier,
+    cycleStartDay: Int,
+    onDaySelected: (Int) -> Unit
+) {
+    var showPicker by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
+            )
+            .clickable { showPicker = true }
+            .padding(Dimensions.SIZE_16),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(Dimensions.SIZE_40)
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                modifier = Modifier.size(Dimensions.SIZE_20),
+                painter = painterResource(Res.drawable.ic_calendar),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(Res.string.label_cycle_start_day),
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Medium
+                )
+            )
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_2))
+
+            Text(
+                text = stringResource(Res.string.label_cycle_start_day_description),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    shape = MaterialTheme.shapes.medium
+                )
+                .padding(horizontal = Dimensions.SIZE_12, vertical = Dimensions.SIZE_6),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = cycleStartDay.toString(),
+                style = MaterialTheme.typography.titleSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            )
+        }
+    }
+
+    if (showPicker) {
+        CycleStartDayPickerDialog(
+            currentDay = cycleStartDay,
+            onDaySelected = { day ->
+                showPicker = false
+                if (day != cycleStartDay) {
+                    onDaySelected(day)
+                }
+            },
+            onDismiss = { showPicker = false }
+        )
+    }
+}
+
+@Composable
+private fun CycleStartDayPickerDialog(
+    currentDay: Int,
+    onDaySelected: (Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var selectedDay by remember { mutableIntStateOf(currentDay) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    color = MaterialTheme.colorScheme.surface,
+                    shape = MaterialTheme.shapes.large
+                )
+                .padding(Dimensions.SIZE_24)
+        ) {
+            Text(
+                text = stringResource(Res.string.label_cycle_start_day),
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_4))
+
+            Text(
+                text = stringResource(Res.string.label_cycle_start_day_description),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_20))
+
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(7),
+                horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_6),
+                verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_6)
+            ) {
+                items((1..28).toList()) { day ->
+                    val isSelected = day == selectedDay
+
+                    Box(
+                        modifier = Modifier
+                            .aspectRatio(1f)
+                            .clip(CircleShape)
+                            .then(
+                                if (isSelected) {
+                                    Modifier.background(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = CircleShape
+                                    )
+                                } else {
+                                    Modifier.background(
+                                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        shape = CircleShape
+                                    )
+                                }
+                            )
+                            .clickable { selectedDay = day },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = day.toString(),
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isSelected) {
+                                    MaterialTheme.colorScheme.onPrimary
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_20))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent,
+                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(
+                        defaultElevation = Dimensions.zero
+                    ),
+                    onClick = onDismiss
+                ) {
+                    Text(
+                        text = stringResource(Res.string.label_cancel),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+
+                Button(
+                    onClick = { onDaySelected(selectedDay) }
+                ) {
+                    Text(
+                        text = stringResource(Res.string.label_yes),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun ProfileScreenPreview() {
@@ -260,6 +484,7 @@ private fun ProfileScreenPreview() {
                 imageUrl = "https://someimage.com",
                 name = "Fawwaz",
                 email = "andriawan2422@gmail.com",
+                cycleStartDay = 25,
                 onSignedOut = { }
             )
         }

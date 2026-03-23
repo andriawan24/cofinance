@@ -82,6 +82,8 @@
     <string name="label_edit_profile">Edit Profil</string>
     <string name="label_logout">Keluar Akun</string>
     <string name="label_logout_question">Apakah kamu yakin ingin logout dari akunmu?</string>
+    <string name="label_cycle_start_day">Hari mulai siklus</string>
+    <string name="label_cycle_start_day_description">Transaksi dikelompokkan mulai tanggal ini setiap bulan</string>
 
     <!-- Empty States -->
     <string name="content_description_empty_state_image">Gambar untuk data kosong</string>

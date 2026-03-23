@@ -1,8 +1,8 @@
 package id.andriawan.cofinance.data.model.request
 
 data class GetTransactionsRequest(
-    val month: Int? = null,
-    val year: Int? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
     val isDraft: Boolean = false,
     val transactionId: String? = null
 )

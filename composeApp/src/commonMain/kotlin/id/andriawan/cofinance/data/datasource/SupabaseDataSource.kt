@@ -18,12 +18,6 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.json.JsonPrimitive
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.toInstant
-import kotlin.time.ExperimentalTime
 
 
 class SupabaseDataSource(private val supabase: SupabaseClient) {
@@ -70,6 +64,14 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         }
     }
 
+    suspend fun updateCycleStartDay(day: Int): UserInfo {
+        return supabase.auth.updateUser {
+            data {
+                put("cycle_start_day", JsonPrimitive(day))
+            }
+        }
+    }
+
     // endregion
 
     // region Data (used by OnlineOnlyDatabase for web targets)
@@ -94,11 +96,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
             .decodeSingle()
     }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun getTransactions(request: GetTransactionsRequest): List<TransactionResponse> {
-        val month = request.month
-        val year = request.year
-
         val columns = Columns.raw(
             """
                 *,
@@ -109,26 +107,10 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
 
         val transactions = supabase.from(TransactionResponse.TABLE_NAME).select(columns = columns) {
             filter {
-                if (month != null && year != null) {
-                    val startDate = LocalDateTime(
-                        year = year,
-                        month = month,
-                        day = 1,
-                        hour = 0,
-                        minute = 0,
-                        second = 0,
-                        nanosecond = 0
-                    ).toInstant(TimeZone.currentSystemDefault())
-
-                    val nextDate = startDate.plus(
-                        value = 1,
-                        unit = DateTimeUnit.MONTH,
-                        timeZone = TimeZone.currentSystemDefault()
-                    )
-
+                if (request.startDate != null && request.endDate != null) {
                     and {
-                        gte(column = TransactionResponse.DATE_FIELD, value = startDate.toString())
-                        lt(column = TransactionResponse.DATE_FIELD, value = nextDate.toString())
+                        gte(column = TransactionResponse.DATE_FIELD, value = request.startDate)
+                        lt(column = TransactionResponse.DATE_FIELD, value = request.endDate)
                     }
                 }
 
