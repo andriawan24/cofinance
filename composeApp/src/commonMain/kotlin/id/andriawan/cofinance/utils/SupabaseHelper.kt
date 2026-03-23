@@ -14,7 +14,7 @@ object SupabaseHelper {
             supabaseUrl = BuildKonfig.SUPABASE_URL,
             supabaseKey = BuildKonfig.SUPABASE_API_KEY
         ) {
-            defaultLogLevel = LogLevel.DEBUG
+            defaultLogLevel = LogLevel.NONE
 
             install(Auth)
             install(Postgrest)
