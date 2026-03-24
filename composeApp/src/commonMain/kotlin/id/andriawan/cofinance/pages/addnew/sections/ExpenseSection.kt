@@ -32,6 +32,7 @@ import id.andriawan.cofinance.components.InputAmount
 import id.andriawan.cofinance.components.InputNote
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.components.UploadPhotoCardButton
+import id.andriawan.cofinance.utils.NumberHelper
 import id.andriawan.cofinance.pages.addnew.AddNewDialogEvent
 import id.andriawan.cofinance.pages.addnew.AddNewUiEvent
 import id.andriawan.cofinance.pages.addnew.AddNewUiState
@@ -77,7 +78,7 @@ fun ExpenseSection(
         AddNewSection(
             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
             label = stringResource(Res.string.label_account),
-            value = uiState.senderAccount?.name.orEmpty(),
+            value = uiState.senderAccount?.let { "${it.name} (${NumberHelper.formatRupiah(it.balance)})" }.orEmpty(),
             onSectionClicked = {
                 onEvent.invoke(AddNewUiEvent.SetAccountChooserType(AccountTransferType.SENDER))
                 onDialogEvent.invoke(AddNewDialogEvent.ToggleAccountDialog(true))
