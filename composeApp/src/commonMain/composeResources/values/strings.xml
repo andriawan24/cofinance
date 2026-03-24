@@ -52,6 +52,7 @@
     <!-- Add Transaction -->
     <string name="title_add_activity">Add Transaction</string>
     <string name="action_add_activity">Add Activity</string>
+    <string name="title_edit_activity">Edit Transaction</string>
     <string name="action_save">Save</string>
     <string name="label_dates">Dates</string>
     <string name="label_date">Date</string>
@@ -67,8 +68,20 @@
     <string name="label_add_account">Add Account</string>
     <string name="action_add_new_account">Add New Account</string>
     <string name="label_account_category">Account Category</string>
+    <string name="label_account_type_asset">Asset</string>
+    <string name="label_account_type_regular">Regular Balance</string>
+    <string name="label_edit_account">Edit Account</string>
     <string name="label_name">Name</string>
     <string name="label_loading_accounts">Loading account...</string>
+
+    <!-- Cycle Review -->
+    <string name="cycle_reset_title">Cycle Ended</string>
+    <string name="cycle_reset_subtitle">Your billing cycle has ended. Choose what to do with each account:</string>
+    <string name="carry_over_yes">Carry over</string>
+    <string name="carry_over_no">Start fresh</string>
+    <string name="carry_all">Carry All</string>
+    <string name="action_confirm">Confirm</string>
+    <string name="label_remaining_balance">Remaining: %1$s</string>
 
     <!-- Receipt Scan / Camera -->
     <string name="title_auto_fill_photo">Auto-Fill with Receipt Photo</string>

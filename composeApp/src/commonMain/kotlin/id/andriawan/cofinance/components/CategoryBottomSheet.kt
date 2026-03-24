@@ -115,7 +115,8 @@ fun CategoryBottomSheetContent(
         when (type) {
             TransactionType.EXPENSE,
             TransactionType.TRANSFER,
-            TransactionType.DRAFT -> TransactionCategory.getExpenseCategories()
+            TransactionType.DRAFT,
+            TransactionType.CYCLE_RESET -> TransactionCategory.getExpenseCategories()
 
             TransactionType.INCOME -> TransactionCategory.getIncomeCategories()
         }

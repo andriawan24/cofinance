@@ -20,7 +20,7 @@ class GetBalanceStatsUseCase(private val transactionRepository: TransactionRepos
 
                 val expense = response.filter {
                     it.type == TransactionType.EXPENSE
-                }.sumOf { it.amount }
+                }.sumOf { it.amount + it.fee }
 
                 val balance = income - expense
 

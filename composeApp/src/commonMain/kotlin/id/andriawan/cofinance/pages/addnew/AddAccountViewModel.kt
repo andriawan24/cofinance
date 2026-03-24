@@ -11,6 +11,7 @@ import id.andriawan.cofinance.utils.None
 import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.emptyString
 import id.andriawan.cofinance.utils.enums.AccountGroupType
+import id.andriawan.cofinance.utils.enums.AccountType
 import id.andriawan.cofinance.utils.extensions.isDigitOnly
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,6 +24,7 @@ import kotlinx.coroutines.launch
 
 data class AddAccountUiState(
     val category: AccountGroupType = AccountGroupType.CASH,
+    val accountType: AccountType = AccountType.REGULAR_BALANCE,
     val name: String = emptyString(),
     val amount: String = emptyString(),
     val openCategoryChooser: Boolean = false,
@@ -33,6 +35,7 @@ sealed interface AddAccountEvent {
     data object OpenCategoryChooser : AddAccountEvent
     data object CloseCategoryChooser : AddAccountEvent
     data class CategoryChosen(val category: AccountGroupType) : AddAccountEvent
+    data class AccountTypeChanged(val accountType: AccountType) : AddAccountEvent
     data class NameChanged(val name: String) : AddAccountEvent
     data class AmountChanged(val amount: String) : AddAccountEvent
     data object SaveAccount : AddAccountEvent
@@ -55,6 +58,7 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
             is AddAccountEvent.OpenCategoryChooser -> openCategoryChooser()
             is AddAccountEvent.CloseCategoryChooser -> closeCategoryChooser()
             is AddAccountEvent.CategoryChosen -> onCategorySelected(event.category)
+            is AddAccountEvent.AccountTypeChanged -> onAccountTypeChanged(event.accountType)
             is AddAccountEvent.NameChanged -> onNameChanged(event.name)
             is AddAccountEvent.AmountChanged -> onAmountChanged(event.amount)
             is AddAccountEvent.SaveAccount -> saveAccount()
@@ -73,6 +77,10 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
 
     private fun onCategorySelected(category: AccountGroupType) {
         _uiState.update { it.copy(category = category) }
+    }
+
+    private fun onAccountTypeChanged(accountType: AccountType) {
+        _uiState.update { it.copy(accountType = accountType) }
     }
 
     private fun onNameChanged(name: String) {
@@ -95,7 +103,8 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
                 val account = AccountParam(
                     name = name,
                     balance = amount,
-                    group = category.name
+                    group = category.name,
+                    accountType = _uiState.value.accountType.name
                 )
 
                 _uiState.update { it.copy(isLoading = true) }

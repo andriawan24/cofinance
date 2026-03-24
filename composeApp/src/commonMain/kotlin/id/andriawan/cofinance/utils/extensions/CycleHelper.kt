@@ -106,3 +106,36 @@ private fun isLeapYear(year: Int): Boolean {
 private fun shortMonthName(month: Int): String {
     return Month(month).name.take(3).lowercase().replaceFirstChar { it.uppercaseChar() }
 }
+
+/**
+ * Checks if the current cycle boundary has passed since the last reset.
+ * Returns true if we are in a new cycle that hasn't been processed yet.
+ */
+@OptIn(ExperimentalTime::class)
+fun isCycleBoundaryPassed(lastResetDate: String?, cycleStartDay: Int): Boolean {
+    val today = Clock.System.now()
+        .toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+    val (currentCycleMonth, currentCycleYear) = getCurrentCycleMonth(cycleStartDay)
+    val currentCycleRange = computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
+    val cycleStartDate = LocalDate.parse(currentCycleRange.startDate)
+
+    if (lastResetDate == null) {
+        // No reset recorded yet — check if we're past the first cycle start
+        return today >= cycleStartDate
+    }
+
+    val lastReset = LocalDate.parse(lastResetDate)
+    // If last reset was before the current cycle started, we need a new reset
+    return lastReset < cycleStartDate
+}
+
+/**
+ * Returns the end date string of the previous cycle (the cycle that just ended).
+ */
+@OptIn(ExperimentalTime::class)
+fun getPreviousCycleEndDate(cycleStartDay: Int): String {
+    val (currentCycleMonth, currentCycleYear) = getCurrentCycleMonth(cycleStartDay)
+    val currentCycleRange = computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
+    return currentCycleRange.startDate // The end of prev cycle is the start of current cycle
+}

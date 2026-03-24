@@ -13,6 +13,7 @@ object ColorHelper {
         return when (transactionType) {
             TransactionType.EXPENSE -> Color(0xFFC50102)
             TransactionType.DRAFT -> Color(0xFFC50102)
+            TransactionType.CYCLE_RESET -> Color(0xFFC50102)
             TransactionType.INCOME -> Color(0xFF045330)
             TransactionType.TRANSFER -> MaterialTheme.colorScheme.onBackground
         }

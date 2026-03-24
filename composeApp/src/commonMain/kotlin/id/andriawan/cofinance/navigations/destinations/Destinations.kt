@@ -39,5 +39,8 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object Profile : Destinations(Profile::class.simpleName.orEmpty())
+
+    @Serializable
+    data object CycleReview : Destinations(CycleReview::class.simpleName.orEmpty())
 }
 

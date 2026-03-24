@@ -2,6 +2,7 @@ package id.andriawan.cofinance.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,9 +39,13 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @Composable
-fun TransactionItem(modifier: Modifier = Modifier, transaction: Transaction) {
+fun TransactionItem(
+    modifier: Modifier = Modifier,
+    transaction: Transaction,
+    onTransactionClicked: (Transaction) -> Unit = {}
+) {
     Row(
-        modifier = modifier,
+        modifier = modifier.clickable { onTransactionClicked(transaction) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)
     ) {

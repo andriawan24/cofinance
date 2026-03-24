@@ -52,6 +52,7 @@
     <!-- Add Transaction -->
     <string name="title_add_activity">Tambah Transaksi</string>
     <string name="action_add_activity">Tambah Aktivitas</string>
+    <string name="title_edit_activity">Edit Transaksi</string>
     <string name="action_save">Simpan</string>
     <string name="label_dates">Tanggal</string>
     <string name="label_date">Tanggal</string>
@@ -67,8 +68,20 @@
     <string name="label_add_account">Tambah Akun</string>
     <string name="action_add_new_account">Tambah Akun Baru</string>
     <string name="label_account_category">Kategori Akun</string>
+    <string name="label_account_type_asset">Aset</string>
+    <string name="label_account_type_regular">Saldo Reguler</string>
+    <string name="label_edit_account">Edit Akun</string>
     <string name="label_name">Nama</string>
     <string name="label_loading_accounts">Sedang memuat akun...</string>
+
+    <!-- Cycle Review -->
+    <string name="cycle_reset_title">Siklus Berakhir</string>
+    <string name="cycle_reset_subtitle">Siklus penagihan Anda telah berakhir. Pilih apa yang ingin dilakukan untuk setiap akun:</string>
+    <string name="carry_over_yes">Lanjutkan</string>
+    <string name="carry_over_no">Mulai dari awal</string>
+    <string name="carry_all">Lanjutkan Semua</string>
+    <string name="action_confirm">Konfirmasi</string>
+    <string name="label_remaining_balance">Tersisa: %1$s</string>
 
     <!-- Receipt Scan / Camera -->
     <string name="title_auto_fill_photo">Isi Otomatis Menggunakan Foto Nota</string>
