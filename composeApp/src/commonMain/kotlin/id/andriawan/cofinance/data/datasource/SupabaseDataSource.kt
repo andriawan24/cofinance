@@ -72,6 +72,14 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
         }
     }
 
+    suspend fun updateLastCycleResetDate(date: String): UserInfo {
+        return supabase.auth.updateUser {
+            data {
+                put("last_cycle_reset_date", JsonPrimitive(date))
+            }
+        }
+    }
+
     // endregion
 
     // region Data (used by OnlineOnlyDatabase for web targets)
@@ -123,6 +131,7 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                     eq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
                 } else {
                     neq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
+                    neq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.CYCLE_RESET)
                 }
             }
 

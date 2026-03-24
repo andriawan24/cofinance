@@ -31,6 +31,7 @@ class OnlineOnlyDatabase(
         name: String,
         group: String,
         balance: Long,
+        accountType: String,
         userId: String
     ) {
         supabaseDataSource.addAccount(
@@ -38,9 +39,22 @@ class OnlineOnlyDatabase(
                 name = name,
                 balance = balance,
                 group = group,
+                accountType = accountType,
                 usersId = userId
             )
         )
+    }
+
+    override suspend fun updateAccountBalance(accountId: String, delta: Long) {
+        // No-op: server-side RPCs handle balance updates for online-only targets
+    }
+
+    override suspend fun updateAccountType(accountId: String, accountType: String) {
+        // No-op: handled via Supabase directly for online-only targets
+    }
+
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
+        // No-op: handled via Supabase directly for online-only targets
     }
 
     override fun watchTransactions(
@@ -64,6 +78,34 @@ class OnlineOnlyDatabase(
     ): List<TransactionResponse> {
         return supabaseDataSource.getTransactions(
             GetTransactionsRequest(startDate = startDate, endDate = endDate, isDraft = isDraft, transactionId = transactionId)
+        )
+    }
+
+    override suspend fun updateTransaction(
+        id: String,
+        amount: Long,
+        category: String,
+        date: String,
+        fee: Long,
+        notes: String,
+        accountsId: String,
+        receiverAccountsId: String?,
+        type: String
+    ) {
+        // For online-only, upsert handles both create and update
+        supabaseDataSource.createTransaction(
+            AddTransactionRequest(
+                id = id,
+                amount = amount,
+                category = category,
+                date = date,
+                fee = fee,
+                notes = notes,
+                accountsId = accountsId,
+                receiverAccountsId = receiverAccountsId,
+                type = type,
+                usersId = ""
+            )
         )
     }
 

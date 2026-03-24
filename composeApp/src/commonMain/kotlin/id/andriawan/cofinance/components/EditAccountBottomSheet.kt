@@ -1,181 +1,93 @@
-package id.andriawan.cofinance.pages.addaccount
+package id.andriawan.cofinance.components
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.ui.text.style.TextAlign
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_save
-import cofinance.composeapp.generated.resources.ic_account
-import cofinance.composeapp.generated.resources.ic_arrow_left
-import cofinance.composeapp.generated.resources.ic_dropdown
-import cofinance.composeapp.generated.resources.label_account_category
-import cofinance.composeapp.generated.resources.label_add_account
+import cofinance.composeapp.generated.resources.ic_close
+import cofinance.composeapp.generated.resources.label_edit_account
 import cofinance.composeapp.generated.resources.label_name
 import cofinance.composeapp.generated.resources.label_rupiah
 import cofinance.composeapp.generated.resources.label_zero
-import id.andriawan.cofinance.components.AddNewSection
-import id.andriawan.cofinance.components.PrimaryButton
-import id.andriawan.cofinance.pages.addnew.AddAccountEvent
-import id.andriawan.cofinance.pages.addnew.AddAccountUiState
-import id.andriawan.cofinance.pages.addnew.AddAccountViewModel
-import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberFormatTransformation
-import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.enums.AccountType
-import id.andriawan.cofinance.utils.extensions.CollectAsEffect
+import id.andriawan.cofinance.utils.extensions.isDigitOnly
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun AddAccountScreen(onBackClicked: () -> Unit, onAddAccountSuccess: () -> Unit) {
-    val addAccountViewModel: AddAccountViewModel = koinViewModel()
-    val uiState by addAccountViewModel.uiState.collectAsStateWithLifecycle()
-    val snackState = remember { SnackbarHostState() }
-
-    addAccountViewModel.accountAdded.CollectAsEffect {
-        onAddAccountSuccess()
-    }
-
-    Scaffold(snackbarHost = { SnackbarHost(snackState) }) { contentPadding ->
-        AddAccountContent(
-            modifier = Modifier.padding(contentPadding),
-            uiState = uiState,
-            onEvent = { event ->
-                when (event) {
-                    is AddAccountEvent.BackClicked -> onBackClicked()
-                    else -> addAccountViewModel.onEvent(event)
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun AddAccountContent(
-    modifier: Modifier = Modifier,
-    uiState: AddAccountUiState,
-    onEvent: (AddAccountEvent) -> Unit
+fun EditAccountBottomSheetContent(
+    account: Account,
+    onSaveClicked: (name: String, balance: Long, accountType: AccountType) -> Unit,
+    onCloseClicked: () -> Unit
 ) {
-    Column(modifier = modifier.fillMaxSize()) {
+    var name by remember(account) { mutableStateOf(account.name) }
+    var amount by remember(account) { mutableStateOf(account.balance.toString()) }
+    var selectedType by remember(account) { mutableStateOf(account.accountType) }
+
+    Column {
+        // Header
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = Dimensions.SIZE_12, bottom = Dimensions.SIZE_24)
                 .padding(horizontal = Dimensions.SIZE_16)
         ) {
-            IconButton(
-                onClick = { onEvent(AddAccountEvent.BackClicked) },
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                Icon(
-                    painter = painterResource(Res.drawable.ic_arrow_left),
-                    contentDescription = null
-                )
-            }
-
             Text(
-                modifier = Modifier.align(Alignment.Center),
-                text = stringResource(Res.string.label_add_account),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                text = stringResource(Res.string.label_edit_account),
+                textAlign = TextAlign.Center,
                 style = MaterialTheme.typography.labelMedium.copy(
                     color = MaterialTheme.colorScheme.onBackground
                 )
             )
-        }
 
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_20))
-
-        Box(modifier = Modifier.padding(horizontal = Dimensions.SIZE_16)) {
-            AddNewSection(
+            Image(
                 modifier = Modifier
-                    .border(
-                        width = Dimensions.SIZE_2,
-                        color = MaterialTheme.colorScheme.surfaceContainerLow,
-                        shape = MaterialTheme.shapes.large
-                    ),
-                label = stringResource(Res.string.label_account_category),
-                value = uiState.category.displayName,
-                onSectionClicked = { onEvent(AddAccountEvent.OpenCategoryChooser) },
-                startIcon = {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_account),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                },
-                endIcon = {
-                    Icon(
-                        modifier = Modifier.rotate(-90f),
-                        painter = painterResource(Res.drawable.ic_dropdown),
-                        contentDescription = null,
-                        tint = Color.Unspecified
-                    )
-                }
+                    .align(Alignment.CenterEnd)
+                    .clip(CircleShape)
+                    .clickable { onCloseClicked() },
+                painter = painterResource(Res.drawable.ic_close),
+                contentDescription = null
             )
-
-            DropdownMenu(
-                expanded = uiState.openCategoryChooser,
-                onDismissRequest = { onEvent(AddAccountEvent.CloseCategoryChooser) },
-                containerColor = MaterialTheme.colorScheme.onPrimary,
-                shape = MaterialTheme.shapes.large
-            ) {
-                AccountGroupType.entries.forEach { option ->
-                    DropdownMenuItem(
-                        text = {
-                            Text(
-                                text = option.displayName,
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        },
-                        onClick = {
-                            onEvent(AddAccountEvent.CategoryChosen(option))
-                            onEvent(AddAccountEvent.CloseCategoryChooser)
-                        }
-                    )
-                }
-            }
         }
 
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
-        // Account Type selector (Asset / Regular Balance)
+        // Account Type selector
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,17 +95,17 @@ fun AddAccountContent(
             horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10)
         ) {
             AccountType.entries.forEach { type ->
-                val isSelected = uiState.accountType == type
+                val isSelected = selectedType == type
                 Surface(
                     modifier = Modifier.weight(1f),
-                    onClick = { onEvent(AddAccountEvent.AccountTypeChanged(type)) },
+                    onClick = { selectedType = type },
                     shape = MaterialTheme.shapes.large,
                     color = if (isSelected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onPrimary,
-                    border = androidx.compose.foundation.BorderStroke(
+                    else MaterialTheme.colorScheme.onPrimary,
+                    border = BorderStroke(
                         width = Dimensions.SIZE_2,
                         color = if (isSelected) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.surfaceContainerLow
+                        else MaterialTheme.colorScheme.surfaceContainerLow
                     )
                 ) {
                     Text(
@@ -201,9 +113,9 @@ fun AddAccountContent(
                         text = type.displayName,
                         style = MaterialTheme.typography.labelMedium.copy(
                             color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onBackground
+                            else MaterialTheme.colorScheme.onBackground
                         ),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        textAlign = TextAlign.Center
                     )
                 }
             }
@@ -211,6 +123,7 @@ fun AddAccountContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
+        // Name field
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -230,8 +143,8 @@ fun AddAccountContent(
         ) {
             BasicTextField(
                 modifier = Modifier.weight(1f),
-                value = uiState.name,
-                onValueChange = { onEvent(AddAccountEvent.NameChanged(it)) },
+                value = name,
+                onValueChange = { name = it },
                 keyboardOptions = KeyboardOptions(
                     imeAction = ImeAction.Next,
                     keyboardType = KeyboardType.Text
@@ -240,7 +153,7 @@ fun AddAccountContent(
                     color = MaterialTheme.colorScheme.onBackground
                 ),
                 decorationBox = { innerTextField ->
-                    if (uiState.name.isBlank()) {
+                    if (name.isBlank()) {
                         Text(
                             text = stringResource(Res.string.label_name),
                             style = MaterialTheme.typography.labelMedium.copy(
@@ -249,7 +162,6 @@ fun AddAccountContent(
                             )
                         )
                     }
-
                     innerTextField()
                 }
             )
@@ -257,6 +169,7 @@ fun AddAccountContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
+        // Balance field
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -265,8 +178,7 @@ fun AddAccountContent(
                     width = Dimensions.SIZE_2,
                     color = MaterialTheme.colorScheme.surfaceContainerLow,
                     shape = MaterialTheme.shapes.large
-                ),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+                )
         ) {
             Box(
                 modifier = Modifier
@@ -286,9 +198,11 @@ fun AddAccountContent(
 
                     BasicTextField(
                         modifier = Modifier.fillMaxWidth(),
-                        value = uiState.amount,
+                        value = amount,
                         onValueChange = {
-                            onEvent(AddAccountEvent.AmountChanged(it))
+                            if (it.isDigitOnly() && it.length < 13) {
+                                amount = it
+                            }
                         },
                         keyboardOptions = KeyboardOptions(
                             imeAction = ImeAction.Done,
@@ -298,7 +212,7 @@ fun AddAccountContent(
                             color = MaterialTheme.colorScheme.onBackground
                         ),
                         decorationBox = { innerTextField ->
-                            if (uiState.amount.isBlank()) {
+                            if (amount.isBlank()) {
                                 Text(
                                     text = stringResource(Res.string.label_zero),
                                     style = MaterialTheme.typography.labelMedium.copy(
@@ -314,29 +228,26 @@ fun AddAccountContent(
             }
         }
 
-        Spacer(Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
         PrimaryButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = Dimensions.SIZE_24),
-            onClick = { onEvent(AddAccountEvent.SaveAccount) },
-            enabled = !uiState.isLoading
+                .padding(horizontal = Dimensions.SIZE_16)
+                .padding(bottom = Dimensions.SIZE_24),
+            enabled = name.isNotBlank(),
+            onClick = {
+                onSaveClicked(
+                    name,
+                    amount.toLongOrNull() ?: 0L,
+                    selectedType
+                )
+            }
         ) {
             Text(
                 text = stringResource(Res.string.action_save),
                 style = MaterialTheme.typography.labelMedium
             )
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun AddAccountScreenPreview() {
-    CofinanceTheme {
-        Surface {
-            AddAccountScreen(onBackClicked = { }, onAddAccountSuccess = { })
         }
     }
 }

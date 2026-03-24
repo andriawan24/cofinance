@@ -21,8 +21,15 @@ interface CofinanceDatabase {
         name: String,
         group: String,
         balance: Long,
+        accountType: String,
         userId: String
     )
+
+    suspend fun updateAccountBalance(accountId: String, delta: Long)
+
+    suspend fun updateAccountType(accountId: String, accountType: String)
+
+    suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String)
 
     // Transaction reads
     fun watchTransactions(
@@ -42,6 +49,18 @@ interface CofinanceDatabase {
     ): List<TransactionResponse>
 
     // Transaction writes
+    suspend fun updateTransaction(
+        id: String,
+        amount: Long,
+        category: String,
+        date: String,
+        fee: Long,
+        notes: String,
+        accountsId: String,
+        receiverAccountsId: String?,
+        type: String
+    )
+
     suspend fun insertTransaction(
         id: String,
         amount: Long,

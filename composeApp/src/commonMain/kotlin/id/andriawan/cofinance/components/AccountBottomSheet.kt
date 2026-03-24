@@ -48,6 +48,7 @@ import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.pages.addnew.AddNewUiState
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.NumberHelper
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -210,14 +211,22 @@ private fun AccountItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = account.name,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onBackground
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = account.name,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
             )
-        )
+
+            Text(
+                text = NumberHelper.formatRupiah(account.balance),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            )
+        }
 
         RadioButton(
             selected = isSelected,

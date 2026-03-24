@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
@@ -27,7 +28,8 @@ import id.andriawan.cofinance.utils.extensions.toDate
 @Composable
 fun TransactionByMonth(
     modifier: Modifier = Modifier,
-    item: TransactionByDate
+    item: TransactionByDate,
+    onTransactionClicked: (Transaction) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -73,7 +75,10 @@ fun TransactionByMonth(
 
         Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_24)) {
             item.transactions.forEach {
-                TransactionItem(transaction = it)
+                TransactionItem(
+                    transaction = it,
+                    onTransactionClicked = onTransactionClicked
+                )
             }
         }
     }

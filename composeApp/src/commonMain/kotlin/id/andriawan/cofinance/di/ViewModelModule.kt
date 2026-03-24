@@ -6,6 +6,7 @@ import id.andriawan.cofinance.pages.activity.ActivityViewModel
 import id.andriawan.cofinance.pages.addnew.AddAccountViewModel
 import id.andriawan.cofinance.pages.addnew.AddNewViewModel
 import id.andriawan.cofinance.pages.camera.CameraViewModel
+import id.andriawan.cofinance.pages.cyclereview.CycleReviewViewModel
 import id.andriawan.cofinance.pages.editprofile.EditProfileViewModel
 import id.andriawan.cofinance.pages.preview.PreviewViewModel
 import id.andriawan.cofinance.pages.profile.ProfileViewModel
@@ -26,4 +27,5 @@ val viewModelModule = module {
     viewModelOf(::AddAccountViewModel)
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::LoginViewModel)
+    viewModelOf(::CycleReviewViewModel)
 }
