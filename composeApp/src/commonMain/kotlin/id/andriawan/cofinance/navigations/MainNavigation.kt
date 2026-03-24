@@ -20,7 +20,7 @@ import id.andriawan.cofinance.pages.cyclereview.CycleReviewScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
-fun MainNavigation(modifier: Modifier = Modifier) {
+fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null) {
     val navController = rememberNavController()
 
     NavHost(
@@ -60,6 +60,10 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                         popUpTo(0) {
                             inclusive = true
                         }
+                    }
+                    // If opened via share intent, navigate to Preview immediately
+                    if (sharedImageUri != null) {
+                        navController.navigate(Destinations.Preview(imageUrl = sharedImageUri))
                     }
                 },
                 onNavigateToLogin = {

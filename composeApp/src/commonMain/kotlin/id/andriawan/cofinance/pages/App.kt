@@ -25,7 +25,7 @@ val LocalAppLocalization = compositionLocalOf { AppLang.English }
 
 @Composable
 @Preview
-fun App() {
+fun App(sharedImageUri: String? = null) {
     val database = rememberCofinanceDatabase()
 
     KoinApplication(application = {
@@ -51,7 +51,7 @@ fun App() {
 
         CompositionLocalProvider(LocalAppLocalization provides currentLanguage) {
             CofinanceTheme {
-                MainNavigation()
+                MainNavigation(sharedImageUri = sharedImageUri)
             }
         }
     }
