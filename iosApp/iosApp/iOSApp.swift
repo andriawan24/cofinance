@@ -13,7 +13,10 @@ struct iOSApp: App {
             ContentView()
                 .onOpenURL { url in
                     // Handle Google Sign-In URL callback
-                    _ = GoogleSignInBridgeImpl.handleURL(url)
+                    if url.scheme != "cofinance" {
+                        _ = GoogleSignInBridgeImpl.handleURL(url)
+                    }
+                    // cofinance:// scheme URLs are handled by ContentView's onOpenURL
                 }
         }
     }
