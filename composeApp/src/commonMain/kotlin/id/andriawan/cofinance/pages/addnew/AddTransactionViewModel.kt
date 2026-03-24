@@ -161,12 +161,22 @@ class AddNewViewModel(
     fun loadExistingTransaction(id: String) {
         viewModelScope.launch {
             try {
-                val transactions = transactionRepository.getTransactions(
+                // Try loading as a regular transaction first
+                var transactions = transactionRepository.getTransactions(
                     GetTransactionsParam(transactionId = id)
                 )
-                val transaction = transactions.firstOrNull() ?: return@launch
 
-                oldTransaction = transaction
+                // Fall back to draft if not found (e.g. from receipt scan)
+                if (transactions.isEmpty()) {
+                    transactions = transactionRepository.getTransactions(
+                        GetTransactionsParam(transactionId = id, isDraft = true)
+                    )
+                }
+
+                val transaction = transactions.firstOrNull() ?: return@launch
+                val isDraft = transaction.type == TransactionType.DRAFT
+
+                oldTransaction = if (!isDraft) transaction else null
 
                 val category = transaction.category.takeIf { it.isNotBlank() }
                     ?.let { TransactionCategory.getCategoryByName(it) }
@@ -176,15 +186,15 @@ class AddNewViewModel(
                         transactionId = transaction.id,
                         amount = transaction.amount.toString(),
                         dateTime = transaction.date.toDate(),
-                        expenseCategory = if (transaction.type == TransactionType.EXPENSE) category else it.expenseCategory,
+                        expenseCategory = if (transaction.type == TransactionType.EXPENSE || isDraft) category else it.expenseCategory,
                         incomeCategory = if (transaction.type == TransactionType.INCOME) category else it.incomeCategory,
                         fee = if (transaction.fee > 0) transaction.fee.toString() else emptyString(),
                         includeFee = transaction.fee > 0,
                         notes = transaction.notes,
                         senderAccount = transaction.account.takeIf { acc -> acc.id.isNotEmpty() },
                         receiverAccount = transaction.receiverAccount.takeIf { acc -> acc.id.isNotEmpty() },
-                        transactionType = transaction.type,
-                        isEditing = true
+                        transactionType = if (isDraft) TransactionType.EXPENSE else transaction.type,
+                        isEditing = !isDraft
                     )
                 }
                 validateInputs()
