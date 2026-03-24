@@ -50,7 +50,8 @@ data class AddNewUiState(
     val accounts: List<AccountByGroup> = emptyList(),
     val isLoadingAccount: Boolean = false,
     val isLoading: Boolean = false,
-    val transactionId: String? = null
+    val transactionId: String? = null,
+    val isEditing: Boolean = false
 )
 
 @Stable
@@ -91,10 +92,13 @@ sealed class AddNewUiEvent {
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
-    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase
+    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
+    private val transactionRepository: id.andriawan.cofinance.data.repository.TransactionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
+
+    private var oldTransaction: id.andriawan.cofinance.domain.model.response.Transaction? = null
 
     private val _dialogState = MutableStateFlow(AddNewDialogState())
     val dialogState = _dialogState.asStateFlow()
@@ -151,6 +155,40 @@ class AddNewViewModel(
                     }
                 }
             )
+        }
+    }
+
+    fun loadExistingTransaction(id: String) {
+        viewModelScope.launch {
+            try {
+                val transactions = transactionRepository.getTransactions(
+                    GetTransactionsParam(transactionId = id)
+                )
+                val transaction = transactions.firstOrNull() ?: return@launch
+
+                oldTransaction = transaction
+
+                val category = transaction.category.takeIf { it.isNotBlank() }
+                    ?.let { TransactionCategory.getCategoryByName(it) }
+
+                _uiState.update {
+                    it.copy(
+                        transactionId = transaction.id,
+                        amount = transaction.amount.toString(),
+                        dateTime = transaction.date.toDate(),
+                        expenseCategory = if (transaction.type == TransactionType.EXPENSE) category else it.expenseCategory,
+                        incomeCategory = if (transaction.type == TransactionType.INCOME) category else it.incomeCategory,
+                        fee = if (transaction.fee > 0) transaction.fee.toString() else emptyString(),
+                        includeFee = transaction.fee > 0,
+                        notes = transaction.notes,
+                        senderAccount = transaction.account.takeIf { acc -> acc.id.isNotEmpty() },
+                        receiverAccount = transaction.receiverAccount.takeIf { acc -> acc.id.isNotEmpty() },
+                        transactionType = transaction.type,
+                        isEditing = true
+                    )
+                }
+                validateInputs()
+            } catch (_: Exception) { }
         }
     }
 
@@ -280,22 +318,38 @@ class AddNewViewModel(
                 type = uiState.value.transactionType
             )
 
-            createTransactionUseCase.execute(param).collectResult(
-                onLoading = {
-                    _uiState.value = uiState.value.copy(isLoading = true)
-                },
-                onError = { exception ->
-                    _uiState.value = uiState.value.copy(isLoading = false)
+            if (uiState.value.isEditing && oldTransaction != null) {
+                // Update existing transaction with balance reversal
+                _uiState.update { it.copy(isLoading = true) }
+                try {
+                    transactionRepository.updateTransaction(oldTransaction!!, param)
+                    _uiState.update { it.copy(isLoading = false) }
+                    _onSuccessSaved.send(None)
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(isLoading = false) }
                     _showMessage.send(
-                        exception.message?.let { msg -> UiText.Raw(msg) }
+                        e.message?.let { msg -> UiText.Raw(msg) }
                             ?: UiText.Res(Res.string.error_generic)
                     )
-                },
-                onSuccess = {
-                    _uiState.value = uiState.value.copy(isLoading = false)
-                    _onSuccessSaved.send(None)
                 }
-            )
+            } else {
+                createTransactionUseCase.execute(param).collectResult(
+                    onLoading = {
+                        _uiState.value = uiState.value.copy(isLoading = true)
+                    },
+                    onError = { exception ->
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _showMessage.send(
+                            exception.message?.let { msg -> UiText.Raw(msg) }
+                                ?: UiText.Res(Res.string.error_generic)
+                        )
+                    },
+                    onSuccess = {
+                        _uiState.value = uiState.value.copy(isLoading = false)
+                        _onSuccessSaved.send(None)
+                    }
+                )
+            }
         }
     }
 

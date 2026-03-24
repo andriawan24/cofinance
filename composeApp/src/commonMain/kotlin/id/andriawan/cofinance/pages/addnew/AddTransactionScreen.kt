@@ -40,6 +40,7 @@ import cofinance.composeapp.generated.resources.ic_arrow_left
 import cofinance.composeapp.generated.resources.label_cancel
 import cofinance.composeapp.generated.resources.label_ok
 import cofinance.composeapp.generated.resources.title_add_activity
+import cofinance.composeapp.generated.resources.title_edit_activity
 import id.andriawan.cofinance.components.AccountBottomSheetContent
 import id.andriawan.cofinance.components.AddAccountBottomSheet
 import id.andriawan.cofinance.components.BaseBottomSheet
@@ -80,9 +81,10 @@ fun AddTransactionScreen(
     val dialogState by addNewViewModel.dialogState.collectAsStateWithLifecycle()
     var errorUiText by remember { mutableStateOf<UiText?>(null) }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(transactionId) {
         if (transactionId != null) {
-            addNewViewModel.checkDraftTransaction(transactionId)
+            // Try loading as existing transaction first, then fall back to draft
+            addNewViewModel.loadExistingTransaction(transactionId)
         }
     }
 
@@ -125,9 +127,23 @@ fun AddNewContent(
     onDialogEvent: (AddNewDialogEvent) -> Unit
 ) {
     val pagerState = rememberPagerState { TransactionTabType.entries.size }
+    val scope = rememberCoroutineScope()
+
+    // Scroll to the correct tab when editing
+    LaunchedEffect(uiState.isEditing, uiState.transactionType) {
+        if (uiState.isEditing) {
+            val tabIndex = when (uiState.transactionType) {
+                TransactionType.EXPENSE -> TransactionTabType.EXPENSES.ordinal
+                TransactionType.INCOME -> TransactionTabType.INCOME.ordinal
+                TransactionType.TRANSFER -> TransactionTabType.TRANSFER.ordinal
+                else -> 0
+            }
+            pagerState.scrollToPage(tabIndex)
+        }
+    }
 
     Column(modifier = modifier.fillMaxSize()) {
-        AddTransactionHeader(onEvent = onEvent)
+        AddTransactionHeader(onEvent = onEvent, isEditing = uiState.isEditing)
         TransactionTypeTabs(pagerState = pagerState, onEvent = onEvent)
         TransactionPagerContent(
             modifier = Modifier.weight(1f),
@@ -147,7 +163,7 @@ fun AddNewContent(
 }
 
 @Composable
-private fun AddTransactionHeader(onEvent: (AddNewUiEvent) -> Unit) {
+private fun AddTransactionHeader(onEvent: (AddNewUiEvent) -> Unit, isEditing: Boolean = false) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -169,7 +185,7 @@ private fun AddTransactionHeader(onEvent: (AddNewUiEvent) -> Unit) {
 
         Text(
             modifier = Modifier.align(Alignment.Center),
-            text = stringResource(Res.string.title_add_activity),
+            text = stringResource(if (isEditing) Res.string.title_edit_activity else Res.string.title_add_activity),
             style = MaterialTheme.typography.labelMedium.copy(
                 color = MaterialTheme.colorScheme.onBackground
             )
