@@ -23,8 +23,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +41,8 @@ import cofinance.composeapp.generated.resources.label_rupiah
 import cofinance.composeapp.generated.resources.label_total_assets
 import cofinance.composeapp.generated.resources.label_account_type_asset
 import cofinance.composeapp.generated.resources.label_account_type_regular
+import id.andriawan.cofinance.components.BaseBottomSheet
+import id.andriawan.cofinance.components.EditAccountBottomSheetContent
 import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
@@ -52,20 +56,48 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
     accountViewModel: AccountViewModel = koinViewModel(),
     onNavigateToAddAccount: () -> Unit
 ) {
     val uiState by accountViewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
 
     AccountContent(
         uiState = uiState,
         onRefresh = {
             /* no-op */
         },
-        onNavigateToAddAccount = onNavigateToAddAccount
+        onNavigateToAddAccount = onNavigateToAddAccount,
+        onAccountClicked = { account ->
+            accountViewModel.onAccountClicked(account)
+        }
     )
+
+    // Edit Account Bottom Sheet
+    if (uiState.editingAccount != null) {
+        val editSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+        BaseBottomSheet(
+            state = editSheetState,
+            onDismissRequest = { accountViewModel.onDismissEditAccount() }
+        ) {
+            EditAccountBottomSheetContent(
+                account = uiState.editingAccount!!,
+                onSaveClicked = { name, balance, accountType ->
+                    accountViewModel.onSaveAccount(
+                        uiState.editingAccount!!.id,
+                        name,
+                        balance,
+                        accountType
+                    )
+                },
+                onCloseClicked = { accountViewModel.onDismissEditAccount() }
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +107,7 @@ private fun AccountContent(
     uiState: UiState,
     onRefresh: () -> Unit,
     onNavigateToAddAccount: () -> Unit,
+    onAccountClicked: (Account) -> Unit = {},
 ) {
     PullToRefreshBox(isRefreshing = uiState.isRefreshing, onRefresh = onRefresh) {
         Column(modifier = modifier.fillMaxSize()) {
@@ -117,7 +150,7 @@ private fun AccountContent(
                             )
                         }
                         items(uiState.assetAccounts) { group ->
-                            AccountGroupCard(group = group)
+                            AccountGroupCard(group = group, onAccountClicked = onAccountClicked)
                         }
                     }
 
@@ -135,14 +168,14 @@ private fun AccountContent(
                             )
                         }
                         items(uiState.regularAccounts) { group ->
-                            AccountGroupCard(group = group)
+                            AccountGroupCard(group = group, onAccountClicked = onAccountClicked)
                         }
                     }
 
                     // Fallback: show ungrouped if no type info
                     if (uiState.assetAccounts.isEmpty() && uiState.regularAccounts.isEmpty()) {
                         items(uiState.accounts) { group ->
-                            AccountGroupCard(group = group)
+                            AccountGroupCard(group = group, onAccountClicked = onAccountClicked)
                         }
                     }
                 }

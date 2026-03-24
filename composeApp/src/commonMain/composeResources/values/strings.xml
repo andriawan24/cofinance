@@ -69,6 +69,7 @@
     <string name="label_account_category">Account Category</string>
     <string name="label_account_type_asset">Asset</string>
     <string name="label_account_type_regular">Regular Balance</string>
+    <string name="label_edit_account">Edit Account</string>
     <string name="label_name">Name</string>
     <string name="label_loading_accounts">Loading account...</string>
 

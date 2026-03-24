@@ -53,6 +53,10 @@ class OnlineOnlyDatabase(
         // No-op: handled via Supabase directly for online-only targets
     }
 
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
+        // No-op: handled via Supabase directly for online-only targets
+    }
+
     override fun watchTransactions(
         userId: String,
         startDate: String?,
