@@ -81,6 +81,34 @@ class OnlineOnlyDatabase(
         )
     }
 
+    override suspend fun updateTransaction(
+        id: String,
+        amount: Long,
+        category: String,
+        date: String,
+        fee: Long,
+        notes: String,
+        accountsId: String,
+        receiverAccountsId: String?,
+        type: String
+    ) {
+        // For online-only, upsert handles both create and update
+        supabaseDataSource.createTransaction(
+            AddTransactionRequest(
+                id = id,
+                amount = amount,
+                category = category,
+                date = date,
+                fee = fee,
+                notes = notes,
+                accountsId = accountsId,
+                receiverAccountsId = receiverAccountsId,
+                type = type,
+                usersId = ""
+            )
+        )
+    }
+
     override suspend fun insertTransaction(
         id: String,
         amount: Long,
