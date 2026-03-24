@@ -94,6 +94,13 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
         )
     }
 
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
+        database.execute(
+            sql = """UPDATE accounts SET name = ?, balance = ?, account_type = ? WHERE id = ?""",
+            parameters = listOf(name, balance, accountType, accountId)
+        )
+    }
+
     // endregion
 
     // region Transaction reads

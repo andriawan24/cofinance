@@ -69,6 +69,7 @@
     <string name="label_account_category">Kategori Akun</string>
     <string name="label_account_type_asset">Aset</string>
     <string name="label_account_type_regular">Saldo Reguler</string>
+    <string name="label_edit_account">Edit Akun</string>
     <string name="label_name">Nama</string>
     <string name="label_loading_accounts">Sedang memuat akun...</string>
 

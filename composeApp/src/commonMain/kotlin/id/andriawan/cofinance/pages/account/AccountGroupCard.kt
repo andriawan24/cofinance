@@ -19,6 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.clip
+import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
 import id.andriawan.cofinance.domain.model.response.toDrawable
 import id.andriawan.cofinance.utils.Dimensions
@@ -29,6 +32,7 @@ import org.jetbrains.compose.resources.painterResource
 internal fun AccountGroupCard(
     modifier: Modifier = Modifier,
     group: AccountByGroup,
+    onAccountClicked: (Account) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -89,10 +93,12 @@ internal fun AccountGroupCard(
             group.accounts.forEach { account ->
                 Row(
                     modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
                         .background(
                             color = Color(group.backgroundColor),
                             shape = MaterialTheme.shapes.medium
                         )
+                        .clickable { onAccountClicked(account) }
                         .padding(all = Dimensions.SIZE_12),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(space = Dimensions.SIZE_12)

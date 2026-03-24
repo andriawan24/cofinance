@@ -4,6 +4,8 @@ import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
+import id.andriawan.cofinance.data.repository.AccountRepository
+import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.utils.ResultState
@@ -21,11 +23,15 @@ data class UiState(
     val regularAccounts: List<AccountByGroup> = listOf(),
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
-    val balance: Long = 0L
+    val balance: Long = 0L,
+    val editingAccount: Account? = null
 )
 
 @Stable
-class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : ViewModel() {
+class AccountViewModel(
+    private val getAccountsUseCase: GetAccountsUseCase,
+    private val accountRepository: AccountRepository
+) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
 
@@ -78,6 +84,21 @@ class AccountViewModel(private val getAccountsUseCase: GetAccountsUseCase) : Vie
                     }
                 }
             )
+        }
+    }
+
+    fun onAccountClicked(account: Account) {
+        _uiState.update { it.copy(editingAccount = account) }
+    }
+
+    fun onDismissEditAccount() {
+        _uiState.update { it.copy(editingAccount = null) }
+    }
+
+    fun onSaveAccount(accountId: String, name: String, balance: Long, accountType: AccountType) {
+        viewModelScope.launch {
+            accountRepository.updateAccount(accountId, name, balance, accountType.name)
+            _uiState.update { it.copy(editingAccount = null) }
         }
     }
 }
