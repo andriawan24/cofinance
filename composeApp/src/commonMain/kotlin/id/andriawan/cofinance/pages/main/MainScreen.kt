@@ -39,7 +39,8 @@ fun MainScreen(
     onNavigateToAdd: () -> Unit,
     onNavigateToAddAccount: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
-    onNavigateToCycleReview: () -> Unit = {}
+    onNavigateToCycleReview: () -> Unit = {},
+    onNavigateToEditTransaction: (String) -> Unit = {}
 ) {
     val state = rememberCofinanceAppState()
     val accountAddedMessage = stringResource(Res.string.message_account_added)
@@ -68,6 +69,7 @@ fun MainScreen(
             composable<Destinations.Activity> {
                 ActivityScreen(
                     onNavigateToAdd = onNavigateToAdd,
+                    onNavigateToEditTransaction = onNavigateToEditTransaction,
                     onNavigateToCycleReview = onNavigateToCycleReview
                 )
             }

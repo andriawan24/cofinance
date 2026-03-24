@@ -22,6 +22,7 @@ import cofinance.composeapp.generated.resources.label_activity
 import id.andriawan.cofinance.components.BalanceCard
 import id.andriawan.cofinance.components.EmptyView
 import id.andriawan.cofinance.components.TransactionByMonth
+import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.components.PageTitle
@@ -33,6 +34,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ActivityScreen(
     onNavigateToAdd: () -> Unit,
+    onNavigateToEditTransaction: (String) -> Unit = {},
     onNavigateToCycleReview: () -> Unit = {},
     activityViewModel: ActivityViewModel = koinViewModel()
 ) {
@@ -59,7 +61,10 @@ fun ActivityScreen(
         onBookmarkClicked = {
             // TODO: Handle bookmark page open
         },
-        onNavigateToAdd = onNavigateToAdd
+        onNavigateToAdd = onNavigateToAdd,
+        onTransactionClicked = { transaction ->
+            onNavigateToEditTransaction(transaction.id)
+        }
     )
 }
 
@@ -68,7 +73,8 @@ fun ActivityContent(
     uiState: ActivityUiState,
     onEvent: (ActivityUiEvent) -> Unit,
     onBookmarkClicked: () -> Unit,
-    onNavigateToAdd: () -> Unit
+    onNavigateToAdd: () -> Unit,
+    onTransactionClicked: (Transaction) -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         PageTitle(
@@ -124,7 +130,8 @@ fun ActivityContent(
                     items(items = uiState.transactions) { item ->
                         TransactionByMonth(
                             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
-                            item = item
+                            item = item,
+                            onTransactionClicked = onTransactionClicked
                         )
                     }
                 }

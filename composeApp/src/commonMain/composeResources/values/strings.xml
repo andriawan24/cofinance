@@ -52,6 +52,7 @@
     <!-- Add Transaction -->
     <string name="title_add_activity">Add Transaction</string>
     <string name="action_add_activity">Add Activity</string>
+    <string name="title_edit_activity">Edit Transaction</string>
     <string name="action_save">Save</string>
     <string name="label_dates">Dates</string>
     <string name="label_date">Date</string>

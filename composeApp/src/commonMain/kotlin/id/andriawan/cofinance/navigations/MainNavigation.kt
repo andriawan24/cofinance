@@ -118,6 +118,9 @@ fun MainNavigation(modifier: Modifier = Modifier) {
                 },
                 onNavigateToCycleReview = {
                     navController.navigate(Destinations.CycleReview)
+                },
+                onNavigateToEditTransaction = { transactionId ->
+                    navController.navigate(Destinations.AddNew(transactionId = transactionId))
                 }
             )
         }
