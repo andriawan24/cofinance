@@ -228,6 +228,32 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
 
     // region Transaction writes
 
+    override suspend fun updateTransaction(
+        id: String,
+        amount: Long,
+        category: String,
+        date: String,
+        fee: Long,
+        notes: String,
+        accountsId: String,
+        receiverAccountsId: String?,
+        type: String
+    ) {
+        val now = Clock.System.now().toString()
+        database.execute(
+            sql = """
+                UPDATE transactions
+                SET amount = ?, category = ?, date = ?, fee = ?, notes = ?,
+                    accounts_id = ?, receiver_accounts_id = ?, type = ?, updated_at = ?
+                WHERE id = ?
+            """.trimIndent(),
+            parameters = listOf(
+                amount, category, date, fee, notes,
+                accountsId, receiverAccountsId, type, now, id
+            )
+        )
+    }
+
     override suspend fun insertTransaction(
         id: String,
         amount: Long,
