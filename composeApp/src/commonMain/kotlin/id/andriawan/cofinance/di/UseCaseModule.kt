@@ -1,6 +1,7 @@
 package id.andriawan.cofinance.di
 
 import id.andriawan.cofinance.domain.usecases.accounts.AddAccountUseCase
+import id.andriawan.cofinance.domain.usecases.accounts.DeleteAccountUseCase
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.domain.usecases.accounts.ResetAccountBalanceUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.FetchUserUseCase
@@ -26,6 +27,7 @@ val useCaseModule = module {
     single { CreateTransactionUseCase(get()) }
     single { ScanReceiptUseCase(get()) }
     single { AddAccountUseCase(get()) }
+    single { DeleteAccountUseCase(get()) }
     single { UpdateProfileUseCase(get()) }
     single { UpdateCycleStartDayUseCase(get()) }
     single { ResetAccountBalanceUseCase(get(), get()) }

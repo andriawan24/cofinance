@@ -16,25 +16,33 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.action_delete_account
 import cofinance.composeapp.generated.resources.action_save
+import cofinance.composeapp.generated.resources.ic_account
 import cofinance.composeapp.generated.resources.ic_close
+import cofinance.composeapp.generated.resources.ic_dropdown
+import cofinance.composeapp.generated.resources.label_account_category
 import cofinance.composeapp.generated.resources.label_edit_account
 import cofinance.composeapp.generated.resources.label_name
 import cofinance.composeapp.generated.resources.label_rupiah
@@ -42,6 +50,7 @@ import cofinance.composeapp.generated.resources.label_zero
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.NumberFormatTransformation
+import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.enums.AccountType
 import id.andriawan.cofinance.utils.extensions.isDigitOnly
 import org.jetbrains.compose.resources.painterResource
@@ -50,12 +59,15 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun EditAccountBottomSheetContent(
     account: Account,
-    onSaveClicked: (name: String, balance: Long, accountType: AccountType) -> Unit,
+    onSaveClicked: (name: String, balance: Long, group: AccountGroupType, accountType: AccountType) -> Unit,
+    onDeleteClicked: () -> Unit,
     onCloseClicked: () -> Unit
 ) {
     var name by remember(account) { mutableStateOf(account.name) }
     var amount by remember(account) { mutableStateOf(account.balance.toString()) }
+    var selectedGroup by remember(account) { mutableStateOf(account.group) }
     var selectedType by remember(account) { mutableStateOf(account.accountType) }
+    var groupDropdownExpanded by remember { mutableStateOf(false) }
 
     Column {
         // Header
@@ -86,6 +98,59 @@ fun EditAccountBottomSheetContent(
         }
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
+
+        // Group type selector
+        Box(modifier = Modifier.padding(horizontal = Dimensions.SIZE_16)) {
+            AddNewSection(
+                modifier = Modifier.border(
+                    width = Dimensions.SIZE_2,
+                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    shape = MaterialTheme.shapes.large
+                ),
+                label = stringResource(Res.string.label_account_category),
+                value = selectedGroup.displayName,
+                onSectionClicked = { groupDropdownExpanded = true },
+                startIcon = {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_account),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                },
+                endIcon = {
+                    Icon(
+                        modifier = Modifier.rotate(-90f),
+                        painter = painterResource(Res.drawable.ic_dropdown),
+                        contentDescription = null,
+                        tint = Color.Unspecified
+                    )
+                }
+            )
+
+            DropdownMenu(
+                expanded = groupDropdownExpanded,
+                onDismissRequest = { groupDropdownExpanded = false },
+                containerColor = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
+            ) {
+                AccountGroupType.entries.forEach { option ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = option.displayName,
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        },
+                        onClick = {
+                            selectedGroup = option
+                            groupDropdownExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
         // Account Type selector
         Row(
@@ -233,19 +298,36 @@ fun EditAccountBottomSheetContent(
         PrimaryButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = Dimensions.SIZE_16)
-                .padding(bottom = Dimensions.SIZE_24),
+                .padding(horizontal = Dimensions.SIZE_16),
             enabled = name.isNotBlank(),
             onClick = {
                 onSaveClicked(
                     name,
                     amount.toLongOrNull() ?: 0L,
+                    selectedGroup,
                     selectedType
                 )
             }
         ) {
             Text(
                 text = stringResource(Res.string.action_save),
+                style = MaterialTheme.typography.labelMedium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_8))
+
+        SecondaryButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Dimensions.SIZE_16)
+                .padding(bottom = Dimensions.SIZE_24),
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.error,
+            onClick = onDeleteClicked
+        ) {
+            Text(
+                text = stringResource(Res.string.action_delete_account),
                 style = MaterialTheme.typography.labelMedium
             )
         }

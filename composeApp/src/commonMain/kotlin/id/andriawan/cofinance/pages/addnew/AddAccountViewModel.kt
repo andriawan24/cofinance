@@ -62,7 +62,8 @@ class AddAccountViewModel(private val addAccountUseCase: AddAccountUseCase) : Vi
             is AddAccountEvent.NameChanged -> onNameChanged(event.name)
             is AddAccountEvent.AmountChanged -> onAmountChanged(event.amount)
             is AddAccountEvent.SaveAccount -> saveAccount()
-            is AddAccountEvent.BackClicked -> { /* no-op */
+            is AddAccountEvent.BackClicked -> {
+                /* no-op */
             }
         }
     }

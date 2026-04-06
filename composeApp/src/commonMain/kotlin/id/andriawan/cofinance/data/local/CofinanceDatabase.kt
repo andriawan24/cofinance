@@ -29,7 +29,9 @@ interface CofinanceDatabase {
 
     suspend fun updateAccountType(accountId: String, accountType: String)
 
-    suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String)
+    suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String)
+
+    suspend fun deleteAccount(accountId: String)
 
     // Transaction reads
     fun watchTransactions(

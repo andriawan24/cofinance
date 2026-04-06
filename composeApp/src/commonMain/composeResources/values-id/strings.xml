@@ -73,6 +73,7 @@
     <string name="label_edit_account">Edit Akun</string>
     <string name="label_name">Nama</string>
     <string name="label_loading_accounts">Sedang memuat akun...</string>
+    <string name="action_delete_account">Hapus Akun</string>
 
     <!-- Cycle Review -->
     <string name="cycle_reset_title">Siklus Berakhir</string>

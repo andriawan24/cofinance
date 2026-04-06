@@ -3,20 +3,20 @@ package id.andriawan.cofinance.pages.addnew
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.error_generic
 import coil3.Uri
+import id.andriawan.cofinance.data.repository.TransactionRepository
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
-import id.andriawan.cofinance.domain.model.response.TransactionByDate
+import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
-import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
-import cofinance.composeapp.generated.resources.Res
-import cofinance.composeapp.generated.resources.error_generic
 import id.andriawan.cofinance.utils.None
-import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.UiText
+import id.andriawan.cofinance.utils.collectResult
 import id.andriawan.cofinance.utils.emptyString
 import id.andriawan.cofinance.utils.enums.AccountTransferType
 import id.andriawan.cofinance.utils.enums.TransactionCategory
@@ -25,7 +25,6 @@ import id.andriawan.cofinance.utils.extensions.toDate
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -92,13 +91,12 @@ sealed class AddNewUiEvent {
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
-    private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
-    private val transactionRepository: id.andriawan.cofinance.data.repository.TransactionRepository
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
 
-    private var oldTransaction: id.andriawan.cofinance.domain.model.response.Transaction? = null
+    private var oldTransaction: Transaction? = null
 
     private val _dialogState = MutableStateFlow(AddNewDialogState())
     val dialogState = _dialogState.asStateFlow()
@@ -117,12 +115,8 @@ class AddNewViewModel(
         _uiState.value = uiState.value.copy(isLoadingAccount = true)
         viewModelScope.launch {
             getAccountsUseCase.execute().collectResult(
-                onLoading = {
-                    _uiState.update { state -> state.copy(isLoadingAccount = true) }
-                },
-                onError = {
-                    _uiState.update { state -> state.copy(isLoadingAccount = false) }
-                },
+                onLoading = { _uiState.update { state -> state.copy(isLoadingAccount = true) } },
+                onError = { _uiState.update { state -> state.copy(isLoadingAccount = false) } },
                 onSuccess = { data ->
                     _uiState.update { currentState ->
                         currentState.copy(accounts = data, isLoadingAccount = false)
@@ -132,41 +126,12 @@ class AddNewViewModel(
         }
     }
 
-    fun checkDraftTransaction(id: String) {
-        viewModelScope.launch {
-            getTransactionsGroupByMonthUseCase.execute(
-                GetTransactionsParam(transactionId = id, isDraft = true)
-            ).collectResult(
-                onSuccess = { data ->
-                    data.getOrNull(0)?.transactions?.getOrNull(0)?.let { transaction ->
-                        val category = transaction.category.takeIf { it.isNotBlank() }
-                            ?.let { TransactionCategory.getCategoryByName(it) }
-
-                        _uiState.update {
-                            it.copy(
-                                transactionId = transaction.id,
-                                amount = it.amount.ifBlank { transaction.amount.toString() },
-                                dateTime = transaction.date.toDate(),
-                                expenseCategory = category,
-                                fee = if (transaction.fee > 0) transaction.fee.toString() else it.fee,
-                                includeFee = transaction.fee > 0
-                            )
-                        }
-                    }
-                }
-            )
-        }
-    }
-
     fun loadExistingTransaction(id: String) {
         viewModelScope.launch {
             try {
-                // Try loading as a regular transaction first
-                var transactions = transactionRepository.getTransactions(
-                    GetTransactionsParam(transactionId = id)
-                )
+                var transactions =
+                    transactionRepository.getTransactions(GetTransactionsParam(transactionId = id))
 
-                // Fall back to draft if not found (e.g. from receipt scan)
                 if (transactions.isEmpty()) {
                     transactions = transactionRepository.getTransactions(
                         GetTransactionsParam(transactionId = id, isDraft = true)
@@ -197,8 +162,11 @@ class AddNewViewModel(
                         isEditing = !isDraft
                     )
                 }
+
                 validateInputs()
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+                /* no-op */
+            }
         }
     }
 
@@ -329,7 +297,6 @@ class AddNewViewModel(
             )
 
             if (uiState.value.isEditing && oldTransaction != null) {
-                // Update existing transaction with balance reversal
                 _uiState.update { it.copy(isLoading = true) }
                 try {
                     transactionRepository.updateTransaction(oldTransaction!!, param)
@@ -344,9 +311,7 @@ class AddNewViewModel(
                 }
             } else {
                 createTransactionUseCase.execute(param).collectResult(
-                    onLoading = {
-                        _uiState.value = uiState.value.copy(isLoading = true)
-                    },
+                    onLoading = { _uiState.value = uiState.value.copy(isLoading = true) },
                     onError = { exception ->
                         _uiState.value = uiState.value.copy(isLoading = false)
                         _showMessage.send(
