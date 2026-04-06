@@ -83,7 +83,6 @@ fun AddTransactionScreen(
 
     LaunchedEffect(transactionId) {
         if (transactionId != null) {
-            // Try loading as existing transaction first, then fall back to draft
             addNewViewModel.loadExistingTransaction(transactionId)
         }
     }

@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,11 +13,11 @@ import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.addaccount.AddAccountScreen
 import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
 import id.andriawan.cofinance.pages.camera.CameraScreen
+import id.andriawan.cofinance.pages.cyclereview.CycleReviewScreen
 import id.andriawan.cofinance.pages.editprofile.EditProfileScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
-import id.andriawan.cofinance.pages.cyclereview.CycleReviewScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
 
 @Composable
@@ -141,10 +142,13 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
                     navController.navigate(Destinations.Camera)
                 },
                 onSuccessSave = {
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set("add_activity_result", true)
-                    navController.navigateUp()
+                    val previousEntry = navController.previousBackStackEntry
+                    if (previousEntry?.destination?.hasRoute(Destinations.Preview::class) == true) {
+                        navController.popBackStack<Destinations.Main>(inclusive = false)
+                    } else {
+                        previousEntry?.savedStateHandle?.set("add_activity_result", true)
+                        navController.navigateUp()
+                    }
                 }
             )
         }

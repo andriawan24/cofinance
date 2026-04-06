@@ -86,13 +86,17 @@ fun AccountScreen(
         ) {
             EditAccountBottomSheetContent(
                 account = uiState.editingAccount!!,
-                onSaveClicked = { name, balance, accountType ->
+                onSaveClicked = { name, balance, group, accountType ->
                     accountViewModel.onSaveAccount(
                         uiState.editingAccount!!.id,
                         name,
                         balance,
+                        group,
                         accountType
                     )
+                },
+                onDeleteClicked = {
+                    accountViewModel.onDeleteAccount(uiState.editingAccount!!.id)
                 },
                 onCloseClicked = { accountViewModel.onDismissEditAccount() }
             )

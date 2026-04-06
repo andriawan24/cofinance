@@ -94,10 +94,17 @@ class PowerSyncCofinanceDatabase(private val database: PowerSyncDatabase) : Cofi
         )
     }
 
-    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String) {
         database.execute(
-            sql = """UPDATE accounts SET name = ?, balance = ?, account_type = ? WHERE id = ?""",
-            parameters = listOf(name, balance, accountType, accountId)
+            sql = """UPDATE accounts SET name = ?, balance = ?, "group" = ?, account_type = ? WHERE id = ?""",
+            parameters = listOf(name, balance, group, accountType, accountId)
+        )
+    }
+
+    override suspend fun deleteAccount(accountId: String) {
+        database.execute(
+            sql = "DELETE FROM accounts WHERE id = ?",
+            parameters = listOf(accountId)
         )
     }
 

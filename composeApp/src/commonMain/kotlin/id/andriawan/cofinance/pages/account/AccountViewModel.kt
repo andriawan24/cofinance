@@ -7,8 +7,10 @@ import com.diamondedge.logging.logging
 import id.andriawan.cofinance.data.repository.AccountRepository
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
+import id.andriawan.cofinance.domain.usecases.accounts.DeleteAccountUseCase
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.utils.ResultState
+import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.enums.AccountType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,7 +32,8 @@ data class UiState(
 @Stable
 class AccountViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val deleteAccountUseCase: DeleteAccountUseCase
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(UiState())
     val uiState = _uiState.asStateFlow()
@@ -95,9 +98,16 @@ class AccountViewModel(
         _uiState.update { it.copy(editingAccount = null) }
     }
 
-    fun onSaveAccount(accountId: String, name: String, balance: Long, accountType: AccountType) {
+    fun onSaveAccount(accountId: String, name: String, balance: Long, group: AccountGroupType, accountType: AccountType) {
         viewModelScope.launch {
-            accountRepository.updateAccount(accountId, name, balance, accountType.name)
+            accountRepository.updateAccount(accountId, name, balance, group.name, accountType.name)
+            _uiState.update { it.copy(editingAccount = null) }
+        }
+    }
+
+    fun onDeleteAccount(accountId: String) {
+        viewModelScope.launch {
+            deleteAccountUseCase.execute(accountId).collect { }
             _uiState.update { it.copy(editingAccount = null) }
         }
     }

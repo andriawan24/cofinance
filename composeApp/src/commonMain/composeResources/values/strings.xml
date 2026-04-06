@@ -73,6 +73,7 @@
     <string name="label_edit_account">Edit Account</string>
     <string name="label_name">Name</string>
     <string name="label_loading_accounts">Loading account...</string>
+    <string name="action_delete_account">Delete Account</string>
 
     <!-- Cycle Review -->
     <string name="cycle_reset_title">Cycle Ended</string>

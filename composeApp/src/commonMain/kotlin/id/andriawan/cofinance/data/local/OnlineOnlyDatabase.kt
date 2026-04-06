@@ -53,7 +53,11 @@ class OnlineOnlyDatabase(
         // No-op: handled via Supabase directly for online-only targets
     }
 
-    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String) {
+        // No-op: handled via Supabase directly for online-only targets
+    }
+
+    override suspend fun deleteAccount(accountId: String) {
         // No-op: handled via Supabase directly for online-only targets
     }
 

@@ -17,7 +17,8 @@ interface AccountRepository {
     suspend fun addAccount(param: AccountParam)
     suspend fun updateAccountBalance(accountId: String, delta: Long)
     suspend fun updateAccountType(accountId: String, accountType: String)
-    suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String)
+    suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String)
+    suspend fun deleteAccount(accountId: String)
 }
 
 
@@ -58,7 +59,11 @@ class AccountRepositoryImpl(
         database.updateAccountType(accountId, accountType)
     }
 
-    override suspend fun updateAccount(accountId: String, name: String, balance: Long, accountType: String) {
-        database.updateAccount(accountId, name, balance, accountType)
+    override suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String) {
+        database.updateAccount(accountId, name, balance, group, accountType)
+    }
+
+    override suspend fun deleteAccount(accountId: String) {
+        database.deleteAccount(accountId)
     }
 }
