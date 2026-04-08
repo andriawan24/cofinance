@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-04-07T08:31:12.014Z",
+  "projectRoot": "/Users/andriawan24/Documents/Programming/KMM/Cofinance_Shared",
+  "structure": {
+    "hasPackageJson": false,
+    "hasTsConfig": false,
+    "hasClaudeConfig": true,
+    "hasClaudeFlow": true
+  },
+  "scannedAt": 1775550672014
+}
