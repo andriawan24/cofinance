@@ -15,7 +15,9 @@ captures
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
+!gradle/wrapper/gradle-wrapper.jar
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 agents/
 .hotswan
+.agents/

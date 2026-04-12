@@ -49,7 +49,7 @@ jobs:
         run: ./gradlew :androidApp:lint --no-daemon
 
       - name: Run Unit Tests
-        run: ./gradlew :composeApp:allTests --no-daemon
+        run: ./gradlew :composeApp:desktopTest :androidApp:testDebugUnitTest --no-daemon
 
       - name: Upload Lint Report
         if: always()
