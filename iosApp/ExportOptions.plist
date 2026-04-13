@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Use "ad-hoc" for Firebase App Distribution to registered devices -->
+    <!-- Use "development" for smaller tester groups with dev certificates -->
+    <key>method</key>
+    <string>ad-hoc</string>
+
+    <!-- Your 10-character Apple Developer Team ID -->
+    <key>teamID</key>
+    <string>YOUR_TEAM_ID</string>
+
+    <key>uploadBitcode</key>
+    <false/>
+
+    <key>compileBitcode</key>
+    <false/>
+
+    <key>stripSwiftSymbols</key>
+    <true/>
+
+    <!-- Map bundle ID → provisioning profile name (as shown in Apple Developer portal) -->
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>id.andriawan.cofinance.Cofinance</key>
+        <string>YOUR_ADHOC_PROVISIONING_PROFILE_NAME</string>
+    </dict>
+</dict>
+</plist>
