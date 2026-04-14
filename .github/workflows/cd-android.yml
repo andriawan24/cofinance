@@ -58,7 +58,39 @@ jobs:
           name: android-release-apk
           path: androidApp/build/outputs/apk/release/*.apk
 
+      - name: Validate Firebase App Distribution credentials
+        id: firebase_distribution
+        shell: bash
+        env:
+          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${FIREBASE_APP_ID_ANDROID:-}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Skipping Firebase App Distribution because FIREBASE_APP_ID_ANDROID is not configured."
+            exit 0
+          fi
+
+          if [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not configured."
+            exit 0
+          fi
+
+          firebase_service_account_type="$(ruby -rjson -e 'print(JSON.parse(ENV.fetch("FIREBASE_SERVICE_ACCOUNT_JSON")).fetch("type", ""))' 2>/dev/null || true)"
+
+          if [ "$firebase_service_account_type" != "service_account" ]; then
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not a service account credential."
+            exit 0
+          fi
+
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
       - name: Upload to Firebase App Distribution
+        if: steps.firebase_distribution.outputs.enabled == 'true'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
