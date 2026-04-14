@@ -6,6 +6,7 @@ plugins {
 android {
     namespace = "id.andriawan.cofinance"
     compileSdk = 36
+    val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
 
     defaultConfig {
         applicationId = "id.andriawan.cofinance"
@@ -17,9 +18,8 @@ android {
 
     signingConfigs {
         create("release") {
-            val keystorePath = System.getenv("KEYSTORE_PATH")
-            if (!keystorePath.isNullOrEmpty()) {
-                storeFile = file(keystorePath)
+            if (!releaseKeystorePath.isNullOrEmpty()) {
+                storeFile = file(releaseKeystorePath)
                 storePassword = System.getenv("KEYSTORE_PASSWORD")
                 keyAlias = System.getenv("KEYSTORE_ALIAS")
                 keyPassword = System.getenv("KEY_PASSWORD")
@@ -35,7 +35,11 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (releaseKeystorePath.isNullOrEmpty()) {
+                signingConfigs.getByName("debug")
+            } else {
+                signingConfigs.getByName("release")
+            }
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = false
