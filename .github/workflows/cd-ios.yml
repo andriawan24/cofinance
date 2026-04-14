@@ -57,7 +57,7 @@ jobs:
           IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
           IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
           FIREBASE_APP_ID_IOS: ${{ secrets.FIREBASE_APP_ID_IOS }}
-          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+          FIREBASE_SERVICE_ACCOUNT_JSON_BASE64: ${{ secrets.GOOGLE_SERVICE_JSON }}
         run: |
           set -euo pipefail
 
@@ -81,15 +81,35 @@ jobs:
           if [ -z "${FIREBASE_APP_ID_IOS:-}" ]; then
             can_distribute=false
             echo "::warning::Skipping Firebase App Distribution because FIREBASE_APP_ID_IOS is not configured."
-          elif [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON:-}" ]; then
+          elif [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON_BASE64:-}" ]; then
             can_distribute=false
             echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not configured."
           else
-            firebase_service_account_type="$(ruby -rjson -e 'print(JSON.parse(ENV.fetch("FIREBASE_SERVICE_ACCOUNT_JSON")).fetch("type", ""))' 2>/dev/null || true)"
+            firebase_service_account_json=""
 
-            if [ "$firebase_service_account_type" != "service_account" ]; then
+            if firebase_service_account_json="$(printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON_BASE64" | base64 --decode 2>/dev/null)"; then
+              :
+            elif firebase_service_account_json="$(printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON_BASE64" | base64 -D 2>/dev/null)"; then
+              :
+            else
               can_distribute=false
-              echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not a service account credential."
+              echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not valid base64."
+            fi
+
+            if [ "$can_distribute" = true ]; then
+              firebase_service_account_type="$(
+                FIREBASE_SERVICE_ACCOUNT_JSON="$firebase_service_account_json" \
+                ruby -rjson -e 'print(JSON.parse(ENV.fetch("FIREBASE_SERVICE_ACCOUNT_JSON")).fetch("type", ""))' 2>/dev/null || true
+              )"
+
+              if [ "$firebase_service_account_type" != "service_account" ]; then
+                can_distribute=false
+                echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not a service account credential."
+              else
+                firebase_service_account_path="$RUNNER_TEMP/firebase-service-account.json"
+                printf '%s' "$firebase_service_account_json" > "$firebase_service_account_path"
+                echo "service_account_path=$firebase_service_account_path" >> "$GITHUB_OUTPUT"
+              fi
             fi
           fi
 
@@ -163,7 +183,7 @@ jobs:
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID_IOS }}
-          serviceCredentialsFileContent: ${{ secrets.GOOGLE_SERVICE_JSON }}
+          serviceCredentialsFile: ${{ steps.ios_distribution.outputs.service_account_path }}
           groups: internal-testers
           file: ${{ runner.temp }}/ipa/iosApp.ipa
           releaseNotes: |
