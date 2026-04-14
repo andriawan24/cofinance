@@ -48,8 +48,56 @@ jobs:
           powersync.url=${{ secrets.POWERSYNC_URL }}
           EOF
 
+      - name: Validate iOS build and distribution credentials
+        id: ios_distribution
+        shell: bash
+        env:
+          IOS_CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
+          IOS_CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
+          IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+          FIREBASE_APP_ID_IOS: ${{ secrets.FIREBASE_APP_ID_IOS }}
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_JSON }}
+        run: |
+          set -euo pipefail
+
+          for variable_name in \
+            IOS_CERTIFICATE_BASE64 \
+            IOS_CERTIFICATE_PASSWORD \
+            IOS_KEYCHAIN_PASSWORD \
+            IOS_PROVISION_PROFILE_BASE64; do
+            if [ -z "${!variable_name:-}" ]; then
+              echo "can_build=false" >> "$GITHUB_OUTPUT"
+              echo "can_distribute=false" >> "$GITHUB_OUTPUT"
+              echo "::warning::Skipping iOS archive and distribution because one or more iOS signing secrets are not configured."
+              exit 0
+            fi
+          done
+
+          echo "can_build=true" >> "$GITHUB_OUTPUT"
+
+          can_distribute=true
+
+          if [ -z "${FIREBASE_APP_ID_IOS:-}" ]; then
+            can_distribute=false
+            echo "::warning::Skipping Firebase App Distribution because FIREBASE_APP_ID_IOS is not configured."
+          elif [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON:-}" ]; then
+            can_distribute=false
+            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not configured."
+          else
+            firebase_service_account_type="$(ruby -rjson -e 'print(JSON.parse(ENV.fetch("FIREBASE_SERVICE_ACCOUNT_JSON")).fetch("type", ""))' 2>/dev/null || true)"
+
+            if [ "$firebase_service_account_type" != "service_account" ]; then
+              can_distribute=false
+              echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not a service account credential."
+            fi
+          fi
+
+          echo "can_distribute=$can_distribute" >> "$GITHUB_OUTPUT"
+
       # ------- Apple Code Signing -------
       - name: Install Apple Certificate
+        if: steps.ios_distribution.outputs.can_build == 'true'
         env:
           CERTIFICATE_BASE64: ${{ secrets.IOS_CERTIFICATE_BASE64 }}
           CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERTIFICATE_PASSWORD }}
@@ -66,6 +114,7 @@ jobs:
           security list-keychain -d user -s $KEYCHAIN_PATH
 
       - name: Install Provisioning Profile
+        if: steps.ios_distribution.outputs.can_build == 'true'
         env:
           PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
         run: |
@@ -79,10 +128,12 @@ jobs:
       # We set OVERRIDE_KOTLIN_BUILD_IDE_SUPPORTED=YES in xcodebuild so Xcode skips
       # re-invoking Gradle, and instead we run it explicitly here first.
       - name: Build KMP Framework
+        if: steps.ios_distribution.outputs.can_build == 'true'
         run: ./gradlew :composeApp:linkReleaseFrameworkIosArm64 --no-daemon
 
       # ------- Xcode Archive -------
       - name: Archive iOS App
+        if: steps.ios_distribution.outputs.can_build == 'true'
         run: |
           xcodebuild -project iosApp/iosApp.xcodeproj \
             -scheme iosApp \
@@ -92,6 +143,7 @@ jobs:
             clean archive
 
       - name: Export IPA
+        if: steps.ios_distribution.outputs.can_build == 'true'
         run: |
           xcodebuild -exportArchive \
             -archivePath $RUNNER_TEMP/iosApp.xcarchive \
@@ -99,6 +151,7 @@ jobs:
             -exportPath $RUNNER_TEMP/ipa
 
       - name: Upload IPA Artifact
+        if: steps.ios_distribution.outputs.can_build == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ios-release-ipa
@@ -106,6 +159,7 @@ jobs:
 
       # ------- Firebase App Distribution -------
       - name: Upload to Firebase App Distribution
+        if: steps.ios_distribution.outputs.can_distribute == 'true'
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: ${{ secrets.FIREBASE_APP_ID_IOS }}
