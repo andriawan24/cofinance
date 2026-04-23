@@ -14,7 +14,7 @@ plugins {
 }
 
 kotlin {
-    androidLibrary {
+    android {
         namespace = "id.andriawan.cofinance.shared"
         compileSdk = 36
         minSdk = 24
@@ -192,4 +192,3 @@ compose.desktop {
         }
     }
 }
-

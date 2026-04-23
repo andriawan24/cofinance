@@ -4,22 +4,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.data.local.rememberCofinanceDatabase
 import id.andriawan.cofinance.di.databaseModule
 import id.andriawan.cofinance.di.networkModule
 import id.andriawan.cofinance.di.repositoryModule
 import id.andriawan.cofinance.di.useCaseModule
 import id.andriawan.cofinance.di.viewModelModule
-import kotlinx.coroutines.launch
 import id.andriawan.cofinance.localization.AppLang
 import id.andriawan.cofinance.localization.rememberAppLocale
 import id.andriawan.cofinance.navigations.MainNavigation
 import id.andriawan.cofinance.theme.CofinanceTheme
-import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
+import org.koin.dsl.koinConfiguration
 
 val LocalAppLocalization = compositionLocalOf { AppLang.English }
 
@@ -28,31 +28,34 @@ val LocalAppLocalization = compositionLocalOf { AppLang.English }
 fun App(sharedImageUri: String? = null) {
     val database = rememberCofinanceDatabase()
 
-    KoinApplication(application = {
-        modules(
-            networkModule,
-            databaseModule(database),
-            repositoryModule,
-            useCaseModule,
-            viewModelModule
-        )
-    }) {
-        val scope = rememberCoroutineScope()
-
-        LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
-            scope.launch { database.pauseSync() }
+    KoinApplication(
+        configuration = koinConfiguration(declaration = {
+            modules(
+                networkModule,
+                databaseModule(database),
+                repositoryModule,
+                useCaseModule,
+                viewModelModule
+            )
         }
+        ), content = {
+            val scope = rememberCoroutineScope()
 
-        LifecycleEventEffect(Lifecycle.Event.ON_START) {
-            scope.launch { database.resumeSync() }
-        }
+            LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+                scope.launch { database.pauseSync() }
+            }
 
-        val currentLanguage = rememberAppLocale()
+            LifecycleEventEffect(Lifecycle.Event.ON_START) {
+                scope.launch { database.resumeSync() }
+            }
 
-        CompositionLocalProvider(LocalAppLocalization provides currentLanguage) {
-            CofinanceTheme {
-                MainNavigation(sharedImageUri = sharedImageUri)
+            val currentLanguage = rememberAppLocale()
+
+            CompositionLocalProvider(LocalAppLocalization provides currentLanguage) {
+                CofinanceTheme {
+                    MainNavigation(sharedImageUri = sharedImageUri)
+                }
             }
         }
-    }
+    )
 }
