@@ -57,7 +57,6 @@ class CycleReviewViewModel(
             val choices = regularAccountsWithBalance.map { account ->
                 AccountCarryOverChoice(
                     account = account,
-                    // Default: carry over for positive, start fresh for negative
                     carryOver = account.balance > 0
                 )
             }
@@ -100,14 +99,11 @@ class CycleReviewViewModel(
 
             val user = getUserUseCase.execute()
             val cycleEndDate = getPreviousCycleEndDate(user.cycleStartDay)
-
-            // Process each account that chose "start fresh"
             val accountsToReset = _uiState.value.accounts.filter { !it.carryOver }
             for (choice in accountsToReset) {
                 resetAccountBalanceUseCase.execute(choice.account, cycleEndDate)
             }
 
-            // Record the reset date in user metadata
             val today = Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault()).date
             authenticationRepository.updateLastCycleResetDate(today.toString())

@@ -33,18 +33,10 @@ fun SplashScreen(
     LaunchedEffect(true) {
         splashViewModel.fetchUser().collectLatest {
             when (it) {
-                is ResultState.Error -> {
-                    println("SplashScreen: Not logged in ${it.exception}")
-                    onNavigateToLogin()
-                    // TODO: Handle error
-                }
-
+                is ResultState.Success<*> -> onNavigateToMain()
+                is ResultState.Error -> onNavigateToLogin()
                 ResultState.Loading -> {
                     /* no-op */
-                }
-
-                is ResultState.Success<*> -> {
-                    onNavigateToMain()
                 }
             }
         }
