@@ -11,6 +11,7 @@
     <string name="label_activity">Activity</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Account</string>
+    <string name="label_account_subtitle">Review your balances and keep each money bucket organized.</string>
     <string name="label_profile">Profile</string>
 
     <!-- Language -->
@@ -74,6 +75,8 @@
     <string name="label_name">Name</string>
     <string name="label_loading_accounts">Loading account...</string>
     <string name="action_delete_account">Delete Account</string>
+    <string name="title_no_accounts">No accounts yet</string>
+    <string name="description_no_accounts">Create your first account to start tracking where your money lives.</string>
 
     <!-- Cycle Review -->
     <string name="cycle_reset_title">Cycle Ended</string>
@@ -98,6 +101,11 @@
     <string name="label_logout_question">Are you sure you want to logout?</string>
     <string name="label_cycle_start_day">Cycle start day</string>
     <string name="label_cycle_start_day_description">Transactions are grouped from this day each month</string>
+    <string name="label_profile_subtitle">Keep your account details and monthly cycle in sync.</string>
+    <string name="action_change_photo">Change photo</string>
+    <string name="action_back">Back</string>
+    <string name="content_description_profile_photo">Profile photo</string>
+    <string name="content_description_change_profile_photo">Change profile photo</string>
 
     <!-- Empty States -->
     <string name="content_description_empty_state_image">Empty state image for activity</string>

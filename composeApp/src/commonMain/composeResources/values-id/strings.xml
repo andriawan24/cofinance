@@ -11,6 +11,7 @@
     <string name="label_activity">Aktivitas</string>
     <string name="label_stats">Stats</string>
     <string name="label_account">Rekening</string>
+    <string name="label_account_subtitle">Tinjau saldo dan rapikan setiap tempat penyimpanan uangmu.</string>
     <string name="label_profile">Profil</string>
 
     <!-- Language -->
@@ -74,6 +75,8 @@
     <string name="label_name">Nama</string>
     <string name="label_loading_accounts">Sedang memuat akun...</string>
     <string name="action_delete_account">Hapus Akun</string>
+    <string name="title_no_accounts">Belum ada akun</string>
+    <string name="description_no_accounts">Buat akun pertamamu untuk mulai melacak tempat uangmu disimpan.</string>
 
     <!-- Cycle Review -->
     <string name="cycle_reset_title">Siklus Berakhir</string>
@@ -98,6 +101,11 @@
     <string name="label_logout_question">Apakah kamu yakin ingin logout dari akunmu?</string>
     <string name="label_cycle_start_day">Hari mulai siklus</string>
     <string name="label_cycle_start_day_description">Transaksi dikelompokkan mulai tanggal ini setiap bulan</string>
+    <string name="label_profile_subtitle">Kelola detail akun dan siklus bulananmu dengan rapi.</string>
+    <string name="action_change_photo">Ganti foto</string>
+    <string name="action_back">Kembali</string>
+    <string name="content_description_profile_photo">Foto profil</string>
+    <string name="content_description_change_profile_photo">Ganti foto profil</string>
 
     <!-- Empty States -->
     <string name="content_description_empty_state_image">Gambar untuk data kosong</string>
