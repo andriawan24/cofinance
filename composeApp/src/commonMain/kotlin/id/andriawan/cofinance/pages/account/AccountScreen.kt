@@ -29,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.description_no_accounts
@@ -191,10 +192,7 @@ private fun AccountContent(
 }
 
 @Composable
-private fun AssetCard(
-    balance: Long,
-    onAddAccountClicked: () -> Unit
-) {
+private fun AssetCard(balance: Long, onAddAccountClicked: () -> Unit) {
     Surface(
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.72f)
@@ -239,7 +237,11 @@ private fun AssetCard(
                     )
 
                     Text(
-                        text = "${stringResource(Res.string.label_rupiah)} ${NumberHelper.formatNumber(balance)}",
+                        text = "${stringResource(Res.string.label_rupiah)} ${
+                            NumberHelper.formatNumber(
+                                balance
+                            )
+                        }",
                         style = MaterialTheme.typography.displaySmall.copy(
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -281,9 +283,7 @@ private fun AssetCard(
 }
 
 @Composable
-private fun EmptyAccountsState(
-    onAddAccountClicked: () -> Unit
-) {
+private fun EmptyAccountsState(onAddAccountClicked: () -> Unit) {
     Surface(
         shape = MaterialTheme.shapes.extraLarge,
         color = MaterialTheme.colorScheme.surface
@@ -323,6 +323,7 @@ private fun EmptyAccountsState(
     }
 }
 
+@Preview
 @Composable
 private fun AccountScreenPreview() {
     CofinanceTheme {
