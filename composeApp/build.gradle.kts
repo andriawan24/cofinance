@@ -13,6 +13,14 @@ plugins {
     id("com.codingfeline.buildkonfig")
 }
 
+val generateComposeStorybook = tasks.register<ComposeStorybookGeneratorTask>("generateComposeStorybook") {
+    componentsDir.set(
+        layout.projectDirectory.dir("src/commonMain/kotlin/id/andriawan/cofinance/components")
+    )
+    configFile.set(layout.projectDirectory.file("storybook/storybook.properties"))
+    outputDir.set(layout.buildDirectory.dir("generated/storybook/webMain/kotlin"))
+}
+
 kotlin {
     android {
         namespace = "id.andriawan.cofinance.shared"
@@ -61,6 +69,7 @@ kotlin {
         // Intermediate source set for web platforms (JS, WasmJS)
         val webMain by creating {
             dependsOn(commonMain.get())
+            kotlin.srcDir(generateComposeStorybook.map { it.outputDir })
         }
         jsMain.get().dependsOn(webMain)
         wasmJsMain.get().dependsOn(webMain)
@@ -140,6 +149,12 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
+    }
+}
+
+tasks.configureEach {
+    if (name.contains("compile", ignoreCase = true) && name.contains("Kotlin", ignoreCase = true)) {
+        dependsOn(generateComposeStorybook)
     }
 }
 
