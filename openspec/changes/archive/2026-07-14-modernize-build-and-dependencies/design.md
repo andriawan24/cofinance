@@ -53,6 +53,20 @@ Use a single Compose release version for aligned Compose modules where publisher
 
 Remove the import of AGP's internal `gradleLocalProperties`. Resolve required secrets through Gradle providers, supporting ignored `local.properties` for local builds and environment variables for CI without logging values.
 
+### 7. Retain the Gemini wrapper pending a dedicated replacement change
+
+Keep `dev.shreyaspatil.generativeai:generativeai-google` at `0.9.0-1.1.0` in this mechanical modernization. Receipt scanning currently depends on its request and response model, while no drop-in supported KMP replacement has been validated across Android, iOS, Desktop, JS, and WasmJS. Replacing it would exceed this change's non-goal of avoiding product behavior changes.
+
+Create a separate OpenSpec change before replacement when at least one of these triggers occurs: the wrapper no longer resolves with the supported Kotlin/Compose toolchain, a security or service deprecation requires migration, or a candidate Google/Firebase GenAI client is verified for every target that supports receipt scanning. That change must cover API mapping, error behavior, platform availability, and receipt-scanning regression tests.
+
+### 8. Disable optional Okio Node modules in browser bundles
+
+Add a Kotlin-supported `webpack.config.d` fragment that resolves Okio's optional `os` and `path` imports to `false` for browser bundles. Okio guards these imports behind its Node environment path, so the browser does not require Node filesystem modules; Webpack 5 nevertheless resolves the static imports while bundling. Keep the fallback limited to browser packaging instead of adding Node polyfills and unnecessary runtime dependencies.
+
+### 9. Accept browser compilation and bundle verification without Chrome execution
+
+For this change, verify JS and WasmJS through target compilation, test compilation, and development Webpack bundling. Chrome browser execution is explicitly omitted because no compatible Chrome runtime is installed, the official Chrome-for-Testing artifact host is unreachable from this environment, and the installed Arc browser cannot be captured by Karma in headless or normal Chromium modes. This omission does not count as evidence for interactive web behavior; the affected runtime smoke checks remain open under task 4.4.
+
 ## Audit Findings and Priority
 
 | Priority | Finding | Evidence | Intended update |
@@ -80,4 +94,15 @@ Remove the import of AGP's internal `gradleLocalProperties`. Resolve required se
 
 ## Verification Strategy
 
-Run warning-enabled configuration and compilation for Android, Desktop, both iOS architectures, JS, and WasmJS. Then run shared tests, Android debug assembly, and focused smoke tests for Google sign-in, remote image loading, Supabase requests, PowerSync startup, and receipt scanning. Treat new warnings as audit inputs rather than suppressing them by default.
+Run warning-enabled configuration and compilation for Android, Desktop, both iOS architectures, JS, and WasmJS. Run shared tests on the available host, Desktop, and iOS simulator targets; compile JS and WasmJS tests and verify both development browser bundles without requiring Chrome execution for this change. Then run Android debug assembly and focused smoke tests for Google sign-in, remote image loading, Supabase requests, PowerSync startup, and receipt scanning. Treat new warnings as audit inputs rather than suppressing them by default.
+
+## Implementation Verification Findings
+
+- `./gradlew help --warning-mode=all` succeeds. The remaining Gradle 10 project-notation diagnostic is attributed by Gradle's problems report to AGP 9.2.1 plugin IDs (`com.android.internal.application` and `com.android.internal.kotlin.multiplatform.library`), not a project-authored build API. The Android app now declares the shared module through `DependencyHandler.project(String)`.
+- Warning-enabled Android debug assembly and Desktop compilation succeed. Their remaining Kotlin warning is the existing Beta status of `expect`/`actual` classes.
+- iOS device and simulator compilation succeed and both task graphs consume `iosMain` and `nonWebMain`. Existing iOS warnings remain for Beta `expect`/`actual` classes, `BetaInteropApi`, and a redundant Elvis expression in `Helper.ios.kt`.
+- JS and WasmJS compilation succeed. Dependency insight confirms OkHttp without CIO on Android, Darwin without CIO on iOS, and CIO without OkHttp or Darwin on Desktop.
+- Android host, Desktop, and iOS simulator tests pass. The Coil addition's JS and Wasm Yarn locks were refreshed, resolving the initially stale `@js-joda/core` installation. JS and Wasm development Webpack bundles now succeed; the JS report confirms Okio's optional Node `os` and `path` modules are ignored by the project fallback.
+- The aggregate `allTests` task cannot complete because browser tests require Chrome. An isolated Chrome for Testing install was attempted under ignored build output: the current macOS ARM headless-shell build was unavailable, and the standard Chrome binary download timed out without receiving data from Google storage. A later bounded retry against the official Chrome-for-Testing storage URL also timed out while establishing the TLS connection, before any response or artifact was received. The installed Arc browser also failed Karma capture in both headless and normal Chromium modes. Chrome execution is therefore an explicitly accepted omission for this change, supported by successful JS/Wasm test compilation and development bundle verification rather than represented as a browser-runtime pass.
+- A bounded Desktop launch succeeds, loads the PowerSync native library, and starts all 38 Koin definitions. This is startup evidence only. Google sign-in, remote image fetching, authenticated Supabase requests, PowerSync synchronization, and receipt scanning still require interactive platform runtimes and configured service state; they remain manual validation gates rather than being inferred from startup or compilation.
+- All four required local configuration inputs are present without exposing their values. No Android device is connected. iOS simulators are installed but the required XcodeBuildMCP integration is not connected, so the repository's simulator-testing workflow cannot perform install, launch, screenshots, logs, or authenticated UI interaction in this session.

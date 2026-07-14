@@ -21,5 +21,7 @@ node_modules/
 agents/
 !/.codex/agents/
 !/.codex/agents/*.toml
+!/.codex/skills/*/agents/
+!/.codex/skills/*/agents/openai.yaml
 .hotswan
 .agents/

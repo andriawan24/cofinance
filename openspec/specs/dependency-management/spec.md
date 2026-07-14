@@ -29,22 +29,37 @@ Libraries published as a coordinated family SHALL use the publisher's BOM or a s
 - **THEN** their versions SHALL be intentionally compatible with the selected Kotlin compiler and Compose compiler plugin
 
 ### Requirement: Scope platform engines and native libraries
-Platform-specific engines and native libraries SHALL be declared only in source sets that support them.
+Platform-specific engines and native libraries SHALL be declared only in source sets that support them, and each target SHALL resolve exactly one intended Ktor engine.
 
-#### Scenario: Ktor client resolves on a platform
-- **WHEN** a target constructs an HTTP client
-- **THEN** exactly one intended engine SHALL be available for that target
+#### Scenario: Ktor client resolves on Android
+- **WHEN** Android constructs an HTTP client
+- **THEN** OkHttp SHALL be the intended engine and CIO SHALL NOT be inherited from common code
+
+#### Scenario: Ktor client resolves on iOS
+- **WHEN** iOS constructs an HTTP client
+- **THEN** Darwin SHALL be the intended engine and CIO SHALL NOT be inherited from common code
+
+#### Scenario: Ktor client resolves on Desktop
+- **WHEN** Desktop constructs an HTTP client
+- **THEN** CIO SHALL be available as the intended engine
 
 #### Scenario: PowerSync resolves
 - **WHEN** native or web targets compile
 - **THEN** PowerSync SHALL be present for Android, iOS, and Desktop and absent from unsupported web source sets
+
+### Requirement: Support remote image loading explicitly
+The dependency graph SHALL include Coil Compose integration and a compatible Coil network artifact for targets that render remote images.
+
+#### Scenario: Render a remote profile image
+- **WHEN** Coil receives an HTTP or HTTPS image URL
+- **THEN** it SHALL fetch the image through the target's selected network engine
 
 ### Requirement: Verify upgrades before adoption
 Dependency upgrades SHALL be validated against the project's supported targets and publisher migration guidance before being treated as complete.
 
 #### Scenario: Build tooling is upgraded
 - **WHEN** Gradle, AGP, Kotlin, or Compose changes
-- **THEN** Android, Desktop, and iOS compilation SHALL succeed and new deprecation or hierarchy diagnostics SHALL be reviewed
+- **THEN** Android, Desktop, both iOS architectures, JS, and WasmJS SHALL compile and new deprecation or hierarchy diagnostics SHALL be reviewed
 
 #### Scenario: Runtime library is upgraded
 - **WHEN** a runtime dependency changes
@@ -56,4 +71,3 @@ Build scripts SHALL avoid internal plugin APIs and settings scheduled for remova
 #### Scenario: Build runs with all warnings enabled
 - **WHEN** Gradle executes with `--warning-mode=all`
 - **THEN** the build SHALL not rely on APIs or flags documented for removal in Gradle 10 or AGP 10
-

@@ -1,0 +1,4 @@
+interface:
+  display_name: "OpenSpec Continue"
+  short_description: "Resume an active OpenSpec change safely"
+  default_prompt: "Use $openspec-continue to resume the current OpenSpec change from its latest verified state."

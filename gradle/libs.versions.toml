@@ -5,10 +5,8 @@ androidx-activity = "1.13.0"
 androidx-lifecycle = "2.10.0"
 camerak = "1.1"
 coil = "3.5.0"
-componentsResources = "1.11.1"
 composeMultiplatform = "1.11.1"
 credentials = "1.6.0"
-foundation = "1.11.1"
 googleid = "1.2.0"
 kotlin = "2.4.0"
 composeNavigation = "2.9.2"
@@ -16,20 +14,18 @@ appcompat = "1.7.1"
 kotlinxDatetime = "0.8.0"
 logging = "2.1.1"
 material3 = "1.9.0"
-runtime = "1.11.1"
 supabasekt = "3.6.0"
 ktor = "3.5.1"
 generativeaiGoogle = "0.9.0-1.1.0"
 buildkonfigGradlePlugin = "0.22.0"
 koin-bom = "4.2.2"
-ui = "1.11.1"
-uiToolingPreview = "1.11.1"
 
 [libraries]
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
 androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "credentials" }
 camerak = { module = "io.github.kashif-mehmood-km:camerak", version.ref = "camerak" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coil" }
 googleid = { module = "com.google.android.libraries.identity.googleid:googleid", version.ref = "googleid" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
@@ -40,12 +36,12 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
 
 # Compose
-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "runtime" }
-compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "componentsResources" }
-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "foundation" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "ui" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 
 # Supabase
 logging = { module = "com.diamondedge:logging", version.ref = "logging" }

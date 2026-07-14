@@ -62,7 +62,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":composeApp"))
+    implementation(project.dependencies.project(":composeApp"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
 }
