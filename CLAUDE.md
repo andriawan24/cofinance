@@ -1,5 +1,11 @@
 # Cofinance - CLAUDE.md
 
+## Mandatory OpenSpec Workflow
+
+`AGENTS.md` is the authoritative repository policy and MUST be read before any work. Its **Mandatory OpenSpec Workflow** applies unchanged to Claude, Claude subagents, goal-driven work, and every implementation request.
+
+In particular, do not edit implementation files unless a single named OpenSpec change has been selected, its required artifacts are complete and strictly valid, and `openspec instructions apply --change "<name>" --json` reports it ready. Implement through the `openspec-apply-change` workflow, keep `tasks.md` current, synchronize delta specs when applicable, and satisfy the completion gate in `AGENTS.md` before claiming completion.
+
 ## Project Overview
 
 Cofinance is a Kotlin Multiplatform (KMP) personal finance app targeting Android, iOS, Desktop (JVM), and Web (JS/WASM). It uses Compose Multiplatform for the UI layer.

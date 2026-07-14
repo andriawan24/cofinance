@@ -1,20 +1,27 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+context: |
+  Cofinance is a Kotlin Multiplatform personal finance app using Compose Multiplatform,
+  MVVM, Clean Architecture, Koin, Supabase, and PowerSync. Supported targets are Android,
+  iOS device/simulator, Desktop JVM, JS, and WasmJS.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  OpenSpec is mandatory for every implementation change. Implementation must be associated
+  with one named, apply-ready change, and agents must follow the Mandatory OpenSpec Workflow
+  in AGENTS.md. Goal-driven work is not complete until every in-scope task and requirement is
+  verified, relevant tests/builds pass, strict OpenSpec validation passes, and applicable delta
+  specs are synchronized to main specs.
+
+  Secrets from local.properties or environment variables must never be committed or logged.
+
+rules:
+  proposal:
+    - Preserve the full user request or goal scope; do not narrow it to existing implementation.
+    - Identify affected existing capabilities and explicit non-goals.
+  design:
+    - Ground decisions in current code and include platform-specific consequences for affected KMP targets.
+    - Define verification evidence for every supported platform affected by the change.
+  specs:
+    - Write testable requirements and scenarios that describe observable behavior rather than implementation intent.
+  tasks:
+    - Map every task to proposal, design, or specification scope and include proportional verification.
+    - Do not mark a task complete until its implementation and verification evidence both succeed.
