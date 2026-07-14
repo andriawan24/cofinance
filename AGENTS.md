@@ -131,14 +131,19 @@ Platform-specific code uses `expect`/`actual` for: permissions, Google auth, cam
 
 ## Key Libraries
 
-- **Compose Multiplatform** 1.10.0 — UI framework
-- **Supabase Kotlin** 3.3.0 — Auth, PostgREST, Realtime, Storage
-- **Ktor** 3.4.0 — HTTP client
-- **Koin** 4.1.1 — Dependency injection
-- **Coil** 3.3.0 — Image loading
+- **Kotlin** 2.4.0 — Multiplatform language and compiler
+- **Android Gradle Plugin** 9.2.1 — Android and Android-KMP build tooling
+- **Compose Multiplatform** 1.11.1 — UI framework
+- **Material 3** 1.9.0 — Compose design system components
+- **Supabase Kotlin** 3.6.0 — Auth, PostgREST, and Storage
+- **PowerSync** 1.13.0 — Offline-first SQLite synchronization on native targets
+- **Ktor** 3.5.1 — HTTP client
+- **Koin** 4.2.2 — Dependency injection
+- **Coil** 3.5.0 — Image loading
 - **Google Generative AI** 0.9.0-1.1.0 — Gemini for receipt scanning
-- **CameraK** 0.2.0 — Multiplatform camera
-- **Kotlin Datetime** 0.7.1 — Date/time handling
+- **CameraK** 1.1 — Multiplatform camera
+- **Kotlinx Datetime** 0.8.0 — Date/time handling
+- **BuildKonfig** 0.22.0 — Multiplatform build-time configuration
 
 ## Code Style
 
