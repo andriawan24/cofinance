@@ -1,0 +1,44 @@
+# Google Authentication Specification
+
+## Purpose
+
+Define Google ID-token authentication across Cofinance platforms and the exchange of native credentials for a Supabase session.
+
+## Requirements
+
+### Requirement: Native Google sign-in on Android
+The Android application SHALL request a Google ID token through Android Credential Manager.
+
+#### Scenario: Android sign-in succeeds
+- **WHEN** a user selects a Google account and Credential Manager returns a valid Google ID token
+- **THEN** the application SHALL exchange that token with Supabase Auth and establish a session
+
+#### Scenario: Android sign-in is cancelled
+- **WHEN** the user cancels the credential flow
+- **THEN** the application SHALL return to the login state without reporting an authentication failure
+
+### Requirement: Native Google sign-in on iOS
+The iOS application SHALL use the Google Sign-In iOS SDK through the Swift-to-Kotlin bridge.
+
+#### Scenario: iOS bridge is configured
+- **WHEN** the iOS application starts
+- **THEN** it SHALL configure `GoogleSignInBridgeImpl`, register it with the shared bridge holder, and handle callback URLs
+
+#### Scenario: iOS sign-in succeeds
+- **WHEN** the native Google account flow returns an ID token
+- **THEN** the shared login flow SHALL exchange that token with Supabase Auth and establish a session
+
+### Requirement: Explicit unsupported-platform behavior
+Platforms without an implemented Google provider SHALL return an explicit unsupported result rather than starting a broken flow.
+
+#### Scenario: Unsupported platform requests sign-in
+- **WHEN** Desktop, JS, or WasmJS invokes Google sign-in
+- **THEN** the application SHALL return a user-safe error and SHALL NOT create a partial session
+
+### Requirement: Protect authentication material
+The application SHALL NOT log ID tokens, access tokens, refresh tokens, client secrets, or private configuration.
+
+#### Scenario: Authentication fails
+- **WHEN** a native or Supabase authentication operation fails
+- **THEN** diagnostics SHALL describe the failure without including credential material
+
