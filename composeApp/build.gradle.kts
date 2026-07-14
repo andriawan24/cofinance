@@ -14,6 +14,7 @@ plugins {
 }
 
 val generateComposeStorybook = tasks.register<ComposeStorybookGeneratorTask>("generateComposeStorybook") {
+    description = "Generate storybook from every components"
     componentsDir.set(
         layout.projectDirectory.dir("src/commonMain/kotlin/id/andriawan/cofinance/components")
     )
