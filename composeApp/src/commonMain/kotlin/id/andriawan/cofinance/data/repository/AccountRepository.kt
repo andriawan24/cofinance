@@ -3,8 +3,7 @@ package id.andriawan.cofinance.data.repository
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.model.response.Account
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
+import dev.gitlive.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.ExperimentalUuidApi
@@ -24,10 +23,11 @@ interface AccountRepository {
 
 class AccountRepositoryImpl(
     private val database: CofinanceDatabase,
-    private val supabaseClient: SupabaseClient
+    private val firebaseAuth: FirebaseAuth
 ) : AccountRepository {
 
-    private fun getUserId(): String = supabaseClient.auth.currentUserOrNull()?.id.orEmpty()
+    private fun getUserId(): String =
+        firebaseAuth.currentUser?.uid ?: error("No authenticated Firebase user")
 
     override suspend fun getAccounts(): List<Account> {
         return database.getAccounts(getUserId()).map { Account.from(it) }

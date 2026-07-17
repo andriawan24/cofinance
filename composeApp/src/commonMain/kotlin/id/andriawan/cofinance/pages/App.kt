@@ -3,11 +3,7 @@ package id.andriawan.cofinance.pages
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.compose.LifecycleEventEffect
-import id.andriawan.cofinance.data.local.rememberCofinanceDatabase
 import id.andriawan.cofinance.di.databaseModule
 import id.andriawan.cofinance.di.networkModule
 import id.andriawan.cofinance.di.repositoryModule
@@ -17,7 +13,6 @@ import id.andriawan.cofinance.localization.AppLang
 import id.andriawan.cofinance.localization.rememberAppLocale
 import id.andriawan.cofinance.navigations.MainNavigation
 import id.andriawan.cofinance.theme.CofinanceTheme
-import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
 
@@ -26,29 +21,19 @@ val LocalAppLocalization = compositionLocalOf { AppLang.English }
 @Composable
 @Preview
 fun App(sharedImageUri: String? = null) {
-    val database = rememberCofinanceDatabase()
-
     KoinApplication(
-        configuration = koinConfiguration(declaration = {
-            modules(
-                networkModule,
-                databaseModule(database),
-                repositoryModule,
-                useCaseModule,
-                viewModelModule
-            )
-        }
-        ), content = {
-            val scope = rememberCoroutineScope()
-
-            LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
-                scope.launch { database.pauseSync() }
+        configuration = koinConfiguration(
+            declaration = {
+                modules(
+                    networkModule,
+                    databaseModule,
+                    repositoryModule,
+                    useCaseModule,
+                    viewModelModule
+                )
             }
-
-            LifecycleEventEffect(Lifecycle.Event.ON_START) {
-                scope.launch { database.resumeSync() }
-            }
-
+        ),
+        content = {
             val currentLanguage = rememberAppLocale()
 
             CompositionLocalProvider(LocalAppLocalization provides currentLanguage) {

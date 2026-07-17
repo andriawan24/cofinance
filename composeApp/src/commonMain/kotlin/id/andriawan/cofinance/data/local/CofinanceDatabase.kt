@@ -2,12 +2,9 @@ package id.andriawan.cofinance.data.local
 
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
-import io.github.jan.supabase.SupabaseClient
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Abstraction for local data operations, backed by PowerSync (offline-first) on Android/iOS.
- */
+/** Shared account and transaction persistence contract backed by Cloud Firestore. */
 interface CofinanceDatabase {
     // Account reads
     fun watchAccounts(userId: String): Flow<List<AccountResponse>>
@@ -58,8 +55,9 @@ interface CofinanceDatabase {
         notes: String,
         accountsId: String,
         receiverAccountsId: String?,
-        type: String
-    )
+        type: String,
+        userId: String
+    ): TransactionResponse
 
     suspend fun insertTransaction(
         id: String,
@@ -72,13 +70,5 @@ interface CofinanceDatabase {
         receiverAccountsId: String?,
         type: String,
         userId: String
-    )
-
-    // Sync lifecycle
-    suspend fun connectSync(supabaseClient: SupabaseClient, powerSyncUrl: String)
-    suspend fun disconnectSync()
-    suspend fun disconnectAndClearSync()
-    suspend fun pauseSync()
-    suspend fun resumeSync()
-
+    ): TransactionResponse
 }

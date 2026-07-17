@@ -1,6 +1,8 @@
 [versions]
 agp = "9.3.0"
-powersync = "1.13.0"
+firebaseKotlin = "2.4.0"
+firebaseBom = "33.15.0"
+googleServices = "4.5.0"
 androidx-activity = "1.13.0"
 androidx-lifecycle = "2.11.0"
 camerak = "1.1"
@@ -9,12 +11,12 @@ composeMultiplatform = "1.11.1"
 credentials = "1.6.0"
 googleid = "1.2.0"
 kotlin = "2.4.0"
+kotlinxSerialization = "1.9.0"
 composeNavigation = "2.9.2"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.8.0"
 logging = "2.1.1"
 material3 = "1.9.0"
-supabasekt = "3.6.0"
 ktor = "3.5.1"
 generativeaiGoogle = "0.9.0-1.1.0"
 buildkonfigGradlePlugin = "0.22.0"
@@ -34,6 +36,7 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDatetime" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 # Compose
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
@@ -43,13 +46,12 @@ compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", v
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "composeMultiplatform" }
 
-# Supabase
+# Firebase
 logging = { module = "com.diamondedge:logging", version.ref = "logging" }
-supabasekt-bom = { module = "io.github.jan-tennert.supabase:bom", version.ref = "supabasekt" }
-supabasekt-postgrest = { module = "io.github.jan-tennert.supabase:postgrest-kt" }
-supabasekt-auth = { module = "io.github.jan-tennert.supabase:auth-kt" }
-
-supabasekt-storage = { module = "io.github.jan-tennert.supabase:storage-kt" }
+firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseKotlin" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebaseKotlin" }
+firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "firebaseKotlin" }
 
 # Ktor
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
@@ -66,10 +68,6 @@ koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-view
 # Gen AI
 generativeai-google = { module = "dev.shreyaspatil.generativeai:generativeai-google", version.ref = "generativeaiGoogle" }
 
-# PowerSync
-powersync-core = { module = "com.powersync:core", version.ref = "powersync" }
-powersync-compose = { module = "com.powersync:compose", version.ref = "powersync" }
-
 # BuildKonfig
 buildkonfig-gradle-plugin = { module = "com.codingfeline.buildkonfig:buildkonfig-gradle-plugin", version.ref = "buildkonfigGradlePlugin" }
 
@@ -81,3 +79,4 @@ cmp = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kmp = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+googleServices = { id = "com.google.gms.google-services", version.ref = "googleServices" }

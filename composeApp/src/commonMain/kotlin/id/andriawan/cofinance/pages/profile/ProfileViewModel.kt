@@ -3,7 +3,6 @@ package id.andriawan.cofinance.pages.profile
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.LogoutUseCase
 import id.andriawan.cofinance.domain.usecases.authentications.UpdateCycleStartDayUseCase
@@ -35,8 +34,7 @@ data class UiState(
 class ProfileViewModel(
     private val getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val updateCycleStartDayUseCase: UpdateCycleStartDayUseCase,
-    private val database: CofinanceDatabase
+    private val updateCycleStartDayUseCase: UpdateCycleStartDayUseCase
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
@@ -76,12 +74,6 @@ class ProfileViewModel(
 
     fun logout() {
         viewModelScope.launch {
-            try {
-                database.disconnectSync()
-            } catch (_: Exception) {
-                // Non-fatal - proceed with logout anyway
-            }
-
             logoutUseCase.execute().collectResult(
                 onError = { _profileEvent.send(ShowMessage(mapAuthErrorMessage(it))) },
                 onSuccess = { _profileEvent.send(NavigateToLoginPage) }

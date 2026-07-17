@@ -1,9 +1,12 @@
 import SwiftUI
+import FirebaseCore
 
 @main
 struct iOSApp: App {
 
     init() {
+        FirebaseApp.configure()
+
         // Configure Google Sign-In on app launch
         GoogleSignInBridgeImpl.configure()
     }

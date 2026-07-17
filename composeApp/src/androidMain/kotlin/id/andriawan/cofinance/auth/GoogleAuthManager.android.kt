@@ -39,7 +39,7 @@ actual class GoogleAuthManager {
                     request = request
                 )
                 handleSignInResult(result)
-            } catch (e: GetCredentialCancellationException) {
+            } catch (_: GetCredentialCancellationException) {
                 GoogleAuthResult.Cancelled
             } catch (e: GetCredentialException) {
                 GoogleAuthResult.Error(e.message ?: "Failed to get credentials", e)
@@ -72,7 +72,7 @@ actual class GoogleAuthManager {
     }
 
     actual fun signOut() {
-        // Google Sign-In via Credential Manager doesn't have a sign-out method
-        // Sign-out is handled by Supabase Auth
+        /* no-op */
+        // Handled by firebase auth sign out
     }
 }

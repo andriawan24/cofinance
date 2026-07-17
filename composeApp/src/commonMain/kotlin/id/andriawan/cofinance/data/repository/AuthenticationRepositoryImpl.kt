@@ -1,7 +1,6 @@
 package id.andriawan.cofinance.data.repository
 
-import com.diamondedge.logging.logging
-import id.andriawan.cofinance.data.datasource.SupabaseDataSource
+import id.andriawan.cofinance.data.datasource.FirebaseDataSource
 import id.andriawan.cofinance.domain.model.request.IdTokenParam
 import id.andriawan.cofinance.domain.model.request.IdTokenParam.Companion.toRequest
 import id.andriawan.cofinance.domain.model.response.User
@@ -20,45 +19,41 @@ interface AuthenticationRepository {
 
 
 class AuthenticationRepositoryImpl(
-    private val supabaseDataSource: SupabaseDataSource
+    private val firebaseDataSource: FirebaseDataSource
 ) : AuthenticationRepository {
 
-    override fun getUser(): User = User.from(supabaseDataSource.getUser())
+    override fun getUser(): User = User.from(firebaseDataSource.getUser())
 
     override suspend fun fetchUser(): User {
-        val user = supabaseDataSource.fetchUser()
+        val user = firebaseDataSource.fetchUser()
         return User.from(user)
     }
 
     override suspend fun login(idTokenParam: IdTokenParam) {
-        supabaseDataSource.login(idTokenParam.toRequest())
+        firebaseDataSource.login(idTokenParam.toRequest())
     }
 
     override suspend fun logout() {
-        supabaseDataSource.logout()
+        firebaseDataSource.logout()
     }
 
     override suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User {
         var avatarUrl: String? = null
         if (avatarBytes != null) {
-            val userId = supabaseDataSource.getUser()?.id.orEmpty()
-            avatarUrl = supabaseDataSource.uploadAvatar(userId, avatarBytes)
+            val userId = firebaseDataSource.getUser()?.id.orEmpty()
+            avatarUrl = firebaseDataSource.uploadAvatar(userId, avatarBytes)
         }
-        val userInfo = supabaseDataSource.updateUserMetadata(name, avatarUrl)
+        val userInfo = firebaseDataSource.updateUserMetadata(name, avatarUrl)
         return User.from(userInfo)
     }
 
     override suspend fun updateCycleStartDay(day: Int): User {
-        val userInfo = supabaseDataSource.updateCycleStartDay(day)
+        val userInfo = firebaseDataSource.updateCycleStartDay(day)
         return User.from(userInfo)
     }
 
     override suspend fun updateLastCycleResetDate(date: String): User {
-        val userInfo = supabaseDataSource.updateLastCycleResetDate(date)
+        val userInfo = firebaseDataSource.updateLastCycleResetDate(date)
         return User.from(userInfo)
-    }
-
-    companion object {
-        val log = logging(AuthenticationRepositoryImpl::class.simpleName)
     }
 }

@@ -1,8 +1,11 @@
 package id.andriawan.cofinance.di
 
 import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.data.local.FirestoreCofinanceDatabase
+import org.koin.core.module.dsl.bind
+import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-fun databaseModule(database: CofinanceDatabase) = module {
-    single<CofinanceDatabase> { database }
+val databaseModule = module {
+    singleOf(::FirestoreCofinanceDatabase) { bind<CofinanceDatabase>() }
 }

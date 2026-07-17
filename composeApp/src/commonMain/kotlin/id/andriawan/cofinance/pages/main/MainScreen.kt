@@ -90,8 +90,7 @@ fun MainScreen(
                     if (addAccountSucceeded) {
                         state.showMessage(accountAddedMessage)
 
-                        // No need to manually call getAccounts() — the PowerSync
-                        // watch flow automatically re-emits on local DB changes.
+                        // Firestore account snapshots automatically re-emit after changes.
 
                         parentNavController.currentBackStackEntry
                             ?.savedStateHandle

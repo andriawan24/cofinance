@@ -36,16 +36,8 @@ kotlin {
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val nonWebMain = create("nonWebMain") { dependsOn(commonMain.get()) }
-        androidMain.get().dependsOn(nonWebMain)
-        iosMain.get().dependsOn(nonWebMain)
-
-        nonWebMain.dependencies {
-            implementation(libs.powersync.core)
-            implementation(libs.powersync.compose)
-        }
-
         androidMain.dependencies {
+            implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.compose.ui.tooling.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
@@ -77,12 +69,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.kotlinx.serialization.json)
 
-            // Supabase
-            implementation(project.dependencies.platform(libs.supabasekt.bom))
-            implementation(libs.supabasekt.postgrest)
-            implementation(libs.supabasekt.auth)
-            implementation(libs.supabasekt.storage)
+            // Firebase
+            implementation(libs.firebase.auth)
+            implementation(libs.firebase.firestore)
+            implementation(libs.firebase.storage)
 
             // KTOR
             implementation(libs.ktor.client.core)
@@ -140,18 +132,6 @@ buildkonfig {
     defaultConfigs {
         buildConfigField(
             FieldSpec.Type.STRING,
-            "SUPABASE_URL",
-            requiredBuildConfig("supabase.project_url", "SUPABASE_PROJECT_URL")
-        )
-
-        buildConfigField(
-            FieldSpec.Type.STRING,
-            "SUPABASE_API_KEY",
-            requiredBuildConfig("supabase.public_api_key", "SUPABASE_PUBLIC_API_KEY")
-        )
-
-        buildConfigField(
-            FieldSpec.Type.STRING,
             "GEMINI_API_KEY",
             requiredBuildConfig("gemini.api_key", "GEMINI_API_KEY")
         )
@@ -160,12 +140,6 @@ buildkonfig {
             FieldSpec.Type.STRING,
             "GOOGLE_AUTH_API_KEY",
             requiredBuildConfig("google_auth_client_id", "GOOGLE_AUTH_CLIENT_ID")
-        )
-
-        buildConfigField(
-            FieldSpec.Type.STRING,
-            "POWERSYNC_URL",
-            requiredBuildConfig("powersync.url", "POWERSYNC_URL")
         )
     }
 }

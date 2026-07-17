@@ -6,22 +6,18 @@ import androidx.lifecycle.viewModelScope
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.error_sign_in_failed
 import coil3.PlatformContext
-import com.andriawan.cofinance.BuildKonfig
 import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.auth.GoogleAuthResult
-import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.domain.model.request.IdTokenParam
+import id.andriawan.cofinance.domain.usecases.authentications.LoginIdTokenUseCase
+import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.UiText
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
-import io.github.jan.supabase.auth.providers.Google
-import io.github.jan.supabase.auth.providers.builtin.IDToken
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-
 
 sealed class LoginUiEvent {
     data object NavigateHomePage : LoginUiEvent()
@@ -34,8 +30,7 @@ data class LoginUiState(
 
 @Stable
 class LoginViewModel(
-    private val supabase: SupabaseClient,
-    private val database: CofinanceDatabase,
+    private val loginIdTokenUseCase: LoginIdTokenUseCase,
     private val googleAuthManager: GoogleAuthManager
 ) : ViewModel() {
     private val _loginUiEvent = Channel<LoginUiEvent>(Channel.BUFFERED)
@@ -50,21 +45,17 @@ class LoginViewModel(
 
             when (val result = googleAuthManager.signIn(context)) {
                 is GoogleAuthResult.Success -> {
-                    try {
-                        supabase.auth.signInWith(IDToken) {
-                            idToken = result.idToken
-                            provider = Google
-                        }
-
-                        database.connectSync(supabase, BuildKonfig.POWERSYNC_URL)
-                        _loginUiEvent.send(LoginUiEvent.NavigateHomePage)
-                    } catch (e: Exception) {
-                        _loginUiEvent.send(
-                            LoginUiEvent.ShowMessage(
-                                e.message?.let { UiText.Raw(it) }
-                                    ?: UiText.Res(Res.string.error_sign_in_failed)
+                    loginIdTokenUseCase.execute(IdTokenParam(result.idToken)).collect { state ->
+                        when (state) {
+                            is ResultState.Success -> _loginUiEvent.send(LoginUiEvent.NavigateHomePage)
+                            is ResultState.Error -> _loginUiEvent.send(
+                                LoginUiEvent.ShowMessage(
+                                    state.exception.message?.let(UiText::Raw)
+                                        ?: UiText.Res(Res.string.error_sign_in_failed)
+                                )
                             )
-                        )
+                            ResultState.Loading -> Unit
+                        }
                     }
                 }
 

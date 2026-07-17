@@ -1,9 +1,6 @@
 package id.andriawan.cofinance.domain.model.response
 
-import io.github.jan.supabase.auth.user.UserInfo
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.intOrNull
-import kotlinx.serialization.json.jsonPrimitive
+import id.andriawan.cofinance.data.model.response.FirebaseUserResponse
 
 data class User(
     val avatarUrl: String = "",
@@ -14,21 +11,14 @@ data class User(
     val lastCycleResetDate: String? = null
 ) {
     companion object {
-        fun from(user: UserInfo?): User {
-            val metadata = user?.userMetadata
-            val customName = metadata?.get("custom_name")?.jsonPrimitive?.content
-            val customAvatar = metadata?.get("custom_avatar_url")?.jsonPrimitive?.content
-            val googleAvatar = metadata?.get("avatar_url")?.jsonPrimitive?.content
-            val cycleStartDay = metadata?.get("cycle_start_day")?.jsonPrimitive?.intOrNull ?: 1
-            val lastCycleResetDate = metadata?.get("last_cycle_reset_date")?.jsonPrimitive?.contentOrNull
-
+        fun from(user: FirebaseUserResponse?): User {
             return User(
-                avatarUrl = customAvatar?.ifBlank { null } ?: googleAvatar.orEmpty(),
-                name = customName.orEmpty(),
+                avatarUrl = user?.avatarUrl.orEmpty(),
+                name = user?.name.orEmpty(),
                 email = user?.email.orEmpty(),
                 id = user?.id.orEmpty(),
-                cycleStartDay = cycleStartDay.coerceIn(1, 28),
-                lastCycleResetDate = lastCycleResetDate
+                cycleStartDay = user?.cycleStartDay?.coerceIn(1, 28) ?: 1,
+                lastCycleResetDate = user?.lastCycleResetDate
             )
         }
     }

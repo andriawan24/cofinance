@@ -6,9 +6,7 @@ import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
-import id.andriawan.cofinance.utils.enums.TransactionType
-import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.auth
+import dev.gitlive.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.ExperimentalUuidApi
@@ -27,11 +25,11 @@ interface TransactionRepository {
 class TransactionRepositoryImpl(
     private val geminiDataSource: GeminiDataSource,
     private val database: CofinanceDatabase,
-    private val supabaseClient: SupabaseClient
+    private val firebaseAuth: FirebaseAuth
 ) : TransactionRepository {
 
     private fun getUserId(): String =
-        supabaseClient.auth.currentUserOrNull()?.id.orEmpty()
+        firebaseAuth.currentUser?.uid ?: error("No authenticated Firebase user")
 
     override suspend fun scanReceipt(image: ByteArray): ReceiptScan {
         val response = geminiDataSource.scanReceipt(image)
@@ -66,7 +64,7 @@ class TransactionRepositoryImpl(
         val userId = getUserId()
         val id = params.id ?: Uuid.random().toString()
 
-        database.insertTransaction(
+        val inserted = database.insertTransaction(
             id = id,
             amount = params.amount ?: 0L,
             category = params.category.orEmpty(),
@@ -79,42 +77,7 @@ class TransactionRepositoryImpl(
             userId = userId
         )
 
-        // Optimistically update account balances locally
-        val amount = params.amount ?: 0L
-        val fee = params.fee ?: 0L
-        when (params.type) {
-            TransactionType.INCOME -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, amount)
-                }
-            }
-            TransactionType.EXPENSE -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, -(amount + fee))
-                }
-            }
-            TransactionType.TRANSFER -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, -(amount + fee))
-                }
-                if (!params.receiverAccountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.receiverAccountsId, amount)
-                }
-            }
-            else -> { /* DRAFT, CYCLE_RESET — no balance change */ }
-        }
-
-        // Get the inserted transaction back from local database
-        val inserted = database.getTransactions(
-            userId = userId,
-            transactionId = id
-        )
-        return if (inserted.isNotEmpty()) {
-            Transaction.from(inserted.first())
-        } else {
-            // Return a minimal transaction object
-            Transaction(id = id, amount = params.amount ?: 0L, type = params.type)
-        }
+        return Transaction.from(inserted)
     }
 
     override suspend fun updateTransaction(
@@ -123,11 +86,7 @@ class TransactionRepositoryImpl(
     ): Transaction {
         val id = params.id ?: oldTransaction.id
 
-        // 1. Reverse the old transaction's balance impact
-        reverseBalanceImpact(oldTransaction)
-
-        // 2. Update the transaction row
-        database.updateTransaction(
+        val updated = database.updateTransaction(
             id = id,
             amount = params.amount ?: 0L,
             category = params.category.orEmpty(),
@@ -136,67 +95,9 @@ class TransactionRepositoryImpl(
             notes = params.notes.orEmpty(),
             accountsId = params.accountsId.orEmpty(),
             receiverAccountsId = params.receiverAccountsId,
-            type = params.type.name
+            type = params.type.name,
+            userId = getUserId()
         )
-
-        // 3. Apply the new transaction's balance impact
-        val newAmount = params.amount ?: 0L
-        val newFee = params.fee ?: 0L
-        when (params.type) {
-            TransactionType.INCOME -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, newAmount)
-                }
-            }
-            TransactionType.EXPENSE -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, -(newAmount + newFee))
-                }
-            }
-            TransactionType.TRANSFER -> {
-                if (!params.accountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.accountsId, -(newAmount + newFee))
-                }
-                if (!params.receiverAccountsId.isNullOrEmpty()) {
-                    database.updateAccountBalance(params.receiverAccountsId, newAmount)
-                }
-            }
-            else -> { /* DRAFT, CYCLE_RESET — no balance change */ }
-        }
-
-        // 4. Read back the updated transaction
-        val userId = getUserId()
-        val updated = database.getTransactions(userId = userId, transactionId = id)
-        return if (updated.isNotEmpty()) {
-            Transaction.from(updated.first())
-        } else {
-            Transaction(id = id, amount = params.amount ?: 0L, type = params.type)
-        }
-    }
-
-    private suspend fun reverseBalanceImpact(transaction: Transaction) {
-        val amount = transaction.amount
-        val fee = transaction.fee
-        when (transaction.type) {
-            TransactionType.INCOME -> {
-                if (transaction.account.id.isNotEmpty()) {
-                    database.updateAccountBalance(transaction.account.id, -amount)
-                }
-            }
-            TransactionType.EXPENSE -> {
-                if (transaction.account.id.isNotEmpty()) {
-                    database.updateAccountBalance(transaction.account.id, amount + fee)
-                }
-            }
-            TransactionType.TRANSFER -> {
-                if (transaction.account.id.isNotEmpty()) {
-                    database.updateAccountBalance(transaction.account.id, amount + fee)
-                }
-                if (transaction.receiverAccount.id.isNotEmpty()) {
-                    database.updateAccountBalance(transaction.receiverAccount.id, -amount)
-                }
-            }
-            else -> { /* DRAFT, CYCLE_RESET — no balance change */ }
-        }
+        return Transaction.from(updated)
     }
 }
