@@ -23,6 +23,7 @@ A cross-platform personal finance management application built with **Kotlin Mul
 | Navigation Compose | 2.9.1 |
 | Android Gradle Plugin | 8.13.2 |
 | AndroidX Lifecycle | 2.9.6 |
+| Firebase Kotlin SDK | 2.4.0 |
 
 ### Target Platforms
 
@@ -62,7 +63,7 @@ Cofinance_Shared/
 - **Android Studio** (latest stable) or **IntelliJ IDEA**
 - **Android SDK** (API 24+)
 - **Xcode** (for iOS development, macOS only)
-- **CocoaPods** (for iOS dependencies)
+- **Xcode Swift Package Manager** (Firebase and Google Sign-In dependencies)
 
 ## Getting Started
 
@@ -101,6 +102,35 @@ Or build the framework via Gradle:
 ```
 
 ## Configuration
+
+### Firebase
+
+Create a Firebase project, enable Google sign-in in Firebase Authentication, create a Cloud Firestore database, and enable Firebase Storage. Register both application targets, then install their Firebase configuration files:
+
+- Android: download `google-services.json` and place it at `androidApp/google-services.json`. The Android application module processes it with the Google Services Gradle plugin.
+- iOS: download `GoogleService-Info.plist` and place it at `iosApp/iosApp/GoogleService-Info.plist`. Ensure the file belongs to the `iosApp` target; the filesystem-synchronized Xcode group includes files in this directory automatically. The Swift application entry point calls `FirebaseApp.configure()`.
+
+Keep only the non-Firebase API inputs in the untracked `local.properties` file:
+
+```properties
+google_auth_client_id=your-web-oauth-client-id.apps.googleusercontent.com
+gemini.api_key=your-gemini-api-key
+```
+
+Equivalent uppercase environment variables are supported for those two values: `GOOGLE_AUTH_CLIENT_ID` and `GEMINI_API_KEY`. Never commit API credentials.
+
+Register `id.andriawan.cofinance` for Android and the bundle identifier configured in `iosApp/Configuration/Config.xcconfig` for iOS. The iOS Xcode project links Firebase Core, Auth, Firestore, and Storage through Swift Package Manager.
+
+Firestore uses this user-scoped structure:
+
+```text
+users/{uid}                         # Cofinance profile metadata
+users/{uid}/accounts/{accountId}    # Finance accounts
+users/{uid}/transactions/{id}       # Transactions
+avatars/{uid}/avatar.jpg            # Firebase Storage avatar
+```
+
+Configure Firestore and Storage security rules so authenticated users can access only paths whose `{uid}` equals `request.auth.uid`. The app talks directly to Firestore and does not provide a PowerSync-style app-managed local synchronization layer.
 
 ### Gradle Properties
 

@@ -74,12 +74,10 @@ Cofinance is a Kotlin Multiplatform (KMP) personal finance app targeting Android
 ### Build Configuration
 
 A `local.properties` file is required with:
-- `supabase.project_url`
-- `supabase.public_api_key`
 - `gemini.api_key`
 - `google_auth_client_id`
 
-These are **secrets** injected at build time via BuildKonfig and must never be committed (including into forks), included in screenshots, or printed to CI logs. `local.properties` is already in `.gitignore` — do not remove it. To share keys across machines or CI, use environment variables or a secret manager rather than checking the file in.
+Firebase uses the standard platform configuration files: `androidApp/google-services.json` and `iosApp/iosApp/GoogleService-Info.plist`. Download each file for the matching registered application in Firebase Console; do not copy configuration values into BuildKonfig. The remaining `local.properties` values are injected at build time and must never be committed, included in screenshots, or printed to CI logs. `local.properties` is already in `.gitignore` — do not remove it. To share keys across machines or CI, use environment variables or a secret manager rather than checking the file in.
 
 ## Architecture
 
@@ -121,7 +119,7 @@ All shared code lives under `composeApp/src/commonMain/kotlin/id/andriawan/cofin
 - `navigations/` — Route definitions
 - `domain/usecases/` — Business logic
 - `data/repository/` — Repository implementations
-- `data/datasource/` — Supabase and Gemini data sources
+- `data/datasource/` — Firebase and Gemini data sources
 - `di/` — Koin modules
 - `theme/` — Material Design 3 theming
 - `localization/` — English and Indonesian strings
@@ -135,8 +133,7 @@ Platform-specific code uses `expect`/`actual` for: permissions, Google auth, cam
 - **Android Gradle Plugin** 9.2.1 — Android and Android-KMP build tooling
 - **Compose Multiplatform** 1.11.1 — UI framework
 - **Material 3** 1.9.0 — Compose design system components
-- **Supabase Kotlin** 3.6.0 — Auth, PostgREST, and Storage
-- **PowerSync** 1.13.0 — Offline-first SQLite synchronization on native targets
+- **Firebase Kotlin SDK** 2.4.0 — Authentication, Cloud Firestore, and Storage
 - **Ktor** 3.5.1 — HTTP client
 - **Koin** 4.2.2 — Dependency injection
 - **Coil** 3.5.0 — Image loading
