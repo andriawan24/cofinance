@@ -12,4 +12,4 @@
 
 - [x] 3.1 Verify decoded secrets match the local source files without printing their contents, and verify workflow files never upload or log Firebase application configuration.
 - [x] 3.2 Run Android lint and unit tests with ignored configuration files, validate workflow YAML, and run strict OpenSpec validation.
-- [ ] 3.3 Commit only the CI/OpenSpec change, push it to `main`, and confirm the resulting GitHub Actions runs pass or report any independent residual failures.
+- [x] 3.3 Commit only the CI/OpenSpec change, push it to `main`, and confirm the resulting GitHub Actions runs pass or report any independent residual failures.
