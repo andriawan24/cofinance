@@ -1,10 +1,4 @@
-# Google Authentication Specification
-
-## Purpose
-
-Define Google ID-token authentication across Cofinance platforms and the exchange of native credentials for a Firebase session.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Native Google sign-in on Android
 The Android application SHALL request a Google ID token through Android Credential Manager.

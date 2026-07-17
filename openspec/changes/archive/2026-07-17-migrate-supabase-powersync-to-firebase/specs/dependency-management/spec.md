@@ -1,21 +1,4 @@
-# Dependency Management Specification
-
-## Purpose
-
-Define how Cofinance declares, aligns, verifies, and upgrades build tooling and third-party libraries.
-
-## Current Implementation
-
-The project uses `gradle/libs.versions.toml` as its version catalog, published BOMs for Firebase Android and Koin families, a Gradle wrapper, platform-scoped Ktor engines, and Swift Package Manager for Firebase on iOS. The July 2026 working tree targets Gradle 9.6.1, AGP 9.3.0, Kotlin 2.4.0, Compose Multiplatform 1.11.1, Ktor 3.5.1, Coil 3.5.0, Firebase Kotlin SDK 2.4.0, Koin 4.2.2, CameraK 1.1, and kotlinx-datetime 0.8.0.
-
-## Requirements
-
-### Requirement: Centralize dependency versions
-Direct dependency and plugin versions SHALL be declared in the version catalog unless a tool requires declaration in a settings or wrapper file.
-
-#### Scenario: A dependency is upgraded
-- **WHEN** a library or plugin version changes
-- **THEN** the authoritative version SHALL be updated once and all related coordinates SHALL resolve consistently
+## MODIFIED Requirements
 
 ### Requirement: Align dependency families
 Libraries published as a coordinated family SHALL use the publisher's BOM or a single shared catalog version.
@@ -47,13 +30,6 @@ Platform-specific engines and native libraries SHALL be declared only in source 
 - **WHEN** an Android or iOS application target is built
 - **THEN** Android SHALL process `google-services.json` with the Google Services plugin and iOS SHALL bundle `GoogleService-Info.plist` for `FirebaseApp.configure()`
 
-### Requirement: Support remote image loading explicitly
-The dependency graph SHALL include Coil Compose integration and a compatible Coil network artifact for targets that render remote images.
-
-#### Scenario: Render a remote profile image
-- **WHEN** Coil receives an HTTP or HTTPS image URL
-- **THEN** it SHALL fetch the image through the target's selected network engine
-
 ### Requirement: Verify upgrades before adoption
 Dependency replacements and upgrades SHALL be validated against the project's supported targets and publisher migration guidance before being treated as complete.
 
@@ -64,10 +40,3 @@ Dependency replacements and upgrades SHALL be validated against the project's su
 #### Scenario: Runtime library is replaced or upgraded
 - **WHEN** a runtime dependency changes
 - **THEN** affected source sets SHALL compile and critical flows SHALL have requirement-level verification evidence for every platform that consumes it
-
-### Requirement: Prefer supported public build APIs
-Build scripts SHALL avoid internal plugin APIs and settings scheduled for removal in the next major Gradle or AGP release.
-
-#### Scenario: Build runs with all warnings enabled
-- **WHEN** Gradle executes with `--warning-mode=all`
-- **THEN** the build SHALL not rely on APIs or flags documented for removal in Gradle 10 or AGP 10
