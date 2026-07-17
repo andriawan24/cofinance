@@ -49,6 +49,37 @@ jobs:
           sdk.dir=$ANDROID_HOME
           EOF
 
+      - name: Provision Android Firebase configuration
+        shell: bash
+        env:
+          FIREBASE_ANDROID_CONFIG_BASE64: ${{ secrets.FIREBASE_ANDROID_CONFIG_BASE64 }}
+          FIREBASE_ANDROID_PACKAGE_NAME: id.andriawan.cofinance
+          FIREBASE_ANDROID_CONFIG_PATH: androidApp/google-services.json
+        run: |
+          set -euo pipefail
+
+          if [ -z "${FIREBASE_ANDROID_CONFIG_BASE64:-}" ]; then
+            echo "::error::FIREBASE_ANDROID_CONFIG_BASE64 is not configured."
+            exit 1
+          fi
+
+          ruby -rbase64 -rjson -e '
+            begin
+              encoded = ENV.fetch("FIREBASE_ANDROID_CONFIG_BASE64").delete("\r\n")
+              decoded = Base64.strict_decode64(encoded)
+              config = JSON.parse(decoded)
+              package_name = ENV.fetch("FIREBASE_ANDROID_PACKAGE_NAME")
+              matching_client = config.fetch("client").any? do |client|
+                client.dig("client_info", "android_client_info", "package_name") == package_name
+              end
+              raise "package mismatch" unless matching_client
+              File.binwrite(ENV.fetch("FIREBASE_ANDROID_CONFIG_PATH"), decoded)
+            rescue StandardError
+              warn "Android Firebase configuration is invalid or does not match the application package."
+              exit 1
+            end
+          '
+
       - name: Build Release APK
         run: ./gradlew :androidApp:assembleRelease --no-daemon
 

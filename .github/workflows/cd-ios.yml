@@ -48,6 +48,44 @@ jobs:
           powersync.url=${{ secrets.POWERSYNC_URL }}
           EOF
 
+      - name: Provision iOS Firebase configuration
+        shell: bash
+        env:
+          FIREBASE_IOS_CONFIG_BASE64: ${{ secrets.FIREBASE_IOS_CONFIG_BASE64 }}
+          FIREBASE_IOS_BUNDLE_ID: id.andriawan.cofinance
+          FIREBASE_IOS_CONFIG_PATH: iosApp/iosApp/GoogleService-Info.plist
+        run: |
+          set -euo pipefail
+
+          if [ -z "${FIREBASE_IOS_CONFIG_BASE64:-}" ]; then
+            echo "::error::FIREBASE_IOS_CONFIG_BASE64 is not configured."
+            exit 1
+          fi
+
+          if ! ruby -rbase64 -e '
+            begin
+              encoded = ENV.fetch("FIREBASE_IOS_CONFIG_BASE64").delete("\r\n")
+              decoded = Base64.strict_decode64(encoded)
+              File.binwrite(ENV.fetch("FIREBASE_IOS_CONFIG_PATH"), decoded)
+            rescue StandardError
+              exit 1
+            end
+          '; then
+            echo "::error::iOS Firebase configuration is not valid base64."
+            exit 1
+          fi
+
+          if ! plutil -lint "$FIREBASE_IOS_CONFIG_PATH" >/dev/null; then
+            echo "::error::iOS Firebase configuration is not a valid plist."
+            exit 1
+          fi
+
+          firebase_bundle_id="$(/usr/libexec/PlistBuddy -c 'Print :BUNDLE_ID' "$FIREBASE_IOS_CONFIG_PATH" 2>/dev/null || true)"
+          if [ "$firebase_bundle_id" != "$FIREBASE_IOS_BUNDLE_ID" ]; then
+            echo "::error::iOS Firebase configuration does not match the application bundle identifier."
+            exit 1
+          fi
+
       - name: Validate iOS build and distribution credentials
         id: ios_distribution
         shell: bash
