@@ -1,6 +1,4 @@
 import com.codingfeline.buildkonfig.compiler.FieldSpec
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.util.Properties
 
@@ -11,15 +9,6 @@ plugins {
     alias(libs.plugins.androidKmpLibrary)
     alias(libs.plugins.kotlinSerialization)
     id("com.codingfeline.buildkonfig")
-}
-
-val generateComposeStorybook = tasks.register<ComposeStorybookGeneratorTask>("generateComposeStorybook") {
-    description = "Generate storybook from every components"
-    componentsDir.set(
-        layout.projectDirectory.dir("src/commonMain/kotlin/id/andriawan/cofinance/components")
-    )
-    configFile.set(layout.projectDirectory.file("storybook/storybook.properties"))
-    outputDir.set(layout.buildDirectory.dir("generated/storybook/webMain/kotlin"))
 }
 
 kotlin {
@@ -44,36 +33,12 @@ kotlin {
         }
     }
 
-    jvm("desktop")
-
-    js {
-        browser()
-        binaries.executable()
-    }
-
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
     applyDefaultHierarchyTemplate()
 
     sourceSets {
-        val desktopMain = getByName("desktopMain")
-
-        // Intermediate source set for platforms that support PowerSync (Android, iOS, Desktop)
-        val nonWebMain = create("nonWebMain") {
-            dependsOn(commonMain.get())
-        }
+        val nonWebMain = create("nonWebMain") { dependsOn(commonMain.get()) }
         androidMain.get().dependsOn(nonWebMain)
         iosMain.get().dependsOn(nonWebMain)
-        desktopMain.dependsOn(nonWebMain)
-
-        // webMain is provided and wired to JS/WasmJS by the default hierarchy template.
-        getByName("webMain").apply {
-            kotlin.srcDir(generateComposeStorybook.map { it.outputDir })
-        }
 
         nonWebMain.dependencies {
             implementation(libs.powersync.core)
@@ -96,14 +61,6 @@ kotlin {
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
-
-            // CameraK
-            implementation(libs.camerak)
-        }
-
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
-            implementation(libs.ktor.client.cio)
 
             // CameraK
             implementation(libs.camerak)
@@ -151,12 +108,6 @@ kotlin {
         commonTest.dependencies {
             implementation(libs.kotlin.test)
         }
-    }
-}
-
-tasks.configureEach {
-    if (name.contains("compile", ignoreCase = true) && name.contains("Kotlin", ignoreCase = true)) {
-        dependsOn(generateComposeStorybook)
     }
 }
 
@@ -213,30 +164,5 @@ buildkonfig {
             "POWERSYNC_URL",
             requiredBuildConfig("powersync.url", "POWERSYNC_URL")
         )
-    }
-}
-
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "Cofinance"
-            packageVersion = "1.0.0"
-
-            macOS {
-                bundleID = "com.andriawan.cofinance"
-            }
-
-            windows {
-                menuGroup = "Cofinance"
-                upgradeUuid = "YOUR-UNIQUE-UUID"
-            }
-
-            linux {
-                packageName = "cofinance"
-            }
-        }
     }
 }

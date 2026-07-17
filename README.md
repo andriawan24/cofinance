@@ -1,10 +1,10 @@
 # Cofinance
 
-A cross-platform personal finance management application built with **Kotlin Multiplatform** and **Compose Multiplatform**. Track your finances, manage accounts, view statistics, and monitor financial activities across Android, iOS, and Web platforms.
+A cross-platform personal finance management application built with **Kotlin Multiplatform** and **Compose Multiplatform**. Track your finances, manage accounts, view statistics, and monitor financial activities across Android and iOS.
 
 ## Features
 
-- **Multi-Platform Support** - Single codebase for Android, iOS, and Web (JS/Wasm)
+- **Multi-Platform Support** - Single codebase for Android and iOS
 - **Authentication** - Login screen with Google Sign-in integration
 - **Multi-Language Support** - English and Indonesian localization
 - **Material Design 3** - Modern UI with Light and Dark theme support
@@ -28,7 +28,6 @@ A cross-platform personal finance management application built with **Kotlin Mul
 
 - **Android**: minSdk 24, targetSdk 36
 - **iOS**: arm64 & Simulator architectures
-- **Web**: JavaScript and WebAssembly targets
 
 ## Project Structure
 
@@ -45,9 +44,7 @@ Cofinance_Shared/
 │       │       ├── localization/   # Multi-language support
 │       │       └── utils/          # Utilities & extensions
 │       ├── androidMain/            # Android-specific code
-│       ├── iosMain/                # iOS-specific code
-│       ├── jsMain/                 # Web JS target
-│       └── wasmJsMain/             # Web Wasm target
+│       └── iosMain/                # iOS-specific code
 │
 ├── iosApp/                         # iOS native app wrapper
 │   └── iosApp/
@@ -101,26 +98,6 @@ Or build the framework via Gradle:
 
 ```bash
 ./gradlew :composeApp:linkDebugFrameworkIosArm64
-```
-
-### Web (Wasm)
-
-```bash
-# Development server with hot reload
-./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-
-# Production build
-./gradlew :composeApp:wasmJsBrowserProductionWebpack
-```
-
-### Web (JavaScript)
-
-```bash
-# Development server
-./gradlew :composeApp:jsBrowserDevelopmentRun
-
-# Production build
-./gradlew :composeApp:jsBrowserProductionWebpack
 ```
 
 ## Configuration
@@ -186,7 +163,6 @@ String resources are located in:
 
 - [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)
 - [Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/)
-- [Kotlin/Wasm](https://kotl.in/wasm/)
 - [Material Design 3](https://m3.material.io/)
 
 ## License

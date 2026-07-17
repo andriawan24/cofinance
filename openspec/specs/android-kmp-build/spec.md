@@ -18,7 +18,7 @@ The system SHALL keep the Android application entry point in `androidApp` and sh
 - **THEN** it SHALL use `com.android.kotlin.multiplatform.library` and expose shared UI and platform actual implementations to `androidApp`
 
 ### Requirement: Preserve multiplatform targets
-The shared module SHALL provide Android, iOS device, iOS simulator, Desktop JVM, JavaScript, and WasmJS targets, and every intermediate source set SHALL participate in each intended target compilation.
+The shared module SHALL provide Android, iOS device, and iOS simulator targets only, and every intermediate source set SHALL participate in each intended target compilation.
 
 #### Scenario: Resolve platform implementations
 - **WHEN** any supported target is compiled
@@ -26,7 +26,11 @@ The shared module SHALL provide Android, iOS device, iOS simulator, Desktop JVM,
 
 #### Scenario: Compile shared iOS implementations
 - **WHEN** either iOS device or iOS simulator code is compiled
-- **THEN** sources and dependencies declared in `iosMain` and `nonWebMain` SHALL participate in that compilation
+- **THEN** sources and dependencies declared in `iosMain` and the shared PowerSync-bearing intermediate source set SHALL participate in that compilation
+
+#### Scenario: No Desktop, JS, or WasmJS targets remain
+- **WHEN** `composeApp/build.gradle.kts` is inspected
+- **THEN** it SHALL NOT declare a `jvm("desktop")`, `js`, or `wasmJs` Kotlin target, and SHALL NOT configure a `compose.desktop` application block
 
 ### Requirement: Use supported build APIs
 The build SHALL use public Gradle, Kotlin, and Android Gradle Plugin APIs that remain supported by the next announced major release.

@@ -1,21 +1,12 @@
 package id.andriawan.cofinance.data.datasource
 
-import id.andriawan.cofinance.data.model.request.AccountRequest
-import id.andriawan.cofinance.data.model.request.AddTransactionRequest
-import id.andriawan.cofinance.data.model.request.GetTransactionsRequest
 import id.andriawan.cofinance.data.model.request.IdTokenRequest
-import id.andriawan.cofinance.data.model.response.AccountResponse
-import id.andriawan.cofinance.data.model.response.TransactionResponse
-import id.andriawan.cofinance.utils.enums.TransactionType
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
-import io.github.jan.supabase.postgrest.from
-import io.github.jan.supabase.postgrest.query.Columns
-import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.storage
 import kotlinx.serialization.json.JsonPrimitive
 
@@ -78,89 +69,6 @@ class SupabaseDataSource(private val supabase: SupabaseClient) {
                 put("last_cycle_reset_date", JsonPrimitive(date))
             }
         }
-    }
-
-    // endregion
-
-    // region Data (used by OnlineOnlyDatabase for web targets)
-
-    suspend fun getAccounts(): List<AccountResponse> {
-        return supabase.from(AccountResponse.TABLE_NAME)
-            .select {
-                order(
-                    column = AccountResponse.NAME_FIELD,
-                    order = Order.DESCENDING
-                )
-            }
-            .decodeList<AccountResponse>()
-    }
-
-    suspend fun addAccount(request: AccountRequest): AccountResponse {
-        val userId = supabase.auth.currentUserOrNull()?.id.orEmpty()
-        val newRequest = request.copy(usersId = userId)
-
-        return supabase.from(AccountResponse.TABLE_NAME)
-            .insert(newRequest) { select() }
-            .decodeSingle()
-    }
-
-    suspend fun getTransactions(request: GetTransactionsRequest): List<TransactionResponse> {
-        val columns = Columns.raw(
-            """
-                *,
-                sender:transactions_accounts_id_fkey(*),
-                receiver:transactions_receiver_accounts_id_fkey(*)
-            """.trimIndent()
-        )
-
-        val transactions = supabase.from(TransactionResponse.TABLE_NAME).select(columns = columns) {
-            filter {
-                if (request.startDate != null && request.endDate != null) {
-                    and {
-                        gte(column = TransactionResponse.DATE_FIELD, value = request.startDate)
-                        lt(column = TransactionResponse.DATE_FIELD, value = request.endDate)
-                    }
-                }
-
-                if (request.transactionId != null) {
-                    eq(column = TransactionResponse.ID_FIELD, value = request.transactionId)
-                    this@select.limit(1)
-                }
-
-                if (request.isDraft) {
-                    eq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
-                } else {
-                    neq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.DRAFT)
-                    neq(column = TransactionResponse.TRANSACTION_TYPE_FIELD, TransactionType.CYCLE_RESET)
-                }
-            }
-
-            order(
-                column = TransactionResponse.DATE_FIELD,
-                order = Order.DESCENDING
-            )
-        }
-
-        return transactions.decodeList<TransactionResponse>()
-    }
-
-    suspend fun createTransaction(request: AddTransactionRequest): TransactionResponse {
-        val userId = supabase.auth.currentUserOrNull()?.id.orEmpty()
-        val newRequest = request.copy(usersId = userId)
-
-        return supabase.from(table = TransactionResponse.TABLE_NAME)
-            .upsert(value = newRequest) {
-                select(
-                    columns = Columns.raw(
-                        """
-                            *,
-                            sender:transactions_accounts_id_fkey(*),
-                            receiver:transactions_receiver_accounts_id_fkey(*)
-                        """.trimIndent()
-                    )
-                )
-            }
-            .decodeSingle<TransactionResponse>()
     }
 
     // endregion

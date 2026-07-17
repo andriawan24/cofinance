@@ -6,9 +6,7 @@ import io.github.jan.supabase.SupabaseClient
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Abstraction for local data operations.
- * On Android/iOS/Desktop: backed by PowerSync (offline-first).
- * On JS/WasmJS: backed by direct Supabase calls (online-only).
+ * Abstraction for local data operations, backed by PowerSync (offline-first) on Android/iOS.
  */
 interface CofinanceDatabase {
     // Account reads

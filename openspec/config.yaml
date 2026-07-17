@@ -2,8 +2,8 @@ schema: spec-driven
 
 context: |
   Cofinance is a Kotlin Multiplatform personal finance app using Compose Multiplatform,
-  MVVM, Clean Architecture, Koin, Supabase, and PowerSync. Supported targets are Android,
-  iOS device/simulator, Desktop JVM, JS, and WasmJS.
+  MVVM, Clean Architecture, Koin, Supabase, and PowerSync. Supported targets are Android
+  and iOS device/simulator.
 
   OpenSpec is mandatory for every implementation change. Implementation must be associated
   with one named, apply-ready change, and agents must follow the Mandatory OpenSpec Workflow

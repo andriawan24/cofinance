@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Define offline-first account and transaction behavior on native targets while retaining an online-only web implementation.
+Define offline-first account and transaction behavior on Android and iOS.
 
 ## Requirements
 
 ### Requirement: Native targets use a local PowerSync database
-Android, iOS, and Desktop SHALL read and write accounts and transactions through the local PowerSync-backed `CofinanceDatabase`.
+Android and iOS SHALL read and write accounts and transactions through the local PowerSync-backed `CofinanceDatabase`.
 
 #### Scenario: Read while offline
 - **WHEN** a signed-in native user has previously synchronized data and loses connectivity
@@ -16,13 +16,6 @@ Android, iOS, and Desktop SHALL read and write accounts and transactions through
 #### Scenario: Write while offline
 - **WHEN** a signed-in native user creates or updates supported finance data without connectivity
 - **THEN** the write SHALL be committed locally and queued for later upload
-
-### Requirement: Web targets remain online-only
-JS and WasmJS SHALL use the Supabase-backed `OnlineOnlyDatabase` until a supported web synchronization implementation is adopted.
-
-#### Scenario: Web data access
-- **WHEN** a web user reads or writes finance data
-- **THEN** the operation SHALL use Supabase and surface network failure explicitly
 
 ### Requirement: Repositories depend on a shared database contract
 Account and transaction repositories SHALL use `CofinanceDatabase` rather than selecting a platform storage implementation directly.

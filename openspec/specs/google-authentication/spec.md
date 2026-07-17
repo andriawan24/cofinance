@@ -28,13 +28,6 @@ The iOS application SHALL use the Google Sign-In iOS SDK through the Swift-to-Ko
 - **WHEN** the native Google account flow returns an ID token
 - **THEN** the shared login flow SHALL exchange that token with Supabase Auth and establish a session
 
-### Requirement: Explicit unsupported-platform behavior
-Platforms without an implemented Google provider SHALL return an explicit unsupported result rather than starting a broken flow.
-
-#### Scenario: Unsupported platform requests sign-in
-- **WHEN** Desktop, JS, or WasmJS invokes Google sign-in
-- **THEN** the application SHALL return a user-safe error and SHALL NOT create a partial session
-
 ### Requirement: Protect authentication material
 The application SHALL NOT log ID tokens, access tokens, refresh tokens, client secrets, or private configuration.
 
