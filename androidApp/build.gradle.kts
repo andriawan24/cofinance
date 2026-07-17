@@ -5,13 +5,14 @@ plugins {
 
 android {
     namespace = "id.andriawan.cofinance"
-    compileSdk = 36
+    compileSdk = 37
+
     val releaseKeystorePath = System.getenv("KEYSTORE_PATH")
 
     defaultConfig {
         applicationId = "id.andriawan.cofinance"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 8
         versionName = "0.0.1"
     }

@@ -14,7 +14,7 @@ plugins {
 kotlin {
     android {
         namespace = "id.andriawan.cofinance.shared"
-        compileSdk = 36
+        compileSdk = 37
         minSdk = 24
         withHostTest {}
         compilerOptions {
@@ -122,12 +122,15 @@ val localPropertiesProvider = providers
 
 fun requiredBuildConfig(localKey: String, environmentKey: String): String {
     val value = providers.environmentVariable(environmentKey)
-        .orElse(localPropertiesProvider.map { properties -> properties.getProperty(localKey).orEmpty() })
+        .orElse(localPropertiesProvider.map { properties ->
+            properties.getProperty(localKey).orEmpty()
+        })
         .orNull
 
     require(!value.isNullOrBlank()) {
         "Register $localKey in local.properties or provide $environmentKey"
     }
+
     return value
 }
 
