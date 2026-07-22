@@ -27,14 +27,13 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun SplashScreen(
     onNavigateToMain: () -> Unit,
-    onNavigateToLogin: () -> Unit,
     splashViewModel: SplashViewModel = koinViewModel()
 ) {
     LaunchedEffect(true) {
         splashViewModel.fetchUser().collectLatest {
             when (it) {
                 is ResultState.Success<*> -> onNavigateToMain()
-                is ResultState.Error -> onNavigateToLogin()
+                is ResultState.Error -> onNavigateToMain()
                 ResultState.Loading -> {
                     /* no-op */
                 }

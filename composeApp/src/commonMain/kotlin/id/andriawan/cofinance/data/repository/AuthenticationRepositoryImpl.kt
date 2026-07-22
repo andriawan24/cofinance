@@ -4,7 +4,8 @@ import id.andriawan.cofinance.data.datasource.FirebaseDataSource
 import id.andriawan.cofinance.domain.model.request.IdTokenParam
 import id.andriawan.cofinance.domain.model.request.IdTokenParam.Companion.toRequest
 import id.andriawan.cofinance.domain.model.response.User
-import id.andriawan.cofinance.pages.activity.ActivityViewModel
+import id.andriawan.cofinance.data.session.SessionPolicy
+import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 
 
 interface AuthenticationRepository {
@@ -15,11 +16,14 @@ interface AuthenticationRepository {
     suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User
     suspend fun updateCycleStartDay(day: Int): User
     suspend fun updateLastCycleResetDate(date: String): User
+    fun isSignedIn(): Boolean
 }
 
 
 class AuthenticationRepositoryImpl(
-    private val firebaseDataSource: FirebaseDataSource
+    private val firebaseDataSource: FirebaseDataSource,
+    private val sessionPolicy: SessionPolicy,
+    private val syncCoordinator: FinanceSyncCoordinator
 ) : AuthenticationRepository {
 
     override fun getUser(): User = User.from(firebaseDataSource.getUser())
@@ -31,6 +35,7 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun login(idTokenParam: IdTokenParam) {
         firebaseDataSource.login(idTokenParam.toRequest())
+        syncCoordinator.syncAfterSignIn()
     }
 
     override suspend fun logout() {
@@ -56,4 +61,6 @@ class AuthenticationRepositoryImpl(
         val userInfo = firebaseDataSource.updateLastCycleResetDate(date)
         return User.from(userInfo)
     }
+
+    override fun isSignedIn(): Boolean = sessionPolicy.isSignedIn()
 }

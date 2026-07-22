@@ -106,7 +106,9 @@ class CycleReviewViewModel(
 
             val today = Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault()).date
-            authenticationRepository.updateLastCycleResetDate(today.toString())
+            if (authenticationRepository.isSignedIn()) {
+                authenticationRepository.updateLastCycleResetDate(today.toString())
+            }
 
             _uiState.update { it.copy(isProcessing = false, isCompleted = true) }
         }

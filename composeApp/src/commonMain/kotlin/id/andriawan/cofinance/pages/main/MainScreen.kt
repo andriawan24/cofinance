@@ -123,7 +123,8 @@ fun MainScreen(
                 }
 
                 ProfileScreen(
-                    onSignedOut = onNavigateToLogin,
+                    onSignedOut = {},
+                    onSignIn = onNavigateToLogin,
                     onNavigateToEditProfile = onNavigateToEditProfile,
                     showMessage = {
                         state.showMessage(it)

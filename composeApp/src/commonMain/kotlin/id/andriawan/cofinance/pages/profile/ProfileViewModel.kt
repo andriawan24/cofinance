@@ -27,20 +27,22 @@ sealed class ProfileEvent {
 
 data class UiState(
     val isShowDialogLogout: Boolean = false,
-    val isUpdatingCycle: Boolean = false
+    val isUpdatingCycle: Boolean = false,
+    val isSignedIn: Boolean = false
 )
 
 @Stable
 class ProfileViewModel(
     private val getUserUseCase: GetUserUseCase,
     private val logoutUseCase: LogoutUseCase,
-    private val updateCycleStartDayUseCase: UpdateCycleStartDayUseCase
+    private val updateCycleStartDayUseCase: UpdateCycleStartDayUseCase,
+    private val authenticationRepository: id.andriawan.cofinance.data.repository.AuthenticationRepository
 ) : ViewModel() {
 
     private val _profileEvent = Channel<ProfileEvent>(Channel.BUFFERED)
     val profileEvent = _profileEvent.receiveAsFlow()
 
-    private val _uiState = MutableStateFlow(UiState())
+    private val _uiState = MutableStateFlow(UiState(isSignedIn = authenticationRepository.isSignedIn()))
     val uiState = _uiState.asStateFlow()
 
     private val _user = MutableStateFlow(getUserUseCase.execute())
@@ -48,6 +50,7 @@ class ProfileViewModel(
 
     fun refreshUser() {
         _user.value = getUserUseCase.execute()
+        _uiState.update { it.copy(isSignedIn = authenticationRepository.isSignedIn()) }
     }
 
     fun toggleDialogLogout(isShow: Boolean) {
@@ -76,7 +79,11 @@ class ProfileViewModel(
         viewModelScope.launch {
             logoutUseCase.execute().collectResult(
                 onError = { _profileEvent.send(ShowMessage(mapAuthErrorMessage(it))) },
-                onSuccess = { _profileEvent.send(NavigateToLoginPage) }
+                onSuccess = {
+                    _user.value = id.andriawan.cofinance.domain.model.response.User()
+                    _uiState.update { it.copy(isSignedIn = false) }
+                    _profileEvent.send(NavigateToLoginPage)
+                }
             )
         }
     }

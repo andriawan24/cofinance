@@ -6,6 +6,10 @@
     <!-- Auth / Login -->
     <string name="label_track_your_money">Track your money with\n</string>
     <string name="action_sign_in_google">Sign in with Google</string>
+    <string name="action_sign_in_to_sync">Sign in to sync</string>
+    <string name="title_local_only_mode">Using Cofinance locally</string>
+    <string name="description_local_only_mode">Your accounts and transactions stay on this device. Sign in when you want to sync them securely to the cloud.</string>
+    <string name="message_sign_in_for_ai">Sign in to use AI receipt scanning.</string>
 
     <!-- Navigation / Tabs -->
     <string name="label_activity">Activity</string>

@@ -47,7 +47,8 @@ class ActivityViewModel(
     private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
     private val getBalanceStateUseCase: GetBalanceStatsUseCase,
     private val getUserUseCase: GetUserUseCase,
-    private val accountRepository: AccountRepository
+    private val accountRepository: AccountRepository,
+    private val authenticationRepository: id.andriawan.cofinance.data.repository.AuthenticationRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ActivityUiState())
     val uiState = _uiState.asStateFlow()
@@ -177,6 +178,7 @@ class ActivityViewModel(
     }
 
     fun checkCycleBoundary() {
+        if (!authenticationRepository.isSignedIn()) return
         viewModelScope.launch {
             try {
                 val user = getUserUseCase.execute()

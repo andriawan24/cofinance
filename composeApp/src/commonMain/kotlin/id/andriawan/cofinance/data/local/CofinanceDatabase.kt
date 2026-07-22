@@ -4,11 +4,11 @@ import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
 import kotlinx.coroutines.flow.Flow
 
-/** Shared account and transaction persistence contract backed by Cloud Firestore. */
+/** Durable local account and transaction persistence contract. */
 interface CofinanceDatabase {
     // Account reads
-    fun watchAccounts(userId: String): Flow<List<AccountResponse>>
-    suspend fun getAccounts(userId: String): List<AccountResponse>
+    fun watchAccounts(): Flow<List<AccountResponse>>
+    suspend fun getAccounts(): List<AccountResponse>
 
     // Account writes
     suspend fun insertAccount(
@@ -16,8 +16,7 @@ interface CofinanceDatabase {
         name: String,
         group: String,
         balance: Long,
-        accountType: String,
-        userId: String
+        accountType: String
     )
 
     suspend fun updateAccountBalance(accountId: String, delta: Long)
@@ -30,7 +29,6 @@ interface CofinanceDatabase {
 
     // Transaction reads
     fun watchTransactions(
-        userId: String,
         startDate: String? = null,
         endDate: String? = null,
         isDraft: Boolean = false,
@@ -38,12 +36,13 @@ interface CofinanceDatabase {
     ): Flow<List<TransactionResponse>>
 
     suspend fun getTransactions(
-        userId: String,
         startDate: String? = null,
         endDate: String? = null,
         isDraft: Boolean = false,
         transactionId: String? = null
     ): List<TransactionResponse>
+
+    suspend fun getAllTransactions(): List<TransactionResponse>
 
     // Transaction writes
     suspend fun updateTransaction(
@@ -55,8 +54,7 @@ interface CofinanceDatabase {
         notes: String,
         accountsId: String,
         receiverAccountsId: String?,
-        type: String,
-        userId: String
+        type: String
     ): TransactionResponse
 
     suspend fun insertTransaction(
@@ -68,7 +66,9 @@ interface CofinanceDatabase {
         notes: String,
         accountsId: String,
         receiverAccountsId: String?,
-        type: String,
-        userId: String
+        type: String
     ): TransactionResponse
+
+    suspend fun upsertAccounts(accounts: List<AccountResponse>)
+    suspend fun upsertTransactions(transactions: List<TransactionResponse>)
 }

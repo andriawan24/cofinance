@@ -6,6 +6,10 @@
     <!-- Auth / Login -->
     <string name="label_track_your_money">Pandai mengelola keuangan dengan\n</string>
     <string name="action_sign_in_google">Masuk dengan Google</string>
+    <string name="action_sign_in_to_sync">Masuk untuk sinkronisasi</string>
+    <string name="title_local_only_mode">Menggunakan Cofinance secara lokal</string>
+    <string name="description_local_only_mode">Akun dan transaksi Anda tetap tersimpan di perangkat ini. Masuk saat Anda ingin menyinkronkannya dengan aman ke cloud.</string>
+    <string name="message_sign_in_for_ai">Masuk untuk menggunakan pemindaian struk AI.</string>
 
     <!-- Navigation / Tabs -->
     <string name="label_activity">Aktivitas</string>

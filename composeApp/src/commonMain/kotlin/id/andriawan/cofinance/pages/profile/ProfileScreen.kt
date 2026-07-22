@@ -63,6 +63,9 @@ import cofinance.composeapp.generated.resources.label_logout_question
 import cofinance.composeapp.generated.resources.label_profile
 import cofinance.composeapp.generated.resources.label_profile_subtitle
 import cofinance.composeapp.generated.resources.label_yes
+import cofinance.composeapp.generated.resources.action_sign_in_to_sync
+import cofinance.composeapp.generated.resources.description_local_only_mode
+import cofinance.composeapp.generated.resources.title_local_only_mode
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
@@ -81,6 +84,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun ProfileScreen(
     onSignedOut: () -> Unit,
+    onSignIn: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
     showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
@@ -101,7 +105,9 @@ fun ProfileScreen(
         imageUrl = user.avatarUrl,
         email = user.email,
         cycleStartDay = user.cycleStartDay,
+        isSignedIn = uiState.isSignedIn,
         isUpdatingCycle = uiState.isUpdatingCycle,
+        onSignIn = onSignIn,
         onSignedOut = { profileViewModel.toggleDialogLogout(true) },
         onEditProfile = onNavigateToEditProfile,
         onCycleStartDayChanged = { profileViewModel.updateCycleStartDay(it) }
@@ -180,7 +186,9 @@ fun ProfileContent(
     email: String,
     imageUrl: String,
     cycleStartDay: Int = 1,
+    isSignedIn: Boolean = true,
     isUpdatingCycle: Boolean = false,
+    onSignIn: () -> Unit = {},
     onSignedOut: () -> Unit,
     onEditProfile: () -> Unit = {},
     onCycleStartDayChanged: (Int) -> Unit = {}
@@ -204,49 +212,84 @@ fun ProfileContent(
         ) {
             PageTitle(title = stringResource(Res.string.label_profile))
 
-            ProfileSummaryCard(
-                name = displayName,
-                email = email,
-                imageUrl = imageUrl,
-                onEditProfile = onEditProfile
-            )
+            if (isSignedIn) {
+                ProfileSummaryCard(
+                    name = displayName,
+                    email = email,
+                    imageUrl = imageUrl,
+                    onEditProfile = onEditProfile
+                )
 
-            CycleStartDaySetting(
-                cycleStartDay = cycleStartDay,
-                isUpdating = isUpdatingCycle,
-                onDaySelected = onCycleStartDayChanged
-            )
+                CycleStartDaySetting(
+                    cycleStartDay = cycleStartDay,
+                    isUpdating = isUpdatingCycle,
+                    onDaySelected = onCycleStartDayChanged
+                )
 
-            SecondaryButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = Dimensions.SIZE_56),
-                contentPadding = PaddingValues(
-                    vertical = Dimensions.SIZE_16,
-                    horizontal = Dimensions.SIZE_16
-                ),
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.error,
-                shape = MaterialTheme.shapes.large,
-                onClick = onSignedOut
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
-                    verticalAlignment = Alignment.CenterVertically
+                SecondaryButton(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = Dimensions.SIZE_56),
+                    contentPadding = PaddingValues(
+                        vertical = Dimensions.SIZE_16,
+                        horizontal = Dimensions.SIZE_16
+                    ),
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                    contentColor = MaterialTheme.colorScheme.error,
+                    shape = MaterialTheme.shapes.large,
+                    onClick = onSignedOut
                 ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_exit),
-                        contentDescription = null
-                    )
-
-                    Text(
-                        text = stringResource(Res.string.label_logout),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.SemiBold
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_exit),
+                            contentDescription = null
                         )
-                    )
+
+                        Text(
+                            text = stringResource(Res.string.label_logout),
+                            style = MaterialTheme.typography.titleSmall.copy(
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        )
+                    }
                 }
+            } else {
+                LocalOnlyProfileCard(onSignIn = onSignIn)
+            }
+        }
+    }
+}
+
+@Composable
+private fun LocalOnlyProfileCard(onSignIn: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Column(
+            modifier = Modifier.padding(Dimensions.SIZE_24),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+        ) {
+            Text(
+                text = stringResource(Res.string.title_local_only_mode),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Text(
+                text = stringResource(Res.string.description_local_only_mode),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            PrimaryButton(
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = Dimensions.SIZE_52),
+                onClick = onSignIn
+            ) {
+                Text(text = stringResource(Res.string.action_sign_in_to_sync))
             }
         }
     }

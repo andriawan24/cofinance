@@ -1,12 +1,13 @@
 package id.andriawan.cofinance.data.repository
 
-import id.andriawan.cofinance.data.datasource.GeminiDataSource
+import id.andriawan.cofinance.data.datasource.ReceiptScanner
 import id.andriawan.cofinance.data.local.CofinanceDatabase
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
-import dev.gitlive.firebase.auth.FirebaseAuth
+import id.andriawan.cofinance.data.session.SessionPolicy
+import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.ExperimentalUuidApi
@@ -23,22 +24,20 @@ interface TransactionRepository {
 
 
 class TransactionRepositoryImpl(
-    private val geminiDataSource: GeminiDataSource,
+    private val receiptScanner: ReceiptScanner,
     private val database: CofinanceDatabase,
-    private val firebaseAuth: FirebaseAuth
+    private val sessionPolicy: SessionPolicy,
+    private val syncCoordinator: FinanceSyncCoordinator
 ) : TransactionRepository {
 
-    private fun getUserId(): String =
-        firebaseAuth.currentUser?.uid ?: error("No authenticated Firebase user")
-
     override suspend fun scanReceipt(image: ByteArray): ReceiptScan {
-        val response = geminiDataSource.scanReceipt(image)
+        sessionPolicy.requireUserId()
+        val response = receiptScanner.scanReceipt(image)
         return ReceiptScan.from(response)
     }
 
     override suspend fun getTransactions(param: GetTransactionsParam): List<Transaction> {
         val response = database.getTransactions(
-            userId = getUserId(),
             startDate = param.startDate,
             endDate = param.endDate,
             isDraft = param.isDraft,
@@ -49,7 +48,6 @@ class TransactionRepositoryImpl(
 
     override fun watchTransactions(param: GetTransactionsParam): Flow<List<Transaction>> {
         return database.watchTransactions(
-            userId = getUserId(),
             startDate = param.startDate,
             endDate = param.endDate,
             isDraft = param.isDraft,
@@ -61,7 +59,6 @@ class TransactionRepositoryImpl(
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun createTransaction(params: AddTransactionParam): Transaction {
-        val userId = getUserId()
         val id = params.id ?: Uuid.random().toString()
 
         val inserted = database.insertTransaction(
@@ -73,9 +70,10 @@ class TransactionRepositoryImpl(
             notes = params.notes.orEmpty(),
             accountsId = params.accountsId.orEmpty(),
             receiverAccountsId = params.receiverAccountsId,
-            type = params.type.name,
-            userId = userId
+            type = params.type.name
         )
+
+        syncCoordinator.mirrorAllIfSignedIn()
 
         return Transaction.from(inserted)
     }
@@ -95,9 +93,9 @@ class TransactionRepositoryImpl(
             notes = params.notes.orEmpty(),
             accountsId = params.accountsId.orEmpty(),
             receiverAccountsId = params.receiverAccountsId,
-            type = params.type.name,
-            userId = getUserId()
+            type = params.type.name
         )
+        syncCoordinator.mirrorAllIfSignedIn()
         return Transaction.from(updated)
     }
 }

@@ -19,10 +19,13 @@ import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
 import id.andriawan.cofinance.pages.splash.SplashScreen
+import id.andriawan.cofinance.data.session.SessionPolicy
+import org.koin.compose.koinInject
 
 @Composable
 fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null) {
     val navController = rememberNavController()
+    val sessionPolicy = koinInject<SessionPolicy>()
 
     NavHost(
         modifier = modifier,
@@ -63,16 +66,10 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
                         }
                     }
                     // If opened via share intent, navigate to Preview immediately
-                    if (sharedImageUri != null) {
+                    if (sharedImageUri != null && sessionPolicy.isSignedIn()) {
                         navController.navigate(Destinations.Preview(imageUrl = sharedImageUri))
-                    }
-                },
-                onNavigateToLogin = {
-                    navController.navigate(Destinations.Login) {
-                        launchSingleTop = true
-                        popUpTo(0) {
-                            inclusive = true
-                        }
+                    } else if (sharedImageUri != null) {
+                        navController.navigate(Destinations.Login)
                     }
                 }
             )
@@ -97,9 +94,6 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
                 onNavigateToLogin = {
                     navController.navigate(Destinations.Login) {
                         launchSingleTop = true
-                        popUpTo(0) {
-                            inclusive = true
-                        }
                     }
                 },
                 onNavigateToAdd = {
@@ -139,7 +133,11 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
                     navController.navigateUp()
                 },
                 onInputPictureClicked = {
-                    navController.navigate(Destinations.Camera)
+                    if (sessionPolicy.isSignedIn()) {
+                        navController.navigate(Destinations.Camera)
+                    } else {
+                        navController.navigate(Destinations.Login) { launchSingleTop = true }
+                    }
                 },
                 onSuccessSave = {
                     val previousEntry = navController.previousBackStackEntry

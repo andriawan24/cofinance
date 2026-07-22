@@ -15,18 +15,20 @@ import id.andriawan.cofinance.navigations.MainNavigation
 import id.andriawan.cofinance.theme.CofinanceTheme
 import org.koin.compose.KoinApplication
 import org.koin.dsl.koinConfiguration
+import coil3.compose.LocalPlatformContext
 
 val LocalAppLocalization = compositionLocalOf { AppLang.English }
 
 @Composable
 @Preview
 fun App(sharedImageUri: String? = null) {
+    val platformContext = LocalPlatformContext.current
     KoinApplication(
         configuration = koinConfiguration(
             declaration = {
                 modules(
                     networkModule,
-                    databaseModule,
+                    databaseModule(platformContext),
                     repositoryModule,
                     useCaseModule,
                     viewModelModule
