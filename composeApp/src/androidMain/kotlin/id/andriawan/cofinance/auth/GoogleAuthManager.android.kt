@@ -17,6 +17,7 @@ import kotlinx.coroutines.withContext
 /**
  * Holder for Android Context - must be set during app initialization
  */
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 actual class GoogleAuthManager {
 
     actual suspend fun signIn(context: PlatformContext): GoogleAuthResult =

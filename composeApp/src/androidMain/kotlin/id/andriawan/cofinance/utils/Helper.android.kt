@@ -6,6 +6,7 @@ import androidx.core.net.toUri
 import coil3.PlatformContext
 import java.io.ByteArrayOutputStream
 import java.io.File
+import androidx.core.graphics.scale
 
 actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
     val uri = fileUri.toUri()
@@ -18,10 +19,10 @@ actual fun readFromFile(context: PlatformContext, fileUri: String): ByteArray? {
     return context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
 }
 
-actual fun deleteFile(fileUri: String) {
+actual fun deleteFile(fileUri: String): Boolean {
     val uri = fileUri.toUri()
-    val path = uri.path ?: return
-    File(path).delete()
+    val path = uri.path ?: return false
+    return File(path).delete()
 }
 
 actual fun compressImage(imageBytes: ByteArray, maxDimension: Int, quality: Int): ByteArray {
@@ -45,7 +46,7 @@ actual fun compressImage(imageBytes: ByteArray, maxDimension: Int, quality: Int)
     val scaled = if (scale < 1f) {
         val newWidth = (bitmap.width * scale).toInt()
         val newHeight = (bitmap.height * scale).toInt()
-        Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true).also {
+        bitmap.scale(newWidth, newHeight).also {
             if (it !== bitmap) bitmap.recycle()
         }
     } else {

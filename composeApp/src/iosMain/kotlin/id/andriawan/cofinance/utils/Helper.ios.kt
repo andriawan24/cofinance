@@ -1,6 +1,7 @@
 package id.andriawan.cofinance.utils
 
 import coil3.PlatformContext
+import kotlinx.cinterop.BetaInteropApi
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.cinterop.addressOf
 import kotlinx.cinterop.useContents
@@ -73,22 +74,21 @@ private fun readFromPhotosLibrary(phUri: String): ByteArray? {
 }
 
 @OptIn(ExperimentalForeignApi::class)
-actual fun deleteFile(fileUri: String) {
-    if (fileUri.startsWith("ph://")) return
+actual fun deleteFile(fileUri: String): Boolean {
+    if (fileUri.startsWith("ph://")) return false
+    val nsUrl = NSURL.URLWithString(fileUri) ?: NSURL.fileURLWithPath(fileUri)
+    val path = nsUrl.path ?: return false
 
-    val nsUrl = NSURL.URLWithString(fileUri)
-        ?: NSURL.fileURLWithPath(fileUri)
-    val path = nsUrl.path ?: return
-    NSFileManager.defaultManager.removeItemAtPath(path, null)
+    return NSFileManager.defaultManager.removeItemAtPath(path, null)
 }
 
-@OptIn(ExperimentalForeignApi::class)
+@OptIn(ExperimentalForeignApi::class, BetaInteropApi::class)
 actual fun compressImage(imageBytes: ByteArray, maxDimension: Int, quality: Int): ByteArray {
     val nsData = imageBytes.usePinned { pinned ->
         NSData.create(bytes = pinned.addressOf(0), length = imageBytes.size.toULong())
     }
 
-    val image = UIImage(data = nsData) ?: return imageBytes
+    val image = UIImage(data = nsData)
     val width = image.size.useContents { width }
     val height = image.size.useContents { height }
 
