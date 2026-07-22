@@ -1,10 +1,4 @@
-# Firebase Data Backend Specification
-
-## Purpose
-
-Define Firebase as Cofinance's sole authenticated profile, file, and optional finance synchronization backend.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Firebase is the sole application backend
 Cofinance SHALL use Firebase Authentication, Cloud Firestore, and Firebase Storage as its sole cloud backend for authenticated sessions, optional finance synchronization, profile metadata, and avatar files without Supabase or PowerSync runtime dependencies. Signed-out finance data SHALL remain exclusively in the on-device database.
@@ -53,14 +47,3 @@ Creating or updating a non-draft transaction and its affected local account bala
 #### Scenario: Transaction is updated
 - **WHEN** an existing transaction is updated
 - **THEN** its old local balance impact SHALL be reversed and its new balance impact and transaction record SHALL commit atomically
-
-### Requirement: Firebase profile data preserves Cofinance fields
-Firebase Auth and the user's Firestore profile document SHALL together provide the current name, email, avatar URL, cycle start day, and last cycle reset date.
-
-#### Scenario: Google user signs in for the first time
-- **WHEN** Firebase accepts a Google credential and no profile document exists
-- **THEN** Cofinance SHALL create profile defaults while retaining the Firebase provider name, email, and photo
-
-#### Scenario: User updates an avatar
-- **WHEN** a signed-in user saves profile changes with avatar bytes
-- **THEN** the bytes SHALL be uploaded to Firebase Storage and the resulting URL SHALL be stored in the user's Firestore profile

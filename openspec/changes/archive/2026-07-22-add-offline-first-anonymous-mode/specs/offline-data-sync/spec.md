@@ -1,10 +1,4 @@
-# Finance Data Access Specification
-
-## Purpose
-
-Define Cofinance's durable local finance data boundary and optional authenticated cloud synchronization behavior.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Repositories depend on a shared database contract
 Account and transaction repositories SHALL use durable local `CofinanceDatabase` storage as their source of truth, while authenticated cloud mirroring SHALL use a separate Firebase synchronization boundary.
@@ -16,6 +10,8 @@ Account and transaction repositories SHALL use durable local `CofinanceDatabase`
 #### Scenario: No authenticated user performs a finance operation
 - **WHEN** an account or transaction operation is requested without a Firebase user
 - **THEN** it SHALL read or write the local database without requiring Firebase
+
+## ADDED Requirements
 
 ### Requirement: Sign-in synchronizes local and remote finance data
 After successful authentication, Cofinance SHALL merge the signed-in user's remote accounts and transactions into local storage and upload the complete merged local snapshot to that user's Firebase collections.
@@ -44,3 +40,4 @@ Finance mutations SHALL commit to local storage first and SHALL be mirrored to t
 - **WHEN** a local mutation succeeds but its Firebase mirror fails
 - **THEN** the local mutation SHALL remain durable
 - **AND** a later successful sign-in synchronization SHALL retry the local snapshot
+
