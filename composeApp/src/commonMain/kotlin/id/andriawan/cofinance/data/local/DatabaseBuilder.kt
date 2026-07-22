@@ -12,4 +12,5 @@ fun buildLocalDatabase(context: PlatformContext): CofinanceRoomDatabase =
     databaseBuilder(context)
         .setDriver(BundledSQLiteDriver())
         .setQueryCoroutineContext(Dispatchers.IO)
+        .fallbackToDestructiveMigration(dropAllTables = true)
         .build()

@@ -11,7 +11,8 @@ import androidx.room.Query
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.Update
-import androidx.room.withTransaction
+import androidx.room.immediateTransaction
+import androidx.room.useWriterConnection
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
 import kotlinx.coroutines.flow.Flow
@@ -92,7 +93,6 @@ abstract class CofinanceRoomDatabase : RoomDatabase() {
     abstract fun financeDao(): LocalFinanceDao
 }
 
-@Suppress("NO_ACTUAL_FOR_EXPECT")
 expect object CofinanceRoomDatabaseConstructor : RoomDatabaseConstructor<CofinanceRoomDatabase> {
     override fun initialize(): CofinanceRoomDatabase
 }
@@ -116,14 +116,23 @@ class RoomCofinanceDatabase(
         accountType: String
     ) {
         dao.upsertAccount(
-            LocalAccountEntity(id, name, group, balance, accountType, kotlin.time.Clock.System.now().toString())
+            LocalAccountEntity(
+                id,
+                name,
+                group,
+                balance,
+                accountType,
+                kotlin.time.Clock.System.now().toString()
+            )
         )
     }
 
     override suspend fun updateAccountBalance(accountId: String, delta: Long) {
-        roomDatabase.withTransaction {
-            val account = dao.getAccount(accountId) ?: error("Account does not exist")
-            dao.updateAccount(account.copy(balance = account.balance + delta))
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                val account = dao.getAccount(accountId) ?: error("Account does not exist")
+                dao.updateAccount(account.copy(balance = account.balance + delta))
+            }
         }
     }
 
@@ -138,7 +147,14 @@ class RoomCofinanceDatabase(
         group: String,
         accountType: String
     ) {
-        mutateAccount(accountId) { it.copy(name = name, balance = balance, group = group, accountType = accountType) }
+        mutateAccount(accountId) {
+            it.copy(
+                name = name,
+                balance = balance,
+                group = group,
+                accountType = accountType
+            )
+        }
     }
 
     override suspend fun deleteAccount(accountId: String) {
@@ -191,9 +207,11 @@ class RoomCofinanceDatabase(
         val entity = LocalTransactionEntity(
             id, amount, category, date, fee, notes, accountsId, receiverAccountsId, type, now, now
         )
-        roomDatabase.withTransaction {
-            applyBalanceDeltas(entity)
-            dao.upsertTransaction(entity)
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                applyBalanceDeltas(entity)
+                dao.upsertTransaction(entity)
+            }
         }
         return getTransactions(transactionId = id, isDraft = type == TYPE_DRAFT).first()
     }
@@ -209,22 +227,24 @@ class RoomCofinanceDatabase(
         receiverAccountsId: String?,
         type: String
     ): TransactionResponse {
-        roomDatabase.withTransaction {
-            val old = dao.getTransaction(id) ?: error("Transaction does not exist")
-            val replacement = old.copy(
-                amount = amount,
-                category = category,
-                date = date,
-                fee = fee,
-                notes = notes,
-                senderAccountId = accountsId,
-                receiverAccountId = receiverAccountsId,
-                type = type,
-                updatedAt = kotlin.time.Clock.System.now().toString()
-            )
-            applyBalanceDeltas(old, -1)
-            applyBalanceDeltas(replacement)
-            dao.upsertTransaction(replacement)
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                val old = dao.getTransaction(id) ?: error("Transaction does not exist")
+                val replacement = old.copy(
+                    amount = amount,
+                    category = category,
+                    date = date,
+                    fee = fee,
+                    notes = notes,
+                    senderAccountId = accountsId,
+                    receiverAccountId = receiverAccountsId,
+                    type = type,
+                    updatedAt = kotlin.time.Clock.System.now().toString()
+                )
+                applyBalanceDeltas(old, -1)
+                applyBalanceDeltas(replacement)
+                dao.upsertTransaction(replacement)
+            }
         }
         return getTransactions(transactionId = id, isDraft = type == TYPE_DRAFT).first()
     }
@@ -237,13 +257,21 @@ class RoomCofinanceDatabase(
         if (transactions.isNotEmpty()) dao.upsertTransactions(transactions.map(TransactionResponse::toEntity))
     }
 
-    private suspend fun mutateAccount(id: String, transform: (LocalAccountEntity) -> LocalAccountEntity) {
-        roomDatabase.withTransaction {
-            dao.updateAccount(transform(dao.getAccount(id) ?: error("Account does not exist")))
+    private suspend fun mutateAccount(
+        id: String,
+        transform: (LocalAccountEntity) -> LocalAccountEntity
+    ) {
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                dao.updateAccount(transform(dao.getAccount(id) ?: error("Account does not exist")))
+            }
         }
     }
 
-    private suspend fun applyBalanceDeltas(transaction: LocalTransactionEntity, multiplier: Long = 1) {
+    private suspend fun applyBalanceDeltas(
+        transaction: LocalTransactionEntity,
+        multiplier: Long = 1
+    ) {
         balanceDeltas(transaction).forEach { (accountId, delta) ->
             val account = dao.getAccount(accountId) ?: error("Account does not exist")
             dao.updateAccount(account.copy(balance = account.balance + delta * multiplier))
@@ -261,10 +289,10 @@ class RoomCofinanceDatabase(
         val accountMap = accounts.associateBy(LocalAccountEntity::id)
         return transactions.filter { transaction ->
             (transactionId == null || transaction.id == transactionId) &&
-                (startDate == null || endDate == null || transaction.date >= startDate && transaction.date < endDate) &&
-                if (transactionId != null) true
-                else if (isDraft) transaction.type == TYPE_DRAFT
-                else transaction.type != TYPE_DRAFT && transaction.type != TYPE_CYCLE_RESET
+                    (startDate == null || endDate == null || transaction.date >= startDate && transaction.date < endDate) &&
+                    if (transactionId != null) true
+                    else if (isDraft) transaction.type == TYPE_DRAFT
+                    else transaction.type != TYPE_DRAFT && transaction.type != TYPE_CYCLE_RESET
         }.map { transaction ->
             transaction.toResponse(
                 sender = accountMap[transaction.senderAccountId]?.toResponse(),
@@ -280,7 +308,11 @@ class RoomCofinanceDatabase(
         }
         when (transaction.type) {
             TYPE_INCOME -> add(transaction.senderAccountId, transaction.amount)
-            TYPE_EXPENSE -> add(transaction.senderAccountId, -(transaction.amount + transaction.fee))
+            TYPE_EXPENSE -> add(
+                transaction.senderAccountId,
+                -(transaction.amount + transaction.fee)
+            )
+
             TYPE_TRANSFER -> {
                 add(transaction.senderAccountId, -(transaction.amount + transaction.fee))
                 add(transaction.receiverAccountId, transaction.amount)
@@ -301,10 +333,16 @@ class RoomCofinanceDatabase(
     }
 }
 
-private fun LocalAccountEntity.toResponse() = AccountResponse(id, name, group, balance, accountType, createdAt)
+private fun LocalAccountEntity.toResponse() =
+    AccountResponse(id, name, group, balance, accountType, createdAt)
 
 private fun AccountResponse.toEntity() = LocalAccountEntity(
-    id.orEmpty(), name.orEmpty(), group.orEmpty(), balance ?: 0, accountType.orEmpty(), createdAt.orEmpty()
+    id.orEmpty(),
+    name.orEmpty(),
+    group.orEmpty(),
+    balance ?: 0,
+    accountType.orEmpty(),
+    createdAt.orEmpty()
 )
 
 private fun LocalTransactionEntity.toResponse(
