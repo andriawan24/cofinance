@@ -12,9 +12,9 @@
 
 ## 3. Remote Verification
 
-- [ ] 3.1 Commit only the scoped OpenSpec and workflow changes and push them to the repository
-- [ ] 3.2 Monitor CI and Android delivery for the pushed SHA, diagnose failures, and apply validated corrections until both succeed
-- [ ] 3.3 Confirm the successful Android run executed Firebase distribution rather than skipping it and record requirement-level evidence
+- [x] 3.1 Commit only the scoped OpenSpec and workflow changes and push them to the repository
+- [x] 3.2 Monitor CI and Android delivery for the pushed SHA, diagnose failures, and apply validated corrections until both succeed
+- [x] 3.3 Confirm the successful Android run executed Firebase distribution rather than skipping it and record requirement-level evidence
 
 ## 4. OpenSpec Completion
 
