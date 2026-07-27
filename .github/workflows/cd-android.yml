@@ -29,6 +29,11 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
       - name: Cache Gradle
         uses: actions/cache@v4
         with:
@@ -41,15 +46,13 @@ jobs:
       - name: Create local.properties
         run: |
           cat > local.properties << EOF
-          supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}
-          supabase.public_api_key=${{ secrets.SUPABASE_PUBLIC_API_KEY }}
           gemini.api_key=${{ secrets.GEMINI_API_KEY }}
           google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}
-          powersync.url=${{ secrets.POWERSYNC_URL }}
           sdk.dir=$ANDROID_HOME
           EOF
 
       - name: Provision Android Firebase configuration
+        id: android_firebase
         shell: bash
         env:
           FIREBASE_ANDROID_CONFIG_BASE64: ${{ secrets.FIREBASE_ANDROID_CONFIG_BASE64 }}
@@ -80,6 +83,20 @@ jobs:
             end
           '
 
+          firebase_project_id="$(
+            ruby -rjson -e '
+              config = JSON.parse(File.read(ENV.fetch("FIREBASE_ANDROID_CONFIG_PATH")))
+              print config.dig("project_info", "project_id").to_s
+            '
+          )"
+
+          if [ -z "$firebase_project_id" ]; then
+            echo "::error::Android Firebase configuration does not contain a project ID."
+            exit 1
+          fi
+
+          echo "project_id=$firebase_project_id" >> "$GITHUB_OUTPUT"
+
       - name: Build Release APK
         run: ./gradlew :androidApp:assembleRelease --no-daemon
 
@@ -99,15 +116,13 @@ jobs:
           set -euo pipefail
 
           if [ -z "${FIREBASE_APP_ID_ANDROID:-}" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping Firebase App Distribution because FIREBASE_APP_ID_ANDROID is not configured."
-            exit 0
+            echo "::error::FIREBASE_APP_ID_ANDROID is not configured."
+            exit 1
           fi
 
           if [ -z "${FIREBASE_SERVICE_ACCOUNT_JSON_BASE64:-}" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not configured."
-            exit 0
+            echo "::error::GOOGLE_SERVICE_JSON is not configured."
+            exit 1
           fi
 
           firebase_service_account_json=""
@@ -117,9 +132,8 @@ jobs:
           elif firebase_service_account_json="$(printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON_BASE64" | base64 -D 2>/dev/null)"; then
             :
           else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not valid base64."
-            exit 0
+            echo "::error::GOOGLE_SERVICE_JSON is not valid base64."
+            exit 1
           fi
 
           firebase_service_account_type="$(
@@ -128,26 +142,57 @@ jobs:
           )"
 
           if [ "$firebase_service_account_type" != "service_account" ]; then
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Skipping Firebase App Distribution because GOOGLE_SERVICE_JSON is not a service account credential."
-            exit 0
+            echo "::error::GOOGLE_SERVICE_JSON is not a service account credential."
+            exit 1
           fi
 
           firebase_service_account_path="$RUNNER_TEMP/firebase-service-account.json"
           printf '%s' "$firebase_service_account_json" > "$firebase_service_account_path"
 
-          echo "enabled=true" >> "$GITHUB_OUTPUT"
           echo "service_account_path=$firebase_service_account_path" >> "$GITHUB_OUTPUT"
 
-      - name: Upload to Firebase App Distribution
-        if: steps.firebase_distribution.outputs.enabled == 'true'
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
-          serviceCredentialsFile: ${{ steps.firebase_distribution.outputs.service_account_path }}
-          groups: internal-testers
-          file: androidApp/build/outputs/apk/release/androidApp-release.apk
-          releaseNotes: |
-            ${{ github.event.inputs.release_notes || format('Build #{0} from {1}', github.run_number, github.ref_name) }}
+      - name: Install Firebase CLI
+        run: npm install --global firebase-tools@15.24.0
 
-            Commit: ${{ github.sha }}
+      - name: Ensure Firebase tester group exists
+        shell: bash
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.firebase_distribution.outputs.service_account_path }}
+          FIREBASE_PROJECT_ID: ${{ steps.android_firebase.outputs.project_id }}
+        run: |
+          set -euo pipefail
+
+          groups_json="$RUNNER_TEMP/firebase-app-distribution-groups.json"
+          firebase appdistribution:groups:list \
+            --project "$FIREBASE_PROJECT_ID" \
+            --json > "$groups_json"
+
+          if ! GROUPS_JSON_PATH="$groups_json" ruby -rjson -e '
+            payload = JSON.parse(File.read(ENV.fetch("GROUPS_JSON_PATH")))
+            groups = payload.dig("result", "groups") || payload["groups"] || []
+            exit(groups.any? { |group| group["name"].to_s.end_with?("/groups/internal-testers") } ? 0 : 1)
+          '; then
+            firebase appdistribution:groups:create \
+              "Internal Testers" \
+              internal-testers \
+              --project "$FIREBASE_PROJECT_ID"
+          fi
+
+      - name: Distribute release through Firebase
+        shell: bash
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ steps.firebase_distribution.outputs.service_account_path }}
+          FIREBASE_APP_ID_ANDROID: ${{ secrets.FIREBASE_APP_ID_ANDROID }}
+          RELEASE_NOTES: >-
+            ${{ github.event.inputs.release_notes ||
+                format('Build #{0} from {1}', github.run_number, github.ref_name) }}
+        run: |
+          set -euo pipefail
+
+          firebase appdistribution:distribute \
+            androidApp/build/outputs/apk/release/androidApp-release.apk \
+            --app "$FIREBASE_APP_ID_ANDROID" \
+            --groups internal-testers \
+            --release-notes "$RELEASE_NOTES
+
+          Commit: $GITHUB_SHA"

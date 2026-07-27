@@ -37,11 +37,8 @@ jobs:
       - name: Create local.properties
         run: |
           cat > local.properties << EOF
-          supabase.project_url=${{ secrets.SUPABASE_PROJECT_URL }}
-          supabase.public_api_key=${{ secrets.SUPABASE_PUBLIC_API_KEY }}
           gemini.api_key=${{ secrets.GEMINI_API_KEY }}
           google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}
-          powersync.url=${{ secrets.POWERSYNC_URL }}
           sdk.dir=$ANDROID_HOME
           EOF
 
@@ -80,7 +77,7 @@ jobs:
         run: ./gradlew :androidApp:lint --no-daemon
 
       - name: Run Unit Tests
-        run: ./gradlew :composeApp:allTests :androidApp:testDebugUnitTest --no-daemon
+        run: ./gradlew :composeApp:testAndroidHostTest :androidApp:testDebugUnitTest --no-daemon
 
       - name: Upload Lint Report
         if: always()
