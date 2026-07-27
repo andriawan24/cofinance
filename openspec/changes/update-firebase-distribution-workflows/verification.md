@@ -22,6 +22,13 @@
 - Firebase App Distribution release: `0.0.1 (8)`, release ID `1k479mph10lqg`; the CLI reported `distributed to testers/groups successfully`.
 - These runs exposed Node 20 deprecation annotations for official v4 actions, which prompted the validated Node 24 action-major update.
 
+### Final remote run for `1cde6895da1ce376abb3612f069fe9f06628b4a4`
+
+- CI: https://github.com/andriawan24/cofinance/actions/runs/30268691910 — succeeded with lint, Android-hosted tests, and artifact uploads executed.
+- Android delivery: https://github.com/andriawan24/cofinance/actions/runs/30268691926 — succeeded with every setup, build, credential, group, and distribution step executed.
+- Firebase App Distribution release: `0.0.1 (8)`, release ID `56akmklhakvng`; the CLI reported `distributed to testers/groups successfully`.
+- GitHub's check-run annotation endpoints returned empty arrays for both CI and Android delivery, proving the previous Node 20 deprecation annotation is absent.
+
 ### Requirement and scenario audit
 
 | Capability | Scenario | Evidence | Result |
@@ -34,4 +41,4 @@
 | `dependency-management` | Automation generates local build configuration | All three workflows write only Gemini, Google authentication, and platform SDK values. | Pass |
 | `dependency-management` | Linux CI verifies the KMP project | CI executed Android lint, `testAndroidHostTest`, and `testDebugUnitTest` successfully. | Pass |
 | `dependency-management` | Android delivery invokes build and distribution tools | Run used JDK 17, Node 22, and Firebase CLI `15.24.0`; release build and distribution succeeded. | Pass |
-| `dependency-management` | GitHub-hosted jobs invoke official actions | First remote runs passed but emitted Node 20 deprecation/forced-Node-24 annotations for v4 official actions. | Pending |
+| `dependency-management` | GitHub-hosted jobs invoke official actions | Final CI and Android runs used Node 24 action majors and both check-run annotation endpoints returned no annotations. | Pass |
