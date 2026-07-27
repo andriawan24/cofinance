@@ -3,6 +3,7 @@
 - [x] 1.1 Remove obsolete Supabase and PowerSync inputs from CI and delivery-generated `local.properties`
 - [x] 1.2 Update Linux CI to run the current Android-hosted lint and unit-test tasks
 - [x] 1.3 Replace Android's third-party Firebase upload action with pinned Node 22 and Firebase CLI 15.24.0 setup
+- [ ] 1.4 Upgrade official workflow actions to Node 24-based majors and remove hosted-runner deprecation annotations
 
 ## 2. Reliable Firebase Distribution
 

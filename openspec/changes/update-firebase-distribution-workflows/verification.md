@@ -14,11 +14,19 @@
 - Firebase App Distribution release: `0.0.1 (8)`, release ID `02o4of7q4nrm0`.
 - Firebase CLI created `Internal Testers` with alias `internal-testers`, uploaded the release, added release notes, and reported `distributed to testers/groups successfully`.
 
+### Remote run for `6364aab6b580f8ed8d21faebc700b8fc667f4c86`
+
+- CI: https://github.com/andriawan24/cofinance/actions/runs/30268360490 — succeeded.
+- Android delivery: https://github.com/andriawan24/cofinance/actions/runs/30268361183 — succeeded.
+- The group-list command completed and the workflow advanced directly to distribution without executing group creation, proving the existing `internal-testers` branch.
+- Firebase App Distribution release: `0.0.1 (8)`, release ID `1k479mph10lqg`; the CLI reported `distributed to testers/groups successfully`.
+- These runs exposed Node 20 deprecation annotations for official v4 actions, which prompted the validated Node 24 action-major update.
+
 ### Requirement and scenario audit
 
 | Capability | Scenario | Evidence | Result |
 | --- | --- | --- | --- |
-| `ci-firebase-configuration` | Tester group already exists | Pending a second delivery run after the first run created the group. | Pending |
+| `ci-firebase-configuration` | Tester group already exists | On Android run `30268361183`, group listing completed, no group-creation command executed, and distribution to `internal-testers` succeeded. | Pass |
 | `ci-firebase-configuration` | Tester group does not exist | Android step `Ensure Firebase tester group exists` created alias `internal-testers`; distribution then succeeded. | Pass |
 | `ci-firebase-configuration` | Firebase rejects distribution | The workflow uses `set -euo pipefail` and no conditional success override around group setup or distribution; command failure exits the job. | Pass (structural) |
 | `ci-firebase-configuration` | Distribution input is missing or invalid | Configuration and credential validation paths exit nonzero with diagnostics and do not print decoded contents. | Pass (structural) |
@@ -26,3 +34,4 @@
 | `dependency-management` | Automation generates local build configuration | All three workflows write only Gemini, Google authentication, and platform SDK values. | Pass |
 | `dependency-management` | Linux CI verifies the KMP project | CI executed Android lint, `testAndroidHostTest`, and `testDebugUnitTest` successfully. | Pass |
 | `dependency-management` | Android delivery invokes build and distribution tools | Run used JDK 17, Node 22, and Firebase CLI `15.24.0`; release build and distribution succeeded. | Pass |
+| `dependency-management` | GitHub-hosted jobs invoke official actions | First remote runs passed but emitted Node 20 deprecation/forced-Node-24 annotations for v4 official actions. | Pending |

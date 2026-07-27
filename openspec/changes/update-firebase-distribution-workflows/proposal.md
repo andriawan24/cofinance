@@ -5,6 +5,7 @@ The Android delivery workflow uploads a release to Firebase but then fails with 
 ## What Changes
 
 - Align CI and delivery build inputs with the current Firebase-based application configuration and supported Android/iOS targets.
+- Upgrade official GitHub Actions to Node 24-based majors so hosted runs do not rely on the deprecated Node 20 action runtime.
 - Replace the fragile third-party Android distribution step with a pinned Firebase CLI flow that authenticates through the existing service account, ensures the configured tester group exists, and distributes the release.
 - Make missing or invalid Android distribution credentials fail the delivery job instead of silently skipping the required outcome.
 - Verify distribution through the GitHub Actions result and Firebase CLI success output without logging credentials or decoded Firebase configuration.

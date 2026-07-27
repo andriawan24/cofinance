@@ -14,3 +14,7 @@ Continuous integration and delivery workflows SHALL use build inputs, runtime to
 #### Scenario: Android delivery invokes build and distribution tools
 - **WHEN** the Android release is built and distributed
 - **THEN** the workflow SHALL use a Java runtime compatible with the configured JVM target and a pinned Firebase CLI version running on a supported Node.js runtime
+
+#### Scenario: GitHub-hosted jobs invoke official actions
+- **WHEN** a CI or delivery job uses official checkout, Java setup, Node setup, cache, or artifact actions
+- **THEN** it SHALL use a major that runs on the supported Node 24 action runtime without a Node 20 deprecation override
