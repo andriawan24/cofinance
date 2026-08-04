@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,8 +24,10 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
+import androidx.compose.ui.tooling.preview.AndroidUiModes.UI_MODE_NIGHT_YES
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.ic_expense
 import cofinance.composeapp.generated.resources.ic_income
@@ -41,7 +44,12 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun BalanceCard(modifier: Modifier = Modifier, balance: Long, income: Long, expense: Long) {
+fun BalanceCard(
+    modifier: Modifier = Modifier,
+    balance: Long,
+    income: Long,
+    expense: Long
+) {
     Column(
         modifier = modifier
             .dropShadow(
@@ -155,7 +163,7 @@ private fun Balance(modifier: Modifier = Modifier, balance: Long) {
             Text(
                 text = stringResource(Res.string.label_balance),
                 style = MaterialTheme.typography.headlineSmall.copy(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     lineHeightStyle = LineHeightStyle(
                         LineHeightStyle.Alignment.Center,
                         LineHeightStyle.Trim.Both
@@ -199,6 +207,19 @@ private fun Balance(modifier: Modifier = Modifier, balance: Long) {
 @Preview
 @Composable
 private fun BalanceCardPreview() {
+    CofinanceTheme {
+        BalanceCard(
+            modifier = Modifier.fillMaxWidth(),
+            balance = 6000000,
+            income = 10000000,
+            expense = 4000000
+        )
+    }
+}
+
+@Preview(uiMode = UI_MODE_NIGHT_YES)
+@Composable
+private fun BalanceCardDarkPreview() {
     CofinanceTheme {
         BalanceCard(
             modifier = Modifier.fillMaxWidth(),
