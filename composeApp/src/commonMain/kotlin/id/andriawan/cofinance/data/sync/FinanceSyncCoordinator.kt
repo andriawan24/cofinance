@@ -17,15 +17,22 @@ class FinanceSyncCoordinator(
         val localAccountIds = localAccounts.mapTo(mutableSetOf()) { it.id }
         val localTransactionIds = localTransactions.mapTo(mutableSetOf()) { it.id }
 
-        localDatabase.upsertAccounts(remoteDataSource.getAccounts().filterNot { it.id in localAccountIds })
-        localDatabase.upsertTransactions(remoteDataSource.getTransactions().filterNot { it.id in localTransactionIds })
+        localDatabase.upsertAccounts(
+            remoteDataSource.getAccounts().filterNot { it.id in localAccountIds })
+        localDatabase.upsertTransactions(
+            remoteDataSource.getTransactions().filterNot { it.id in localTransactionIds })
 
         mirrorAllIfSignedIn()
     }
 
     suspend fun mirrorAllIfSignedIn() {
-        if (!sessionPolicy.isSignedIn()) return
-        remoteDataSource.upsertAccounts(localDatabase.getAccounts())
-        remoteDataSource.upsertTransactions(localDatabase.getAllTransactions())
+        if (sessionPolicy.isSignedIn()) {
+            remoteDataSource.upsertAccounts(localDatabase.getAccounts())
+            remoteDataSource.upsertTransactions(localDatabase.getAllTransactions())
+        }
+    }
+
+    suspend fun clearLocalAfterSignOut() {
+        localDatabase.clearAll()
     }
 }

@@ -67,6 +67,9 @@ interface LocalFinanceDao {
     @Query("DELETE FROM accounts WHERE id = :id")
     suspend fun deleteAccount(id: String)
 
+    @Query("DELETE FROM accounts")
+    suspend fun deleteAllAccounts()
+
     @Query("SELECT * FROM transactions ORDER BY date DESC")
     fun watchTransactions(): Flow<List<LocalTransactionEntity>>
 
@@ -81,6 +84,9 @@ interface LocalFinanceDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertTransactions(transactions: List<LocalTransactionEntity>)
+
+    @Query("DELETE FROM transactions")
+    suspend fun deleteAllTransactions()
 }
 
 @Database(
@@ -255,6 +261,15 @@ class RoomCofinanceDatabase(
 
     override suspend fun upsertTransactions(transactions: List<TransactionResponse>) {
         if (transactions.isNotEmpty()) dao.upsertTransactions(transactions.map(TransactionResponse::toEntity))
+    }
+
+    override suspend fun clearAll() {
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                dao.deleteAllTransactions()
+                dao.deleteAllAccounts()
+            }
+        }
     }
 
     private suspend fun mutateAccount(

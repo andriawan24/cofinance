@@ -40,6 +40,7 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun logout() {
         firebaseDataSource.logout()
+        syncCoordinator.clearLocalAfterSignOut()
     }
 
     override suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User {

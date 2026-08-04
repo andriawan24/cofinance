@@ -71,4 +71,7 @@ interface CofinanceDatabase {
 
     suspend fun upsertAccounts(accounts: List<AccountResponse>)
     suspend fun upsertTransactions(transactions: List<TransactionResponse>)
+
+    /** Wipes all locally persisted accounts and transactions, e.g. on logout. */
+    suspend fun clearAll()
 }
