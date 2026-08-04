@@ -29,8 +29,6 @@ fun computeCycleDateRange(month: Int, year: Int, cycleStartDay: Int): CycleDateR
         )
     }
 
-    // Cycle starts on cycleStartDay of previous month, ends on cycleStartDay of current month
-    // For month=3, year=2026, cycleStartDay=25: start = Feb 25, end = Mar 25
     val prevMonth = if (month == 1) 12 else month - 1
     val prevYear = if (month == 1) year - 1 else year
 
@@ -40,13 +38,12 @@ fun computeCycleDateRange(month: Int, year: Int, cycleStartDay: Int): CycleDateR
     val endDay = cycleStartDay.coerceAtMost(daysInMonth(year, month))
     val endDate = LocalDate(year, month, endDay)
 
-    // Label shows the inclusive range: startDate to endDate minus 1 day visually
     val lastInclusiveDay = endDay - 1
     val lastMonth: Int
     val lastYear: Int
     val lastDay: Int
+
     if (lastInclusiveDay < 1) {
-        // Edge case: end is the 1st, so last inclusive day is last day of previous month
         lastMonth = prevMonth
         lastYear = prevYear
         lastDay = daysInMonth(prevYear, prevMonth)
@@ -56,7 +53,8 @@ fun computeCycleDateRange(month: Int, year: Int, cycleStartDay: Int): CycleDateR
         lastDay = lastInclusiveDay
     }
 
-    val label = "${startDay} ${shortMonthName(prevMonth)} - $lastDay ${shortMonthName(lastMonth)} $lastYear"
+    val label =
+        "$startDay ${shortMonthName(prevMonth)} - $lastDay ${shortMonthName(lastMonth)} $lastYear"
 
     return CycleDateRange(
         startDate = startDate.toString(),
@@ -117,16 +115,16 @@ fun isCycleBoundaryPassed(lastResetDate: String?, cycleStartDay: Int): Boolean {
         .toLocalDateTime(TimeZone.currentSystemDefault()).date
 
     val (currentCycleMonth, currentCycleYear) = getCurrentCycleMonth(cycleStartDay)
-    val currentCycleRange = computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
+    val currentCycleRange =
+        computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
     val cycleStartDate = LocalDate.parse(currentCycleRange.startDate)
 
     if (lastResetDate == null) {
-        // No reset recorded yet — check if we're past the first cycle start
         return today >= cycleStartDate
     }
 
     val lastReset = LocalDate.parse(lastResetDate)
-    // If last reset was before the current cycle started, we need a new reset
+
     return lastReset < cycleStartDate
 }
 
@@ -136,6 +134,7 @@ fun isCycleBoundaryPassed(lastResetDate: String?, cycleStartDay: Int): Boolean {
 @OptIn(ExperimentalTime::class)
 fun getPreviousCycleEndDate(cycleStartDay: Int): String {
     val (currentCycleMonth, currentCycleYear) = getCurrentCycleMonth(cycleStartDay)
-    val currentCycleRange = computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
+    val currentCycleRange =
+        computeCycleDateRange(currentCycleMonth, currentCycleYear, cycleStartDay)
     return currentCycleRange.startDate // The end of prev cycle is the start of current cycle
 }

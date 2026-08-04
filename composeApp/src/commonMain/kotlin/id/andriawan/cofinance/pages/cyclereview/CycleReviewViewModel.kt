@@ -33,6 +33,7 @@ data class CycleReviewUiState(
     val cycleEndDateLabel: String = ""
 )
 
+@Stable
 class CycleReviewViewModel(
     private val accountRepository: AccountRepository,
     private val resetAccountBalanceUseCase: ResetAccountBalanceUseCase,
@@ -104,8 +105,7 @@ class CycleReviewViewModel(
                 resetAccountBalanceUseCase.execute(choice.account, cycleEndDate)
             }
 
-            val today = Clock.System.now()
-                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
             if (authenticationRepository.isSignedIn()) {
                 authenticationRepository.updateLastCycleResetDate(today.toString())
             }

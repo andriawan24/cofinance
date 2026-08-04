@@ -111,24 +111,6 @@ class ActivityViewModel(
         }
     }
 
-    fun refreshCycleSettings() {
-        val user = getUserUseCase.execute()
-        val cycleStartDay = user.cycleStartDay
-        val (month, year) = getCurrentCycleMonth(cycleStartDay)
-        val range = computeCycleDateRange(month, year, cycleStartDay)
-
-        _uiState.value = uiState.value.copy(
-            month = month,
-            year = year,
-            cycleStartDay = cycleStartDay,
-            dateLabel = range.label,
-            transactions = emptyList()
-        )
-
-        getBalance()
-        fetchTransaction()
-    }
-
     fun getBalance() {
         viewModelScope.launch {
             val range = computeCycleDateRange(uiState.value.month, uiState.value.year, uiState.value.cycleStartDay)
@@ -179,6 +161,7 @@ class ActivityViewModel(
 
     fun checkCycleBoundary() {
         if (!authenticationRepository.isSignedIn()) return
+
         viewModelScope.launch {
             try {
                 val user = getUserUseCase.execute()
@@ -186,7 +169,6 @@ class ActivityViewModel(
                 val lastResetDate = user.lastCycleResetDate
 
                 if (isCycleBoundaryPassed(lastResetDate, cycleStartDay)) {
-                    // Check if there are any Regular Balance accounts with non-zero balance
                     val accounts = accountRepository.getAccounts()
                     val regularAccountsWithBalance = accounts.filter {
                         it.accountType == AccountType.REGULAR_BALANCE && it.balance != 0L
