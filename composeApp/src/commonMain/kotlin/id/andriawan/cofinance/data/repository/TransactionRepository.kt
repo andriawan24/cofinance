@@ -51,7 +51,8 @@ class TransactionRepositoryImpl(
             startDate = param.startDate,
             endDate = param.endDate,
             isDraft = param.isDraft,
-            transactionId = param.transactionId
+            transactionId = param.transactionId,
+            expenseOnly = param.expenseOnly
         ).map { transactions ->
             transactions.map(Transaction::from)
         }

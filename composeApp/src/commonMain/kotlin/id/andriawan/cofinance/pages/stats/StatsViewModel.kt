@@ -118,8 +118,17 @@ class StatsViewModel(
 
     private fun fetchTransaction() {
         viewModelScope.launch {
-            val range = computeCycleDateRange(uiState.value.month, uiState.value.year, uiState.value.cycleStartDay)
-            val param = GetTransactionsParam(startDate = range.startDate, endDate = range.endDate)
+            val range = computeCycleDateRange(
+                month = uiState.value.month,
+                year = uiState.value.year,
+                cycleStartDay = uiState.value.cycleStartDay
+            )
+
+            val param = GetTransactionsParam(
+                startDate = range.startDate,
+                endDate = range.endDate,
+                expenseOnly = true
+            )
 
             getTransactionsUseCase.execute(param = param).collectResult(
                 onLoading = {

@@ -15,6 +15,7 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -103,13 +104,10 @@ expect object CofinanceRoomDatabaseConstructor : RoomDatabaseConstructor<Cofinan
     override fun initialize(): CofinanceRoomDatabase
 }
 
-class RoomCofinanceDatabase(
-    private val roomDatabase: CofinanceRoomDatabase
-) : CofinanceDatabase {
+class RoomCofinanceDatabase(private val roomDatabase: CofinanceRoomDatabase) : CofinanceDatabase {
     private val dao = roomDatabase.financeDao()
 
-    override fun watchAccounts(): Flow<List<AccountResponse>> =
-        dao.watchAccounts().mapAccounts()
+    override fun watchAccounts(): Flow<List<AccountResponse>> = dao.watchAccounts().mapAccounts()
 
     override suspend fun getAccounts(): List<AccountResponse> =
         dao.getAccounts().map(LocalAccountEntity::toResponse)
@@ -171,12 +169,13 @@ class RoomCofinanceDatabase(
         startDate: String?,
         endDate: String?,
         isDraft: Boolean,
-        transactionId: String?
+        transactionId: String?,
+        expenseOnly: Boolean?
     ): Flow<List<TransactionResponse>> = combine(
         dao.watchTransactions(),
         dao.watchAccounts()
     ) { transactions, accounts ->
-        hydrate(transactions, accounts, startDate, endDate, isDraft, transactionId)
+        hydrate(transactions, accounts, startDate, endDate, isDraft, transactionId, expenseOnly)
     }
 
     override suspend fun getTransactions(
@@ -185,7 +184,13 @@ class RoomCofinanceDatabase(
         isDraft: Boolean,
         transactionId: String?
     ): List<TransactionResponse> = hydrate(
-        dao.getTransactions(), dao.getAccounts(), startDate, endDate, isDraft, transactionId
+        dao.getTransactions(),
+        dao.getAccounts(),
+        startDate,
+        endDate,
+        isDraft,
+        transactionId,
+        null
     )
 
     override suspend fun getAllTransactions(): List<TransactionResponse> {
@@ -211,14 +216,26 @@ class RoomCofinanceDatabase(
     ): TransactionResponse {
         val now = kotlin.time.Clock.System.now().toString()
         val entity = LocalTransactionEntity(
-            id, amount, category, date, fee, notes, accountsId, receiverAccountsId, type, now, now
+            id = id,
+            amount = amount,
+            category = category,
+            date = date,
+            fee = fee,
+            notes = notes,
+            senderAccountId = accountsId,
+            receiverAccountId = receiverAccountsId,
+            type = type,
+            createdAt = now,
+            updatedAt = now
         )
+
         roomDatabase.useWriterConnection {
             it.immediateTransaction {
                 applyBalanceDeltas(entity)
                 dao.upsertTransaction(entity)
             }
         }
+
         return getTransactions(transactionId = id, isDraft = type == TYPE_DRAFT).first()
     }
 
@@ -247,6 +264,7 @@ class RoomCofinanceDatabase(
                     type = type,
                     updatedAt = kotlin.time.Clock.System.now().toString()
                 )
+
                 applyBalanceDeltas(old, -1)
                 applyBalanceDeltas(replacement)
                 dao.upsertTransaction(replacement)
@@ -299,15 +317,32 @@ class RoomCofinanceDatabase(
         startDate: String? = null,
         endDate: String? = null,
         isDraft: Boolean = false,
-        transactionId: String? = null
+        transactionId: String? = null,
+        expenseOnly: Boolean?
     ): List<TransactionResponse> {
         val accountMap = accounts.associateBy(LocalAccountEntity::id)
+
+        fun matchesId(transaction: LocalTransactionEntity) =
+            transactionId == null || transaction.id == transactionId
+
+        fun matchesDateRange(transaction: LocalTransactionEntity) =
+            startDate == null || endDate == null || transaction.date in startDate..<endDate
+
+        fun matchesType(transaction: LocalTransactionEntity): Boolean {
+            if (transactionId != null) return true
+            if (isDraft) return transaction.type == TYPE_DRAFT
+
+            return transaction.type != TYPE_DRAFT && transaction.type != TYPE_CYCLE_RESET
+        }
+
+        fun matchesExpenseOnly(transaction: LocalTransactionEntity) =
+            expenseOnly != true || transaction.type != TYPE_INCOME
+
         return transactions.filter { transaction ->
-            (transactionId == null || transaction.id == transactionId) &&
-                    (startDate == null || endDate == null || transaction.date >= startDate && transaction.date < endDate) &&
-                    if (transactionId != null) true
-                    else if (isDraft) transaction.type == TYPE_DRAFT
-                    else transaction.type != TYPE_DRAFT && transaction.type != TYPE_CYCLE_RESET
+            matchesId(transaction) &&
+                    matchesDateRange(transaction) &&
+                    matchesType(transaction) &&
+                    matchesExpenseOnly(transaction)
         }.map { transaction ->
             transaction.toResponse(
                 sender = accountMap[transaction.senderAccountId]?.toResponse(),
@@ -318,9 +353,11 @@ class RoomCofinanceDatabase(
 
     private fun balanceDeltas(transaction: LocalTransactionEntity): Map<String, Long> {
         val deltas = mutableMapOf<String, Long>()
+
         fun add(id: String?, delta: Long) {
             if (!id.isNullOrBlank()) deltas[id] = deltas.getOrElse(id) { 0 } + delta
         }
+
         when (transaction.type) {
             TYPE_INCOME -> add(transaction.senderAccountId, transaction.amount)
             TYPE_EXPENSE -> add(
@@ -333,6 +370,7 @@ class RoomCofinanceDatabase(
                 add(transaction.receiverAccountId, transaction.amount)
             }
         }
+
         return deltas
     }
 
