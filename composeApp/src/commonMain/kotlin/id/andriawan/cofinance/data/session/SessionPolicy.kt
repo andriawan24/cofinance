@@ -5,7 +5,6 @@ import dev.gitlive.firebase.auth.FirebaseAuth
 interface SessionPolicy {
     fun isSignedIn(): Boolean
     fun userIdOrNull(): String?
-
     fun requireUserId(): String = userIdOrNull() ?: throw SignedInSessionRequiredException()
 }
 
@@ -16,4 +15,5 @@ class FirebaseSessionPolicy(
     override fun userIdOrNull(): String? = firebaseAuth.currentUser?.uid
 }
 
-class SignedInSessionRequiredException : IllegalStateException("Sign in is required for this feature")
+class SignedInSessionRequiredException :
+    IllegalStateException("Sign in is required for this feature")
