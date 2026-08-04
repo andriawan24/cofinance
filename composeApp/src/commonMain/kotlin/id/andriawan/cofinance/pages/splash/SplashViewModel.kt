@@ -36,8 +36,7 @@ class SplashViewModel(
                     }
                 }
             }
-        } catch (e: Exception) {
-            // Startup remains local-first if the authenticated profile is temporarily offline.
+        } catch (_: Exception) {
             emit(ResultState.Success(true))
         }
     }

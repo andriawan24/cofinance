@@ -42,6 +42,7 @@ class MainActivity : ComponentActivity() {
 
             return imageUri?.toString()
         }
+
         return null
     }
 }

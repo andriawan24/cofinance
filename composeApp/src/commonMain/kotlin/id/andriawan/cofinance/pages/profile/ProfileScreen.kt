@@ -86,7 +86,6 @@ fun ProfileScreen(
     onSignedOut: () -> Unit,
     onSignIn: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
-    showMessage: (String) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val uiState by profileViewModel.uiState.collectAsStateWithLifecycle()
