@@ -228,4 +228,9 @@ private class FakeDatabase(
         transactions.forEach { existing[it.id] = it }
         transactionState.value = existing.values.toList()
     }
+
+    override suspend fun clearAll() {
+        accountState.value = emptyList()
+        transactionState.value = emptyList()
+    }
 }
