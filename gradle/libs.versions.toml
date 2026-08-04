@@ -1,7 +1,7 @@
 [versions]
-agp = "9.3.0"
-firebaseKotlin = "2.4.0"
-firebaseBom = "33.15.0"
+agp = "9.3.1"
+firebaseKotlin = "2.5.0"
+firebaseBom = "34.16.0"
 googleServices = "4.5.0"
 androidx-activity = "1.13.0"
 androidx-lifecycle = "2.11.0"
@@ -10,8 +10,8 @@ coil = "3.5.0"
 composeMultiplatform = "1.11.1"
 credentials = "1.6.0"
 googleid = "1.2.0"
-kotlin = "2.4.0"
-kotlinxSerialization = "1.9.0"
+kotlin = "2.4.10"
+kotlinxSerialization = "1.11.0"
 composeNavigation = "2.9.2"
 appcompat = "1.7.1"
 kotlinxDatetime = "0.8.0"
@@ -24,7 +24,7 @@ koin-bom = "4.2.2"
 room = "2.8.4"
 sqlite = "2.7.0"
 ksp = "2.3.10"
-coroutines = "1.10.2"
+coroutines = "1.11.0"
 
 [libraries]
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
@@ -45,6 +45,7 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 # Compose
 compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "composeMultiplatform" }
 compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "composeMultiplatform" }
+compose-ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "composeMultiplatform" }
 compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "composeMultiplatform" }
 compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "composeMultiplatform" }
 compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }

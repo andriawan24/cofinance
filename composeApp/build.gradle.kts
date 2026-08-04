@@ -41,6 +41,7 @@ kotlin {
         androidMain.dependencies {
             implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.compose.ui.tooling.preview)
+            implementation(libs.compose.ui.tooling)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
 

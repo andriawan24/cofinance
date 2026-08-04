@@ -42,6 +42,7 @@ android {
             } else {
                 signingConfigs.getByName("release")
             }
+
             isMinifyEnabled = true
             isShrinkResources = true
             isDebuggable = false
@@ -64,7 +65,7 @@ android {
 }
 
 dependencies {
-    implementation(project.dependencies.project(":composeApp"))
+    implementation(project(":composeApp"))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.appcompat)
 }
