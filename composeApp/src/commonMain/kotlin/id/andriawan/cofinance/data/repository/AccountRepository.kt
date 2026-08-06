@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.repository
 
-import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
@@ -22,7 +22,7 @@ interface AccountRepository {
 
 
 class AccountRepositoryImpl(
-    private val database: CofinanceDatabase,
+    private val database: AccountLocalDataSource,
     private val syncCoordinator: FinanceSyncCoordinator
 ) : AccountRepository {
 

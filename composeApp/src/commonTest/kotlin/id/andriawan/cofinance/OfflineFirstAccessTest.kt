@@ -1,11 +1,13 @@
 package id.andriawan.cofinance
 
 import id.andriawan.cofinance.data.datasource.ReceiptScanner
-import id.andriawan.cofinance.data.local.CofinanceDatabase
-import id.andriawan.cofinance.data.local.RemoteFinanceDataSource
+import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
+import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.ReceiptScanResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
+import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.repository.AccountRepositoryImpl
 import id.andriawan.cofinance.data.repository.TransactionRepositoryImpl
 import id.andriawan.cofinance.data.session.SessionPolicy
@@ -23,18 +25,26 @@ import kotlin.test.assertTrue
 class OfflineFirstAccessTest {
     @Test
     fun signedOutAccountWriteStaysLocalAndDoesNotTouchCloud() = runTest {
-        val local = FakeDatabase()
-        val remote = FakeRemote(failOnAccess = true)
+        val localAccounts = FakeAccountLocalDataSource()
+        val localTransactions = FakeTransactionLocalDataSource()
+        val remoteAccounts = FakeAccountRemoteDataSource(failOnAccess = true)
+        val remoteTransactions = FakeTransactionRemoteDataSource(failOnAccess = true)
         val session = FakeSessionPolicy(userId = null)
         val repository = AccountRepositoryImpl(
-            database = local,
-            syncCoordinator = FinanceSyncCoordinator(local, remote, session)
+            database = localAccounts,
+            syncCoordinator = FinanceSyncCoordinator(
+                localAccounts,
+                localTransactions,
+                remoteAccounts,
+                remoteTransactions,
+                session
+            )
         )
 
         repository.addAccount(AccountParam("Cash", 50_000, "Wallet"))
 
-        assertEquals("Cash", local.getAccounts().single().name)
-        assertEquals(0, remote.accessCount)
+        assertEquals("Cash", localAccounts.getAccounts().single().name)
+        assertEquals(0, remoteAccounts.accessCount)
     }
 
     @Test
@@ -42,29 +52,45 @@ class OfflineFirstAccessTest {
         val localRecord = account("shared", "Local")
         val remoteCollision = account("shared", "Remote")
         val remoteOnly = account("remote-only", "Cloud savings")
-        val local = FakeDatabase(accounts = listOf(localRecord))
-        val remote = FakeRemote(accounts = listOf(remoteCollision, remoteOnly))
-        val coordinator = FinanceSyncCoordinator(local, remote, FakeSessionPolicy("firebase-user"))
+        val localAccounts = FakeAccountLocalDataSource(accounts = listOf(localRecord))
+        val localTransactions = FakeTransactionLocalDataSource()
+        val remoteAccounts = FakeAccountRemoteDataSource(accounts = listOf(remoteCollision, remoteOnly))
+        val remoteTransactions = FakeTransactionRemoteDataSource()
+        val coordinator = FinanceSyncCoordinator(
+            localAccounts,
+            localTransactions,
+            remoteAccounts,
+            remoteTransactions,
+            FakeSessionPolicy("firebase-user")
+        )
 
         coordinator.syncAfterSignIn()
 
-        assertEquals(setOf("shared", "remote-only"), local.getAccounts().mapNotNull { it.id }.toSet())
-        assertEquals("Local", local.getAccounts().first { it.id == "shared" }.name)
-        assertEquals("Local", remote.uploadedAccounts.first { it.id == "shared" }.name)
-        assertTrue(remote.uploadedAccounts.any { it.id == "remote-only" })
+        assertEquals(setOf("shared", "remote-only"), localAccounts.getAccounts().mapNotNull { it.id }.toSet())
+        assertEquals("Local", localAccounts.getAccounts().first { it.id == "shared" }.name)
+        assertEquals("Local", remoteAccounts.uploadedAccounts.first { it.id == "shared" }.name)
+        assertTrue(remoteAccounts.uploadedAccounts.any { it.id == "remote-only" })
     }
 
     @Test
     fun signedOutReceiptScanIsRejectedBeforeScannerInvocation() = runTest {
-        val local = FakeDatabase()
+        val localAccounts = FakeAccountLocalDataSource()
+        val localTransactions = FakeTransactionLocalDataSource()
         val session = FakeSessionPolicy(null)
         val scanner = FakeReceiptScanner()
-        val remote = FakeRemote()
+        val remoteAccounts = FakeAccountRemoteDataSource()
+        val remoteTransactions = FakeTransactionRemoteDataSource()
         val repository = TransactionRepositoryImpl(
             receiptScanner = scanner,
-            database = local,
+            database = localTransactions,
             sessionPolicy = session,
-            syncCoordinator = FinanceSyncCoordinator(local, remote, session)
+            syncCoordinator = FinanceSyncCoordinator(
+                localAccounts,
+                localTransactions,
+                remoteAccounts,
+                remoteTransactions,
+                session
+            )
         )
 
         assertFailsWith<SignedInSessionRequiredException> {
@@ -96,18 +122,15 @@ private class FakeReceiptScanner : ReceiptScanner {
     }
 }
 
-private class FakeRemote(
+private class FakeAccountRemoteDataSource(
     accounts: List<AccountResponse> = emptyList(),
-    transactions: List<TransactionResponse> = emptyList(),
     private val failOnAccess: Boolean = false
-) : RemoteFinanceDataSource {
+) : AccountRemoteDataSource {
     private val storedAccounts = accounts.toMutableList()
-    private val storedTransactions = transactions.toMutableList()
     var accessCount = 0
     var uploadedAccounts: List<AccountResponse> = emptyList()
 
     override suspend fun getAccounts(): List<AccountResponse> = access { storedAccounts.toList() }
-    override suspend fun getTransactions(): List<TransactionResponse> = access { storedTransactions.toList() }
 
     override suspend fun upsertAccounts(accounts: List<AccountResponse>) {
         access {
@@ -116,6 +139,22 @@ private class FakeRemote(
             storedAccounts.addAll(accounts)
         }
     }
+
+    private fun <T> access(block: () -> T): T {
+        accessCount++
+        if (failOnAccess) error("Cloud must not be used")
+        return block()
+    }
+}
+
+private class FakeTransactionRemoteDataSource(
+    transactions: List<TransactionResponse> = emptyList(),
+    private val failOnAccess: Boolean = false
+) : TransactionRemoteDataSource {
+    private val storedTransactions = transactions.toMutableList()
+    var accessCount = 0
+
+    override suspend fun getTransactions(): List<TransactionResponse> = access { storedTransactions.toList() }
 
     override suspend fun upsertTransactions(transactions: List<TransactionResponse>) {
         access {
@@ -131,12 +170,10 @@ private class FakeRemote(
     }
 }
 
-private class FakeDatabase(
-    accounts: List<AccountResponse> = emptyList(),
-    transactions: List<TransactionResponse> = emptyList()
-) : CofinanceDatabase {
+private class FakeAccountLocalDataSource(
+    accounts: List<AccountResponse> = emptyList()
+) : AccountLocalDataSource {
     private val accountState = MutableStateFlow(accounts)
-    private val transactionState = MutableStateFlow(transactions)
 
     override fun watchAccounts(): Flow<List<AccountResponse>> = accountState
     override suspend fun getAccounts(): List<AccountResponse> = accountState.value
@@ -177,11 +214,28 @@ private class FakeDatabase(
         accountState.value = accountState.value.filterNot { it.id == accountId }
     }
 
+    override suspend fun upsertAccounts(accounts: List<AccountResponse>) {
+        val existing = accountState.value.associateBy { it.id }.toMutableMap()
+        accounts.forEach { existing[it.id] = it }
+        accountState.value = existing.values.toList()
+    }
+
+    override suspend fun clearAccounts() {
+        accountState.value = emptyList()
+    }
+}
+
+private class FakeTransactionLocalDataSource(
+    transactions: List<TransactionResponse> = emptyList()
+) : TransactionLocalDataSource {
+    private val transactionState = MutableStateFlow(transactions)
+
     override fun watchTransactions(
         startDate: String?,
         endDate: String?,
         isDraft: Boolean,
-        transactionId: String?
+        transactionId: String?,
+        expenseOnly: Boolean?
     ): Flow<List<TransactionResponse>> = transactionState
 
     override suspend fun getTransactions(
@@ -217,20 +271,13 @@ private class FakeDatabase(
         type: String
     ): TransactionResponse = error("Not used by these tests")
 
-    override suspend fun upsertAccounts(accounts: List<AccountResponse>) {
-        val existing = accountState.value.associateBy { it.id }.toMutableMap()
-        accounts.forEach { existing[it.id] = it }
-        accountState.value = existing.values.toList()
-    }
-
     override suspend fun upsertTransactions(transactions: List<TransactionResponse>) {
         val existing = transactionState.value.associateBy { it.id }.toMutableMap()
         transactions.forEach { existing[it.id] = it }
         transactionState.value = existing.values.toList()
     }
 
-    override suspend fun clearAll() {
-        accountState.value = emptyList()
+    override suspend fun clearTransactions() {
         transactionState.value = emptyList()
     }
 }

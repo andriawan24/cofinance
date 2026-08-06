@@ -1,7 +1,7 @@
 package id.andriawan.cofinance.data.repository
 
 import id.andriawan.cofinance.data.datasource.ReceiptScanner
-import id.andriawan.cofinance.data.local.CofinanceDatabase
+import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
@@ -25,7 +25,7 @@ interface TransactionRepository {
 
 class TransactionRepositoryImpl(
     private val receiptScanner: ReceiptScanner,
-    private val database: CofinanceDatabase,
+    private val database: TransactionLocalDataSource,
     private val sessionPolicy: SessionPolicy,
     private val syncCoordinator: FinanceSyncCoordinator
 ) : TransactionRepository {
