@@ -45,6 +45,7 @@ import id.andriawan.cofinance.components.AccountBottomSheetContent
 import id.andriawan.cofinance.components.AddAccountBottomSheet
 import id.andriawan.cofinance.components.BaseBottomSheet
 import id.andriawan.cofinance.components.ErrorBottomSheet
+import id.andriawan.cofinance.data.ocr.parser.ReceiptField
 import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.components.DialogDatePickerContent
 import id.andriawan.cofinance.components.FancyTabIndicator
@@ -72,6 +73,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AddTransactionScreen(
     transactionId: String?,
+    lowConfidenceFields: Set<ReceiptField> = emptySet(),
     onBackPressed: () -> Unit,
     onSuccessSave: () -> Unit,
     onInputPictureClicked: () -> Unit,
@@ -83,7 +85,7 @@ fun AddTransactionScreen(
 
     LaunchedEffect(transactionId) {
         if (transactionId != null) {
-            addNewViewModel.loadExistingTransaction(transactionId)
+            addNewViewModel.loadExistingTransaction(transactionId, lowConfidenceFields)
         }
     }
 

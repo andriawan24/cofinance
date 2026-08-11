@@ -37,6 +37,7 @@ import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.enums.AccountTransferType
 import id.andriawan.cofinance.utils.extensions.formatToString
 import id.andriawan.cofinance.components.AddNewSection
+import id.andriawan.cofinance.data.ocr.parser.ReceiptField
 import id.andriawan.cofinance.components.InputAmount
 import id.andriawan.cofinance.components.InputNote
 import kotlinx.datetime.TimeZone
@@ -67,6 +68,8 @@ fun TransferSection(
             fee = uiState.fee,
             includeFee = uiState.includeFee,
             enableFee = true,
+            amountNeedsVerification = uiState.needsVerification(ReceiptField.AMOUNT),
+            feeNeedsVerification = uiState.needsVerification(ReceiptField.FEE),
             onAmountChanged = { amount -> onEvent.invoke(AddNewUiEvent.SetAmount(amount)) },
             onFeeChanged = { fee -> onEvent.invoke(AddNewUiEvent.SetFee(fee)) },
             onIncludeFeeChanged = { isIncludeFee ->
@@ -130,6 +133,7 @@ fun TransferSection(
             onSectionClicked = {
                 onDialogEvent.invoke(AddNewDialogEvent.ToggleDatePickerDialog(true))
             },
+            needsVerification = uiState.needsVerification(ReceiptField.DATE),
             startIcon = {
                 Icon(
                     painter = painterResource(Res.drawable.ic_calendar),

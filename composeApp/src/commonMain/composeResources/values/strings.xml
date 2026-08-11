@@ -67,6 +67,7 @@
     <string name="label_notes">Notes</string>
     <string name="label_zero">0</string>
     <string name="label_sender_account">Sender Account</string>
+    <string name="label_needs_verification">Please double-check</string>
     <string name="label_beneficiary_account">Beneficiary Account</string>
 
     <!-- Accounts -->

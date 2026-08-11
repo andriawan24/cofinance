@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.error_generic
 import coil3.Uri
+import id.andriawan.cofinance.data.ocr.parser.MerchantCategoryLearning
+import id.andriawan.cofinance.data.ocr.parser.ReceiptField
 import id.andriawan.cofinance.data.repository.TransactionRepository
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
@@ -50,8 +52,12 @@ data class AddNewUiState(
     val isLoadingAccount: Boolean = false,
     val isLoading: Boolean = false,
     val transactionId: String? = null,
-    val isEditing: Boolean = false
-)
+    val isEditing: Boolean = false,
+    /** Fields a receipt scan extracted with low confidence, shown as needing a glance. */
+    val lowConfidenceFields: Set<ReceiptField> = emptySet()
+) {
+    fun needsVerification(field: ReceiptField): Boolean = field in lowConfidenceFields
+}
 
 @Stable
 data class AddNewDialogState(
@@ -88,15 +94,29 @@ sealed class AddNewUiEvent {
 }
 
 
+/**
+ * The category worth teaching the device-local merchant map, or null when there is nothing
+ * to learn. Only scan-originated drafts carry a [scannedCategory], and only a genuine change
+ * counts, so re-saving an untouched draft teaches nothing.
+ */
+fun categoryCorrectionOf(scannedCategory: String?, chosenCategory: String): String? {
+    val scanned = scannedCategory ?: return null
+    return chosenCategory.takeIf { it.isNotBlank() && it != scanned }
+}
+
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
-    private val transactionRepository: TransactionRepository
+    private val transactionRepository: TransactionRepository,
+    private val merchantCategoryLearning: MerchantCategoryLearning
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AddNewUiState())
     val uiState = _uiState.asStateFlow()
 
     private var oldTransaction: Transaction? = null
+
+    /** Category the scan produced for the loaded draft, or null when the draft is not scan-originated. */
+    private var scannedCategory: String? = null
 
     private val _dialogState = MutableStateFlow(AddNewDialogState())
     val dialogState = _dialogState.asStateFlow()
@@ -126,7 +146,7 @@ class AddNewViewModel(
         }
     }
 
-    fun loadExistingTransaction(id: String) {
+    fun loadExistingTransaction(id: String, lowConfidenceFields: Set<ReceiptField> = emptySet()) {
         viewModelScope.launch {
             try {
                 var transactions =
@@ -142,6 +162,7 @@ class AddNewViewModel(
                 val isDraft = transaction.type == TransactionType.DRAFT
 
                 oldTransaction = if (!isDraft) transaction else null
+                scannedCategory = if (isDraft) transaction.category else null
 
                 val category = transaction.category.takeIf { it.isNotBlank() }
                     ?.let { TransactionCategory.getCategoryByName(it) }
@@ -159,7 +180,8 @@ class AddNewViewModel(
                         senderAccount = transaction.account.takeIf { acc -> acc.id.isNotEmpty() },
                         receiverAccount = transaction.receiverAccount.takeIf { acc -> acc.id.isNotEmpty() },
                         transactionType = if (isDraft) TransactionType.EXPENSE else transaction.type,
-                        isEditing = !isDraft
+                        isEditing = !isDraft,
+                        lowConfidenceFields = if (isDraft) lowConfidenceFields else emptySet()
                     )
                 }
 
@@ -321,11 +343,18 @@ class AddNewViewModel(
                     },
                     onSuccess = {
                         _uiState.value = uiState.value.copy(isLoading = false)
+                        recordCategoryCorrection(category)
                         _onSuccessSaved.send(None)
                     }
                 )
             }
         }
+    }
+
+    private suspend fun recordCategoryCorrection(chosenCategory: String) {
+        val correction = categoryCorrectionOf(scannedCategory, chosenCategory)
+        scannedCategory = null
+        correction?.let { merchantCategoryLearning.recordCategoryCorrection(it) }
     }
 
     private fun validateInputs() {

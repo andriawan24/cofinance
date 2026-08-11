@@ -3,6 +3,7 @@ package id.andriawan.cofinance.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -32,6 +33,7 @@ fun AddNewSection(
     label: String,
     value: String = emptyString(),
     onSectionClicked: (() -> Unit)? = null,
+    needsVerification: Boolean = false,
     startIcon: @Composable () -> Unit,
     endIcon: (@Composable () -> Unit)? = null
 ) {
@@ -42,6 +44,7 @@ fun AddNewSection(
                 color = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             )
+            .needsVerificationOutline(needsVerification)
             .conditional(
                 condition = onSectionClicked != null,
                 trueModifier = {
@@ -56,14 +59,20 @@ fun AddNewSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         startIcon()
-        Text(
+        Column(
             modifier = Modifier.weight(1f),
-            text = value.ifBlank { label },
-            style = MaterialTheme.typography.labelMedium.copy(
-                color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground,
-                fontWeight = FontWeight.Medium
+            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_2)
+        ) {
+            Text(
+                text = value.ifBlank { label },
+                style = MaterialTheme.typography.labelMedium.copy(
+                    color = if (value.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium
+                )
             )
-        )
+
+            if (needsVerification) NeedsVerificationHint()
+        }
         endIcon?.invoke()
     }
 }

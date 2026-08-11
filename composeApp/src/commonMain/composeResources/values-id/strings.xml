@@ -67,6 +67,7 @@
     <string name="label_notes">Catatan</string>
     <string name="label_zero">0</string>
     <string name="label_sender_account">Akun Pengirim</string>
+    <string name="label_needs_verification">Mohon periksa kembali</string>
     <string name="label_beneficiary_account">Akun Pengirim</string>
 
     <!-- Accounts -->

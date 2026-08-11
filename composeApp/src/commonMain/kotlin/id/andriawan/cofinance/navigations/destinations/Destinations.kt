@@ -11,7 +11,11 @@ sealed class Destinations(val route: String) {
     data object Login : Destinations(Login::class.simpleName.orEmpty())
 
     @Serializable
-    data class AddNew(val transactionId: String? = null) : Destinations(AddNew::class.simpleName.orEmpty())
+    data class AddNew(
+        val transactionId: String? = null,
+        /** Comma-joined `ReceiptField` names the scan was unsure about, or null. */
+        val lowConfidenceFields: String? = null
+    ) : Destinations(AddNew::class.simpleName.orEmpty())
 
     @Serializable
     data object Camera : Destinations(Camera::class.simpleName.orEmpty())

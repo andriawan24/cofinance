@@ -6,26 +6,28 @@ import androidx.lifecycle.viewModelScope
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.error_generic
 import cofinance.composeapp.generated.resources.error_receipt_scan_failed
+import id.andriawan.cofinance.data.ocr.parser.ReceiptField
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
-import id.andriawan.cofinance.domain.model.response.ReceiptScan
-import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.ScanReceiptUseCase
-import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.utils.UiText
+import id.andriawan.cofinance.utils.collectResult
 import id.andriawan.cofinance.utils.compressImage
 import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import id.andriawan.cofinance.utils.collectResult
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 
 sealed class PreviewUiEvent {
-    data class NavigateToBalance(val transactionId: String) : PreviewUiEvent()
+    data class NavigateToBalance(
+        val transactionId: String,
+        val lowConfidenceFields: Set<ReceiptField> = emptySet()
+    ) : PreviewUiEvent()
+
     data class ShowMessage(val message: UiText) : PreviewUiEvent()
 }
 
@@ -48,9 +50,7 @@ class PreviewViewModel(
         viewModelScope.launch {
             _previewUiState.update { state -> state.copy(showLoading = true) }
 
-            if (file == null) {
-                return@launch
-            }
+            if (file == null) return@launch
 
             val compressed = compressImage(file)
             scanReceiptUseCase.execute(compressed).collectResult(
@@ -71,7 +71,7 @@ class PreviewViewModel(
                         type = TransactionType.DRAFT
                     )
 
-                    handleCreateTransaction(input)
+                    createTransaction(input, data.lowConfidenceFields)
                 },
                 onError = { exception ->
                     _previewUiState.update { state -> state.copy(showLoading = false) }
@@ -86,12 +86,18 @@ class PreviewViewModel(
         }
     }
 
-    private suspend fun handleCreateTransaction(input: AddTransactionParam) {
+    private suspend fun createTransaction(
+        input: AddTransactionParam,
+        lowConfidenceFields: Set<ReceiptField>
+    ) {
         createTransactionUseCase.execute(input).collectResult(
             onSuccess = { data ->
                 _previewUiState.update { state -> state.copy(showLoading = false) }
                 _previewUiEvent.send(
-                    PreviewUiEvent.NavigateToBalance(transactionId = data.id)
+                    PreviewUiEvent.NavigateToBalance(
+                        transactionId = data.id,
+                        lowConfidenceFields = lowConfidenceFields
+                    )
                 )
             },
             onError = { exception ->

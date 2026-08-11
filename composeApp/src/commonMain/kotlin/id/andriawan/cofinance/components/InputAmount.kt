@@ -47,6 +47,8 @@ fun InputAmount(
     fee: String,
     includeFee: Boolean,
     enableFee: Boolean,
+    amountNeedsVerification: Boolean = false,
+    feeNeedsVerification: Boolean = false,
     onAmountChanged: (String) -> Unit,
     onFeeChanged: (String) -> Unit,
     onIncludeFeeChanged: (Boolean) -> Unit
@@ -58,6 +60,7 @@ fun InputAmount(
         AmountInputSection(
             amount = amount,
             showAddFeeButton = enableFee && !includeFee,
+            needsVerification = amountNeedsVerification,
             onAmountChanged = onAmountChanged,
             onAddFeeClick = { onIncludeFeeChanged(true) }
         )
@@ -65,6 +68,7 @@ fun InputAmount(
         if (includeFee) {
             FeeInputSection(
                 fee = fee,
+                needsVerification = feeNeedsVerification,
                 onFeeChanged = onFeeChanged,
                 onRemoveFeeClick = { onIncludeFeeChanged(false) }
             )
@@ -76,6 +80,7 @@ fun InputAmount(
 private fun AmountInputSection(
     amount: String,
     showAddFeeButton: Boolean,
+    needsVerification: Boolean,
     onAmountChanged: (String) -> Unit,
     onAddFeeClick: () -> Unit
 ) {
@@ -85,12 +90,17 @@ private fun AmountInputSection(
                 color = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             )
+            .needsVerificationOutline(needsVerification)
             .padding(all = Dimensions.SIZE_16)
     ) {
-        AmountTextField(
-            amount = amount,
-            onAmountChanged = onAmountChanged
-        )
+        Column(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_4)) {
+            AmountTextField(
+                amount = amount,
+                onAmountChanged = onAmountChanged
+            )
+
+            if (needsVerification) NeedsVerificationHint()
+        }
 
         if (showAddFeeButton) {
             AddFeeButton(
@@ -191,6 +201,7 @@ private fun AddFeeButton(
 @Composable
 private fun FeeInputSection(
     fee: String,
+    needsVerification: Boolean,
     onFeeChanged: (String) -> Unit,
     onRemoveFeeClick: () -> Unit
 ) {
@@ -200,6 +211,7 @@ private fun FeeInputSection(
                 color = MaterialTheme.colorScheme.onPrimary,
                 shape = MaterialTheme.shapes.large
             )
+            .needsVerificationOutline(needsVerification)
             .padding(all = Dimensions.SIZE_16),
         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10),
         verticalAlignment = Alignment.CenterVertically
@@ -209,11 +221,14 @@ private fun FeeInputSection(
             contentDescription = null
         )
 
-        FeeTextField(
+        Column(
             modifier = Modifier.weight(1f),
-            fee = fee,
-            onFeeChanged = onFeeChanged
-        )
+            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_2)
+        ) {
+            FeeTextField(fee = fee, onFeeChanged = onFeeChanged)
+
+            if (needsVerification) NeedsVerificationHint()
+        }
 
         Image(
             modifier = Modifier

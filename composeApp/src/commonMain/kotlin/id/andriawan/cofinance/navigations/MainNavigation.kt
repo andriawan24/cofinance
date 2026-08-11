@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import id.andriawan.cofinance.data.ocr.parser.decodeReceiptFields
 import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.addaccount.AddAccountScreen
 import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
@@ -129,6 +130,7 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
             AddTransactionScreen(
                 transactionId = route.transactionId,
+                lowConfidenceFields = decodeReceiptFields(route.lowConfidenceFields),
                 onBackPressed = {
                     navController.navigateUp()
                 },
@@ -168,8 +170,13 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
             PreviewScreen(
                 imageUrl = params.imageUrl,
-                onNavigateToAdd = {
-                    navController.navigate(Destinations.AddNew(transactionId = it)) {
+                onNavigateToAdd = { transactionId, lowConfidenceFields ->
+                    navController.navigate(
+                        Destinations.AddNew(
+                            transactionId = transactionId,
+                            lowConfidenceFields = lowConfidenceFields
+                        )
+                    ) {
                         popUpTo<Destinations.AddNew> {
                             inclusive = true
                         }

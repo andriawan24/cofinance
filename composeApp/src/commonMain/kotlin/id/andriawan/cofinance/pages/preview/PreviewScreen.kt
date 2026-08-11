@@ -19,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.shadow.Shadow
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -37,17 +37,16 @@ import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_retake_photo
 import cofinance.composeapp.generated.resources.action_use_photo
 import cofinance.composeapp.generated.resources.ic_arrow_left
-import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import com.diamondedge.logging.logging
 import id.andriawan.cofinance.components.ErrorBottomSheet
 import id.andriawan.cofinance.components.PrimaryButton
+import id.andriawan.cofinance.data.ocr.parser.encodeToArgument
 import id.andriawan.cofinance.theme.CofinanceTheme
-import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.Dimensions
+import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.deleteFile
 import id.andriawan.cofinance.utils.extensions.CollectAsEffect
 import id.andriawan.cofinance.utils.readFromFile
@@ -58,7 +57,7 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun PreviewScreen(
     imageUrl: String,
-    onNavigateToAdd: (String) -> Unit,
+    onNavigateToAdd: (transactionId: String, lowConfidenceFields: String?) -> Unit,
     onNavigateBack: () -> Unit,
     previewViewModel: PreviewViewModel = koinViewModel()
 ) {
@@ -73,7 +72,11 @@ fun PreviewScreen(
 
     previewViewModel.previewUiEvent.CollectAsEffect {
         when (it) {
-            is PreviewUiEvent.NavigateToBalance -> onNavigateToAdd(it.transactionId)
+            is PreviewUiEvent.NavigateToBalance -> onNavigateToAdd(
+                it.transactionId,
+                it.lowConfidenceFields.encodeToArgument()
+            )
+
             is PreviewUiEvent.ShowMessage -> errorUiText = it.message
         }
     }
@@ -149,9 +152,7 @@ fun PreviewScreen(
                         horizontal = Dimensions.SIZE_24,
                         vertical = Dimensions.SIZE_16
                     ),
-                    onClick = {
-                        // TODO: navigate back later
-                    },
+                    onClick = onNavigateBack,
                     enabled = !uiState.showLoading
                 ) {
                     Text(
@@ -178,7 +179,7 @@ private fun PreviewScreenPreview() {
         Surface {
             PreviewScreen(
                 imageUrl = "https://google.com",
-                onNavigateToAdd = {},
+                onNavigateToAdd = { _, _ -> },
                 onNavigateBack = {}
             )
         }
