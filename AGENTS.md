@@ -74,7 +74,6 @@ Cofinance is a Kotlin Multiplatform (KMP) personal finance app targeting Android
 ### Build Configuration
 
 A `local.properties` file is required with:
-- `gemini.api_key`
 - `google_auth_client_id`
 
 Firebase uses the standard platform configuration files: `androidApp/google-services.json` and `iosApp/iosApp/GoogleService-Info.plist`. Download each file for the matching registered application in Firebase Console; do not copy configuration values into BuildKonfig. The remaining `local.properties` values are injected at build time and must never be committed, included in screenshots, or printed to CI logs. `local.properties` is already in `.gitignore` — do not remove it. To share keys across machines or CI, use environment variables or a secret manager rather than checking the file in.
@@ -119,7 +118,7 @@ All shared code lives under `composeApp/src/commonMain/kotlin/id/andriawan/cofin
 - `navigations/` — Route definitions
 - `domain/usecases/` — Business logic
 - `data/repository/` — Repository implementations
-- `data/datasource/` — Firebase and Gemini data sources
+- `data/datasource/` — Firebase and on-device receipt scanning data sources
 - `di/` — Koin modules
 - `theme/` — Material Design 3 theming
 - `localization/` — English and Indonesian strings
@@ -137,7 +136,7 @@ Platform-specific code uses `expect`/`actual` for: permissions, Google auth, cam
 - **Ktor** 3.5.1 — HTTP client
 - **Koin** 4.2.2 — Dependency injection
 - **Coil** 3.5.0 — Image loading
-- **Google Generative AI** 0.9.0-1.1.0 — Gemini for receipt scanning
+- **ML Kit Text Recognition** 16.0.1 — On-device OCR for receipt scanning (Android; iOS uses Vision)
 - **CameraK** 1.1 — Multiplatform camera
 - **Kotlinx Datetime** 0.8.0 — Date/time handling
 - **BuildKonfig** 0.22.0 — Multiplatform build-time configuration

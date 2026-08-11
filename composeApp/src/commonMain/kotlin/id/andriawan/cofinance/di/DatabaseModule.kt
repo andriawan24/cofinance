@@ -3,8 +3,11 @@ package id.andriawan.cofinance.di
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.data.local.account.RoomAccountLocalDataSource
 import id.andriawan.cofinance.data.local.buildLocalDatabase
+import id.andriawan.cofinance.data.local.merchant.MerchantCategoryLocalDataSource
+import id.andriawan.cofinance.data.local.merchant.RoomMerchantCategoryLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.RoomTransactionLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
+import id.andriawan.cofinance.data.ocr.parser.MerchantCategoryLearning
 import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
 import id.andriawan.cofinance.data.remote.FirestoreAccountDataSource
 import id.andriawan.cofinance.data.remote.FirestoreTransactionDataSource
@@ -19,7 +22,9 @@ fun databaseModule(context: PlatformContext) = module {
     single { buildLocalDatabase(context) }
     singleOf(::RoomAccountLocalDataSource) { bind<AccountLocalDataSource>() }
     singleOf(::RoomTransactionLocalDataSource) { bind<TransactionLocalDataSource>() }
+    singleOf(::RoomMerchantCategoryLocalDataSource) { bind<MerchantCategoryLocalDataSource>() }
     singleOf(::FirestoreAccountDataSource) { bind<AccountRemoteDataSource>() }
     singleOf(::FirestoreTransactionDataSource) { bind<TransactionRemoteDataSource>() }
     singleOf(::FinanceSyncCoordinator)
+    single { MerchantCategoryLearning(get(), get()) }
 }

@@ -6,7 +6,6 @@ import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
-import id.andriawan.cofinance.data.session.SessionPolicy
 import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,21 +18,21 @@ interface TransactionRepository {
     suspend fun getTransactions(param: GetTransactionsParam): List<Transaction>
     fun watchTransactions(param: GetTransactionsParam): Flow<List<Transaction>>
     suspend fun createTransaction(params: AddTransactionParam): Transaction
-    suspend fun updateTransaction(oldTransaction: Transaction, params: AddTransactionParam): Transaction
+    suspend fun updateTransaction(
+        oldTransaction: Transaction,
+        params: AddTransactionParam
+    ): Transaction
 }
 
 
 class TransactionRepositoryImpl(
     private val receiptScanner: ReceiptScanner,
     private val database: TransactionLocalDataSource,
-    private val sessionPolicy: SessionPolicy,
     private val syncCoordinator: FinanceSyncCoordinator
 ) : TransactionRepository {
 
     override suspend fun scanReceipt(image: ByteArray): ReceiptScan {
-        sessionPolicy.requireUserId()
-        val response = receiptScanner.scanReceipt(image)
-        return ReceiptScan.from(response)
+        return ReceiptScan.from(receiptScanner.scanReceipt(image))
     }
 
     override suspend fun getTransactions(param: GetTransactionsParam): List<Transaction> {
@@ -43,6 +42,7 @@ class TransactionRepositoryImpl(
             isDraft = param.isDraft,
             transactionId = param.transactionId
         )
+
         return response.map(Transaction::from)
     }
 
@@ -61,7 +61,6 @@ class TransactionRepositoryImpl(
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun createTransaction(params: AddTransactionParam): Transaction {
         val id = params.id ?: Uuid.random().toString()
-
         val inserted = database.insertTransaction(
             id = id,
             amount = params.amount ?: 0L,
@@ -84,7 +83,6 @@ class TransactionRepositoryImpl(
         params: AddTransactionParam
     ): Transaction {
         val id = params.id ?: oldTransaction.id
-
         val updated = database.updateTransaction(
             id = id,
             amount = params.amount ?: 0L,
@@ -96,7 +94,9 @@ class TransactionRepositoryImpl(
             receiverAccountsId = params.receiverAccountsId,
             type = params.type.name
         )
+
         syncCoordinator.mirrorAllIfSignedIn()
+
         return Transaction.from(updated)
     }
 }

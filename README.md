@@ -114,10 +114,9 @@ Keep only the non-Firebase API inputs in the untracked `local.properties` file:
 
 ```properties
 google_auth_client_id=your-web-oauth-client-id.apps.googleusercontent.com
-gemini.api_key=your-gemini-api-key
 ```
 
-Equivalent uppercase environment variables are supported for those two values: `GOOGLE_AUTH_CLIENT_ID` and `GEMINI_API_KEY`. Never commit API credentials.
+The equivalent uppercase environment variable `GOOGLE_AUTH_CLIENT_ID` is also supported. Never commit API credentials.
 
 Register `id.andriawan.cofinance` for Android and the bundle identifier configured in `iosApp/Configuration/Config.xcconfig` for iOS. The iOS Xcode project links Firebase Core, Auth, Firestore, and Storage through Swift Package Manager.
 

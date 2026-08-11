@@ -52,6 +52,9 @@ kotlin {
 
             // CameraK
             implementation(libs.camerak)
+
+            // On-device OCR
+            implementation(libs.mlkit.text.recognition)
         }
 
         iosMain.dependencies {
@@ -81,9 +84,6 @@ kotlin {
 
             // KTOR
             implementation(libs.ktor.client.core)
-
-            // Gen AI
-            implementation(libs.generativeai.google)
 
             // Koin
             implementation(project.dependencies.platform(libs.koin.bom))
@@ -148,12 +148,6 @@ buildkonfig {
     packageName = "com.andriawan.cofinance"
 
     defaultConfigs {
-        buildConfigField(
-            FieldSpec.Type.STRING,
-            "GEMINI_API_KEY",
-            requiredBuildConfig("gemini.api_key", "GEMINI_API_KEY")
-        )
-
         buildConfigField(
             FieldSpec.Type.STRING,
             "GOOGLE_AUTH_API_KEY",

@@ -6,20 +6,24 @@ import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.model.response.AccountResponse
 import id.andriawan.cofinance.data.model.response.ReceiptScanResponse
 import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.ocr.parser.ParsedReceipt
 import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
 import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.repository.AccountRepositoryImpl
 import id.andriawan.cofinance.data.repository.TransactionRepositoryImpl
 import id.andriawan.cofinance.data.session.SessionPolicy
-import id.andriawan.cofinance.data.session.SignedInSessionRequiredException
 import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 import id.andriawan.cofinance.domain.model.request.AccountParam
+import id.andriawan.cofinance.domain.model.request.AddTransactionParam
+import id.andriawan.cofinance.domain.model.response.ReceiptScan
+import id.andriawan.cofinance.domain.usecases.transactions.ScanReceiptUseCase
+import id.andriawan.cofinance.utils.collectResult
+import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
 class OfflineFirstAccessTest {
@@ -73,17 +77,23 @@ class OfflineFirstAccessTest {
     }
 
     @Test
-    fun signedOutReceiptScanIsRejectedBeforeScannerInvocation() = runTest {
+    fun signedOutReceiptScanReachesTheScannerAndProducesALocalDraft() = runTest {
         val localAccounts = FakeAccountLocalDataSource()
         val localTransactions = FakeTransactionLocalDataSource()
         val session = FakeSessionPolicy(null)
-        val scanner = FakeReceiptScanner()
-        val remoteAccounts = FakeAccountRemoteDataSource()
-        val remoteTransactions = FakeTransactionRemoteDataSource()
+        val scanner = FakeReceiptScanner(
+            ReceiptScanResponse(
+                totalPrice = 125_000,
+                transactionDate = "2026-03-05T10:15:00+07:00",
+                fee = 2_500,
+                category = "FOOD"
+            )
+        )
+        val remoteAccounts = FakeAccountRemoteDataSource(failOnAccess = true)
+        val remoteTransactions = FakeTransactionRemoteDataSource(failOnAccess = true)
         val repository = TransactionRepositoryImpl(
             receiptScanner = scanner,
             database = localTransactions,
-            sessionPolicy = session,
             syncCoordinator = FinanceSyncCoordinator(
                 localAccounts,
                 localTransactions,
@@ -93,10 +103,64 @@ class OfflineFirstAccessTest {
             )
         )
 
-        assertFailsWith<SignedInSessionRequiredException> {
-            repository.scanReceipt(byteArrayOf(1, 2, 3))
-        }
-        assertEquals(0, scanner.invocationCount)
+        val scan = repository.scanReceipt(byteArrayOf(1, 2, 3))
+
+        assertEquals(1, scanner.invocationCount)
+        assertEquals(125_000L, scan.totalPrice)
+        assertEquals(2_500L, scan.fee)
+
+        repository.createTransaction(
+            AddTransactionParam(
+                amount = scan.totalPrice,
+                category = scan.category,
+                fee = scan.fee,
+                date = scan.transactionDate,
+                type = TransactionType.DRAFT
+            )
+        )
+
+        val draft = localTransactions.getAllTransactions().single()
+        assertEquals(TransactionType.DRAFT.name, draft.type)
+        assertEquals(125_000L, draft.amount)
+        assertEquals(0, remoteTransactions.accessCount)
+    }
+
+    @Test
+    fun receiptScanCarriesFeeThroughTheDomainMapping() {
+        val scan = ReceiptScan.from(ReceiptScanResponse(totalPrice = 50_000, fee = 6_500))
+
+        assertEquals(6_500L, scan.fee)
+    }
+
+    @Test
+    fun blankTransactionDateFailsTheScanAndWritesNoDraft() = runTest {
+        val localAccounts = FakeAccountLocalDataSource()
+        val localTransactions = FakeTransactionLocalDataSource()
+        val session = FakeSessionPolicy(null)
+        val scanner = FakeReceiptScanner(ReceiptScanResponse(totalPrice = 90_000, transactionDate = null))
+        val repository = TransactionRepositoryImpl(
+            receiptScanner = scanner,
+            database = localTransactions,
+            syncCoordinator = FinanceSyncCoordinator(
+                localAccounts,
+                localTransactions,
+                FakeAccountRemoteDataSource(),
+                FakeTransactionRemoteDataSource(),
+                session
+            )
+        )
+
+        var failureReported = false
+        ScanReceiptUseCase(repository).execute(byteArrayOf(1)).collectResult(
+            onSuccess = { data ->
+                // Mirrors PreviewViewModel: a blank date aborts before any draft is created.
+                if (data.transactionDate.isBlank()) failureReported = true
+            },
+            onError = { failureReported = true }
+        )
+
+        assertTrue(failureReported)
+        assertTrue(localTransactions.getAllTransactions().isEmpty())
     }
 
     private fun account(id: String, name: String) = AccountResponse(
@@ -114,11 +178,13 @@ private class FakeSessionPolicy(private val userId: String?) : SessionPolicy {
     override fun userIdOrNull(): String? = userId
 }
 
-private class FakeReceiptScanner : ReceiptScanner {
+private class FakeReceiptScanner(
+    private val response: ReceiptScanResponse = ReceiptScanResponse()
+) : ReceiptScanner {
     var invocationCount = 0
-    override suspend fun scanReceipt(image: ByteArray): ReceiptScanResponse {
+    override suspend fun scanReceipt(image: ByteArray): ParsedReceipt {
         invocationCount++
-        return ReceiptScanResponse()
+        return ParsedReceipt(response = response, confidence = emptyMap())
     }
 }
 
@@ -269,7 +335,21 @@ private class FakeTransactionLocalDataSource(
         accountsId: String,
         receiverAccountsId: String?,
         type: String
-    ): TransactionResponse = error("Not used by these tests")
+    ): TransactionResponse {
+        val inserted = TransactionResponse(
+            id = id,
+            amount = amount,
+            category = category,
+            date = date,
+            fee = fee,
+            notes = notes,
+            senderAccountId = accountsId,
+            receiverAccountId = receiverAccountsId,
+            type = type
+        )
+        transactionState.value += inserted
+        return inserted
+    }
 
     override suspend fun upsertTransactions(transactions: List<TransactionResponse>) {
         val existing = transactionState.value.associateBy { it.id }.toMutableMap()

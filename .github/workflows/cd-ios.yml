@@ -41,7 +41,6 @@ jobs:
       - name: Create local.properties
         run: |
           cat > local.properties << EOF
-          gemini.api_key=${{ secrets.GEMINI_API_KEY }}
           google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}
           EOF
 
