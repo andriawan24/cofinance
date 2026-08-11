@@ -7,37 +7,40 @@ import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.session.SessionPolicy
 
 class FinanceSyncCoordinator(
-    private val localAccounts: AccountLocalDataSource,
-    private val localTransactions: TransactionLocalDataSource,
-    private val remoteAccounts: AccountRemoteDataSource,
-    private val remoteTransactions: TransactionRemoteDataSource,
+    private val localAccountSource: AccountLocalDataSource,
+    private val localTransactionSource: TransactionLocalDataSource,
+    private val remoteAccountSource: AccountRemoteDataSource,
+    private val remoteTransactionSource: TransactionRemoteDataSource,
     private val sessionPolicy: SessionPolicy
 ) {
     suspend fun syncAfterSignIn() {
         sessionPolicy.requireUserId()
 
-        val localAccountRecords = localAccounts.getAccounts()
-        val localTransactionRecords = localTransactions.getAllTransactions()
+        val localAccountRecords = localAccountSource.getAccounts()
+        val localTransactionRecords = localTransactionSource.getAllTransactions()
         val localAccountIds = localAccountRecords.mapTo(mutableSetOf()) { it.id }
         val localTransactionIds = localTransactionRecords.mapTo(mutableSetOf()) { it.id }
 
-        localAccounts.upsertAccounts(
-            remoteAccounts.getAccounts().filterNot { it.id in localAccountIds })
-        localTransactions.upsertTransactions(
-            remoteTransactions.getTransactions().filterNot { it.id in localTransactionIds })
+        val localAccounts = remoteAccountSource.getAccounts().filterNot { it.id in localAccountIds }
+        localAccountSource.upsertAccounts(localAccounts)
+
+        val localTransactions = remoteTransactionSource.getTransactions().filterNot {
+            it.id in localTransactionIds
+        }
+        localTransactionSource.upsertTransactions(localTransactions)
 
         mirrorAllIfSignedIn()
     }
 
     suspend fun mirrorAllIfSignedIn() {
         if (sessionPolicy.isSignedIn()) {
-            remoteAccounts.upsertAccounts(localAccounts.getAccounts())
-            remoteTransactions.upsertTransactions(localTransactions.getAllTransactions())
+            remoteAccountSource.upsertAccounts(localAccountSource.getAccounts())
+            remoteTransactionSource.upsertTransactions(localTransactionSource.getAllTransactions())
         }
     }
 
     suspend fun clearLocalAfterSignOut() {
-        localAccounts.clearAccounts()
-        localTransactions.clearTransactions()
+        localAccountSource.clearAccounts()
+        localTransactionSource.clearTransactions()
     }
 }

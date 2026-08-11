@@ -1,9 +1,9 @@
 package id.andriawan.cofinance.data.repository
 
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
+import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.model.response.Account
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.ExperimentalUuidApi
@@ -16,7 +16,14 @@ interface AccountRepository {
     suspend fun addAccount(param: AccountParam)
     suspend fun updateAccountBalance(accountId: String, delta: Long)
     suspend fun updateAccountType(accountId: String, accountType: String)
-    suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String)
+    suspend fun updateAccount(
+        accountId: String,
+        name: String,
+        balance: Long,
+        group: String,
+        accountType: String
+    )
+
     suspend fun deleteAccount(accountId: String)
 }
 
@@ -58,7 +65,13 @@ class AccountRepositoryImpl(
         syncCoordinator.mirrorAllIfSignedIn()
     }
 
-    override suspend fun updateAccount(accountId: String, name: String, balance: Long, group: String, accountType: String) {
+    override suspend fun updateAccount(
+        accountId: String,
+        name: String,
+        balance: Long,
+        group: String,
+        accountType: String
+    ) {
         database.updateAccount(accountId, name, balance, group, accountType)
         syncCoordinator.mirrorAllIfSignedIn()
     }

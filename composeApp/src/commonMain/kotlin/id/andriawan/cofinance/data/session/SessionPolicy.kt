@@ -8,12 +8,9 @@ interface SessionPolicy {
     fun requireUserId(): String = userIdOrNull() ?: throw SignedInSessionRequiredException()
 }
 
-class FirebaseSessionPolicy(
-    private val firebaseAuth: FirebaseAuth
-) : SessionPolicy {
+class FirebaseSessionPolicy(private val firebaseAuth: FirebaseAuth) : SessionPolicy {
     override fun isSignedIn(): Boolean = firebaseAuth.currentUser != null
     override fun userIdOrNull(): String? = firebaseAuth.currentUser?.uid
 }
 
-class SignedInSessionRequiredException :
-    IllegalStateException("Sign in is required for this feature")
+class SignedInSessionRequiredException : IllegalStateException("You must login to use this feature")

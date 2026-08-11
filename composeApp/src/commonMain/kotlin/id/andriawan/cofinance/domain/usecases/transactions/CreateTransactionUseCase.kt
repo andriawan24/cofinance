@@ -7,15 +7,11 @@ import id.andriawan.cofinance.utils.ResultState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class CreateTransactionUseCase(
-    private val transactionRepository: TransactionRepository
-) {
+class CreateTransactionUseCase(private val transactionRepository: TransactionRepository) {
     fun execute(params: AddTransactionParam): Flow<ResultState<Transaction>> = flow {
         emit(ResultState.Loading)
 
         try {
-            // Single local write. Balance updates are handled atomically
-            // server-side via adjust_balance/execute_transfer RPC in the connector's uploadData.
             val response = transactionRepository.createTransaction(params)
             emit(ResultState.Success(response))
         } catch (e: Exception) {
