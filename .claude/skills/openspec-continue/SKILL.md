@@ -70,6 +70,7 @@ Resume one existing OpenSpec change without rebuilding its plan or weakening its
    3. Run strict change validation again.
    4. Use `openspec-sync-specs` when delta specs must update main specs, then validate the main specs.
    5. Report any unchecked task or unverified requirement as incomplete.
+   6. Run `openspec-verify-change` for an independent audit. It re-checks every requirement against evidence and catches false-completes — checked tasks whose verification never actually happened. Do not claim completion on this skill's own say-so when a verify pass is available.
 
    Suggest archival only after all completion gates pass. Archive only when the user explicitly requests it (use `openspec-archive-change`).
 
