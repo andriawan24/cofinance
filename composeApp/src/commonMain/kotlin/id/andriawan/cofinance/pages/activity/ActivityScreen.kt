@@ -58,9 +58,6 @@ fun ActivityScreen(
         onEvent = {
             activityViewModel.onEvent(it)
         },
-        onBookmarkClicked = {
-            // TODO: Handle bookmark page open
-        },
         onNavigateToAdd = onNavigateToAdd,
         onTransactionClicked = { transaction ->
             onNavigateToEditTransaction(transaction.id)
@@ -72,28 +69,13 @@ fun ActivityScreen(
 fun ActivityContent(
     uiState: ActivityUiState,
     onEvent: (ActivityUiEvent) -> Unit,
-    onBookmarkClicked: () -> Unit,
     onNavigateToAdd: () -> Unit,
     onTransactionClicked: (Transaction) -> Unit = {}
 ) {
     Column(modifier = Modifier.fillMaxSize()) {
         PageTitle(
             modifier = Modifier.padding(Dimensions.SIZE_16, Dimensions.SIZE_24),
-            title = stringResource(Res.string.label_activity),
-            endContent = {
-//                IconButton(
-//                    colors = IconButtonDefaults.filledIconButtonColors(
-//                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-//                        contentColor = MaterialTheme.colorScheme.primary
-//                    ),
-//                    onClick = onBookmarkClicked
-//                ) {
-//                    Icon(
-//                        painter = painterResource(R.drawable.ic_bookmark),
-//                        contentDescription = null
-//                    )
-//                }
-            }
+            title = stringResource(Res.string.label_activity)
         )
 
         DateSwitcher(
@@ -152,7 +134,6 @@ private fun ActivityContentPreview() {
         Surface {
             ActivityContent(
                 uiState = ActivityUiState(isLoading = true),
-                onBookmarkClicked = { },
                 onEvent = { },
                 onNavigateToAdd = { }
             )

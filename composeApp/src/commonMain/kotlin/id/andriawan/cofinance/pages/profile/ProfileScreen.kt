@@ -192,73 +192,60 @@ fun ProfileContent(
     onEditProfile: () -> Unit = {},
     onCycleStartDayChanged: (Int) -> Unit = {}
 ) {
-    val scrollState = rememberScrollState()
     val displayName = remember(name, email) {
         name.ifBlank { email.substringBefore("@").ifBlank { email } }
     }
 
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = MaterialTheme.colorScheme.background
-    ) { contentPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(scrollState)
-                .padding(contentPadding)
-                .padding(horizontal = Dimensions.SIZE_16, vertical = Dimensions.SIZE_24),
-            verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
-        ) {
-            PageTitle(title = stringResource(Res.string.label_profile))
+    Column(modifier = Modifier.fillMaxSize()) {
+        PageTitle(title = stringResource(Res.string.label_profile))
 
-            if (isSignedIn) {
-                ProfileSummaryCard(
-                    name = displayName,
-                    email = email,
-                    imageUrl = imageUrl,
-                    onEditProfile = onEditProfile
-                )
+        if (isSignedIn) {
+            ProfileSummaryCard(
+                name = displayName,
+                email = email,
+                imageUrl = imageUrl,
+                onEditProfile = onEditProfile
+            )
 
-                CycleStartDaySetting(
-                    cycleStartDay = cycleStartDay,
-                    isUpdating = isUpdatingCycle,
-                    onDaySelected = onCycleStartDayChanged
-                )
+            CycleStartDaySetting(
+                cycleStartDay = cycleStartDay,
+                isUpdating = isUpdatingCycle,
+                onDaySelected = onCycleStartDayChanged
+            )
 
-                SecondaryButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .sizeIn(minHeight = Dimensions.SIZE_56),
-                    contentPadding = PaddingValues(
-                        vertical = Dimensions.SIZE_16,
-                        horizontal = Dimensions.SIZE_16
-                    ),
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    contentColor = MaterialTheme.colorScheme.error,
-                    shape = MaterialTheme.shapes.large,
-                    onClick = onSignedOut
+            SecondaryButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sizeIn(minHeight = Dimensions.SIZE_56),
+                contentPadding = PaddingValues(
+                    vertical = Dimensions.SIZE_16,
+                    horizontal = Dimensions.SIZE_16
+                ),
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.error,
+                shape = MaterialTheme.shapes.large,
+                onClick = onSignedOut
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_exit),
-                            contentDescription = null
-                        )
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_exit),
+                        contentDescription = null
+                    )
 
-                        Text(
-                            text = stringResource(Res.string.label_logout),
-                            style = MaterialTheme.typography.titleSmall.copy(
-                                fontWeight = FontWeight.SemiBold
-                            )
+                    Text(
+                        text = stringResource(Res.string.label_logout),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold
                         )
-                    }
+                    )
                 }
-            } else {
-                LocalOnlyProfileCard(onSignIn = onSignIn)
             }
+        } else {
+            LocalOnlyProfileCard(onSignIn = onSignIn)
         }
     }
 }
