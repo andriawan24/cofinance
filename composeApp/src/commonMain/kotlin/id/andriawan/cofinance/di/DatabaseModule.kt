@@ -12,7 +12,7 @@ import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
 import id.andriawan.cofinance.data.remote.FirestoreAccountDataSource
 import id.andriawan.cofinance.data.remote.FirestoreTransactionDataSource
 import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import coil3.PlatformContext
 import org.koin.core.module.dsl.bind
 import org.koin.core.module.dsl.singleOf
@@ -25,6 +25,6 @@ fun databaseModule(context: PlatformContext) = module {
     singleOf(::RoomMerchantCategoryLocalDataSource) { bind<MerchantCategoryLocalDataSource>() }
     singleOf(::FirestoreAccountDataSource) { bind<AccountRemoteDataSource>() }
     singleOf(::FirestoreTransactionDataSource) { bind<TransactionRemoteDataSource>() }
-    singleOf(::FinanceSyncCoordinator)
+    singleOf(::FirebaseSyncCoordinator)
     single { MerchantCategoryLearning(get(), get()) }
 }

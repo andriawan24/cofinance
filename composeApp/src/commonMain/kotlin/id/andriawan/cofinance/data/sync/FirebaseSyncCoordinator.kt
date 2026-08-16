@@ -6,14 +6,14 @@ import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
 import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.session.SessionPolicy
 
-class FinanceSyncCoordinator(
+class FirebaseSyncCoordinator(
     private val localAccountSource: AccountLocalDataSource,
     private val localTransactionSource: TransactionLocalDataSource,
     private val remoteAccountSource: AccountRemoteDataSource,
     private val remoteTransactionSource: TransactionRemoteDataSource,
     private val sessionPolicy: SessionPolicy
 ) {
-    suspend fun syncAfterSignIn() {
+    suspend fun syncDataAfterSignIn() {
         sessionPolicy.requireUserId()
 
         val localAccountRecords = localAccountSource.getAccounts()
@@ -29,17 +29,17 @@ class FinanceSyncCoordinator(
         }
         localTransactionSource.upsertTransactions(localTransactions)
 
-        mirrorAllIfSignedIn()
+        mirrorDataIfSignedIn()
     }
 
-    suspend fun mirrorAllIfSignedIn() {
+    suspend fun mirrorDataIfSignedIn() {
         if (sessionPolicy.isSignedIn()) {
             remoteAccountSource.upsertAccounts(localAccountSource.getAccounts())
             remoteTransactionSource.upsertTransactions(localTransactionSource.getAllTransactions())
         }
     }
 
-    suspend fun clearLocalAfterSignOut() {
+    suspend fun clearLocalData() {
         localAccountSource.clearAccounts()
         localTransactionSource.clearTransactions()
     }

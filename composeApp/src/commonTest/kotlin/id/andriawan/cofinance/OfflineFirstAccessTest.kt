@@ -12,7 +12,7 @@ import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.repository.AccountRepositoryImpl
 import id.andriawan.cofinance.data.repository.TransactionRepositoryImpl
 import id.andriawan.cofinance.data.session.SessionPolicy
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
@@ -36,7 +36,7 @@ class OfflineFirstAccessTest {
         val session = FakeSessionPolicy(userId = null)
         val repository = AccountRepositoryImpl(
             database = localAccounts,
-            syncCoordinator = FinanceSyncCoordinator(
+            syncCoordinator = FirebaseSyncCoordinator(
                 localAccounts,
                 localTransactions,
                 remoteAccounts,
@@ -60,7 +60,7 @@ class OfflineFirstAccessTest {
         val localTransactions = FakeTransactionLocalDataSource()
         val remoteAccounts = FakeAccountRemoteDataSource(accounts = listOf(remoteCollision, remoteOnly))
         val remoteTransactions = FakeTransactionRemoteDataSource()
-        val coordinator = FinanceSyncCoordinator(
+        val coordinator = FirebaseSyncCoordinator(
             localAccounts,
             localTransactions,
             remoteAccounts,
@@ -68,7 +68,7 @@ class OfflineFirstAccessTest {
             FakeSessionPolicy("firebase-user")
         )
 
-        coordinator.syncAfterSignIn()
+        coordinator.syncDataAfterSignIn()
 
         assertEquals(setOf("shared", "remote-only"), localAccounts.getAccounts().mapNotNull { it.id }.toSet())
         assertEquals("Local", localAccounts.getAccounts().first { it.id == "shared" }.name)
@@ -94,7 +94,7 @@ class OfflineFirstAccessTest {
         val repository = TransactionRepositoryImpl(
             receiptScanner = scanner,
             database = localTransactions,
-            syncCoordinator = FinanceSyncCoordinator(
+            syncCoordinator = FirebaseSyncCoordinator(
                 localAccounts,
                 localTransactions,
                 remoteAccounts,
@@ -141,7 +141,7 @@ class OfflineFirstAccessTest {
         val repository = TransactionRepositoryImpl(
             receiptScanner = scanner,
             database = localTransactions,
-            syncCoordinator = FinanceSyncCoordinator(
+            syncCoordinator = FirebaseSyncCoordinator(
                 localAccounts,
                 localTransactions,
                 FakeAccountRemoteDataSource(),

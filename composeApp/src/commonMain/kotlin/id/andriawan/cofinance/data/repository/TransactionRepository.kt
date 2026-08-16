@@ -6,7 +6,7 @@ import id.andriawan.cofinance.domain.model.request.AddTransactionParam
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
 import id.andriawan.cofinance.domain.model.response.ReceiptScan
 import id.andriawan.cofinance.domain.model.response.Transaction
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlin.uuid.ExperimentalUuidApi
@@ -28,7 +28,7 @@ interface TransactionRepository {
 class TransactionRepositoryImpl(
     private val receiptScanner: ReceiptScanner,
     private val database: TransactionLocalDataSource,
-    private val syncCoordinator: FinanceSyncCoordinator
+    private val syncCoordinator: FirebaseSyncCoordinator
 ) : TransactionRepository {
 
     override suspend fun scanReceipt(image: ByteArray): ReceiptScan {
@@ -73,7 +73,7 @@ class TransactionRepositoryImpl(
             type = params.type.name
         )
 
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
 
         return Transaction.from(inserted)
     }
@@ -95,7 +95,7 @@ class TransactionRepositoryImpl(
             type = params.type.name
         )
 
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
 
         return Transaction.from(updated)
     }

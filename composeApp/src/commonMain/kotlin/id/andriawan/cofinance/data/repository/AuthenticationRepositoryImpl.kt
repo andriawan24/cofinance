@@ -5,7 +5,7 @@ import id.andriawan.cofinance.domain.model.request.IdTokenParam
 import id.andriawan.cofinance.domain.model.request.IdTokenParam.Companion.toRequest
 import id.andriawan.cofinance.domain.model.response.User
 import id.andriawan.cofinance.data.session.SessionPolicy
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 
 
 interface AuthenticationRepository {
@@ -23,7 +23,7 @@ interface AuthenticationRepository {
 class AuthenticationRepositoryImpl(
     private val firebaseDataSource: FirebaseDataSource,
     private val sessionPolicy: SessionPolicy,
-    private val syncCoordinator: FinanceSyncCoordinator
+    private val syncCoordinator: FirebaseSyncCoordinator
 ) : AuthenticationRepository {
 
     override fun getUser(): User = User.from(firebaseDataSource.getUser())
@@ -35,12 +35,12 @@ class AuthenticationRepositoryImpl(
 
     override suspend fun login(idTokenParam: IdTokenParam) {
         firebaseDataSource.login(idTokenParam.toRequest())
-        syncCoordinator.syncAfterSignIn()
+        syncCoordinator.syncDataAfterSignIn()
     }
 
     override suspend fun logout() {
         firebaseDataSource.logout()
-        syncCoordinator.clearLocalAfterSignOut()
+        syncCoordinator.clearLocalData()
     }
 
     override suspend fun updateProfile(name: String, avatarBytes: ByteArray?): User {

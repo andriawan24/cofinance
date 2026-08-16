@@ -12,7 +12,7 @@ import id.andriawan.cofinance.data.ocr.parser.MerchantCategoryLearning
 import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
 import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.session.SessionPolicy
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -32,9 +32,9 @@ class MerchantCategorySyncExclusionTest {
         associations.recordAssociation("TOKO SERBA JAYA", "HOUSING")
         val fixture = SyncFixture()
 
-        fixture.coordinator.syncAfterSignIn()
-        fixture.coordinator.mirrorAllIfSignedIn()
-        fixture.coordinator.clearLocalAfterSignOut()
+        fixture.coordinator.syncDataAfterSignIn()
+        fixture.coordinator.mirrorDataIfSignedIn()
+        fixture.coordinator.clearLocalData()
 
         assertEquals(0, associations.readCount)
         assertEquals(1, associations.associationCount)
@@ -54,7 +54,7 @@ class MerchantCategorySyncExclusionTest {
         learning.recordCategoryCorrection("HOUSING")
         val readsBeforeSync = associations.readCount
 
-        fixture.coordinator.syncAfterSignIn()
+        fixture.coordinator.syncDataAfterSignIn()
 
         assertEquals(1, associations.associationCount)
         assertEquals(readsBeforeSync, associations.readCount)
@@ -83,7 +83,7 @@ private class SyncFixture(
 ) {
     val remoteAccounts = RecordingAccountRemoteDataSource()
     val remoteTransactions = RecordingTransactionRemoteDataSource()
-    val coordinator = FinanceSyncCoordinator(
+    val coordinator = FirebaseSyncCoordinator(
         FakeAccountLocalDataSource(localAccountRecords),
         FakeTransactionLocalDataSource(localTransactions),
         remoteAccounts,

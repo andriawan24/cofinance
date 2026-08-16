@@ -1,7 +1,7 @@
 package id.andriawan.cofinance.data.repository
 
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import id.andriawan.cofinance.domain.model.request.AccountParam
 import id.andriawan.cofinance.domain.model.response.Account
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ interface AccountRepository {
 
 class AccountRepositoryImpl(
     private val database: AccountLocalDataSource,
-    private val syncCoordinator: FinanceSyncCoordinator
+    private val syncCoordinator: FirebaseSyncCoordinator
 ) : AccountRepository {
 
     override suspend fun getAccounts(): List<Account> {
@@ -52,17 +52,17 @@ class AccountRepositoryImpl(
             balance = param.balance,
             accountType = param.accountType
         )
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
     }
 
     override suspend fun updateAccountBalance(accountId: String, delta: Long) {
         database.updateAccountBalance(accountId, delta)
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
     }
 
     override suspend fun updateAccountType(accountId: String, accountType: String) {
         database.updateAccountType(accountId, accountType)
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
     }
 
     override suspend fun updateAccount(
@@ -73,11 +73,11 @@ class AccountRepositoryImpl(
         accountType: String
     ) {
         database.updateAccount(accountId, name, balance, group, accountType)
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
     }
 
     override suspend fun deleteAccount(accountId: String) {
         database.deleteAccount(accountId)
-        syncCoordinator.mirrorAllIfSignedIn()
+        syncCoordinator.mirrorDataIfSignedIn()
     }
 }

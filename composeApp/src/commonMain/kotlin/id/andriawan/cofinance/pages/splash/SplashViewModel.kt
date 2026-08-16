@@ -6,7 +6,7 @@ import id.andriawan.cofinance.domain.model.response.User
 import id.andriawan.cofinance.domain.usecases.authentications.FetchUserUseCase
 import id.andriawan.cofinance.utils.ResultState
 import id.andriawan.cofinance.data.repository.AuthenticationRepository
-import id.andriawan.cofinance.data.sync.FinanceSyncCoordinator
+import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.flow
 class SplashViewModel(
     private val fetchUserUseCase: FetchUserUseCase,
     private val authenticationRepository: AuthenticationRepository,
-    private val syncCoordinator: FinanceSyncCoordinator
+    private val syncCoordinator: FirebaseSyncCoordinator
 ) : ViewModel() {
 
     fun fetchUser(): Flow<ResultState<Boolean>> = flow {
@@ -26,7 +26,7 @@ class SplashViewModel(
         }
 
         try {
-            syncCoordinator.syncAfterSignIn()
+            syncCoordinator.syncDataAfterSignIn()
             fetchUserUseCase.execute().collect { result ->
                 when (result) {
                     is ResultState.Success<User> -> emit(ResultState.Success(true))
