@@ -128,9 +128,7 @@ fun AddNewContent(
     onDialogEvent: (AddNewDialogEvent) -> Unit
 ) {
     val pagerState = rememberPagerState { TransactionTabType.entries.size }
-    val scope = rememberCoroutineScope()
 
-    // Scroll to the correct tab when editing
     LaunchedEffect(uiState.isEditing, uiState.transactionType) {
         if (uiState.isEditing) {
             val tabIndex = when (uiState.transactionType) {
@@ -302,7 +300,6 @@ private fun DateBottomSheetDialog(
                     hour()
                     char(':')
                     minute()
-                    amPmHour()
                 }
             ),
             datePickerState = datePickerState,
