@@ -31,6 +31,7 @@ import id.andriawan.cofinance.models.CofinanceAppState
 import id.andriawan.cofinance.models.rememberCofinanceAppState
 import id.andriawan.cofinance.navigations.destinations.BottomNavigationDestinations
 import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.theme.DarkColorScheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -47,7 +48,7 @@ fun CofinanceBottomNavigation(
                 shadow = Shadow(
                     radius = Dimensions.SIZE_10,
                     spread = Dimensions.SIZE_2,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    color = DarkColorScheme.outlineVariant.copy(alpha = 0.1f),
                     offset = DpOffset(x = Dimensions.zero, y = -Dimensions.SIZE_4)
                 )
             )

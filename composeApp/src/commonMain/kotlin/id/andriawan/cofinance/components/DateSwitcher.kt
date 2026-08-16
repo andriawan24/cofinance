@@ -18,12 +18,15 @@ import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.ic_chevron_left
 import cofinance.composeapp.generated.resources.ic_chevron_right
 import id.andriawan.cofinance.theme.CofinanceTheme
+import id.andriawan.cofinance.theme.DarkColorScheme
+import id.andriawan.cofinance.theme.LightColorScheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.painterResource
 
@@ -40,8 +43,8 @@ fun DateSwitcher(
                 shape = ButtonDefaults.shape,
                 shadow = Shadow(
                     radius = Dimensions.SIZE_10,
-                    spread = Dimensions.SIZE_2,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    spread = Dimensions.SIZE_1,
+                    color = DarkColorScheme.outlineVariant.copy(alpha = 0.1f),
                     offset = DpOffset(x = Dimensions.zero, y = Dimensions.SIZE_2)
                 )
             )
@@ -95,6 +98,26 @@ fun DateSwitcher(
 @Preview(showBackground = true)
 @Composable
 private fun DateSwitcherPreview() {
+    CofinanceTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.background)
+                .padding(Dimensions.SIZE_20)
+        ) {
+            DateSwitcher(
+                modifier = Modifier.fillMaxWidth(),
+                label = "May 2025",
+                onNextClicked = {},
+                onPreviousClicked = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, uiMode = AndroidUiModes.UI_MODE_NIGHT_YES)
+@Composable
+private fun DateSwitcherDarkPreview() {
     CofinanceTheme {
         Column(
             modifier = Modifier
