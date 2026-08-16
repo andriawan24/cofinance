@@ -179,17 +179,21 @@ fun ProfileContent(
     }
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize()
+            .padding(
+                horizontal = Dimensions.SIZE_16,
+                vertical = Dimensions.SIZE_24
+            ),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
     ) {
         PageTitle(
-            modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+            modifier = Modifier,
             title = stringResource(Res.string.label_profile)
         )
 
         if (isSignedIn) {
             ProfileSummaryCard(
-                modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                modifier = Modifier,
                 name = displayName,
                 email = email,
                 imageUrl = imageUrl,
@@ -197,7 +201,7 @@ fun ProfileContent(
             )
 
             CycleStartDaySetting(
-                modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
+                modifier = Modifier,
                 cycleStartDay = cycleStartDay,
                 isUpdating = isUpdatingCycle,
                 onDaySelected = onCycleStartDayChanged
@@ -205,7 +209,6 @@ fun ProfileContent(
 
             SecondaryButton(
                 modifier = Modifier
-                    .padding(horizontal = Dimensions.SIZE_16)
                     .fillMaxWidth()
                     .sizeIn(minHeight = Dimensions.SIZE_56),
                 contentPadding = PaddingValues(Dimensions.SIZE_16),
@@ -311,14 +314,6 @@ private fun ProfileSummaryCard(
                 modifier = Modifier.padding(Dimensions.SIZE_20),
                 verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
             ) {
-                Text(
-                    text = stringResource(Res.string.label_profile_subtitle),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f)
-                    ),
-                    modifier = Modifier.widthIn(max = Dimensions.SIZE_200)
-                )
-
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16),
                     verticalAlignment = Alignment.CenterVertically

@@ -220,8 +220,7 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
                         ?.savedStateHandle
                         ?.set("edit_profile_result", true)
                     navController.popBackStack()
-                },
-                showMessage = { }
+                }
             )
         }
     }
