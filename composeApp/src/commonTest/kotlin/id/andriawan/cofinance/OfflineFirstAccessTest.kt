@@ -1,6 +1,9 @@
 package id.andriawan.cofinance
 
+import id.andriawan.cofinance.data.crypto.DataKey
 import id.andriawan.cofinance.data.datasource.ReceiptScanner
+import id.andriawan.cofinance.data.keyring.EncryptionSession
+import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.model.response.AccountResponse
@@ -41,7 +44,8 @@ class OfflineFirstAccessTest {
                 localTransactions,
                 remoteAccounts,
                 remoteTransactions,
-                session
+                session,
+                unlockedTestSession()
             )
         )
 
@@ -65,7 +69,8 @@ class OfflineFirstAccessTest {
             localTransactions,
             remoteAccounts,
             remoteTransactions,
-            FakeSessionPolicy("firebase-user")
+            FakeSessionPolicy("firebase-user"),
+            unlockedTestSession()
         )
 
         coordinator.syncDataAfterSignIn()
@@ -99,7 +104,8 @@ class OfflineFirstAccessTest {
                 localTransactions,
                 remoteAccounts,
                 remoteTransactions,
-                session
+                session,
+                unlockedTestSession()
             )
         )
 
@@ -146,7 +152,8 @@ class OfflineFirstAccessTest {
                 localTransactions,
                 FakeAccountRemoteDataSource(),
                 FakeTransactionRemoteDataSource(),
-                session
+                session,
+                unlockedTestSession()
             )
         )
 
@@ -172,6 +179,13 @@ class OfflineFirstAccessTest {
         createdAt = "2026-01-01T00:00:00Z"
     )
 }
+
+/**
+ * These tests are about the offline-first boundary rather than about encryption, so they run with a
+ * session that has already been unlocked. The gating itself is covered by `EncryptedSyncGatingTest`.
+ */
+private suspend fun unlockedTestSession(): EncryptionSession =
+    InMemoryEncryptionSession().apply { unlock(DataKey.generate()) }
 
 private class FakeSessionPolicy(private val userId: String?) : SessionPolicy {
     override fun isSignedIn(): Boolean = userId != null

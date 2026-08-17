@@ -1,5 +1,8 @@
 package id.andriawan.cofinance.data.local.merchant
 
+import id.andriawan.cofinance.data.crypto.DataKey
+import id.andriawan.cofinance.data.keyring.EncryptionSession
+import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.model.response.AccountResponse
@@ -30,7 +33,7 @@ class MerchantCategorySyncExclusionTest {
     fun syncPathNeverReadsTheAssociationStore() = runTest {
         val associations = CountingMerchantCategoryStore()
         associations.recordAssociation("TOKO SERBA JAYA", "HOUSING")
-        val fixture = SyncFixture()
+        val fixture = SyncFixture(encryptionSession = unlockedTestSession())
 
         fixture.coordinator.syncDataAfterSignIn()
         fixture.coordinator.mirrorDataIfSignedIn()
@@ -45,6 +48,7 @@ class MerchantCategorySyncExclusionTest {
         val associations = CountingMerchantCategoryStore()
         val learning = MerchantCategoryLearning(associations)
         val fixture = SyncFixture(
+            encryptionSession = unlockedTestSession(),
             localTransactions = listOf(
                 TransactionResponse(id = "t1", amount = 55_000, category = "FOOD", date = "2026-01-02")
             )
@@ -77,7 +81,12 @@ private fun receiptHeaderedBy(merchant: String) = OcrResult(
     )
 )
 
+/** The sync path runs unlocked here; refusal while locked is covered by `EncryptedSyncGatingTest`. */
+private suspend fun unlockedTestSession(): EncryptionSession =
+    InMemoryEncryptionSession().apply { unlock(DataKey.generate()) }
+
 private class SyncFixture(
+    private val encryptionSession: EncryptionSession,
     localAccountRecords: List<AccountResponse> = emptyList(),
     localTransactions: List<TransactionResponse> = emptyList()
 ) {
@@ -91,7 +100,8 @@ private class SyncFixture(
         object : SessionPolicy {
             override fun isSignedIn(): Boolean = true
             override fun userIdOrNull(): String = "firebase-user"
-        }
+        },
+        encryptionSession
     )
 }
 
