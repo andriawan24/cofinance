@@ -26,10 +26,11 @@ s3 = "1.8.31"
 sqlite = "2.7.0"
 ksp = "2.3.10"
 coroutines = "1.11.0"
+cryptography = "0.6.0"
 androidxTest = "1.6.1"
 androidxTestRunner = "1.6.2"
 androidxTestExtJunit = "1.2.1"
-cryptography = "0.6.0"
+androidxBiometric = "1.1.0"
 
 [libraries]
 androidx-credentials = { module = "androidx.credentials:credentials", version.ref = "credentials" }
@@ -85,10 +86,14 @@ androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 
-# Instrumented tests — required to exercise ML Kit, which needs an Android runtime
+# Instrumented tests — ML Kit needs an Android runtime, and the device key vault can only be
+# verified against real platform key storage
 androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTest" }
 androidx-test-runner = { module = "androidx.test:runner", version.ref = "androidxTestRunner" }
 androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "androidxTestExtJunit" }
+
+# App lock — the biometric prompt and the enrollment-invalidating key policy it gates
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "androidxBiometric" }
 
 # Client-side encryption
 cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "cryptography" }
