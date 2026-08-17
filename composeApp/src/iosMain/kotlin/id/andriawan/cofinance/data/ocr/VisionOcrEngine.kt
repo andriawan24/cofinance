@@ -90,23 +90,13 @@ class VisionOcrEngine : OcrEngine {
         )
     }
 
-    /**
-     * Vision reports normalized geometry with a **bottom-left** origin, while
-     * [OcrRect] uses a **top-left** origin. The Y axis is therefore flipped:
-     * the box's maximum Y (its visual top) becomes `top = 1 - maxY`, and its
-     * minimum Y (its visual bottom) becomes `bottom = 1 - minY`.
-     */
     private fun VNRecognizedTextObservation.normalizedRect(): OcrRect =
         boundingBox.useContents {
-            val minX = origin.x
-            val minY = origin.y
-            val maxX = minX + size.width
-            val maxY = minY + size.height
-            OcrRect(
-                left = minX.toFloat().clampToUnit(),
-                top = (1.0 - maxY).toFloat().clampToUnit(),
-                right = maxX.toFloat().clampToUnit(),
-                bottom = (1.0 - minY).toFloat().clampToUnit()
+            visionBoxToTopLeftRect(
+                minX = origin.x,
+                minY = origin.y,
+                width = size.width,
+                height = size.height
             )
         }
 
@@ -133,6 +123,43 @@ class VisionOcrEngine : OcrEngine {
 
         return (upright ?: decoded).CGImage
     }
+}
+
+/**
+ * Converts one Vision bounding box to the shared [OcrRect] convention.
+ *
+ * Vision reports normalized geometry with a **bottom-left** origin and Y growing
+ * **upward**, while [OcrRect] uses a **top-left** origin with Y growing **downward**.
+ * The Y axis is therefore flipped and the two Y edges swap roles:
+ *
+ * - the box's maximum Y — its *visual top* — becomes `top = 1 - maxY`
+ * - the box's minimum Y — its *visual bottom* — becomes `bottom = 1 - minY`
+ *
+ * X needs no conversion: both conventions measure it left-to-right from the left edge.
+ *
+ * Getting the flip backwards would put every receipt's header at the bottom and
+ * invert the parser's "totals sit low on the receipt" heuristic while still
+ * producing plausible-looking 0..1 numbers, so it is isolated here and tested
+ * directly rather than only through a live recognition run.
+ *
+ * Kept top-level and `internal` so it is reachable from `iosTest` without a device,
+ * an image, or the Vision framework.
+ */
+internal fun visionBoxToTopLeftRect(
+    minX: Double,
+    minY: Double,
+    width: Double,
+    height: Double
+): OcrRect {
+    val maxX = minX + width
+    val maxY = minY + height
+
+    return OcrRect(
+        left = minX.toFloat().clampToUnit(),
+        top = (1.0 - maxY).toFloat().clampToUnit(),
+        right = maxX.toFloat().clampToUnit(),
+        bottom = (1.0 - minY).toFloat().clampToUnit()
+    )
 }
 
 private fun Float.clampToUnit(): Float = coerceIn(0f, 1f)
