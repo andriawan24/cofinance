@@ -1,5 +1,6 @@
 package id.andriawan.cofinance.di
 
+import id.andriawan.cofinance.pages.lock.UnlockViewModel
 import id.andriawan.cofinance.pages.login.LoginViewModel
 import id.andriawan.cofinance.pages.account.AccountViewModel
 import id.andriawan.cofinance.pages.activity.ActivityViewModel
@@ -8,10 +9,14 @@ import id.andriawan.cofinance.pages.addnew.AddNewViewModel
 import id.andriawan.cofinance.pages.camera.CameraViewModel
 import id.andriawan.cofinance.pages.cyclereview.CycleReviewViewModel
 import id.andriawan.cofinance.pages.editprofile.EditProfileViewModel
+import id.andriawan.cofinance.pages.encryption.EncryptionSetupViewModel
+import id.andriawan.cofinance.pages.encryption.RecoveryPhraseRestoreViewModel
 import id.andriawan.cofinance.pages.preview.PreviewViewModel
 import id.andriawan.cofinance.pages.profile.ProfileViewModel
+import id.andriawan.cofinance.pages.profile.security.SecuritySettingsViewModel
 import id.andriawan.cofinance.pages.splash.SplashViewModel
 import id.andriawan.cofinance.pages.stats.StatsViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -28,4 +33,10 @@ val viewModelModule = module {
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::CycleReviewViewModel)
+    // Constructed explicitly rather than through viewModelOf: the constructor's trailing Random has
+    // a default that exists for deterministic tests and is not something the graph should resolve.
+    viewModel { EncryptionSetupViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModelOf(::RecoveryPhraseRestoreViewModel)
+    viewModelOf(::UnlockViewModel)
+    viewModelOf(::SecuritySettingsViewModel)
 }

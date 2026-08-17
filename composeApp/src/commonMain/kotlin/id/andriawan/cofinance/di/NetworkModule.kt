@@ -4,6 +4,13 @@ import id.andriawan.cofinance.auth.GoogleAuthManager
 import id.andriawan.cofinance.data.datasource.FirebaseDataSource
 import id.andriawan.cofinance.data.datasource.OnDeviceReceiptScanner
 import id.andriawan.cofinance.data.datasource.ReceiptScanner
+import id.andriawan.cofinance.data.crypto.DeviceKeyVault
+import id.andriawan.cofinance.data.crypto.DeviceKeyWrapper
+import id.andriawan.cofinance.data.crypto.RecordCipher
+import id.andriawan.cofinance.data.crypto.RecoveryPhraseKeyWrapper
+import id.andriawan.cofinance.data.crypto.createDeviceKeyVault
+import id.andriawan.cofinance.data.keyring.EncryptionSession
+import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.ocr.OcrEngine
 import id.andriawan.cofinance.data.ocr.createOcrEngine
 import id.andriawan.cofinance.data.ocr.parser.ReceiptParser
@@ -25,6 +32,17 @@ val networkModule = module {
     single { Firebase.firestore }
     single { Firebase.storage }
     singleOf(::FirebaseSessionPolicy) { bind<SessionPolicy>() }
+    // One session per process: the unwrapped data key exists only inside it, and the setup, unlock,
+    // and synchronization paths all have to be looking at the same lock state.
+    singleOf(::InMemoryEncryptionSession) { bind<EncryptionSession>() }
+    single { RecordCipher() }
+    // The device key vault is created lazily: it reaches platform key storage on first use, which
+    // must not happen while the graph is being built.
+    single<DeviceKeyVault> { createDeviceKeyVault() }
+    single { DeviceKeyWrapper(get()) }
+    single { RecoveryPhraseKeyWrapper() }
+    // The durable local key material store lives in securityModule, next to the lock that reads
+    // and erases it.
     single<Json> {
         Json {
             isLenient = true
