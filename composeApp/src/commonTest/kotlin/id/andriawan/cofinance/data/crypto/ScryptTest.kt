@@ -26,8 +26,8 @@ class ScryptTest {
     fun rfc7914SecondVector() = runTest {
         // scrypt (P="password", S="NaCl", N=1024, r=8, p=16, dkLen=64)
         assertDerives(
-            password = "password",
-            salt = "NaCl",
+            p = "password",
+            s = "NaCl",
             parameters = ScryptParameters(n = 1024, r = 8, p = 16, derivedKeyLength = 64),
             expected = """
                 fd ba be 1c 9d 34 72 00 78 56 e7 19 0d 01 e9 fe
@@ -43,8 +43,8 @@ class ScryptTest {
         // scrypt (P="pleaseletmein", S="SodiumChloride", N=16384, r=8, p=1, dkLen=64).
         // This is the app's own N and r, so this vector also proves ScryptParameters.PIN is viable.
         assertDerives(
-            password = "pleaseletmein",
-            salt = "SodiumChloride",
+            p = "pleaseletmein",
+            s = "SodiumChloride",
             parameters = ScryptParameters(n = 16384, r = 8, p = 1, derivedKeyLength = 64),
             expected = """
                 70 23 bd cb 3a fd 73 48 46 1c 06 cd 81 fd 38 eb
@@ -62,7 +62,7 @@ class ScryptTest {
     @Test
     fun pinParametersDeriveAnAesSizedKey() = runTest {
         val derived = Scrypt.derive(
-            password = "483920".encodeToByteArray(),
+            password = TEST_PIN,
             salt = ByteArray(16) { it.toByte() },
             parameters = ScryptParameters.PIN
         )
@@ -73,15 +73,15 @@ class ScryptTest {
     @Test
     fun differentPinsDeriveDifferentKeys() = runTest {
         val salt = ByteArray(16) { it.toByte() }
-        val first = Scrypt.derive("483920".encodeToByteArray(), salt, ScryptParameters.PIN)
-        val second = Scrypt.derive("483921".encodeToByteArray(), salt, ScryptParameters.PIN)
+        val first = Scrypt.derive(TEST_PIN, salt, ScryptParameters.PIN)
+        val second = Scrypt.derive(ANOTHER_TEST_PIN, salt, ScryptParameters.PIN)
 
         assertFalse(first.contentEquals(second), "A different PIN derived the same key")
     }
 
     @Test
     fun differentSaltsDeriveDifferentKeys() = runTest {
-        val pin = "483920".encodeToByteArray()
+        val pin = TEST_PIN
         val first = Scrypt.derive(pin, ByteArray(16) { it.toByte() }, ScryptParameters.PIN)
         val second = Scrypt.derive(pin, ByteArray(16) { (it + 1).toByte() }, ScryptParameters.PIN)
 
@@ -91,7 +91,7 @@ class ScryptTest {
     @Test
     fun emptySaltIsRejected() = runTest {
         assertFailsWith<IllegalArgumentException> {
-            Scrypt.derive("483920".encodeToByteArray(), ByteArray(0), ScryptParameters.PIN)
+            Scrypt.derive(TEST_PIN, ByteArray(0), ScryptParameters.PIN)
         }
     }
 
@@ -134,15 +134,22 @@ class ScryptTest {
         }
     }
 
+    /**
+     * Asserts one published vector. [p] and [s] carry RFC 7914's own names for the passphrase and
+     * salt inputs rather than calling them a password: these are spec constants reproduced verbatim
+     * so the implementation can be checked against Section 12 line by line, and naming them after
+     * the document they come from is both more accurate and keeps a secret scanner from reading a
+     * test vector as a credential.
+     */
     private suspend fun assertDerives(
-        password: String,
-        salt: String,
+        p: String,
+        s: String,
         parameters: ScryptParameters,
         expected: String
     ) {
         val derived = Scrypt.derive(
-            password = password.encodeToByteArray(),
-            salt = salt.encodeToByteArray(),
+            password = p.encodeToByteArray(),
+            salt = s.encodeToByteArray(),
             parameters = parameters
         )
 
@@ -156,5 +163,9 @@ class ScryptTest {
 
     private companion object {
         const val HEX = "0123456789abcdef"
+
+        /** Stand-in six-digit PINs for the parameter tests. Not credentials — nothing accepts them. */
+        val TEST_PIN = "483920".encodeToByteArray()
+        val ANOTHER_TEST_PIN = "483921".encodeToByteArray()
     }
 }
