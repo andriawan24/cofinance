@@ -56,6 +56,7 @@ import id.andriawan.cofinance.components.PageTitle
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.pages.profile.components.CycleStartDaySetting
+import id.andriawan.cofinance.pages.profile.security.SecuritySettingsSection
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import id.andriawan.cofinance.utils.UiText
@@ -92,7 +93,8 @@ fun ProfileScreen(
         onSignIn = onSignIn,
         onSignedOut = { profileViewModel.toggleDialogLogout(true) },
         onEditProfile = onNavigateToEditProfile,
-        onCycleStartDayChanged = { profileViewModel.updateCycleStartDay(it) }
+        onCycleStartDayChanged = { profileViewModel.updateCycleStartDay(it) },
+        securitySettings = { SecuritySettingsSection() }
     )
 
     if (uiState.isShowDialogLogout) {
@@ -172,7 +174,12 @@ fun ProfileContent(
     onSignIn: () -> Unit = {},
     onSignedOut: () -> Unit,
     onEditProfile: () -> Unit = {},
-    onCycleStartDayChanged: (Int) -> Unit = {}
+    onCycleStartDayChanged: (Int) -> Unit = {},
+    /**
+     * The lock controls, passed in rather than composed here so that this function stays previewable
+     * without a dependency graph. [ProfileScreen] supplies the real section.
+     */
+    securitySettings: @Composable () -> Unit = {}
 ) {
     val displayName = remember(name, email) {
         name.ifBlank { email.substringBefore("@").ifBlank { email } }
@@ -206,6 +213,11 @@ fun ProfileContent(
                 isUpdating = isUpdatingCycle,
                 onDaySelected = onCycleStartDayChanged
             )
+
+            // Renders nothing until encryption setup has completed, so a signed-in user who has not
+            // finished setup — and every local-only user, who never reaches this branch at all —
+            // sees no lock controls.
+            securitySettings()
 
             SecondaryButton(
                 modifier = Modifier

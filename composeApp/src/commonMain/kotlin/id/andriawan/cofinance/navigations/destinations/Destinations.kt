@@ -46,5 +46,21 @@ sealed class Destinations(val route: String) {
 
     @Serializable
     data object CycleReview : Destinations(CycleReview::class.simpleName.orEmpty())
+
+    /** Mandatory encryption setup, reached from sign-in and never by a local-only user. */
+    @Serializable
+    data object EncryptionSetup : Destinations(EncryptionSetup::class.simpleName.orEmpty())
+
+    /**
+     * The app lock's unlock screen, reached only by a session that holds key material it cannot
+     * open. A user who never completed encryption setup has no route to it.
+     */
+    @Serializable
+    data object Unlock : Destinations(Unlock::class.simpleName.orEmpty())
+
+    /** Recovery-phrase restore, for a signed-in device that holds no key material. */
+    @Serializable
+    data object RecoveryPhraseRestore :
+        Destinations(RecoveryPhraseRestore::class.simpleName.orEmpty())
 }
 

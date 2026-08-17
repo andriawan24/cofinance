@@ -137,4 +137,103 @@
     <string name="error_name_required">Nama wajib diisi.</string>
     <string name="error_receipt_scan_failed">Tidak dapat membaca gambar struk, silakan coba lagi.</string>
     <string name="error_generic">Terjadi kesalahan. Silakan coba lagi.</string>
+
+    <!-- Penyiapan enkripsi -->
+    <string name="title_encryption_setup">Siapkan enkripsi</string>
+    <string name="description_encryption_setup">Cofinance mengenkripsi akun dan transaksi Anda di perangkat ini sebelum disinkronkan. Salinan yang tersimpan di cloud tidak dapat dibaca tanpa kunci yang ada di perangkat Anda.</string>
+    <string name="title_recovery_phrase">Frasa pemulihan Anda</string>
+    <string name="description_recovery_phrase">Tulis 12 kata ini di kertas, sesuai urutannya, lalu simpan di tempat yang aman.</string>
+    <string name="warning_recovery_phrase_loss">Jika Anda kehilangan 12 kata ini dan kehilangan perangkat ini, akun dan transaksi yang sudah tersinkronisasi akan hilang selamanya. Tidak ada seorang pun yang dapat mengembalikannya — baik kami maupun pihak lain. Tidak ada pengaturan ulang dan tidak ada kode cadangan.</string>
+    <string name="note_local_data_not_encrypted">Ini tidak mengenkripsi salinan yang tersimpan di ponsel ini. Yang dilindungi adalah salinan yang disinkronkan ke cloud.</string>
+    <string name="action_written_it_down">Saya sudah menuliskannya</string>
+    <string name="title_confirm_recovery_phrase">Konfirmasi frasa Anda</string>
+    <string name="description_confirm_recovery_phrase">Ketik kata-kata berikut dari catatan yang Anda tulis. Penyiapan belum selesai, dan belum ada data yang disinkronkan, sampai kata-katanya cocok.</string>
+    <string name="label_recovery_phrase_word">Kata ke-%1$d</string>
+    <string name="action_back_to_phrase">Tampilkan kata-katanya lagi</string>
+    <string name="action_confirm_recovery_phrase">Selesaikan penyiapan</string>
+    <string name="error_recovery_phrase_confirmation">Kata-kata tersebut tidak cocok dengan frasa Anda. Periksa catatan Anda lalu coba lagi.</string>
+    <string name="error_encryption_setup_failed">Penyiapan enkripsi tidak dapat diselesaikan, sehingga belum ada data yang disinkronkan. Silakan coba lagi.</string>
+
+    <!-- Pemulihan dengan frasa -->
+    <string name="title_restore_data">Pulihkan data Anda</string>
+    <string name="description_restore_data">Masukkan 12 kata yang Anda tulis saat menyiapkan enkripsi. Kata-kata itu satu-satunya cara untuk membaca data yang disinkronkan dari perangkat Anda sebelumnya.</string>
+    <string name="label_recovery_phrase_input">Frasa pemulihan</string>
+    <string name="action_restore">Pulihkan</string>
+    <string name="message_restore_complete">Berhasil memulihkan %1$d akun dan %2$d transaksi.</string>
+    <string name="error_recovery_phrase_word_count">Masukkan seluruh 12 kata. Anda memasukkan %1$d kata.</string>
+    <string name="error_recovery_phrase_unknown_word">Kata ke-%1$d, “%2$s”, bukan salah satu kata pemulihan. Periksa ejaannya.</string>
+    <string name="error_recovery_phrase_checksum">Setiap kata memang kata pemulihan yang sah, tetapi rangkaian frasanya tidak sah. Kemungkinan ada satu kata yang salah atau tertukar urutannya.</string>
+    <string name="error_recovery_phrase_mismatch">Frasa ini tidak dapat membuka data pada akun ini. Tidak ada data yang dipulihkan. Periksa kata-kata Anda lalu coba lagi.</string>
+    <string name="error_recovery_phrase_no_key_material">Belum ada data tersinkronisasi yang dapat dipulihkan untuk akun ini.</string>
+    <string name="error_restore_failed">Pemulihan tidak dapat diselesaikan, sehingga tidak ada data yang diimpor. Silakan coba lagi.</string>
+    <!-- Peluncuran: buka kunci dan migrasi data lama -->
+    <string name="title_unlock_app">Buka kunci Cofinance</string>
+    <string name="description_unlock_app">Masukkan PIN Anda untuk membuka akun dan transaksi di perangkat ini.</string>
+    <string name="label_pin">PIN</string>
+    <string name="action_unlock">Buka kunci</string>
+    <string name="error_pin_incorrect">PIN itu salah. Tersisa %1$d percobaan sebelum perangkat ini kehilangan kuncinya.</string>
+    <string name="message_encrypting_existing_data">Mengenkripsi data tersinkronisasi Anda… %1$d dari %2$d.</string>
+    <string name="message_encrypting_existing_data_preparing">Memeriksa data tersinkronisasi Anda…</string>
+    <string name="error_migration_failed">Enkripsi data tersinkronisasi Anda belum selesai. Tidak ada data yang hilang, dan melanjutkannya dari titik terakhir aman dilakukan.</string>
+    <string name="action_retry">Coba lagi</string>
+
+    <!-- Kunci aplikasi: pintasan biometrik dan waktu tunggu -->
+    <string name="action_use_biometric">Gunakan sidik jari atau wajah</string>
+    <string name="error_pin_incorrect_with_delay">PIN itu salah. Tersisa %1$d percobaan sebelum perangkat ini kehilangan kuncinya. Tunggu %2$s sebelum mencoba lagi.</string>
+    <string name="error_pin_wait">Terlalu banyak percobaan. Coba lagi dalam %1$s.</string>
+    <string name="error_pin_not_set">Belum ada PIN yang diatur di perangkat ini.</string>
+    <string name="error_pin_key_material_destroyed">Terlalu banyak PIN yang salah, sehingga perangkat ini tidak lagi menyimpan kunci Anda. Pulihkan dengan 12 kata pemulihan Anda.</string>
+    <string name="error_biometric_fell_back">Sidik jari atau wajah tidak digunakan. Masukkan PIN Anda.</string>
+    <string name="error_biometric_invalidated">Sidik jari atau wajah Anda berubah, sehingga pintasannya dimatikan. Masukkan PIN Anda.</string>
+    <string name="label_duration_seconds">%1$d detik</string>
+    <string name="label_duration_minutes">%1$d menit</string>
+    <string name="biometric_prompt_unlock_title">Buka kunci Cofinance</string>
+    <string name="biometric_prompt_unlock_subtitle">Gunakan sidik jari atau wajah Anda sebagai pengganti PIN.</string>
+    <string name="biometric_prompt_enable_title">Aktifkan pintasan sidik jari atau wajah</string>
+    <string name="biometric_prompt_enable_subtitle">Pastikan ini Anda untuk menyelesaikan pengaktifan.</string>
+    <string name="biometric_prompt_negative">Gunakan PIN</string>
+
+    <!-- Pengaturan keamanan -->
+    <string name="title_security_settings">Keamanan</string>
+    <string name="description_security_settings">Kunci Cofinance di perangkat ini dan simpan frasa pemulihan Anda tetap dekat.</string>
+    <string name="label_app_pin">PIN</string>
+    <string name="label_pin_set">Sudah diatur. PIN ini Anda masukkan untuk membuka Cofinance.</string>
+    <string name="label_pin_not_set">Belum diatur.</string>
+    <string name="action_set_pin">Atur PIN</string>
+    <string name="action_change_pin">Ubah</string>
+    <string name="action_remove_pin">Hapus</string>
+    <string name="label_biometric_unlock">Sidik jari atau wajah</string>
+    <string name="description_biometric_unlock">Pintasan untuk PIN Anda. PIN Anda tetap berlaku.</string>
+    <string name="label_auto_lock">Kunci setelah</string>
+    <string name="description_auto_lock">Berapa lama Cofinance boleh berada di latar belakang sebelum bertanya lagi.</string>
+    <string name="title_auto_lock">Kunci setelah</string>
+    <string name="label_auto_lock_immediately">Langsung</string>
+    <string name="label_auto_lock_1_minute">1 menit</string>
+    <string name="label_auto_lock_5_minutes">5 menit</string>
+    <string name="label_auto_lock_15_minutes">15 menit</string>
+    <string name="description_recovery_phrase_reveal">Tampilkan 12 kata itu lagi. PIN Anda diperlukan setiap kali.</string>
+    <string name="action_view_recovery_phrase">Tampilkan kata</string>
+    <string name="title_current_pin_required">Masukkan PIN Anda</string>
+    <string name="title_set_pin">Pilih PIN</string>
+    <string name="label_current_pin">PIN saat ini</string>
+    <string name="label_new_pin">PIN baru</string>
+    <string name="label_confirm_new_pin">Ulangi PIN baru</string>
+    <string name="label_close">Tutup</string>
+    <string name="error_pin_length">PIN Anda harus terdiri dari 6 angka.</string>
+    <string name="error_pin_confirmation_mismatch">Kedua PIN itu tidak sama.</string>
+    <string name="error_current_pin_incorrect">Itu bukan PIN Anda saat ini.</string>
+    <string name="error_session_locked">Buka kunci Cofinance dulu, lalu atur PIN Anda.</string>
+    <string name="error_biometric_requires_pin">Atur PIN terlebih dahulu. Sidik jari atau wajah hanya pintasan untuk PIN, bukan penggantinya.</string>
+    <string name="error_biometric_not_enrolled">Belum ada sidik jari atau wajah yang terdaftar di perangkat ini. Tambahkan lewat pengaturan perangkat Anda.</string>
+    <string name="error_biometric_no_hardware">Perangkat ini tidak memiliki sensor sidik jari atau wajah yang dapat dipakai Cofinance.</string>
+    <string name="error_biometric_unavailable">Sidik jari atau wajah belum dapat digunakan saat ini. Coba lagi nanti.</string>
+    <string name="error_biometric_cancelled">Proses itu dibatalkan, jadi tidak ada yang berubah.</string>
+    <string name="error_biometric_failed">Pintasan sidik jari atau wajah tidak dapat diaktifkan. Tidak ada yang berubah.</string>
+    <string name="error_recovery_phrase_unavailable">Perangkat ini tidak menyimpan salinan kata-kata Anda, sehingga tidak dapat menampilkannya. Kata-kata yang Anda tulis tetap berlaku.</string>
+    <string name="message_pin_set">PIN Anda sudah diatur.</string>
+    <string name="message_pin_changed">PIN Anda sudah diubah.</string>
+    <string name="message_pin_removed">PIN Anda sudah dihapus, beserta pintasan sidik jari atau wajahnya.</string>
+    <string name="message_biometric_enabled">Buka kunci dengan sidik jari atau wajah aktif.</string>
+    <string name="message_biometric_disabled">Buka kunci dengan sidik jari atau wajah nonaktif. Membuka kunci sekarang memerlukan PIN Anda.</string>
+    <string name="message_auto_lock_changed">Waktu penguncian Anda sudah diperbarui.</string>
 </resources>
