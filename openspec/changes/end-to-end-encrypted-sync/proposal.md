@@ -36,8 +36,9 @@ Non-goals for this change:
 
 Code:
 
-- `composeApp/src/commonMain/.../data/local/FirestoreCofinanceDatabase.kt` — encrypt on write, decrypt on read, drop `orderBy` on `createdAt` and `date`, change the stored document shape.
-- `composeApp/src/commonMain/.../data/sync/FinanceSyncCoordinator.kt` — gate synchronization on an unlocked data key; `mirrorAllIfSignedIn` and `syncAfterSignIn` operate on ciphertext.
+- `composeApp/src/commonMain/.../data/remote/` — `FirestoreAccountDataSource` and `FirestoreTransactionDataSource` are replaced by `EncryptedAccountDataSource` and `EncryptedTransactionDataSource` over a `FinanceDocumentStore` port, encrypting on write and decrypting on read, dropping `orderBy` on `createdAt` and `date`, and changing the stored document shape.
+- `composeApp/src/commonMain/.../data/sync/FirebaseSyncCoordinator.kt` — gate synchronization on an unlocked data key; `mirrorDataIfSignedIn` and `syncDataAfterSignIn` operate on ciphertext.
+- `composeApp/src/commonMain/.../data/keyring/EncryptionSession.kt` — holds the unwrapped data key in memory only and exposes setup and lock state to the sync paths.
 - `composeApp/src/commonMain/.../data/session/` — session policy gains a lock-state dimension.
 - `composeApp/src/commonMain/.../pages/profile/` — security settings section for PIN, biometric, auto-lock, recovery phrase, and export.
 - New `commonMain` crypto, keyring, recovery-phrase, and lock packages with `androidMain`/`iosMain` actuals for hardware-backed key storage and biometric prompts.

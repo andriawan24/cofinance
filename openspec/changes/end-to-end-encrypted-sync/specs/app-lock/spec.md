@@ -53,9 +53,14 @@ Cofinance SHALL count consecutive failed PIN attempts in secure storage, SHALL i
 - **WHEN** local key material has been destroyed by failed attempts
 - **THEN** the user SHALL be able to restore access with the correct recovery phrase
 
-#### Scenario: Reinstall does not reset the counter
+#### Scenario: Reinstall does not restore fresh attempts
 - **WHEN** the app is reinstalled after failed attempts have accumulated
-- **THEN** the accumulated count SHALL NOT be reset
+- **THEN** the reinstalled app SHALL NOT permit further PIN attempts against the previously wrapped data key
+- **AND** access SHALL require the recovery phrase whenever the accumulated count is not preserved
+
+#### Scenario: The counter is deleted while the PIN wrap survives
+- **WHEN** the stored attempt count is absent or unreadable on a device that still holds a PIN-wrapped copy of the data key
+- **THEN** local key material SHALL be destroyed rather than the count being treated as zero
 
 #### Scenario: Successful unlock clears the counter
 - **WHEN** a correct PIN is entered before the threshold is reached
