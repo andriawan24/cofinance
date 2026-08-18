@@ -15,8 +15,7 @@ sealed class GoogleAuthResult {
  * Platform-specific Google Sign-In manager
  * Implementations handle native Google Sign-In flows for each platform
  */
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
 expect class GoogleAuthManager() {
     suspend fun signIn(context: PlatformContext): GoogleAuthResult
-
-    fun signOut()
 }

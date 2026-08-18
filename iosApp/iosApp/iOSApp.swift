@@ -1,23 +1,21 @@
 import SwiftUI
 import FirebaseCore
+import FirebaseAuth
 
 @main
 struct iOSApp: App {
 
     init() {
         FirebaseApp.configure()
-
-        // Configure Google Sign-In on app launch
-        GoogleSignInBridgeImpl.configure()
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .onOpenURL { url in
-                    // Handle Google Sign-In URL callback
+                    // Firebase Auth handles its own OAuth callback URLs
                     if url.scheme != "cofinance" {
-                        _ = GoogleSignInBridgeImpl.handleURL(url)
+                        _ = Auth.auth().canHandle(url)
                     }
                     // cofinance:// scheme URLs are handled by ContentView's onOpenURL
                 }

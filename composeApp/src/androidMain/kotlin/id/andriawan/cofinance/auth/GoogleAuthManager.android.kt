@@ -71,9 +71,4 @@ actual class GoogleAuthManager {
             else -> GoogleAuthResult.Error("Unexpected credential type")
         }
     }
-
-    actual fun signOut() {
-        /* no-op */
-        // Handled by firebase auth sign out
-    }
 }

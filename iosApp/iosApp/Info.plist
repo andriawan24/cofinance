@@ -14,14 +14,10 @@
 		<dict>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.441243986243-gaq25a4d4nris488iuokh4pfqqtop4if</string>
+				<string>com.googleusercontent.apps.441243986243-elg18die8qman3rmm8rl5qri5j998noj</string>
 			</array>
 		</dict>
 	</array>
-	<key>GIDClientID</key>
-	<string>441243986243-gaq25a4d4nris488iuokh4pfqqtop4if.apps.googleusercontent.com</string>
-	<key>GIDServerClientID</key>
-	<string>441243986243-ks2t66rum6ee4nq1k62mnn68gauth5q1.apps.googleusercontent.com</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>This app needs access to your photo library to select receipt images for scanning.</string>
 </dict>
