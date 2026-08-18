@@ -60,6 +60,9 @@ kotlin {
 
             // On-device OCR
             implementation(libs.mlkit.text.recognition)
+
+            // AWS S3 SDK
+            implementation(libs.s3)
         }
 
         iosMain.dependencies {
@@ -165,6 +168,36 @@ buildkonfig {
             FieldSpec.Type.STRING,
             "GOOGLE_AUTH_API_KEY",
             requiredBuildConfig("google_auth_client_id", "GOOGLE_AUTH_CLIENT_ID")
+        )
+
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "STORAGE_BASE_URL",
+            requiredBuildConfig("storage.base_url", "STORAGE_BASE_URL")
+        )
+
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "STORAGE_ACCESS_KEY",
+            requiredBuildConfig("storage.access_key", "STORAGE_ACCESS_KEY")
+        )
+
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "STORAGE_ACCESS_SECRET",
+            requiredBuildConfig("storage.access_secret", "STORAGE_ACCESS_SECRET")
+        )
+
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "STORAGE_BUCKET_NAME",
+            requiredBuildConfig("storage.bucket_name", "STORAGE_BUCKET_NAME")
+        )
+
+        buildConfigField(
+            FieldSpec.Type.STRING,
+            "STORAGE_REGION",
+            requiredBuildConfig("storage.region", "STORAGE_REGION")
         )
     }
 }

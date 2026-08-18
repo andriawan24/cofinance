@@ -4,16 +4,14 @@ import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.FirebaseUser
 import dev.gitlive.firebase.auth.GoogleAuthProvider
 import dev.gitlive.firebase.firestore.FirebaseFirestore
-import dev.gitlive.firebase.storage.FirebaseStorage
 import id.andriawan.cofinance.data.model.request.IdTokenRequest
 import id.andriawan.cofinance.data.model.response.FirebaseUserResponse
-import id.andriawan.cofinance.utils.toFirebaseData
 import kotlinx.serialization.Serializable
 
 class FirebaseDataSource(
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
-    private val storage: FirebaseStorage
+    private val storage: GarageStorageDataSource
 ) {
     private var cachedProfile: FirebaseProfileDocument? = null
 
@@ -48,9 +46,9 @@ class FirebaseDataSource(
     suspend fun uploadAvatar(userId: String, bytes: ByteArray): String {
         check(requireUser().uid == userId) { "Firebase user scope mismatch" }
         require(bytes.isNotEmpty()) { "Avatar data is empty" }
-        val reference = storage.reference("avatars/$userId/avatar.jpg")
-        reference.putData(bytes.toFirebaseData())
-        return reference.getDownloadUrl()
+        val profileImagePath = "avatars/$userId/avatar.jpg"
+        storage.upload(profileImagePath, bytes)
+        return "$STORAGE_BASE_URL/$profileImagePath"
     }
 
     suspend fun updateUserMetadata(name: String, avatarUrl: String?): FirebaseUserResponse {
