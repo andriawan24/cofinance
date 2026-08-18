@@ -24,9 +24,7 @@ sealed class LoginUiEvent {
     data class ShowMessage(val message: UiText) : LoginUiEvent()
 }
 
-data class LoginUiState(
-    val isLoading: Boolean = false
-)
+data class LoginUiState(val isLoading: Boolean = false)
 
 @Stable
 class LoginViewModel(

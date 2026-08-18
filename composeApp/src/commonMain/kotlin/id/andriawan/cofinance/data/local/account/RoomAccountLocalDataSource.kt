@@ -82,7 +82,8 @@ class RoomAccountLocalDataSource(
     }
 }
 
-fun LocalAccountEntity.toResponse() = AccountResponse(id, name, group, balance, accountType, createdAt)
+fun LocalAccountEntity.toResponse() =
+    AccountResponse(id, name, group, balance, accountType, createdAt)
 
 fun AccountResponse.toEntity() = LocalAccountEntity(
     id.orEmpty(),
