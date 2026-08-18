@@ -18,15 +18,19 @@ kotlin {
         namespace = "id.andriawan.cofinance.shared"
         compileSdk = 37
         minSdk = 24
-        withHostTest {}
-        // ML Kit text recognition loads native libraries through the Android runtime,
-        // so the OCR engine cannot be exercised on the JVM host test target.
+
+        withHostTest {
+            /* no-op */
+        }
+
         withDeviceTest {
             instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         }
+
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
+
         androidResources.enable = true
     }
 
@@ -110,6 +114,10 @@ kotlin {
             // Durable local storage
             implementation(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
+
+            // Client-side encryption
+            implementation(libs.cryptography.core)
+            implementation(libs.cryptography.provider.optimal)
         }
 
         commonTest.dependencies {
