@@ -35,15 +35,19 @@ Cofinance SHALL combine the PIN-derived material with a non-extractable device-h
 - **THEN** a memory-hard derivation SHALL be applied before it is combined with the device-held secret
 
 ### Requirement: Repeated failed unlock attempts are throttled and ultimately destroy local key material
-Cofinance SHALL count consecutive failed PIN attempts in secure storage, SHALL impose escalating delay, SHALL destroy local key material after a configured threshold, and SHALL NOT allow the counter to be reset by reinstalling the app.
+Cofinance SHALL count consecutive failed PIN attempts in secure storage, SHALL impose escalating delay from the fifth consecutive failure, SHALL destroy local key material at the tenth consecutive failure, SHALL NOT expose the threshold as a user setting, and SHALL NOT allow the counter to be reset by reinstalling the app.
 
 #### Scenario: Consecutive failures impose delay
-- **WHEN** a user submits several consecutive incorrect PINs
-- **THEN** each further attempt SHALL be delayed by an increasing interval
+- **WHEN** a user submits a fifth or later consecutive incorrect PIN
+- **THEN** that attempt SHALL be delayed, starting at 30 seconds and doubling with each further failure up to a cap of 5 minutes
 
 #### Scenario: Threshold is reached
-- **WHEN** consecutive failed attempts reach the configured threshold
+- **WHEN** consecutive failed attempts reach ten
 - **THEN** local key material SHALL be destroyed and the app SHALL require recovery-phrase restoration
+
+#### Scenario: Threshold is inspected in settings
+- **WHEN** a user opens security settings
+- **THEN** no control to change the failed-attempt threshold SHALL be offered
 
 #### Scenario: Data remains recoverable after destruction
 - **WHEN** local key material has been destroyed by failed attempts
@@ -82,7 +86,12 @@ Cofinance SHALL expose PIN, biometric, and auto-lock timeout controls in the pro
 
 #### Scenario: User opens security settings
 - **WHEN** a signed-in user with encryption set up opens the profile page
-- **THEN** controls to set or change the PIN, toggle biometric unlock, and choose an auto-lock timeout SHALL be available
+- **THEN** controls to set or change the PIN, toggle biometric unlock, choose an auto-lock timeout, and view the recovery phrase SHALL be available
+
+#### Scenario: Auto-lock options are offered
+- **WHEN** a user opens the auto-lock timeout control
+- **THEN** the options SHALL be immediately, 1 minute, 5 minutes, and 15 minutes
+- **AND** 1 minute SHALL be the value in effect for a user who has never changed it
 
 #### Scenario: User disables biometric
 - **WHEN** a user turns off biometric unlock

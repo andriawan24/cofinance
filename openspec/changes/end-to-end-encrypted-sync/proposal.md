@@ -10,8 +10,8 @@ Cofinance currently writes accounts and transactions to Firestore in plaintext: 
 - **BREAKING** Make encryption mandatory for cloud synchronization. A user cannot sync without completing encryption setup. Encryption setup is gated on sign-in rather than on first launch, so local-only users are unaffected and nothing is required of a user until their data would otherwise leave the device.
 - **BREAKING** Migrate existing plaintext Firestore documents to encrypted form in a forced, resumable, one-time flow, removing the plaintext fields as each document is converted.
 - **BREAKING** Remove server-side ordering from Firestore finance reads. Ciphertext cannot be ordered by the server; ordering is performed locally, which the app already does from its Room source of truth.
-- Add an app lock with a required PIN and an optional biometric shortcut, both toggleable from the profile page, plus an auto-lock timeout. The PIN-derived key is combined with a non-extractable device secret so that a six-digit PIN cannot be attacked offline against synchronized material.
-- Add data export and import driven by the recovery phrase, so a user can move their data to a new device without the operator being able to read it in transit.
+- Add an app lock with a required PIN and an optional biometric shortcut, both toggleable from the profile page, plus an auto-lock timeout defaulting to one minute. The PIN-derived key is combined with a non-extractable device secret so that a six-digit PIN cannot be attacked offline against synchronized material. Ten consecutive failed attempts destroy local key material, leaving the recovery phrase as the way back in.
+- Allow the recovery phrase to be re-displayed from security settings behind fresh PIN entry, so a user who loses their written copy is not left one device failure away from permanent loss.
 
 Non-goals for this change:
 
@@ -20,11 +20,12 @@ Non-goals for this change:
 - Encryption of the local Room database. Local data continues to rely on platform disk encryption. The app lock therefore protects against someone using an unlocked device, not against an attacker with filesystem-level access.
 - Encryption of profile metadata, avatars, cycle settings, or the locally learned merchant-category map.
 - Hiding synchronization metadata. Document counts, record sizes, and write timing remain observable to the backend.
+- A password-protected export file. Restore is driven by the recovery phrase alone.
 
 ## Capabilities
 
 ### New Capabilities
-- `client-side-encryption`: The key hierarchy, the encrypted record envelope, recovery phrase generation and restoration, mandatory encryption setup at sign-in, migration of existing plaintext records, and export/import of encrypted data.
+- `client-side-encryption`: The key hierarchy, the encrypted record envelope, recovery phrase generation, re-display, and restoration, mandatory encryption setup at sign-in, and migration of existing plaintext records.
 - `app-lock`: PIN and optional biometric gating of access to the decrypted data key, the settings that control them, auto-lock behavior, failed-attempt handling, and clearing key material from memory.
 
 ### Modified Capabilities

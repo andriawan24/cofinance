@@ -93,6 +93,21 @@ Cofinance SHALL generate a 12-word recovery phrase encoding at least 128 bits of
 - **WHEN** the phrase is presented to the user
 - **THEN** the app SHALL state that no recovery is possible without it
 
+### Requirement: The recovery phrase can be re-displayed from security settings behind fresh PIN entry
+Cofinance SHALL allow a user who has completed encryption setup to view their recovery phrase again from security settings, and SHALL require the PIN to be entered at that moment even when the app is already unlocked.
+
+#### Scenario: User requests the phrase from settings
+- **WHEN** a user with encryption set up chooses to view their recovery phrase in security settings
+- **THEN** the app SHALL require the current PIN before displaying it
+
+#### Scenario: PIN is not supplied
+- **WHEN** the user dismisses or fails the PIN prompt raised by the re-display request
+- **THEN** the phrase SHALL NOT be displayed
+
+#### Scenario: App is already unlocked
+- **WHEN** a re-display request is made while the app is unlocked and the data key is held in memory
+- **THEN** the PIN SHALL still be required
+
 ### Requirement: Data is restored on a new device using the recovery phrase
 Cofinance SHALL restore access to synchronized data on a device holding no key material when the user supplies a valid recovery phrase, and SHALL reject an invalid one.
 

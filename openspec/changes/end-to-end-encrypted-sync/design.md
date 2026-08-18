@@ -110,6 +110,7 @@ Server-side `orderBy` on `createdAt` and `date` is removed, since those fields n
 - **Nonce reuse under AES-GCM would be catastrophic, and the full-snapshot mirror re-encrypts constantly.** → Fresh random nonce per operation, never content-derived or counter-derived, with a `commonTest` asserting that encrypting identical input twice yields different nonces.
 - **Losing the wrapped key material document makes all synchronized records undecryptable.** → The device holds its own wrap independently, so the Firestore document is not the sole copy for the active device, and the phrase reconstructs the wrap on restore. Key material is written before the first encrypted record.
 - **Removing server-side ordering degrades a future feature that wants server-side queries.** → Accepted. No such feature exists, Room already answers every ordering question, and any future server-side query over encrypted data would require a fundamentally different design regardless.
+- **The `iosSimulatorArm64` test binary does not link today, so tasks 2.4 and 7.1 cannot be verified as written.** → Observed while completing group 1: `:composeApp:linkDebugTestIosSimulatorArm64` fails with `ld: framework 'FirebaseCore' not found`. Firebase reaches the iOS app through the Xcode project rather than through Gradle, so the Gradle-linked test binary has no Firebase frameworks to link against. This predates this change — CI runs only `:composeApp:testAndroidHostTest` and `:androidApp:testDebugUnitTest`, never an iOS test task — and the new `commonMain` crypto code compiles for iOS cleanly. It still has to be solved before any `iosSimulatorArm64` verification can run, either by making the Firebase frameworks available to the test link or by moving the crypto and keyring code into a module that does not depend on Firebase. The second option is the more durable one and is worth weighing before group 2 starts.
 - **Biometric enrollment change destroys the device key mid-use.** → Requiring a PIN before biometric makes this a six-digit recovery rather than a phrase restore. Covered by an explicit platform test.
 - **Mandatory setup at sign-in adds friction and may reduce sign-in completion.** → Deliberate: the alternative is optional encryption, which means maintaining a plaintext sync path forever and being unable to make the privacy claim at all.
 
@@ -127,10 +128,42 @@ Rollback is constrained and must be understood before release. Once records are 
 
 Operator follow-up outside this repository: purge or age out any operator-held backups or exports containing plaintext finance data, since encrypting the live collection does not reach copies made earlier.
 
+### Decision 9: Ten failed PIN attempts destroy local key material, and the threshold is fixed
+
+Consecutive failed attempts are free through the fourth. The fifth imposes a 30-second delay, doubling on each subsequent failure to a 5-minute cap. The tenth consecutive failure destroys local key material, after which access requires the recovery phrase.
+
+Ten is chosen because escalating delay, not the threshold, is what defeats exhaustive search over 10^6 PINs; the threshold only has to be low enough to bound an attacker holding the device indefinitely, while staying above the rate of genuine mistakes. A tighter threshold such as five was rejected because pocket entry and shared-device use produce accidental runs at that length.
+
+The threshold is not user-configurable. Exposing it would add a settings control whose only interesting values are self-destructive (a threshold of three) or self-defeating (never), and neither improves on a fixed ten.
+
+### Decision 10: The recovery phrase is re-displayable from settings behind fresh PIN entry
+
+Security settings offer re-display of the phrase. Re-display requires entering the PIN even when the app is already unlocked, so an unlocked device handed to someone else does not expose it.
+
+Show-once was rejected. With no operator recovery path, a user who loses their written copy is one device failure away from permanent loss of their finance history, and that is the worst outcome this change can produce. The attacker this policy concedes to — someone holding a briefly unlocked phone who also knows the PIN — already has the data itself.
+
+### Decision 11: Auto-lock defaults to one minute, with Immediately, 1, 5, and 15 minute options
+
+One minute is the default. Locking immediately on background was rejected as the default because switching to a banking or messaging app to read an amount and returning is the app's core entry flow, and locking on every such switch would make the lock the dominant interaction. "Immediately" remains available for users who want it.
+
+### Decision 12: Restore is by recovery phrase only; no password-protected export file
+
+There is one recovery path and one derivation path to implement, test, and version. A password-protected export file was rejected: phrase-based restore already covers moving to a new device, and a second format would add a second key derivation, a versioned file schema, and an artifact users can leak while believing it is safe. This also resolves an inconsistency in the original proposal, which listed export and import as a deliverable without any backing requirement or task.
+
+### Decision 13: DRAFT and CYCLE_RESET rows continue to be uploaded, encrypted on the same terms
+
+These rows reach the mirror through `getAllTransactions` today and are therefore in scope. Excluding them from synchronization would reduce both cost and exposure, but it changes what synchronization means rather than how it is protected, so it belongs in a separate synchronization-scope change rather than widening this one.
+
+### Decision 14: scrypt is implemented in `commonMain` over the library's PBKDF2, because no KMP dependency provides a memory-hard derivation
+
+`dev.whyoleg.cryptography` 0.6.0 is the cryptography dependency. It covers AES-GCM, ECDH over P-256, HKDF, and PBKDF2 across Android and Apple through platform-native providers. It does not provide any memory-hard derivation: its key-derivation surface is PBKDF2 and HKDF only, and no Kotlin Multiplatform library covering both Android and Apple offers Argon2 or scrypt.
+
+Decision 3 requires a memory-hard derivation over the PIN before it is composed with the device secret, so the gap has to be closed rather than dropped. scrypt is implemented in `commonMain` on top of the library's PBKDF2-HMAC-SHA256, which is exactly how RFC 7914 defines it, and is verified against the RFC's published test vectors in `commonTest`. This costs roughly 150 lines and keeps the property that cryptographic composition is testable without a device.
+
+Falling back to PBKDF2 alone was rejected. Against a six-digit PIN, iteration count buys far less than memory hardness does, and the whole reason Decision 3 composes the PIN with a device secret is that the PIN's own entropy is too low to stand on its own.
+
+Argon2 through platform bindings was rejected: it would mean a JNI dependency on Android and a separate Apple implementation, moving the derivation out of common code and out of `commonTest` for no security gain over scrypt at equivalent parameters.
+
 ## Open Questions
 
-- What is the failed-PIN-attempt threshold before local key material is destroyed, and should destruction be automatic or user-configurable?
-- Should the recovery phrase be re-displayable from settings behind the app lock, or shown only once at setup? Re-display is better for users who lose a written copy; show-once is stronger against someone with a briefly unlocked device.
-- Should export produce a password-protected file in addition to the phrase-based restore, for users who want an offline copy independent of the backend?
-- What is the auto-lock timeout default, and which options are offered?
-- Should DRAFT and CYCLE_RESET rows continue to be uploaded at all? They are uploaded today and are therefore in scope for encryption, but excluding drafts from synchronization entirely would reduce both cost and exposure. That is a synchronization-scope question, separable from this change.
+None. All questions that govern shipped behavior are resolved in Decisions 9 through 14.
