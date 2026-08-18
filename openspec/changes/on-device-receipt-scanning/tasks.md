@@ -2,8 +2,8 @@
 
 - [x] 1.1 Define the common OCR result model (`OcrResult`, `OcrBlock`, `OcrLine`, `OcrRect`) in `commonMain` with normalized 0..1 top-left-origin geometry, and an `expect` recognizer interface taking image bytes. Verify: `commonMain` compiles and the model is serializable for fixtures.
 - [x] 1.2 Add the ML Kit Text Recognition v2 bundled dependency to the version catalog and `androidMain`. Verify: `:composeApp:assembleDebug` succeeds and the dependency resolves to the bundled variant, not the Play-services-delivered one.
-- [ ] 1.3 Implement the Android `actual` recognizer over ML Kit, converting ML Kit geometry to normalized top-left-origin coordinates. Verify: an Android-side test recognizes a bundled sample receipt image and returns at least one line with coordinates within 0..1.
-- [ ] 1.4 Implement the iOS `actual` recognizer over `VNRecognizeTextRequest` with `recognitionLevel = .accurate` and `usesLanguageCorrection = false`, converting Vision's bottom-left-origin normalized geometry to the top-left-origin convention. Verify: an `iosSimulatorArm64` test recognizes the same sample image, returns at least one line within 0..1, and asserts that a token known to sit at the top of the image has a smaller `top` value than a token known to sit at the bottom.
+- [ ] 1.3 Implement the Android `actual` recognizer over ML Kit, converting ML Kit geometry to normalized top-left-origin coordinates. Verify: an Android-side test recognizes a bundled sample receipt image and returns at least one line with coordinates within 0..1. — **Implementation done; verification blocked on a sample receipt photograph.** `MlKitOcrEngine` normalizes ML Kit's pixel boxes against the source image and clamps to 0..1; ML Kit's origin is already top-left so no axis is flipped, and the image is now decoded EXIF-upright so a portrait capture is not recognized sideways. The instrumented harness is in place and runs: `MlKitGeometryTest` passed 3/3 on a motorola edge 60 pro (Android 16) via `:composeApp:connectedAndroidDeviceTest`, pinning the 0..1 range, the top-left ordering, and the EXIF-rotated case. That test draws a plain canvas, not a receipt, so it does **not** discharge this task. `MlKitSampleReceiptTest` is the stated verification and fails naming the asset the user must supply at `composeApp/src/androidDeviceTest/assets/sample_receipt.jpg` (git-ignored, see the README beside it). A rendered image was deliberately not substituted: it would show only that ML Kit reads clean rasterized type, not real thermal print.
+- [ ] 1.4 Implement the iOS `actual` recognizer over `VNRecognizeTextRequest` with `recognitionLevel = .accurate` and `usesLanguageCorrection = false`, converting Vision's bottom-left-origin normalized geometry to the top-left-origin convention. Verify: an `iosSimulatorArm64` test recognizes the same sample image, returns at least one line within 0..1, and asserts that a token known to sit at the top of the image has a smaller `top` value than a token known to sit at the bottom. — **Implementation done; the stated verification cannot run in this repository.** `VisionOcrEngine` requests the accurate level with language correction off and flips the **Y axis** — Vision's origin is bottom-left with Y growing upward, so a box's maximum Y (its visual top) becomes `top = 1 - maxY` and its minimum Y becomes `bottom = 1 - minY`; X is unchanged. That conversion is now the top-level `visionBoxToTopLeftRect`, covered by `VisionCoordinateConversionTest` in `iosTest`, which asserts the top-token/bottom-token ordering the verify clause calls for. `:composeApp:compileTestKotlinIosSimulatorArm64` succeeds, but `:composeApp:iosSimulatorArm64Test` cannot link: `ld: framework 'FirebaseCore' not found` at `linkDebugTestIosSimulatorArm64`. Firebase reaches iOS through the Xcode project rather than Gradle, so no iOS unit test has ever been runnable here. Pre-existing and out of scope for this change.
 - [x] 1.5 Register the recognizer in the Koin graph alongside the existing data source wiring. Verify: the graph resolves on both platforms without the Gemini model binding.
 
 ## 2. Fixture corpus
@@ -73,11 +73,24 @@ fixture, which would make the thresholds in 2.2 meaningless while appearing gree
 minimum size, or missing a source type. Those four failures are the reminder, not
 a regression.
 
-**Blocked on a physical device — 1.3, 1.4, 7.2, 7.3**
+**Blocked on a sample receipt photograph — 1.3**
 
-The Android and iOS recognizers are implemented and both compile. Their verify
-clauses require running platform OCR over a sample receipt image, and 7.2/7.3
-require an airplane-mode scan and a network trace on real hardware.
+Updated 2026-08-17. The instrumented harness now exists and runs on a real device;
+what is missing is the receipt itself. Drop a photograph of a genuine Indonesian
+receipt at `composeApp/src/androidDeviceTest/assets/sample_receipt.jpg` and run
+`./gradlew :composeApp:connectedAndroidDeviceTest`. The directory is git-ignored
+under the same privacy rule as the fixture corpus: no receipt image data is
+committed.
+
+**Blocked on the iOS test binary not linking — 1.4**
+
+Updated 2026-08-17. The Vision recognizer and its coordinate test both compile;
+`iosSimulatorArm64Test` fails at link with `ld: framework 'FirebaseCore' not found`.
+Same pre-existing cause as 7.1 below.
+
+**Blocked on a physical device — 7.2, 7.3**
+
+7.2 and 7.3 require an airplane-mode scan and a network trace on real hardware.
 
 **Partially blocked — 7.1**
 
