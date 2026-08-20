@@ -12,13 +12,13 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.441243986243-elg18die8qman3rmm8rl5qri5j998noj</string>
+				<string>com.googleusercontent.apps.441243986243-7oot4lnv7v37l971l11vpqr9hvhlgvmt</string>
 			</array>
 		</dict>
 	</array>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>This app needs access to your photo library to select receipt images for scanning.</string>
 </dict>
 </plist>
