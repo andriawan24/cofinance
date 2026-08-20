@@ -38,6 +38,11 @@ jobs:
         run: |
           cat > local.properties << EOF
           google_auth_client_id=${{ secrets.GOOGLE_AUTH_CLIENT_ID }}
+          storage.base_url=${{ secrets.STORAGE_BASE_URL }}
+          storage.access_key=${{ secrets.STORAGE_ACCESS_KEY }}
+          storage.access_secret=${{ secrets.STORAGE_ACCESS_SECRET }}
+          storage.bucket_name=${{ secrets.STORAGE_BUCKET_NAME }}
+          storage.region=${{ secrets.STORAGE_REGION }}
           sdk.dir=$ANDROID_HOME
           EOF
 

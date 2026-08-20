@@ -9,8 +9,11 @@ import id.andriawan.cofinance.data.local.transaction.RoomTransactionLocalDataSou
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.ocr.parser.MerchantCategoryLearning
 import id.andriawan.cofinance.data.remote.AccountRemoteDataSource
-import id.andriawan.cofinance.data.remote.FirestoreAccountDataSource
-import id.andriawan.cofinance.data.remote.FirestoreTransactionDataSource
+import id.andriawan.cofinance.data.remote.EncryptedAccountDataSource
+import id.andriawan.cofinance.data.remote.EncryptedTransactionDataSource
+import id.andriawan.cofinance.data.remote.FinanceDocumentStore
+import id.andriawan.cofinance.data.remote.FirestoreFinanceDocumentStore
+import id.andriawan.cofinance.data.remote.KeyMaterialGate
 import id.andriawan.cofinance.data.remote.TransactionRemoteDataSource
 import id.andriawan.cofinance.data.sync.FirebaseSyncCoordinator
 import coil3.PlatformContext
@@ -24,8 +27,10 @@ fun databaseModule(context: PlatformContext) = module {
     singleOf(::RoomAccountLocalDataSource) { bind<AccountLocalDataSource>() }
     singleOf(::RoomTransactionLocalDataSource) { bind<TransactionLocalDataSource>() }
     singleOf(::RoomMerchantCategoryLocalDataSource) { bind<MerchantCategoryLocalDataSource>() }
-    singleOf(::FirestoreAccountDataSource) { bind<AccountRemoteDataSource>() }
-    singleOf(::FirestoreTransactionDataSource) { bind<TransactionRemoteDataSource>() }
+    singleOf(::FirestoreFinanceDocumentStore) { bind<FinanceDocumentStore>() }
+    singleOf(::KeyMaterialGate)
+    singleOf(::EncryptedAccountDataSource) { bind<AccountRemoteDataSource>() }
+    singleOf(::EncryptedTransactionDataSource) { bind<TransactionRemoteDataSource>() }
     singleOf(::FirebaseSyncCoordinator)
     single { GarageStorageDataSource() }
     single { MerchantCategoryLearning(get(), get()) }

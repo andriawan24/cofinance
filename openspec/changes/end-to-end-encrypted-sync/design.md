@@ -1,14 +1,14 @@
 ## Context
 
-`FirestoreCofinanceDatabase` writes `AccountDocument` and `TransactionDocument` to `users/{uid}/accounts` and `users/{uid}/transactions` as plaintext, and reads them back with server-side `orderBy` on `createdAt` and `date`. `FinanceSyncCoordinator.syncAfterSignIn` merges remote records absent locally, then `mirrorAllIfSignedIn` uploads the entire local snapshot. `getAllTransactions` applies no type filter, so DRAFT and CYCLE_RESET rows are uploaded alongside real transactions.
+`FirestoreAccountDataSource` and `FirestoreTransactionDataSource` write `AccountDocument` and `TransactionDocument` to `users/{uid}/accounts` and `users/{uid}/transactions` as plaintext, and read them back with server-side `orderBy` on `createdAt` and `date`. `FirebaseSyncCoordinator.syncDataAfterSignIn` merges remote records absent locally, then `mirrorDataIfSignedIn` uploads the entire local snapshot. `getAllTransactions` applies no type filter, so DRAFT and CYCLE_RESET rows are uploaded alongside real transactions.
 
 Three properties of the current code shape this design.
 
-First, Room is the source of truth and holds a complete local copy. Firestore reads happen only in `syncAfterSignIn`. Nothing in the app depends on Firestore's ability to sort, filter, or paginate finance data, so giving up server-side ordering costs nothing functionally.
+First, Room is the source of truth and holds a complete local copy. Firestore reads happen only in `syncDataAfterSignIn`. Nothing in the app depends on Firestore's ability to sort, filter, or paginate finance data, so giving up server-side ordering costs nothing functionally.
 
 Second, the app is offline-first and usable with no account. Encryption is only meaningful at the point data would leave the device, which means encryption setup belongs at sign-in, not at first launch. Gating at first launch would force every local-only user to safeguard a recovery phrase that protects nothing, because the local database is deliberately not encrypted by this change.
 
-Third, `mirrorAllIfSignedIn` re-uploads everything on every sync. Under encryption this means re-encrypting the full snapshot each time, which makes nonce discipline a correctness requirement rather than a detail.
+Third, `mirrorDataIfSignedIn` re-uploads everything on every sync. Under encryption this means re-encrypting the full snapshot each time, which makes nonce discipline a correctness requirement rather than a detail.
 
 Constraints: Android and iOS only, `minSdk` 24. The user base is Indonesia-only and single-device at launch. The stated product decision is that losing both the device and the recovery phrase means losing the data, with no operator-side recovery.
 
@@ -87,7 +87,7 @@ Migration requires network access and is blocking. A user who never opens the ap
 
 Each encrypted record stores an envelope version, the identifier of the key that encrypted it, a per-record nonce, and the ciphertext. The document identifier stays plaintext because it is a random identifier the app generates and is required to address the document.
 
-Because `mirrorAllIfSignedIn` re-encrypts the full snapshot on every sync, a fresh random nonce is generated per encryption operation, never derived from record content or a counter. Nonce reuse under GCM is catastrophic rather than degrading, so this is a correctness requirement with an explicit test.
+Because `mirrorDataIfSignedIn` re-encrypts the full snapshot on every sync, a fresh random nonce is generated per encryption operation, never derived from record content or a counter. Nonce reuse under GCM is catastrophic rather than degrading, so this is a correctness requirement with an explicit test.
 
 Server-side `orderBy` on `createdAt` and `date` is removed, since those fields no longer exist in plaintext. Records are ordered locally from Room, which is where every user-facing ordering already comes from.
 
@@ -111,6 +111,7 @@ Server-side `orderBy` on `createdAt` and `date` is removed, since those fields n
 - **Losing the wrapped key material document makes all synchronized records undecryptable.** → The device holds its own wrap independently, so the Firestore document is not the sole copy for the active device, and the phrase reconstructs the wrap on restore. Key material is written before the first encrypted record.
 - **Removing server-side ordering degrades a future feature that wants server-side queries.** → Accepted. No such feature exists, Room already answers every ordering question, and any future server-side query over encrypted data would require a fundamentally different design regardless.
 - **The `iosSimulatorArm64` test binary does not link today, so tasks 2.4 and 7.1 cannot be verified as written.** → Observed while completing group 1: `:composeApp:linkDebugTestIosSimulatorArm64` fails with `ld: framework 'FirebaseCore' not found`. Firebase reaches the iOS app through the Xcode project rather than through Gradle, so the Gradle-linked test binary has no Firebase frameworks to link against. This predates this change — CI runs only `:composeApp:testAndroidHostTest` and `:androidApp:testDebugUnitTest`, never an iOS test task — and the new `commonMain` crypto code compiles for iOS cleanly. It still has to be solved before any `iosSimulatorArm64` verification can run, either by making the Firebase frameworks available to the test link or by moving the crypto and keyring code into a module that does not depend on Firebase. The second option is the more durable one and is worth weighing before group 2 starts.
+- **On API 24 to 30 the device wrap is not hardware-sealed, because Android cannot do Keystore key agreement before API 31.** → Detailed in Decision 15. Mitigated by sealing the software key under a non-extractable hardware key, which defeats an attacker holding the filesystem but not one with live root on an unlocked device. The residual choice — raise `minSdk` or state the weaker guarantee — is the remaining open question.
 - **Biometric enrollment change destroys the device key mid-use.** → Requiring a PIN before biometric makes this a six-digit recovery rather than a phrase restore. Covered by an explicit platform test.
 - **Mandatory setup at sign-in adds friction and may reduce sign-in completion.** → Deliberate: the alternative is optional encryption, which means maintaining a plaintext sync path forever and being unable to make the privacy claim at all.
 
@@ -164,6 +165,40 @@ Falling back to PBKDF2 alone was rejected. Against a six-digit PIN, iteration co
 
 Argon2 through platform bindings was rejected: it would mean a JNI dependency on Android and a separate Apple implementation, moving the derivation out of common code and out of `commonTest` for no security gain over scrypt at equivalent parameters.
 
+### Decision 15: Android key agreement is only hardware-sealed from API 31, and the guarantee below that is stated rather than implied
+
+Decision 2 anticipated the StrongBox split at API 28 but not a harder one. `KeyProperties.PURPOSE_AGREE_KEY` and `KeyAgreement.getInstance("ECDH", "AndroidKeyStore")` both arrive in **API 31**. Below that the Android Keystore cannot perform EC key agreement at all, so a non-extractable ECDH key is not merely degraded on API 24 through 30 — it is impossible.
+
+What ships, by band:
+
+- **API 31 and above.** P-256 generated inside the Keystore with `PURPOSE_AGREE_KEY`. The private half never enters the process, `getKey(...).encoded` is null, and agreement runs in secure hardware. This is the guarantee Decision 2 describes.
+- **API 28 to 30.** The key pair is generated in software and its encodings are sealed with AES-256-GCM under a non-extractable, hardware-backed Keystore AES key, then written to app-private storage. A filesystem copy is useless off the device; the private key exists in process memory only during an agreement. A live root exploit on an unlocked device defeats it.
+- **API 24 to 27.** As above, without StrongBox, which requires API 28. A device whose Keystore is software-only yields a software sealing key, so the implementation reports the protection it actually obtained instead of asserting one.
+
+The device secret is uniform across every band: HMAC-SHA256 of a fixed label under a non-extractable Keystore HMAC key, with nothing stored.
+
+The consequence is a product one and is recorded here rather than buried: the claim that only the user's device can open its data is fully true at API 31 and above, and weaker on 24 to 30. Raising `minSdk` to 31 would make the claim uniform at the cost of the older half of the Indonesian device base; keeping 24 requires user-facing copy that does not overclaim. Until that call is made, the code reports its actual protection level at runtime so the app can adapt what it says.
+
+### Decision 17: Re-display requires persisting the phrase entropy, which Decision 10 did not account for
+
+Decision 10 chose to make the recovery phrase re-displayable from settings. Implementing it exposed an assumption in that decision that was simply false: nothing in the key hierarchy retains the phrase. The phrase wrap seals the data key *under* a key derived from the phrase, so it can verify a phrase the user supplies and can never produce one. Re-display therefore requires storing the phrase entropy somewhere, which Decision 10 treated as free and is not.
+
+The entropy is stored sealed under the data key, in ordinary app-private storage. Two properties follow. The blob is worth exactly what the data key is worth: anyone who can open it already holds the key it would lead to, so it adds no reachable material for an attacker who does not. And it is deliberately not bound to platform key storage — the phrase is the one artifact whose whole purpose is to outlive the device, and sealing it to the device would defeat that on the very hardware failure it exists to survive.
+
+The cost is honest: a device that has completed setup now holds a recoverable copy of the phrase, where before it held only something that could check one. That is the price of Decision 10, and it is the reason phrase re-display is gated on fresh PIN entry rather than on the session already being unlocked. Choosing show-once instead would remove this artifact entirely; the trade was already made in Decision 10 on the grounds that permanent data loss is the worse outcome, and this records what it actually costs.
+
+### Decision 16: The failed-attempt counter survives reinstall literally on iOS and in effect on Android
+
+Decision 9 requires that reinstalling the app cannot reset the failed-attempt count. The platforms deliver that differently, and the difference is worth stating rather than leaving to be discovered.
+
+On iOS the counter is a Keychain generic password under `AfterFirstUnlockThisDeviceOnly`. Keychain items outlive an uninstall, so the count itself persists and the requirement holds literally.
+
+On Android nothing survives a reinstall — no application-writable storage does. What survives is the coupling: clearing app data or uninstalling deletes the counter *and* the Keystore entries that `AndroidDeviceKeyVault` derives the device secret from. Without that secret the PIN wrap no longer opens under any PIN, so a reinstalled app has a zeroed counter and nothing left for fresh attempts to be spent on. Access requires the recovery phrase, which is the same place ten failed attempts would have led. The attacker gains nothing, which is the property Decision 9 is actually protecting.
+
+A partial deletion is handled separately. A successful unlock writes a zero record rather than clearing the record, so an absent or unopenable counter on a device that still holds a PIN wrap is treated as tampering and destroys local key material. A device carrying no PIN wrap is exempt, so a phrase-restored device that has not yet set a PIN is not caught by this.
+
+The app-lock specification states the requirement in terms of what the reinstall must not achieve rather than in terms of the integer persisting, so that it is satisfiable on both platforms as written.
+
 ## Open Questions
 
-None. All questions that govern shipped behavior are resolved in Decisions 9 through 14.
+- Should `minSdk` rise to 31 so the hardware-sealed key agreement in Decision 15 holds for every user, or should 24 be kept and the weaker guarantee stated honestly in user-facing copy? This governs shipped behavior and is the one question left open.

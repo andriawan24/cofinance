@@ -67,6 +67,9 @@ kotlin {
 
             // AWS S3 SDK
             implementation(libs.s3)
+
+            // App lock: the biometric prompt and its enrollment-invalidating Keystore key
+            implementation(libs.androidx.biometric)
         }
 
         iosMain.dependencies {
@@ -125,6 +128,9 @@ kotlin {
             implementation(libs.kotlinx.coroutines.test)
         }
 
+        // Two things need a real device: ML Kit's native OCR pipeline, and the device key vault's
+        // guarantee that its key is non-extractable and hardware-backed, which only real platform
+        // key storage can demonstrate.
         getByName("androidDeviceTest").dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)

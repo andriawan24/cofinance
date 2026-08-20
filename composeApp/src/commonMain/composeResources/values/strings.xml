@@ -136,4 +136,103 @@
     <string name="error_name_required">Name is required.</string>
     <string name="error_receipt_scan_failed">Couldn\'t read the receipt image, please try again.</string>
     <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Encryption setup -->
+    <string name="title_encryption_setup">Set up encryption</string>
+    <string name="description_encryption_setup">Cofinance encrypts your accounts and transactions on this device before syncing them. The copy kept in the cloud cannot be read without the key on your device.</string>
+    <string name="title_recovery_phrase">Your recovery phrase</string>
+    <string name="description_recovery_phrase">Write these 12 words on paper, in this order, and keep them somewhere safe.</string>
+    <string name="warning_recovery_phrase_loss">If you lose these 12 words and lose this device, your synced accounts and transactions are gone for good. Nobody can bring them back — not us, not anyone. There is no reset and no backup code.</string>
+    <string name="note_local_data_not_encrypted">This does not encrypt the copy stored on this phone. It protects the copy that is synced to the cloud.</string>
+    <string name="action_written_it_down">I have written it down</string>
+    <string name="title_confirm_recovery_phrase">Confirm your phrase</string>
+    <string name="description_confirm_recovery_phrase">Type the words below from what you wrote down. Setup is not finished, and nothing is synced, until they match.</string>
+    <string name="label_recovery_phrase_word">Word %1$d</string>
+    <string name="action_back_to_phrase">Show the words again</string>
+    <string name="action_confirm_recovery_phrase">Finish setup</string>
+    <string name="error_recovery_phrase_confirmation">Those words do not match your phrase. Check what you wrote down and try again.</string>
+    <string name="error_encryption_setup_failed">Encryption setup could not be completed, so nothing has been synced. Please try again.</string>
+
+    <!-- Recovery phrase restore -->
+    <string name="title_restore_data">Restore your data</string>
+    <string name="description_restore_data">Enter the 12 words you wrote down when you set up encryption. They are the only way to read the data synced from your other device.</string>
+    <string name="label_recovery_phrase_input">Recovery phrase</string>
+    <string name="action_restore">Restore</string>
+    <string name="message_restore_complete">Restored %1$d accounts and %2$d transactions.</string>
+    <string name="error_recovery_phrase_word_count">Enter all 12 words. You entered %1$d.</string>
+    <string name="error_recovery_phrase_unknown_word">Word %1$d, “%2$s”, is not one of the recovery words. Check its spelling.</string>
+    <string name="error_recovery_phrase_checksum">Each word is a real recovery word, but the phrase as a whole is not valid. One word is probably wrong or in the wrong place.</string>
+    <string name="error_recovery_phrase_mismatch">This phrase does not open the data on this account. Nothing was restored. Check your words and try again.</string>
+    <string name="error_recovery_phrase_no_key_material">There is no synced data to restore for this account.</string>
+    <string name="error_restore_failed">The restore could not be completed, so nothing was imported. Please try again.</string>
+    <!-- Launch: unlock and plaintext migration -->
+    <string name="title_unlock_app">Unlock Cofinance</string>
+    <string name="description_unlock_app">Enter your PIN to open your accounts and transactions on this device.</string>
+    <string name="label_pin">PIN</string>
+    <string name="action_unlock">Unlock</string>
+    <string name="error_pin_incorrect">That PIN is not right. %1$d attempts left before this device loses its key.</string>
+    <string name="message_encrypting_existing_data">Encrypting your synced data… %1$d of %2$d.</string>
+    <string name="message_encrypting_existing_data_preparing">Checking your synced data…</string>
+    <string name="error_migration_failed">Your synced data could not be finished encrypting. Nothing was lost, and picking up where it stopped is safe.</string>
+    <string name="action_retry">Try again</string>
+
+    <!-- App lock: biometric shortcut and waiting times -->
+    <string name="action_use_biometric">Use fingerprint or face</string>
+    <string name="error_pin_incorrect_with_delay">That PIN is not right. %1$d attempts left before this device loses its key. Wait %2$s before trying again.</string>
+    <string name="error_pin_wait">Too many attempts. Try again in %1$s.</string>
+    <string name="error_pin_not_set">No PIN is set on this device.</string>
+    <string name="error_pin_key_material_destroyed">Too many wrong PINs, so this device no longer holds your key. Restore with your 12 recovery words.</string>
+    <string name="error_biometric_fell_back">Fingerprint or face was not used. Enter your PIN instead.</string>
+    <string name="error_biometric_invalidated">Your fingerprint or face has changed, so the shortcut was turned off. Enter your PIN.</string>
+    <string name="label_duration_seconds">%1$d sec</string>
+    <string name="label_duration_minutes">%1$d min</string>
+    <string name="biometric_prompt_unlock_title">Unlock Cofinance</string>
+    <string name="biometric_prompt_unlock_subtitle">Use your fingerprint or face instead of your PIN.</string>
+    <string name="biometric_prompt_enable_title">Turn on the fingerprint or face shortcut</string>
+    <string name="biometric_prompt_enable_subtitle">Confirm it is you to finish turning this on.</string>
+    <string name="biometric_prompt_negative">Use PIN</string>
+
+    <!-- Security settings -->
+    <string name="title_security_settings">Security</string>
+    <string name="description_security_settings">Lock Cofinance on this device and keep your recovery phrase to hand.</string>
+    <string name="label_app_pin">PIN</string>
+    <string name="label_pin_set">Set. You enter it to unlock Cofinance.</string>
+    <string name="label_pin_not_set">Not set yet.</string>
+    <string name="action_set_pin">Set PIN</string>
+    <string name="action_change_pin">Change</string>
+    <string name="action_remove_pin">Remove</string>
+    <string name="label_biometric_unlock">Fingerprint or face</string>
+    <string name="description_biometric_unlock">A shortcut for your PIN. Your PIN keeps working.</string>
+    <string name="label_auto_lock">Lock after</string>
+    <string name="description_auto_lock">How long Cofinance may sit in the background before it asks again.</string>
+    <string name="title_auto_lock">Lock after</string>
+    <string name="label_auto_lock_immediately">Immediately</string>
+    <string name="label_auto_lock_1_minute">1 minute</string>
+    <string name="label_auto_lock_5_minutes">5 minutes</string>
+    <string name="label_auto_lock_15_minutes">15 minutes</string>
+    <string name="description_recovery_phrase_reveal">Show the 12 words again. Your PIN is needed each time.</string>
+    <string name="action_view_recovery_phrase">Show words</string>
+    <string name="title_current_pin_required">Enter your PIN</string>
+    <string name="title_set_pin">Choose a PIN</string>
+    <string name="label_current_pin">Current PIN</string>
+    <string name="label_new_pin">New PIN</string>
+    <string name="label_confirm_new_pin">Repeat new PIN</string>
+    <string name="label_close">Close</string>
+    <string name="error_pin_length">Your PIN must be 6 digits.</string>
+    <string name="error_pin_confirmation_mismatch">Those two PINs do not match.</string>
+    <string name="error_current_pin_incorrect">That is not your current PIN.</string>
+    <string name="error_session_locked">Unlock Cofinance first, then set your PIN.</string>
+    <string name="error_biometric_requires_pin">Set a PIN first. Fingerprint or face is a shortcut for it, not a replacement.</string>
+    <string name="error_biometric_not_enrolled">No fingerprint or face is set up on this device yet. Add one in your device settings.</string>
+    <string name="error_biometric_no_hardware">This device has no fingerprint or face sensor Cofinance can use.</string>
+    <string name="error_biometric_unavailable">Fingerprint or face is not available right now. Try again later.</string>
+    <string name="error_biometric_cancelled">That was cancelled, so nothing changed.</string>
+    <string name="error_biometric_failed">The fingerprint or face shortcut could not be turned on. Nothing changed.</string>
+    <string name="error_recovery_phrase_unavailable">This device did not keep a copy of your words, so it cannot show them. The words you wrote down still work.</string>
+    <string name="message_pin_set">Your PIN is set.</string>
+    <string name="message_pin_changed">Your PIN has been changed.</string>
+    <string name="message_pin_removed">Your PIN has been removed, and the fingerprint or face shortcut with it.</string>
+    <string name="message_biometric_enabled">Fingerprint or face unlock is on.</string>
+    <string name="message_biometric_disabled">Fingerprint or face unlock is off. Unlocking now needs your PIN.</string>
+    <string name="message_auto_lock_changed">Your lock timing has been updated.</string>
 </resources>
