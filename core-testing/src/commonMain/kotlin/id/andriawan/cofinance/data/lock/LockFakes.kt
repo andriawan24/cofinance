@@ -102,7 +102,7 @@ class FakeBiometricKeyBox(
     override suspend fun open(prompt: BiometricPromptText): BiometricOpenResult {
         openResult?.let { scripted ->
             // The invalidation case discards the sealed copy on the real implementations, so the
-            // fake does too; a test that re-checks isEnabled afterwards must see the same thing.
+            // fake does too; a test that re-checks isEnabled afterward must see the same thing.
             if (scripted == BiometricOpenResult.Invalidated) sealed = null
             return scripted
         }

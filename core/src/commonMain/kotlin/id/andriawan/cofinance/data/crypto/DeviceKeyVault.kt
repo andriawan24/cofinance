@@ -53,9 +53,6 @@ interface DeviceKeyVault {
     suspend fun destroyKeyMaterial()
 
     companion object {
-        /** The only curve either platform's hardware key storage offers for ECDH. */
-        const val CURVE_NAME: String = "P-256"
-
         /** Length of an uncompressed P-256 point: a one-byte tag plus two 32-byte coordinates. */
         const val PUBLIC_KEY_SIZE: Int = 65
 
