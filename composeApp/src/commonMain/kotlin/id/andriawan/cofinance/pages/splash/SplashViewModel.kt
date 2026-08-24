@@ -9,13 +9,10 @@ import id.andriawan.cofinance.data.keyring.EncryptionSessionState
 import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.lock.AppLock
 import id.andriawan.cofinance.data.lock.LocalKeyMaterialStore
-import id.andriawan.cofinance.data.migration.MigrationState
-import id.andriawan.cofinance.data.migration.PlaintextMigration
 import id.andriawan.cofinance.data.session.SessionPolicy
 import id.andriawan.cofinance.pages.lock.LaunchLockDecision
 import id.andriawan.cofinance.pages.lock.launchLockDecision
 import kotlin.coroutines.cancellation.CancellationException
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -45,12 +42,6 @@ sealed interface LaunchPhase {
 
     /** Reading key material, signing state, and the account. Nothing is asked of the user. */
     data object Preparing : LaunchPhase
-
-    /** Converting this account's plaintext cloud records, which per Decision 6 blocks the launch. */
-    data class Migrating(val finished: Int, val total: Int) : LaunchPhase
-
-    /** Migration stopped part-way. Records already converted stay converted; a retry resumes. */
-    data object MigrationFailed : LaunchPhase
 }
 
 @Stable
@@ -66,18 +57,13 @@ data class SplashUiState(
  *
  * A seam rather than the two collaborators directly, because both reach Firebase through concrete
  * classes that a host test cannot stand in for, and because the launch sequence has no interest in
- * either of them beyond "do the signed-in work". What it does care about — that this runs *after*
- * migration, never before — is visible in [SplashViewModel.launch] and would be buried if the calls
- * were inlined there.
+ * either of them beyond "do the signed-in work". Keeping the call in [SplashViewModel.launch]
+ * rather than inlining it there keeps the order of the launch sequence readable in one place.
  */
 fun interface LaunchSynchronizer {
 
     /** Mirrors cloud data and loads the account. Failures are the caller's to decide about. */
     suspend fun synchronize()
-}
-
-sealed interface SplashUiEvent {
-    data object RetryMigration : SplashUiEvent
 }
 
 /**
@@ -98,10 +84,6 @@ sealed interface SplashUiEvent {
  * - **A PIN, if one is set, is the gate.** The device wrap could open the session without asking
  *   anything, so [AppLock.isPinSet] is consulted *before* it is used. Nothing here ever sees a PIN:
  *   a device that has one is routed to the unlock screen, which derives the key from it.
- * - **Migration runs before the main experience, and only when there is something to convert.**
- *   It is invoked after the session is unlocked because sealing a record needs the data key, and
- *   its own scan is what decides whether a user is blocked at all — an account with no plaintext
- *   records completes it without ever reaching the conversion phase.
  */
 @Stable
 class SplashViewModel(
@@ -110,8 +92,7 @@ class SplashViewModel(
     private val encryptionSession: InMemoryEncryptionSession,
     private val localKeyMaterialStore: LocalKeyMaterialStore,
     private val deviceKeyWrapper: DeviceKeyWrapper,
-    private val appLock: AppLock,
-    private val migration: PlaintextMigration
+    private val appLock: AppLock
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SplashUiState())
@@ -122,19 +103,11 @@ class SplashViewModel(
         viewModelScope.launch { launch() }
     }
 
-    fun onEvent(event: SplashUiEvent) {
-        when (event) {
-            SplashUiEvent.RetryMigration -> viewModelScope.launch { launch() }
-        }
-    }
-
     /** Runs the whole sequence, and is safe to run again from any point it stopped at. */
     suspend fun launch() {
         _uiState.update { it.copy(phase = LaunchPhase.Preparing, route = null) }
 
         if (!sessionPolicy.isSignedIn()) {
-            // A local-only user. No encrypted copy exists to protect, so setup and unlock are both
-            // skipped rather than deferred, and migration would have nothing in the cloud to find.
             return settle(LaunchRoute.Main)
         }
 
@@ -144,13 +117,10 @@ class SplashViewModel(
         if (state == EncryptionSessionState.SetupIncomplete) {
             return settle(LaunchRoute.EncryptionSetup)
         }
-        // The lock's own rule, rather than a second copy of it here. It answers `Unlock` exactly
-        // when key material exists and the key is not in memory.
+
         if (launchLockDecision(state) == LaunchLockDecision.Unlock) {
             return settle(LaunchRoute.Unlock)
         }
-
-        if (!runMigration()) return
 
         synchronizeAndFetchUser()
         settle(LaunchRoute.Main)
@@ -170,8 +140,6 @@ class SplashViewModel(
 
         encryptionSession.markSetUp()
 
-        // A PIN wrap means the user asked to be asked. The device wrap below would open the session
-        // without a prompt, so this check has to come before it rather than after.
         if (appLock.isPinSet()) return
 
         val deviceWrap = document.wrapsOf(KeyWrapType.Device).firstOrNull()
@@ -189,41 +157,7 @@ class SplashViewModel(
             return
         }
 
-        // A device wrap that no longer opens — the platform key material behind it is gone — and no
-        // PIN to fall back on leaves nothing here that could ever unlock. Forgetting setup routes
-        // the launch to the setup screen, which finds the account's recovery-phrase key material
-        // already published and hands over to restore. Left as `Locked` this would be a dead end.
         encryptionSession.forgetSetup()
-    }
-
-    /** Returns true when the launch may proceed; false leaves a retryable failure on screen. */
-    private suspend fun runMigration(): Boolean = coroutineScope {
-        _uiState.update { it.copy(phase = LaunchPhase.Migrating(finished = 0, total = 0)) }
-
-        // The progress job is a child of the caller rather than of `viewModelScope`, so the whole
-        // sequence is drivable from a test without a main dispatcher, and so a cancelled launch
-        // cannot leave a collector behind.
-        val progress = launch {
-            migration.state.collect { state ->
-                if (state is MigrationState.Converting) {
-                    _uiState.update {
-                        it.copy(phase = LaunchPhase.Migrating(state.finished, state.total))
-                    }
-                }
-            }
-        }
-
-        val outcome = try {
-            migration.run()
-        } finally {
-            progress.cancel()
-        }
-
-        if (outcome is MigrationState.Failed) {
-            _uiState.update { it.copy(phase = LaunchPhase.MigrationFailed) }
-            return@coroutineScope false
-        }
-        true
     }
 
     /**
@@ -231,8 +165,7 @@ class SplashViewModel(
      *
      * Both failures are swallowed into a successful launch, as they were before this change: the
      * app is offline-first and a user with no connection still reaches their local data. What is
-     * *not* swallowed is anything above this line — an unmigrated account or a locked session stops
-     * the launch instead.
+     * *not* swallowed is anything above this line — a locked session stops the launch instead.
      */
     private suspend fun synchronizeAndFetchUser() {
         try {

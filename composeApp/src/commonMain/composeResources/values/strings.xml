@@ -141,16 +141,17 @@
     <string name="title_encryption_setup">Set up encryption</string>
     <string name="description_encryption_setup">Cofinance encrypts your accounts and transactions on this device before syncing them. The copy kept in the cloud cannot be read without the key on your device.</string>
     <string name="title_recovery_phrase">Your recovery phrase</string>
-    <string name="description_recovery_phrase">Write these 12 words on paper, in this order, and keep them somewhere safe.</string>
+    <string name="description_recovery_phrase">Keep these 12 words, in this order, somewhere safe. Copy them into a password manager, save them as a file, or write them on paper.</string>
     <string name="warning_recovery_phrase_loss">If you lose these 12 words and lose this device, your synced accounts and transactions are gone for good. Nobody can bring them back — not us, not anyone. There is no reset and no backup code.</string>
     <string name="note_local_data_not_encrypted">This does not encrypt the copy stored on this phone. It protects the copy that is synced to the cloud.</string>
-    <string name="action_written_it_down">I have written it down</string>
-    <string name="title_confirm_recovery_phrase">Confirm your phrase</string>
-    <string name="description_confirm_recovery_phrase">Type the words below from what you wrote down. Setup is not finished, and nothing is synced, until they match.</string>
-    <string name="label_recovery_phrase_word">Word %1$d</string>
-    <string name="action_back_to_phrase">Show the words again</string>
-    <string name="action_confirm_recovery_phrase">Finish setup</string>
-    <string name="error_recovery_phrase_confirmation">Those words do not match your phrase. Check what you wrote down and try again.</string>
+    <string name="action_copy_recovery_phrase">Copy phrase</string>
+    <string name="action_download_recovery_phrase">Save as file</string>
+    <string name="note_recovery_phrase_export">Copying or saving puts the words somewhere outside Cofinance. Keep them in a password manager or somewhere only you can reach.</string>
+    <string name="message_recovery_phrase_copied">Phrase copied. It stays on your clipboard until something else replaces it.</string>
+    <string name="message_recovery_phrase_copy_failed">The phrase could not be copied. Write the words down instead.</string>
+    <string name="message_recovery_phrase_saved">Saved to %1$s</string>
+    <string name="message_recovery_phrase_save_failed">No file was saved. Try again, or write the words down instead.</string>
+    <string name="action_written_it_down">I have saved my phrase</string>
     <string name="error_encryption_setup_failed">Encryption setup could not be completed, so nothing has been synced. Please try again.</string>
 
     <!-- Recovery phrase restore -->
@@ -171,9 +172,6 @@
     <string name="label_pin">PIN</string>
     <string name="action_unlock">Unlock</string>
     <string name="error_pin_incorrect">That PIN is not right. %1$d attempts left before this device loses its key.</string>
-    <string name="message_encrypting_existing_data">Encrypting your synced data… %1$d of %2$d.</string>
-    <string name="message_encrypting_existing_data_preparing">Checking your synced data…</string>
-    <string name="error_migration_failed">Your synced data could not be finished encrypting. Nothing was lost, and picking up where it stopped is safe.</string>
     <string name="action_retry">Try again</string>
 
     <!-- App lock: biometric shortcut and waiting times -->

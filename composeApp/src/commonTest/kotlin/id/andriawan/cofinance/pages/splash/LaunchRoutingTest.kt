@@ -16,10 +16,6 @@ import id.andriawan.cofinance.data.lock.KeyValueAutoLockSettings
 import id.andriawan.cofinance.data.lock.FakeFailedAttemptStore
 import id.andriawan.cofinance.data.lock.FakeLocalKeyMaterialStore
 import id.andriawan.cofinance.data.lock.LocalKeyMaterialDestroyer
-import id.andriawan.cofinance.data.migration.EncryptionSetup
-import id.andriawan.cofinance.data.migration.FakePlaintextFinanceDocumentStore
-import id.andriawan.cofinance.data.migration.PlaintextMigration
-import id.andriawan.cofinance.data.migration.PlaintextRecordMigrator
 import id.andriawan.cofinance.data.model.document.AccountDocument
 import id.andriawan.cofinance.data.remote.FinanceCollection
 import id.andriawan.cofinance.data.remote.KeyMaterialGate
@@ -38,7 +34,7 @@ import kotlinx.coroutines.test.runTest
  * component below already works in isolation, and the failures this file is written against are
  * failures of composition: a local-only user who never signed in being shown a phrase to write
  * down, a relaunching device being sent through setup a second time because nothing read the
- * durable key material, and migration never being invoked because no caller owned it.
+ * durable key material being ignored.
  */
 class LaunchRoutingTest {
 
@@ -50,7 +46,6 @@ class LaunchRoutingTest {
     private val session = InMemoryEncryptionSession()
     private val keyMaterial = FakeLocalKeyMaterialStore()
     private val attemptStore = FakeFailedAttemptStore()
-    private val store = FakePlaintextFinanceDocumentStore()
 
     private var synchronizations = 0
 
@@ -80,14 +75,13 @@ class LaunchRoutingTest {
     }
 
     @Test
-    fun aLocalOnlyUserIsNotBlockedByMigration() = runTest {
+    fun aLocalOnlyUserReachesTheirDataWithoutTouchingTheCloud() = runTest {
         sessionPolicy.userId = null
-        store.seedPlaintext(FinanceCollection.ACCOUNTS, "account-cash", AccountDocument.serializer(), CASH)
 
         viewModel.launch()
 
         assertEquals(LaunchRoute.Main, route())
-        assertTrue(store.operations.isEmpty(), "migration touched a signed-out user's documents")
+        assertEquals(0, synchronizations, "a signed-out user's launch reached the cloud")
     }
 
     // ------------------------------------------------------------------ a signed-in user
@@ -153,76 +147,15 @@ class LaunchRoutingTest {
         assertEquals(EncryptionSessionState.SetupIncomplete, session.state.value)
     }
 
-    // ------------------------------------------------------------------ migration
-
-    @Test
-    fun migrationRunsBeforeFinanceDataIsReachable() = runTest {
-        val dataKey = DataKey.generate()
-        session.markSetUp()
-        session.unlock(dataKey)
-        store.seedKeyMaterial(keyMaterialWith(dataKey.id, KeyWrapType.RecoveryPhrase))
-        store.seedPlaintext(FinanceCollection.ACCOUNTS, "account-cash", AccountDocument.serializer(), CASH)
-
-        viewModel.launch()
-
-        assertEquals(LaunchRoute.Main, route())
-        assertEquals(
-            listOf("write accounts/account-cash", "delete accounts/account-cash"),
-            store.operations,
-            "the record was not converted, or not in the encrypt-then-delete order"
-        )
-        assertEquals(1, synchronizations)
-    }
-
-    @Test
-    fun aUserWithNoPlaintextRecordsIsNotBlocked() = runTest {
-        val dataKey = DataKey.generate()
-        session.markSetUp()
-        session.unlock(dataKey)
-        store.seedKeyMaterial(keyMaterialWith(dataKey.id, KeyWrapType.RecoveryPhrase))
-
-        viewModel.launch()
-
-        assertEquals(LaunchRoute.Main, route())
-        assertTrue(store.operations.isEmpty(), "an account with nothing to convert was written to")
-        assertEquals(1, synchronizations)
-    }
-
-    @Test
-    fun aFailedMigrationHoldsTheLaunchAndOffersARetryThatFinishesIt() = runTest {
-        val dataKey = DataKey.generate()
-        session.markSetUp()
-        session.unlock(dataKey)
-        store.seedKeyMaterial(keyMaterialWith(dataKey.id, KeyWrapType.RecoveryPhrase))
-        store.seedPlaintext(FinanceCollection.ACCOUNTS, "account-cash", AccountDocument.serializer(), CASH)
-        store.interruptAfter(0)
-
-        viewModel.launch()
-
-        assertNull(route(), "a failed migration let the user through to finance data")
-        assertEquals(LaunchPhase.MigrationFailed, viewModel.uiState.value.phase)
-        assertEquals(0, synchronizations)
-
-        store.interruptAfter(Int.MAX_VALUE)
-        viewModel.launch()
-
-        assertEquals(LaunchRoute.Main, route())
-        assertEquals(
-            listOf("write accounts/account-cash", "delete accounts/account-cash"),
-            store.operations
-        )
-    }
-
     // ------------------------------------------------------------------ harness
 
     /**
-     * The launch sequence over the real lock and the real migration, with only the three things a
-     * host test cannot have faked: platform key storage, the failed-attempt file, and Firestore.
+     * The launch sequence over the real lock, with only the things a host test cannot have faked:
+     * platform key storage, the failed-attempt file, and Firestore.
      *
-     * The lock and the migration are the real classes on purpose. The decisions under test are
-     * about how they compose — whether a PIN wrap stops the device wrap from being used, whether a
-     * scan that finds nothing lets the user through — and a stubbed lock or a stubbed migration
-     * would assert the test's own beliefs about them rather than their behaviour.
+     * The lock is the real class on purpose. The decision under test is how it composes with the
+     * rest of launch — whether a PIN wrap stops the device wrap from being used — and a stubbed
+     * lock would assert the test's own beliefs about it rather than its behaviour.
      */
     private val viewModel: SplashViewModel by lazy {
         val lock = AppLock(
@@ -244,14 +177,7 @@ class LaunchRoutingTest {
             encryptionSession = session,
             localKeyMaterialStore = keyMaterial,
             deviceKeyWrapper = deviceKeyWrapper,
-            appLock = lock,
-            migration = PlaintextMigration(
-                migrator = PlaintextRecordMigrator(store),
-                keyMaterialGate = KeyMaterialGate(store, sessionPolicy),
-                encryptionSession = session,
-                encryptionSetup = EncryptionSetup { session.requireDataKey() },
-                sessionPolicy = sessionPolicy
-            )
+            appLock = lock
         )
     }
 

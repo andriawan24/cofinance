@@ -142,16 +142,17 @@
     <string name="title_encryption_setup">Siapkan enkripsi</string>
     <string name="description_encryption_setup">Cofinance mengenkripsi akun dan transaksi Anda di perangkat ini sebelum disinkronkan. Salinan yang tersimpan di cloud tidak dapat dibaca tanpa kunci yang ada di perangkat Anda.</string>
     <string name="title_recovery_phrase">Frasa pemulihan Anda</string>
-    <string name="description_recovery_phrase">Tulis 12 kata ini di kertas, sesuai urutannya, lalu simpan di tempat yang aman.</string>
+    <string name="description_recovery_phrase">Simpan 12 kata ini, sesuai urutannya, di tempat yang aman. Salin ke pengelola kata sandi, simpan sebagai berkas, atau tulis di kertas.</string>
     <string name="warning_recovery_phrase_loss">Jika Anda kehilangan 12 kata ini dan kehilangan perangkat ini, akun dan transaksi yang sudah tersinkronisasi akan hilang selamanya. Tidak ada seorang pun yang dapat mengembalikannya — baik kami maupun pihak lain. Tidak ada pengaturan ulang dan tidak ada kode cadangan.</string>
     <string name="note_local_data_not_encrypted">Ini tidak mengenkripsi salinan yang tersimpan di ponsel ini. Yang dilindungi adalah salinan yang disinkronkan ke cloud.</string>
-    <string name="action_written_it_down">Saya sudah menuliskannya</string>
-    <string name="title_confirm_recovery_phrase">Konfirmasi frasa Anda</string>
-    <string name="description_confirm_recovery_phrase">Ketik kata-kata berikut dari catatan yang Anda tulis. Penyiapan belum selesai, dan belum ada data yang disinkronkan, sampai kata-katanya cocok.</string>
-    <string name="label_recovery_phrase_word">Kata ke-%1$d</string>
-    <string name="action_back_to_phrase">Tampilkan kata-katanya lagi</string>
-    <string name="action_confirm_recovery_phrase">Selesaikan penyiapan</string>
-    <string name="error_recovery_phrase_confirmation">Kata-kata tersebut tidak cocok dengan frasa Anda. Periksa catatan Anda lalu coba lagi.</string>
+    <string name="action_copy_recovery_phrase">Salin frasa</string>
+    <string name="action_download_recovery_phrase">Simpan sebagai berkas</string>
+    <string name="note_recovery_phrase_export">Menyalin atau menyimpan berarti kata-kata itu berada di luar Cofinance. Simpanlah di pengelola kata sandi atau tempat yang hanya bisa Anda akses.</string>
+    <string name="message_recovery_phrase_copied">Frasa disalin. Kata-kata itu tetap ada di papan klip sampai tergantikan oleh salinan lain.</string>
+    <string name="message_recovery_phrase_copy_failed">Frasa tidak dapat disalin. Tuliskan kata-katanya secara manual.</string>
+    <string name="message_recovery_phrase_saved">Tersimpan di %1$s</string>
+    <string name="message_recovery_phrase_save_failed">Tidak ada berkas yang tersimpan. Coba lagi, atau tuliskan kata-katanya secara manual.</string>
+    <string name="action_written_it_down">Saya sudah menyimpan frasa saya</string>
     <string name="error_encryption_setup_failed">Penyiapan enkripsi tidak dapat diselesaikan, sehingga belum ada data yang disinkronkan. Silakan coba lagi.</string>
 
     <!-- Pemulihan dengan frasa -->
@@ -172,9 +173,6 @@
     <string name="label_pin">PIN</string>
     <string name="action_unlock">Buka kunci</string>
     <string name="error_pin_incorrect">PIN itu salah. Tersisa %1$d percobaan sebelum perangkat ini kehilangan kuncinya.</string>
-    <string name="message_encrypting_existing_data">Mengenkripsi data tersinkronisasi Anda… %1$d dari %2$d.</string>
-    <string name="message_encrypting_existing_data_preparing">Memeriksa data tersinkronisasi Anda…</string>
-    <string name="error_migration_failed">Enkripsi data tersinkronisasi Anda belum selesai. Tidak ada data yang hilang, dan melanjutkannya dari titik terakhir aman dilakukan.</string>
     <string name="action_retry">Coba lagi</string>
 
     <!-- Kunci aplikasi: pintasan biometrik dan waktu tunggu -->
