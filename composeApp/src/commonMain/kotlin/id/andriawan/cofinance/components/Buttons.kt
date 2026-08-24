@@ -56,6 +56,7 @@ fun SecondaryButton(
         horizontal = Dimensions.SIZE_24,
         vertical = Dimensions.SIZE_16
     ),
+    enabled: Boolean = true,
     content: @Composable () -> Unit
 ) {
     Button(
@@ -64,9 +65,12 @@ fun SecondaryButton(
         contentPadding = contentPadding,
         colors = ButtonDefaults.elevatedButtonColors(
             containerColor = containerColor,
-            contentColor = contentColor
+            contentColor = contentColor,
+            disabledContainerColor = containerColor.copy(alpha = 0.5f),
+            disabledContentColor = contentColor.copy(alpha = 0.5f)
         ),
-        onClick = onClick
+        onClick = onClick,
+        enabled = enabled
     ) {
         content()
     }

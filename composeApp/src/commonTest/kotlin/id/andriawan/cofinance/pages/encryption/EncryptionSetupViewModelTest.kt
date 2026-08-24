@@ -1,10 +1,13 @@
 package id.andriawan.cofinance.pages.encryption
 
 import id.andriawan.cofinance.data.crypto.KeyWrapType
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
+import id.andriawan.cofinance.data.crypto.RECOVERY_PHRASE_FILE_NAME
 import id.andriawan.cofinance.data.crypto.RecoveryPhrase
+import id.andriawan.cofinance.data.crypto.toRecoveryPhraseExportText
 import id.andriawan.cofinance.data.keyring.DataKeyUnavailableException
 import id.andriawan.cofinance.data.keyring.EncryptionSessionState
-import id.andriawan.cofinance.data.model.response.AccountResponse
+import id.andriawan.cofinance.data.model.AccountResponse
 import id.andriawan.cofinance.data.remote.FakeFinanceDocumentStore
 import id.andriawan.cofinance.data.remote.FinanceCollection
 import id.andriawan.cofinance.data.remote.keyMaterialWith
@@ -19,86 +22,111 @@ import kotlin.test.assertTrue
 import kotlinx.coroutines.test.runTest
 
 /**
- * What setup does, and — more importantly — what it refuses to do before the requested words come
- * back correctly.
+ * What setup does, and what it refuses to do before the user has moved past the phrase.
  *
- * The verification this task names has two halves, and both are asserted against something
- * observable rather than against the view model's own opinion: setup does not complete, which is the
- * session still reporting `SetupIncomplete`, and synchronization does not begin, which is an
- * encrypted write refusing to run and the fake store's write log staying empty.
+ * Setup no longer examines the phrase — the three-word quiz is gone, since the words were on the
+ * screen above it — so what these tests pin is the part that always mattered: nothing is published
+ * and nothing synchronizes until the user leaves the phrase screen, and the copy and save actions
+ * hand over the phrase without becoming a condition of finishing.
  */
 class EncryptionSetupViewModelTest {
 
     @Test
-    fun theRequestedWordsAreDrawnFromThePhraseRatherThanBeingTheWholePhrase() = runTest {
+    fun thePhraseIsShownWithoutAnyWordsBeingAskedBack() = runTest {
         val fixture = EncryptionFixture()
         val viewModel = fixture.setupViewModel()
 
         viewModel.prepare()
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-
-        val requested = viewModel.uiState.value.requestedWords
-        assertEquals(EncryptionSetupViewModel.REQUESTED_WORD_COUNT, requested.size)
-        assertTrue(
-            requested.size < RecoveryPhrase.WORD_COUNT,
-            "Confirmation asked for the whole phrase, which copying from the screen would satisfy"
-        )
-        assertEquals(
-            requested.map { it.position }.distinct().size,
-            requested.size,
-            "The same position was requested twice"
-        )
-        assertTrue(requested.all { it.position in 1..RecoveryPhrase.WORD_COUNT })
-    }
-
-    @Test
-    fun setupDoesNotCompleteUntilTheRequestedWordsAreCorrect() = runTest {
-        val fixture = EncryptionFixture()
-        val viewModel = fixture.setupViewModel()
-
-        viewModel.prepare()
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.answerAll { "abandon-not-a-word" }
-        viewModel.confirm()
 
         val state = viewModel.uiState.value
-        assertEquals(EncryptionSetupStep.Confirmation, state.step, "Setup completed on wrong words")
-        assertEquals(EncryptionSetupError.RequestedWordsDoNotMatch, state.error)
-        assertTrue(state.requestedWords.all { it.isWrong })
-        assertEquals(EncryptionSessionState.SetupIncomplete, fixture.session.state.value)
-        assertTrue(fixture.store.writeLog.isEmpty(), "Key material was published before confirmation")
-        assertNull(fixture.localKeyMaterialStore.read())
+        assertEquals(EncryptionSetupStep.PhraseDisplay, state.step)
+        assertEquals(RecoveryPhrase.WORD_COUNT, state.words.size)
+        assertNull(state.exportStatus)
     }
 
     @Test
-    fun synchronizationCannotBeginBeforeTheRequestedWordsAreCorrect() = runTest {
+    fun synchronizationCannotBeginWhileThePhraseIsStillOnScreen() = runTest {
         val fixture = EncryptionFixture()
         val viewModel = fixture.setupViewModel()
 
         viewModel.prepare()
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.answerAll { "wrong" }
-        viewModel.confirm()
 
         // The encrypted source is the only route finance data has out of the device, and without a
         // data key it refuses rather than falling back to anything readable.
         assertFailsWith<DataKeyUnavailableException> {
             fixture.remoteAccounts.upsertAccounts(listOf(AccountResponse(id = "a-1", name = "Cash")))
         }
+        assertEquals(EncryptionSessionState.SetupIncomplete, fixture.session.state.value)
         assertTrue(fixture.store.writeLog.isEmpty(), "A record reached the backend before setup")
         assertTrue(fixture.store.documentIds(FinanceCollection.ACCOUNTS).isEmpty())
+        assertNull(fixture.localKeyMaterialStore.read())
     }
 
     @Test
-    fun correctWordsCompleteSetupAndUnlockTheSession() = runTest {
+    fun copyingOrSavingThePhraseDoesNotCompleteSetupByItself() = runTest {
         val fixture = EncryptionFixture()
         val viewModel = fixture.setupViewModel()
 
         viewModel.prepare()
-        val words = viewModel.uiState.value.words
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.answerCorrectly(words)
-        viewModel.confirm()
+        viewModel.copyPhrase()
+        viewModel.downloadPhrase()
+
+        assertEquals(EncryptionSetupStep.PhraseDisplay, viewModel.uiState.value.step)
+        assertEquals(EncryptionSessionState.SetupIncomplete, fixture.session.state.value)
+        assertTrue(fixture.store.writeLog.isEmpty())
+    }
+
+    @Test
+    fun theCopiedAndSavedPhraseIsTheOneOnScreen() = runTest {
+        val fixture = EncryptionFixture()
+        val viewModel = fixture.setupViewModel()
+
+        viewModel.prepare()
+        val expected = viewModel.uiState.value.words.toRecoveryPhraseExportText()
+
+        viewModel.copyPhrase()
+        assertEquals(expected, fixture.recoveryPhraseExporter.copiedText)
+        assertEquals(PhraseExportStatus.Copied, viewModel.uiState.value.exportStatus)
+
+        viewModel.downloadPhrase()
+        assertEquals(expected, fixture.recoveryPhraseExporter.savedText)
+        assertEquals(RECOVERY_PHRASE_FILE_NAME, fixture.recoveryPhraseExporter.savedFileName)
+        assertEquals(
+            PhraseExportStatus.Saved("Download/cofinance-recovery-phrase.txt"),
+            viewModel.uiState.value.exportStatus
+        )
+    }
+
+    @Test
+    fun anExportThatDidNotHappenIsReportedAsAFailureRatherThanAsSuccess() = runTest {
+        val fixture = EncryptionFixture()
+        fixture.recoveryPhraseExporter.copySucceeds = false
+        // What a cancelled save picker looks like from here: no location, so no file.
+        fixture.recoveryPhraseExporter.savedLocation = null
+        val viewModel = fixture.setupViewModel()
+
+        viewModel.prepare()
+
+        viewModel.copyPhrase()
+        assertEquals(PhraseExportStatus.CopyFailed, viewModel.uiState.value.exportStatus)
+
+        viewModel.downloadPhrase()
+        assertEquals(PhraseExportStatus.SaveFailed, viewModel.uiState.value.exportStatus)
+
+        // A failed export is a notice, not a setup failure: the phrase is still on screen and the
+        // user can still finish by writing it down.
+        assertNull(viewModel.uiState.value.error)
+        viewModel.finishSetup()
+        assertEquals(EncryptionSetupStep.Completed, viewModel.uiState.value.step)
+    }
+
+    @Test
+    fun leavingThePhraseScreenCompletesSetupAndUnlocksTheSession() = runTest {
+        val fixture = EncryptionFixture()
+        val viewModel = fixture.setupViewModel()
+
+        viewModel.prepare()
+        viewModel.finishSetup()
 
         assertEquals(EncryptionSetupStep.Completed, viewModel.uiState.value.step)
         assertNull(viewModel.uiState.value.error)
@@ -112,10 +140,7 @@ class EncryptionSetupViewModelTest {
         val viewModel = fixture.setupViewModel()
 
         viewModel.prepare()
-        val words = viewModel.uiState.value.words
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.answerCorrectly(words)
-        viewModel.confirm()
+        viewModel.finishSetup()
 
         assertEquals(
             listOf(FakeFinanceDocumentStore.KEY_MATERIAL_ENTRY),
@@ -141,43 +166,17 @@ class EncryptionSetupViewModelTest {
     }
 
     @Test
-    fun aMistypedWordCanBeCorrectedAndSetupThenCompletes() = runTest {
+    fun theStoredPhraseIsTheOneTheUserWasShown() = runTest {
         val fixture = EncryptionFixture()
         val viewModel = fixture.setupViewModel()
 
         viewModel.prepare()
         val words = viewModel.uiState.value.words
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.answerAll { "wrong" }
-        viewModel.confirm()
-        assertEquals(EncryptionSessionState.SetupIncomplete, fixture.session.state.value)
+        viewModel.finishSetup()
 
-        viewModel.answerCorrectly(words)
-        viewModel.confirm()
-
-        assertEquals(EncryptionSetupStep.Completed, viewModel.uiState.value.step)
-        assertEquals(EncryptionSessionState.Unlocked, fixture.session.state.value)
-    }
-
-    @Test
-    fun aWordIsAcceptedWithTheCapitalizationAndSpacingAKeyboardAdds() = runTest {
-        val fixture = EncryptionFixture()
-        val viewModel = fixture.setupViewModel()
-
-        viewModel.prepare()
-        val words = viewModel.uiState.value.words
-        viewModel.onEvent(EncryptionSetupUiEvent.PhraseWrittenDown)
-        viewModel.uiState.value.requestedWords.forEach { requested ->
-            viewModel.onEvent(
-                EncryptionSetupUiEvent.RequestedWordChanged(
-                    position = requested.position,
-                    value = " ${words[requested.position - 1].replaceFirstChar(Char::uppercase)} "
-                )
-            )
-        }
-        viewModel.confirm()
-
-        assertEquals(EncryptionSetupStep.Completed, viewModel.uiState.value.step)
+        val key = assertNotNull(fixture.session.dataKeyOrNull())
+        val kept = assertNotNull(fixture.recoveryPhraseVault.read(key))
+        assertEquals(words, kept.words)
     }
 
     @Test
@@ -196,19 +195,3 @@ class EncryptionSetupViewModelTest {
         assertTrue(fixture.store.writeLog.isEmpty())
     }
 }
-
-/** Fills every requested word with whatever [answer] returns for its position. */
-private fun EncryptionSetupViewModel.answerAll(answer: (Int) -> String) {
-    uiState.value.requestedWords.forEach { requested ->
-        onEvent(
-            EncryptionSetupUiEvent.RequestedWordChanged(
-                position = requested.position,
-                value = answer(requested.position)
-            )
-        )
-    }
-}
-
-/** Fills every requested word with the word the phrase actually holds at that position. */
-private fun EncryptionSetupViewModel.answerCorrectly(words: List<String>) =
-    answerAll { position -> words[position - 1] }

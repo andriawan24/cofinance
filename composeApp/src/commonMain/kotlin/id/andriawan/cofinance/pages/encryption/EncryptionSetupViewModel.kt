@@ -7,15 +7,18 @@ import id.andriawan.cofinance.data.crypto.DataKey
 import id.andriawan.cofinance.data.crypto.DeviceKeyWrapper
 import id.andriawan.cofinance.data.crypto.KeyMaterialDocument
 import id.andriawan.cofinance.data.crypto.KeyWrapType
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
+import id.andriawan.cofinance.data.crypto.RECOVERY_PHRASE_FILE_NAME
 import id.andriawan.cofinance.data.crypto.RecoveryPhrase
+import id.andriawan.cofinance.data.crypto.RecoveryPhraseExporter
 import id.andriawan.cofinance.data.crypto.RecoveryPhraseKeyWrapper
 import id.andriawan.cofinance.data.crypto.RecoveryPhraseVault
 import id.andriawan.cofinance.data.crypto.createRecoveryPhraseVault
+import id.andriawan.cofinance.data.crypto.toExportText
 import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.lock.LocalKeyMaterialStore
 import id.andriawan.cofinance.data.remote.KeyMaterialGate
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.random.Random
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -30,33 +33,15 @@ enum class EncryptionSetupStep {
     /** Key material already exists for this account, so the restore flow owns this device. */
     RestoreRequired,
 
-    /** The twelve words are on screen to be copied onto paper. */
+    /** The twelve words are on screen, to be copied, saved to a file, or written down. */
     PhraseDisplay,
-
-    /** A few of the words have to be typed back before setup may finish. */
-    Confirmation,
 
     /** Key material is published and the session holds the data key. */
     Completed
 }
 
-/**
- * One word the user is asked to type back, at its 1-based [position] in the phrase.
- *
- * Only a few positions are asked for, never the whole phrase. Re-typing all twelve would be
- * satisfied by copying from the screen above, which proves nothing about what is on paper.
- */
-data class RequestedWord(
-    val position: Int,
-    val entry: String = "",
-    val isWrong: Boolean = false
-)
-
 /** What went wrong during setup, resolved to user-facing text by the screen. */
 sealed interface EncryptionSetupError {
-
-    /** At least one typed word is not the word at that position. Setup has not completed. */
-    data object RequestedWordsDoNotMatch : EncryptionSetupError
 
     /** Key material could not be published. Nothing was set up and nothing was synchronized. */
     data object SetupFailed : EncryptionSetupError
@@ -66,20 +51,15 @@ sealed interface EncryptionSetupError {
 data class EncryptionSetupUiState(
     val step: EncryptionSetupStep = EncryptionSetupStep.Preparing,
     val words: List<String> = emptyList(),
-    val requestedWords: List<RequestedWord> = emptyList(),
     val isBusy: Boolean = false,
-    val error: EncryptionSetupError? = null
-) {
-    /** Every requested word has something in it. Whether it is the right thing is [confirm]'s call. */
-    val canConfirm: Boolean
-        get() = requestedWords.isNotEmpty() && requestedWords.all { it.entry.isNotBlank() }
-}
+    val error: EncryptionSetupError? = null,
+    val exportStatus: PhraseExportStatus? = null
+)
 
 sealed interface EncryptionSetupUiEvent {
-    data object PhraseWrittenDown : EncryptionSetupUiEvent
-    data object BackToPhrase : EncryptionSetupUiEvent
-    data class RequestedWordChanged(val position: Int, val value: String) : EncryptionSetupUiEvent
-    data object Confirm : EncryptionSetupUiEvent
+    data object CopyPhrase : EncryptionSetupUiEvent
+    data object DownloadPhrase : EncryptionSetupUiEvent
+    data object PhraseSaved : EncryptionSetupUiEvent
 }
 
 /**
@@ -87,10 +67,13 @@ sealed interface EncryptionSetupUiEvent {
  *
  * Setup runs at sign-in rather than at first launch, so a user who never signs in never meets it:
  * the phrase protects the copy that leaves the device, and a local-only user has no such copy. That
- * gating lives in navigation; what lives here is the rule that setup is not finished until the
- * requested words come back correctly. Until then no key material is published and the session is
- * never unlocked, and since every synchronization path asks the session for a data key first, an
- * unconfirmed phrase means nothing can be uploaded.
+ * gating lives in navigation; what lives here is the sequence that publishes key material and then
+ * unlocks the session, and the rule that neither happens until the user has moved past the phrase.
+ *
+ * Setup no longer asks for words back. Re-typing three words proved little — the phrase was on the
+ * screen above, so the test was satisfied by copying from it — while costing every user a typing
+ * exercise. Keeping the phrase is offered instead of examined: it can go on the clipboard or into a
+ * file in one tap, and the user says when they are done with it.
  *
  * The data key and the phrase are held in fields rather than in [EncryptionSetupUiState], because
  * state is what the screen renders and neither of those belongs in a recomposition. The words
@@ -107,10 +90,10 @@ class EncryptionSetupViewModel(
     private val deviceKeyWrapper: DeviceKeyWrapper,
     private val recoveryPhraseKeyWrapper: RecoveryPhraseKeyWrapper,
     private val localKeyMaterialStore: LocalKeyMaterialStore,
+    private val recoveryPhraseExporter: RecoveryPhraseExporter,
     // Defaulted so that the graph does not have to name it. The vault is stateless over platform
     // storage, so a second instance is the same vault, and a test supplies its own.
-    private val recoveryPhraseVault: RecoveryPhraseVault = createRecoveryPhraseVault(),
-    private val random: Random = Random.Default
+    private val recoveryPhraseVault: RecoveryPhraseVault = createRecoveryPhraseVault()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(EncryptionSetupUiState())
@@ -121,12 +104,9 @@ class EncryptionSetupViewModel(
 
     fun onEvent(event: EncryptionSetupUiEvent) {
         when (event) {
-            is EncryptionSetupUiEvent.PhraseWrittenDown -> askForWords()
-            is EncryptionSetupUiEvent.BackToPhrase -> returnToPhrase()
-            is EncryptionSetupUiEvent.RequestedWordChanged ->
-                onRequestedWordChanged(event.position, event.value)
-
-            is EncryptionSetupUiEvent.Confirm -> viewModelScope.launch { confirm() }
+            is EncryptionSetupUiEvent.CopyPhrase -> viewModelScope.launch { copyPhrase() }
+            is EncryptionSetupUiEvent.DownloadPhrase -> viewModelScope.launch { downloadPhrase() }
+            is EncryptionSetupUiEvent.PhraseSaved -> viewModelScope.launch { finishSetup() }
         }
     }
 
@@ -176,7 +156,7 @@ class EncryptionSetupViewModel(
     }
 
     /**
-     * Checks the typed words and, only when every one of them is right, completes setup.
+     * Publishes key material, keeps the phrase, and unlocks the session.
      *
      * The order of the three writes is the point. Key material reaches the backend first, because a
      * record encrypted before its recovery-phrase wrap exists is unrecoverable on any other device.
@@ -187,26 +167,13 @@ class EncryptionSetupViewModel(
      * A failure anywhere in that sequence leaves the session untouched, so nothing synchronizes and
      * the user can try again.
      */
-    suspend fun confirm() {
+    suspend fun finishSetup() {
         val phrase = recoveryPhrase ?: return
         val key = dataKey ?: return
         val state = _uiState.value
-        if (state.isBusy || state.step != EncryptionSetupStep.Confirmation) return
+        if (state.isBusy || state.step != EncryptionSetupStep.PhraseDisplay) return
 
-        val checked = state.requestedWords.map { requested ->
-            requested.copy(isWrong = !matches(requested, phrase))
-        }
-        if (checked.any { it.isWrong }) {
-            _uiState.update {
-                it.copy(
-                    requestedWords = checked,
-                    error = EncryptionSetupError.RequestedWordsDoNotMatch
-                )
-            }
-            return
-        }
-
-        _uiState.update { it.copy(requestedWords = checked, isBusy = true, error = null) }
+        _uiState.update { it.copy(isBusy = true, error = null) }
 
         try {
             val material = KeyMaterialDocument(
@@ -234,64 +201,43 @@ class EncryptionSetupViewModel(
         }
     }
 
-    private fun askForWords() {
-        if (_uiState.value.step != EncryptionSetupStep.PhraseDisplay) return
+    /** Puts the phrase on the clipboard. Reports what happened; never blocks setup. */
+    suspend fun copyPhrase() {
+        val phrase = recoveryPhrase ?: return
+        val copied = try {
+            recoveryPhraseExporter.copyToClipboard(phrase.toExportText())
+        } catch (cause: Throwable) {
+            if (cause is CancellationException) throw cause
+            false
+        }
         _uiState.update {
             it.copy(
-                step = EncryptionSetupStep.Confirmation,
-                requestedWords = requestedPositions().map(::RequestedWord),
-                error = null
-            )
-        }
-    }
-
-    private fun returnToPhrase() {
-        if (_uiState.value.step != EncryptionSetupStep.Confirmation) return
-        _uiState.update {
-            it.copy(
-                step = EncryptionSetupStep.PhraseDisplay,
-                requestedWords = emptyList(),
-                error = null
-            )
-        }
-    }
-
-    private fun onRequestedWordChanged(position: Int, value: String) {
-        _uiState.update { state ->
-            state.copy(
-                requestedWords = state.requestedWords.map { requested ->
-                    if (requested.position == position) {
-                        requested.copy(entry = value, isWrong = false)
-                    } else {
-                        requested
-                    }
-                },
-                error = null
+                exportStatus =
+                    if (copied) PhraseExportStatus.Copied else PhraseExportStatus.CopyFailed
             )
         }
     }
 
     /**
-     * Compares a typed word to the phrase, normalizing the way entry does.
+     * Writes the phrase to a file the user chooses or can find.
      *
-     * Trimming and lowercasing are safe for the same reason they are safe in
-     * [RecoveryPhrase.parse]: the wordlist is lowercase ASCII, so normalization can only turn an
-     * entry a human would call correct into one that matches.
+     * A user who backs out of the platform's save flow is indistinguishable here from a write that
+     * failed, and both mean the same thing to them: there is no file. So both report
+     * [PhraseExportStatus.SaveFailed] rather than the screen claiming a file that does not exist.
      */
-    private fun matches(requested: RequestedWord, phrase: RecoveryPhrase): Boolean =
-        requested.entry.trim().lowercase() == phrase.words[requested.position - 1]
-
-    private fun requestedPositions(): List<Int> =
-        (1..RecoveryPhrase.WORD_COUNT).shuffled(random).take(REQUESTED_WORD_COUNT).sorted()
-
-    companion object {
-        /**
-         * How many of the twelve words are asked for.
-         *
-         * Three positions out of twelve is 1 in 1320 to pass by guessing, which is enough to make
-         * confirmation mean something, while staying short enough that a user who did write the
-         * phrase down is not retyping it.
-         */
-        const val REQUESTED_WORD_COUNT: Int = 3
+    suspend fun downloadPhrase() {
+        val phrase = recoveryPhrase ?: return
+        val location = try {
+            recoveryPhraseExporter.saveToFile(RECOVERY_PHRASE_FILE_NAME, phrase.toExportText())
+        } catch (cause: Throwable) {
+            if (cause is CancellationException) throw cause
+            null
+        }
+        _uiState.update {
+            it.copy(
+                exportStatus = location?.let(PhraseExportStatus::Saved)
+                    ?: PhraseExportStatus.SaveFailed
+            )
+        }
     }
 }

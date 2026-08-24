@@ -6,13 +6,14 @@ import id.andriawan.cofinance.data.crypto.FakeDeviceKeyVault
 import id.andriawan.cofinance.data.crypto.InMemoryRecoveryPhraseVault
 import id.andriawan.cofinance.data.crypto.KeyMaterialDocument
 import id.andriawan.cofinance.data.crypto.RecordCipher
+import id.andriawan.cofinance.data.crypto.RecoveryPhraseExporter
 import id.andriawan.cofinance.data.crypto.RecoveryPhraseKeyWrapper
 import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
 import id.andriawan.cofinance.data.lock.FakeLocalKeyMaterialStore
-import id.andriawan.cofinance.data.model.response.AccountResponse
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.AccountResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import id.andriawan.cofinance.data.remote.EncryptedAccountDataSource
 import id.andriawan.cofinance.data.remote.EncryptedTransactionDataSource
 import id.andriawan.cofinance.data.remote.FakeFinanceDocumentStore
@@ -47,6 +48,9 @@ class EncryptionFixture(
     val recoveryPhraseVault: InMemoryRecoveryPhraseVault = InMemoryRecoveryPhraseVault()
     val localKeyMaterialStore: FakeLocalKeyMaterialStore = FakeLocalKeyMaterialStore()
 
+    /** Stands in for the clipboard and the file system, and records what setup handed them. */
+    val recoveryPhraseExporter: FakeRecoveryPhraseExporter = FakeRecoveryPhraseExporter()
+
     val remoteAccounts: EncryptedAccountDataSource =
         EncryptedAccountDataSource(documentStore, keyMaterialGate, session, cipher)
 
@@ -56,15 +60,15 @@ class EncryptionFixture(
     val localAccounts: FakeAccountLocalDataSource = FakeAccountLocalDataSource()
     val localTransactions: FakeTransactionLocalDataSource = FakeTransactionLocalDataSource()
 
-    fun setupViewModel(random: kotlin.random.Random = kotlin.random.Random(7)) =
+    fun setupViewModel() =
         EncryptionSetupViewModel(
             encryptionSession = session,
             keyMaterialGate = keyMaterialGate,
             deviceKeyWrapper = deviceKeyWrapper,
             recoveryPhraseKeyWrapper = recoveryPhraseKeyWrapper,
             localKeyMaterialStore = localKeyMaterialStore,
-            recoveryPhraseVault = recoveryPhraseVault,
-            random = random
+            recoveryPhraseExporter = recoveryPhraseExporter,
+            recoveryPhraseVault = recoveryPhraseVault
         )
 
     fun restoreViewModel() = RecoveryPhraseRestoreViewModel(
@@ -228,3 +232,37 @@ val SEEDED_TRANSACTION = TransactionResponse(
     date = "2026-08-17",
     type = "EXPENSE"
 )
+
+/**
+ * A clipboard and a file system that only remember what they were given.
+ *
+ * Both operations can be made to fail, because "the phrase was not saved" is the case the screen has
+ * to report honestly — a user who believes there is a file when there is none has no recovery path.
+ */
+class FakeRecoveryPhraseExporter(
+    var copySucceeds: Boolean = true,
+    var savedLocation: String? = "Download/cofinance-recovery-phrase.txt"
+) : RecoveryPhraseExporter {
+
+    var copiedText: String? = null
+        private set
+
+    var savedFileName: String? = null
+        private set
+
+    var savedText: String? = null
+        private set
+
+    override suspend fun copyToClipboard(text: String): Boolean {
+        if (!copySucceeds) return false
+        copiedText = text
+        return true
+    }
+
+    override suspend fun saveToFile(fileName: String, text: String): String? {
+        val location = savedLocation ?: return null
+        savedFileName = fileName
+        savedText = text
+        return location
+    }
+}

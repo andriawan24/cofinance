@@ -3,7 +3,11 @@ package id.andriawan.cofinance.pages.profile.security
 import androidx.compose.runtime.Stable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
+import id.andriawan.cofinance.data.crypto.RECOVERY_PHRASE_FILE_NAME
+import id.andriawan.cofinance.data.crypto.RecoveryPhraseExporter
 import id.andriawan.cofinance.data.crypto.RecoveryPhraseVault
+import id.andriawan.cofinance.data.crypto.toRecoveryPhraseExportText
 import id.andriawan.cofinance.data.keyring.EncryptionSessionState
 import id.andriawan.cofinance.data.lock.AppLock
 import id.andriawan.cofinance.data.lock.AutoLockTimeout
@@ -13,6 +17,7 @@ import id.andriawan.cofinance.data.lock.BiometricPromptText
 import id.andriawan.cofinance.data.lock.PinChangeResult
 import id.andriawan.cofinance.data.lock.PinVerification
 import id.andriawan.cofinance.pages.lock.PinRules
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -124,6 +129,8 @@ data class SecuritySettingsUiState(
     val isBusy: Boolean = false,
     /** The twelve words, and only ever after a PIN entered for this request. */
     val revealedPhrase: List<String> = emptyList(),
+    /** What the last copy or save of the revealed phrase did. Cleared when the words are hidden. */
+    val exportStatus: PhraseExportStatus? = null,
     val notice: SecurityNotice? = null,
     /** A refusal that has no prompt behind it, such as biometric asked for with no PIN. */
     val error: SecuritySettingsError? = null
@@ -137,6 +144,8 @@ sealed interface SecuritySettingsUiEvent {
     data object PromptSubmitted : SecuritySettingsUiEvent
     data object PromptDismissed : SecuritySettingsUiEvent
     data object RecoveryPhraseDismissed : SecuritySettingsUiEvent
+    data object CopyRecoveryPhrase : SecuritySettingsUiEvent
+    data object DownloadRecoveryPhrase : SecuritySettingsUiEvent
     data object NoticeDismissed : SecuritySettingsUiEvent
 }
 
@@ -161,7 +170,8 @@ sealed interface SecuritySettingsUiEvent {
 @Stable
 class SecuritySettingsViewModel(
     private val appLock: AppLock,
-    private val recoveryPhraseVault: RecoveryPhraseVault
+    private val recoveryPhraseVault: RecoveryPhraseVault,
+    private val recoveryPhraseExporter: RecoveryPhraseExporter
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SecuritySettingsUiState())
@@ -185,7 +195,13 @@ class SecuritySettingsViewModel(
             SecuritySettingsUiEvent.PromptSubmitted -> viewModelScope.launch { submitPrompt() }
             SecuritySettingsUiEvent.PromptDismissed -> dismissPrompt()
             SecuritySettingsUiEvent.RecoveryPhraseDismissed ->
-                _uiState.update { it.copy(revealedPhrase = emptyList()) }
+                _uiState.update { it.copy(revealedPhrase = emptyList(), exportStatus = null) }
+
+            SecuritySettingsUiEvent.CopyRecoveryPhrase ->
+                viewModelScope.launch { copyRevealedPhrase() }
+
+            SecuritySettingsUiEvent.DownloadRecoveryPhrase ->
+                viewModelScope.launch { downloadRevealedPhrase() }
 
             SecuritySettingsUiEvent.NoticeDismissed -> _uiState.update { it.copy(notice = null) }
         }
@@ -402,6 +418,50 @@ class SecuritySettingsViewModel(
         // Dismissing shows nothing and changes nothing, which is what the specification requires of
         // a dismissed re-display prompt and is the right answer for every other intent too.
         _uiState.update { it.copy(prompt = null, revealedPhrase = emptyList()) }
+    }
+
+    /**
+     * Copies the phrase that is currently on screen.
+     *
+     * Only the revealed words are reachable here — the vault is not read again — so a copy is
+     * possible exactly while the dialog the PIN opened is still up.
+     */
+    suspend fun copyRevealedPhrase() {
+        val words = _uiState.value.revealedPhrase
+        if (words.isEmpty()) return
+        val copied = try {
+            recoveryPhraseExporter.copyToClipboard(words.toRecoveryPhraseExportText())
+        } catch (cause: Throwable) {
+            if (cause is CancellationException) throw cause
+            false
+        }
+        _uiState.update {
+            it.copy(
+                exportStatus =
+                    if (copied) PhraseExportStatus.Copied else PhraseExportStatus.CopyFailed
+            )
+        }
+    }
+
+    /** Writes the revealed phrase to a file. A cancelled picker reports a failure, not a file. */
+    suspend fun downloadRevealedPhrase() {
+        val words = _uiState.value.revealedPhrase
+        if (words.isEmpty()) return
+        val location = try {
+            recoveryPhraseExporter.saveToFile(
+                RECOVERY_PHRASE_FILE_NAME,
+                words.toRecoveryPhraseExportText()
+            )
+        } catch (cause: Throwable) {
+            if (cause is CancellationException) throw cause
+            null
+        }
+        _uiState.update {
+            it.copy(
+                exportStatus = location?.let(PhraseExportStatus::Saved)
+                    ?: PhraseExportStatus.SaveFailed
+            )
+        }
     }
 
     private fun updatePrompt(transform: (SecurityPinPrompt) -> SecurityPinPrompt) {

@@ -1,7 +1,11 @@
 package id.andriawan.cofinance.pages.profile.security
 
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
+import id.andriawan.cofinance.data.crypto.RECOVERY_PHRASE_FILE_NAME
+import id.andriawan.cofinance.data.crypto.toRecoveryPhraseExportText
 import id.andriawan.cofinance.data.lock.AutoLockTimeout
 import id.andriawan.cofinance.data.lock.PinUnlockResult
+import id.andriawan.cofinance.pages.encryption.FakeRecoveryPhraseExporter
 import id.andriawan.cofinance.pages.lock.LockFixture
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,7 +27,9 @@ import kotlinx.coroutines.test.runTest
 class SecuritySettingsViewModelTest {
 
     private val fixture = LockFixture()
-    private val viewModel = SecuritySettingsViewModel(fixture.appLock, fixture.phraseVault)
+    private val exporter = FakeRecoveryPhraseExporter()
+    private val viewModel =
+        SecuritySettingsViewModel(fixture.appLock, fixture.phraseVault, exporter)
 
     private suspend fun open(pin: String? = LockFixture.PIN): LockFixture.SetUpDevice {
         val device = fixture.completeSetup(pin = pin)
@@ -265,6 +271,34 @@ class SecuritySettingsViewModelTest {
 
         assertEquals(device.phrase.words, viewModel.uiState.value.revealedPhrase)
         assertNull(viewModel.uiState.value.prompt)
+    }
+
+    @Test
+    fun theRevealedPhraseCanBeCopiedOrSavedAndOnlyWhileItIsOnScreen() = runTest {
+        val device = open()
+
+        // Nothing is on screen yet, so there is nothing to hand to the clipboard.
+        viewModel.copyRevealedPhrase()
+        assertNull(exporter.copiedText)
+        assertNull(viewModel.uiState.value.exportStatus)
+
+        viewModel.request(SecurityIntent.RevealRecoveryPhrase)
+        enterCurrentPin(LockFixture.PIN)
+        viewModel.submitPrompt()
+
+        val expected = device.phrase.words.toRecoveryPhraseExportText()
+
+        viewModel.copyRevealedPhrase()
+        assertEquals(expected, exporter.copiedText)
+        assertEquals(PhraseExportStatus.Copied, viewModel.uiState.value.exportStatus)
+
+        viewModel.downloadRevealedPhrase()
+        assertEquals(expected, exporter.savedText)
+        assertEquals(RECOVERY_PHRASE_FILE_NAME, exporter.savedFileName)
+
+        viewModel.onEvent(SecuritySettingsUiEvent.RecoveryPhraseDismissed)
+        assertTrue(viewModel.uiState.value.revealedPhrase.isEmpty())
+        assertNull(viewModel.uiState.value.exportStatus)
     }
 
     @Test

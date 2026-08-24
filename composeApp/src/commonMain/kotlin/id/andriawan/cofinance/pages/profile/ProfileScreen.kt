@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -190,68 +191,78 @@ fun ProfileContent(
             .padding(
                 horizontal = Dimensions.SIZE_16,
                 vertical = Dimensions.SIZE_24
-            ),
-        verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)
+            )
     ) {
         PageTitle(
             modifier = Modifier,
             title = stringResource(Res.string.label_profile)
         )
 
-        if (isSignedIn) {
-            ProfileSummaryCard(
-                modifier = Modifier,
-                name = displayName,
-                email = email,
-                imageUrl = imageUrl,
-                onEditProfile = onEditProfile
-            )
-
-            CycleStartDaySetting(
-                modifier = Modifier,
-                cycleStartDay = cycleStartDay,
-                isUpdating = isUpdatingCycle,
-                onDaySelected = onCycleStartDayChanged
-            )
-
-            // Renders nothing until encryption setup has completed, so a signed-in user who has not
-            // finished setup — and every local-only user, who never reaches this branch at all —
-            // sees no lock controls.
-            securitySettings()
-
-            SecondaryButton(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = Dimensions.SIZE_56),
-                contentPadding = PaddingValues(Dimensions.SIZE_16),
-                containerColor = MaterialTheme.colorScheme.errorContainer,
-                contentColor = MaterialTheme.colorScheme.error,
-                shape = MaterialTheme.shapes.large,
-                onClick = onSignedOut
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_exit),
-                        contentDescription = null
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_16)) {
+            if (isSignedIn) {
+                item {
+                    ProfileSummaryCard(
+                        modifier = Modifier,
+                        name = displayName,
+                        email = email,
+                        imageUrl = imageUrl,
+                        onEditProfile = onEditProfile
                     )
+                }
+                item {
+                    CycleStartDaySetting(
+                        modifier = Modifier,
+                        cycleStartDay = cycleStartDay,
+                        isUpdating = isUpdatingCycle,
+                        onDaySelected = onCycleStartDayChanged
+                    )
+                }
 
-                    Text(
-                        text = stringResource(Res.string.label_logout),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.SemiBold
-                        )
+                // Renders nothing until encryption setup has completed, so a signed-in user who has not
+                // finished setup — and every local-only user, who never reaches this branch at all —
+                // sees no lock controls.
+                item {
+                    securitySettings()
+                }
+
+                item {
+                    SecondaryButton(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .sizeIn(minHeight = Dimensions.SIZE_56),
+                        contentPadding = PaddingValues(Dimensions.SIZE_16),
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.error,
+                        shape = MaterialTheme.shapes.large,
+                        onClick = onSignedOut
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_exit),
+                                contentDescription = null
+                            )
+
+                            Text(
+                                text = stringResource(Res.string.label_logout),
+                                style = MaterialTheme.typography.titleSmall.copy(
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            )
+                        }
+                    }
+                }
+            } else {
+                item {
+                    LocalOnlyProfileCard(
+                        modifier = Modifier.padding(Dimensions.SIZE_16),
+                        onSignIn = onSignIn
                     )
                 }
             }
-        } else {
-            LocalOnlyProfileCard(
-                modifier = Modifier.padding(Dimensions.SIZE_16),
-                onSignIn = onSignIn
-            )
         }
     }
 }

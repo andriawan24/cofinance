@@ -33,9 +33,7 @@ val viewModelModule = module {
     viewModelOf(::EditProfileViewModel)
     viewModelOf(::LoginViewModel)
     viewModelOf(::CycleReviewViewModel)
-    // Constructed explicitly rather than through viewModelOf: the constructor's trailing Random has
-    // a default that exists for deterministic tests and is not something the graph should resolve.
-    viewModel { EncryptionSetupViewModel(get(), get(), get(), get(), get(), get()) }
+    viewModel { EncryptionSetupViewModel(get(), get(), get(), get(), get(), get(), get()) }
     viewModelOf(::RecoveryPhraseRestoreViewModel)
     viewModelOf(::UnlockViewModel)
     viewModelOf(::SecuritySettingsViewModel)

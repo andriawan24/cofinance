@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_change_pin
 import cofinance.composeapp.generated.resources.action_confirm
+import cofinance.composeapp.generated.resources.action_copy_recovery_phrase
+import cofinance.composeapp.generated.resources.action_download_recovery_phrase
 import cofinance.composeapp.generated.resources.action_remove_pin
 import cofinance.composeapp.generated.resources.action_set_pin
 import cofinance.composeapp.generated.resources.action_view_recovery_phrase
@@ -78,11 +80,16 @@ import cofinance.composeapp.generated.resources.label_pin_set
 import cofinance.composeapp.generated.resources.message_auto_lock_changed
 import cofinance.composeapp.generated.resources.message_biometric_disabled
 import cofinance.composeapp.generated.resources.message_biometric_enabled
+import cofinance.composeapp.generated.resources.message_recovery_phrase_copied
+import cofinance.composeapp.generated.resources.message_recovery_phrase_copy_failed
+import cofinance.composeapp.generated.resources.message_recovery_phrase_save_failed
+import cofinance.composeapp.generated.resources.message_recovery_phrase_saved
 import cofinance.composeapp.generated.resources.error_pin_key_material_destroyed
 import cofinance.composeapp.generated.resources.message_pin_changed
 import cofinance.composeapp.generated.resources.message_pin_removed
 import cofinance.composeapp.generated.resources.message_pin_set
 import cofinance.composeapp.generated.resources.note_local_data_not_encrypted
+import cofinance.composeapp.generated.resources.note_recovery_phrase_export
 import cofinance.composeapp.generated.resources.title_auto_lock
 import cofinance.composeapp.generated.resources.title_current_pin_required
 import cofinance.composeapp.generated.resources.title_recovery_phrase
@@ -91,6 +98,7 @@ import cofinance.composeapp.generated.resources.title_set_pin
 import cofinance.composeapp.generated.resources.warning_recovery_phrase_loss
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.components.SecondaryButton
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
 import id.andriawan.cofinance.data.lock.AutoLockTimeout
 import id.andriawan.cofinance.data.lock.BiometricCapability
 import id.andriawan.cofinance.data.lock.BiometricPromptText
@@ -304,6 +312,8 @@ fun SecuritySettingsContent(
     if (uiState.revealedPhrase.isNotEmpty()) {
         RevealedPhraseDialog(
             words = uiState.revealedPhrase,
+            exportStatus = uiState.exportStatus,
+            onEvent = onEvent,
             onDismiss = { onEvent(SecuritySettingsUiEvent.RecoveryPhraseDismissed) }
         )
     }
@@ -483,7 +493,12 @@ private fun SecurityPinPromptDialog(
 }
 
 @Composable
-private fun RevealedPhraseDialog(words: List<String>, onDismiss: () -> Unit) {
+private fun RevealedPhraseDialog(
+    words: List<String>,
+    exportStatus: PhraseExportStatus?,
+    onEvent: (SecuritySettingsUiEvent) -> Unit,
+    onDismiss: () -> Unit
+) {
     Dialog(onDismissRequest = onDismiss) {
         Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surface) {
             Column(
@@ -518,6 +533,61 @@ private fun RevealedPhraseDialog(words: List<String>, onDismiss: () -> Unit) {
                         )
                     }
                 }
+
+                Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)) {
+                    SecondaryButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onEvent(SecuritySettingsUiEvent.CopyRecoveryPhrase) }
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.action_copy_recovery_phrase),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+
+                    SecondaryButton(
+                        modifier = Modifier.weight(1f),
+                        onClick = { onEvent(SecuritySettingsUiEvent.DownloadRecoveryPhrase) }
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.action_download_recovery_phrase),
+                            style = MaterialTheme.typography.labelMedium
+                        )
+                    }
+                }
+
+                exportStatus?.let { status ->
+                    Text(
+                        text = when (status) {
+                            is PhraseExportStatus.Copied ->
+                                stringResource(Res.string.message_recovery_phrase_copied)
+
+                            is PhraseExportStatus.Saved -> stringResource(
+                                Res.string.message_recovery_phrase_saved,
+                                status.location
+                            )
+
+                            is PhraseExportStatus.CopyFailed ->
+                                stringResource(Res.string.message_recovery_phrase_copy_failed)
+
+                            is PhraseExportStatus.SaveFailed ->
+                                stringResource(Res.string.message_recovery_phrase_save_failed)
+                        },
+                        style = MaterialTheme.typography.bodySmall,
+                        color = when (status) {
+                            is PhraseExportStatus.CopyFailed, is PhraseExportStatus.SaveFailed ->
+                                MaterialTheme.colorScheme.error
+
+                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                        }
+                    )
+                }
+
+                Text(
+                    text = stringResource(Res.string.note_recovery_phrase_export),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
                 Text(
                     text = stringResource(Res.string.warning_recovery_phrase_loss),

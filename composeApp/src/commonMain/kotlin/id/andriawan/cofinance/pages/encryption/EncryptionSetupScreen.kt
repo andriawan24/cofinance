@@ -12,11 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,28 +25,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
-import cofinance.composeapp.generated.resources.action_back_to_phrase
-import cofinance.composeapp.generated.resources.action_confirm_recovery_phrase
+import cofinance.composeapp.generated.resources.action_copy_recovery_phrase
+import cofinance.composeapp.generated.resources.action_download_recovery_phrase
 import cofinance.composeapp.generated.resources.action_written_it_down
-import cofinance.composeapp.generated.resources.description_confirm_recovery_phrase
 import cofinance.composeapp.generated.resources.description_encryption_setup
 import cofinance.composeapp.generated.resources.description_recovery_phrase
 import cofinance.composeapp.generated.resources.error_encryption_setup_failed
-import cofinance.composeapp.generated.resources.error_recovery_phrase_confirmation
-import cofinance.composeapp.generated.resources.label_recovery_phrase_word
+import cofinance.composeapp.generated.resources.message_recovery_phrase_copied
+import cofinance.composeapp.generated.resources.message_recovery_phrase_copy_failed
+import cofinance.composeapp.generated.resources.message_recovery_phrase_save_failed
+import cofinance.composeapp.generated.resources.message_recovery_phrase_saved
 import cofinance.composeapp.generated.resources.note_local_data_not_encrypted
-import cofinance.composeapp.generated.resources.title_confirm_recovery_phrase
+import cofinance.composeapp.generated.resources.note_recovery_phrase_export
 import cofinance.composeapp.generated.resources.title_encryption_setup
 import cofinance.composeapp.generated.resources.title_recovery_phrase
 import cofinance.composeapp.generated.resources.warning_recovery_phrase_loss
 import id.andriawan.cofinance.components.PrimaryButton
 import id.andriawan.cofinance.components.SecondaryButton
+import id.andriawan.cofinance.data.crypto.PhraseExportStatus
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
 import org.jetbrains.compose.resources.stringResource
@@ -114,12 +112,6 @@ private fun EncryptionSetupContent(
 
         EncryptionSetupStep.PhraseDisplay -> PhraseDisplayContent(
             modifier = modifier,
-            words = uiState.words,
-            onContinue = { onEvent(EncryptionSetupUiEvent.PhraseWrittenDown) }
-        )
-
-        EncryptionSetupStep.Confirmation -> ConfirmationContent(
-            modifier = modifier,
             uiState = uiState,
             onEvent = onEvent
         )
@@ -134,8 +126,8 @@ private fun EncryptionSetupContent(
 
 @Composable
 private fun PhraseDisplayContent(
-    words: List<String>,
-    onContinue: () -> Unit,
+    uiState: EncryptionSetupUiState,
+    onEvent: (EncryptionSetupUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -182,7 +174,62 @@ private fun PhraseDisplayContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
-        RecoveryPhraseWords(words = words)
+        RecoveryPhraseWords(words = uiState.words)
+
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
+
+        // Copying and saving are offered side by side because neither is the right answer for every
+        // user: the clipboard suits a password manager, the file suits everything else.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
+        ) {
+            SecondaryButton(
+                modifier = Modifier.weight(1f),
+                enabled = !uiState.isBusy,
+                onClick = { onEvent(EncryptionSetupUiEvent.CopyPhrase) }
+            ) {
+                Text(
+                    text = stringResource(Res.string.action_copy_recovery_phrase),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+
+            SecondaryButton(
+                modifier = Modifier.weight(1f),
+                enabled = !uiState.isBusy,
+                onClick = { onEvent(EncryptionSetupUiEvent.DownloadPhrase) }
+            ) {
+                Text(
+                    text = stringResource(Res.string.action_download_recovery_phrase),
+                    style = MaterialTheme.typography.labelMedium
+                )
+            }
+        }
+
+        uiState.exportStatus?.let { status ->
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_8))
+
+            Text(
+                text = exportStatusText(status),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = if (status.isFailure) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            )
+        }
+
+        Spacer(modifier = Modifier.height(Dimensions.SIZE_8))
+
+        Text(
+            text = stringResource(Res.string.note_recovery_phrase_export),
+            style = MaterialTheme.typography.bodySmall.copy(
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        )
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
@@ -214,13 +261,45 @@ private fun PhraseDisplayContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
-        PrimaryButton(modifier = Modifier.fillMaxWidth(), onClick = onContinue) {
+        PrimaryButton(
+            modifier = Modifier.fillMaxWidth(),
+            enabled = !uiState.isBusy,
+            onClick = { onEvent(EncryptionSetupUiEvent.PhraseSaved) }
+        ) {
             Text(
                 text = stringResource(Res.string.action_written_it_down),
                 style = MaterialTheme.typography.labelMedium
             )
         }
+
+        uiState.error?.let {
+            Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
+
+            Text(
+                text = stringResource(Res.string.error_encryption_setup_failed),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    color = MaterialTheme.colorScheme.error
+                )
+            )
+        }
     }
+}
+
+/** Whether the last export attempt left the user without the copy they asked for. */
+private val PhraseExportStatus.isFailure: Boolean
+    get() = this is PhraseExportStatus.CopyFailed || this is PhraseExportStatus.SaveFailed
+
+@Composable
+private fun exportStatusText(status: PhraseExportStatus): String = when (status) {
+    is PhraseExportStatus.Copied -> stringResource(Res.string.message_recovery_phrase_copied)
+    is PhraseExportStatus.Saved ->
+        stringResource(Res.string.message_recovery_phrase_saved, status.location)
+
+    is PhraseExportStatus.CopyFailed ->
+        stringResource(Res.string.message_recovery_phrase_copy_failed)
+
+    is PhraseExportStatus.SaveFailed ->
+        stringResource(Res.string.message_recovery_phrase_save_failed)
 }
 
 /** The twelve words, numbered and two to a row, which is the shape people copy from. */
@@ -261,110 +340,6 @@ private fun RecoveryPhraseWords(words: List<String>, modifier: Modifier = Modifi
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun ConfirmationContent(
-    uiState: EncryptionSetupUiState,
-    onEvent: (EncryptionSetupUiEvent) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(Dimensions.SIZE_24)
-    ) {
-        Text(
-            text = stringResource(Res.string.title_confirm_recovery_phrase),
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-        )
-
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_8))
-
-        Text(
-            text = stringResource(Res.string.description_confirm_recovery_phrase),
-            style = MaterialTheme.typography.bodyMedium.copy(
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        )
-
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
-
-        uiState.requestedWords.forEach { requested ->
-            OutlinedTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = Dimensions.SIZE_12),
-                value = requested.entry,
-                onValueChange = {
-                    onEvent(EncryptionSetupUiEvent.RequestedWordChanged(requested.position, it))
-                },
-                label = {
-                    Text(
-                        text = stringResource(
-                            Res.string.label_recovery_phrase_word,
-                            requested.position
-                        )
-                    )
-                },
-                singleLine = true,
-                isError = requested.isWrong,
-                enabled = !uiState.isBusy,
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    // The wordlist is lowercase, and auto-capitalizing the first letter is the most
-                    // common way a correctly written phrase gets typed back wrong.
-                    capitalization = KeyboardCapitalization.None
-                )
-            )
-        }
-
-        uiState.error?.let { error ->
-            Text(
-                text = when (error) {
-                    EncryptionSetupError.RequestedWordsDoNotMatch ->
-                        stringResource(Res.string.error_recovery_phrase_confirmation)
-
-                    EncryptionSetupError.SetupFailed ->
-                        stringResource(Res.string.error_encryption_setup_failed)
-                },
-                style = MaterialTheme.typography.bodySmall.copy(
-                    color = MaterialTheme.colorScheme.error
-                )
-            )
-
-            Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
-        }
-
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
-
-        PrimaryButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { onEvent(EncryptionSetupUiEvent.Confirm) },
-            enabled = uiState.canConfirm && !uiState.isBusy
-        ) {
-            Text(
-                text = stringResource(Res.string.action_confirm_recovery_phrase),
-                style = MaterialTheme.typography.labelMedium
-            )
-        }
-
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
-
-        SecondaryButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { onEvent(EncryptionSetupUiEvent.BackToPhrase) }
-        ) {
-            Text(
-                text = stringResource(Res.string.action_back_to_phrase),
-                style = MaterialTheme.typography.labelMedium
-            )
         }
     }
 }
