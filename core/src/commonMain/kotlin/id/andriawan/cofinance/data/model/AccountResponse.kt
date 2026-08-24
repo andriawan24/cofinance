@@ -1,0 +1,23 @@
+package id.andriawan.cofinance.data.model
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+data class AccountResponse(
+    val id: String? = null,
+    val name: String? = null,
+    val group: String? = null,
+    val balance: Long? = null,
+    @SerialName(ACCOUNT_TYPE_FIELD)
+    val accountType: String? = null,
+    @SerialName(CREATED_AT_FIELD)
+    val createdAt: String? = null
+) {
+    companion object {
+        const val TABLE_NAME = "accounts"
+        const val CREATED_AT_FIELD = "created_at"
+        const val NAME_FIELD = "name"
+        const val ACCOUNT_TYPE_FIELD = "account_type"
+    }
+}

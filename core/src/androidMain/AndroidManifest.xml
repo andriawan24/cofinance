@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application>
+
+        <!--
+            Captures the application context for the device key vault before Application.onCreate.
+            Needed only below API 31, where the ECDH key is sealed into app-private storage.
+
+            Declared here rather than in the app module because the class it names lives here. A
+            library manifest merges into every consumer, so the app still gets it — and this
+            module's own instrumented test APK gets it too, which it otherwise would not: the whole
+            Android lock reaches its storage through the context this provider captures.
+        -->
+        <provider
+                android:name="id.andriawan.cofinance.data.crypto.DeviceKeyVaultInitializer"
+                android:authorities="${applicationId}.devicekeyvaultinitializer"
+                android:exported="false"
+                android:initOrder="100" />
+
+    </application>
+
+</manifest>

@@ -30,5 +30,5 @@ agents/
 
 # Real receipt photographs used by the Android instrumented OCR checks.
 # Receipts are personal financial records and are supplied locally, never committed.
-# See composeApp/src/androidDeviceTest/README.md
-composeApp/src/androidDeviceTest/assets/
+# See core/src/androidDeviceTest/README.md
+core/src/androidDeviceTest/assets/

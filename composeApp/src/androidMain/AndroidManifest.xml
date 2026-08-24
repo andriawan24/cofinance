@@ -10,18 +10,5 @@
             android:name="android.permission.WRITE_EXTERNAL_STORAGE"
             android:maxSdkVersion="28" />
 
-    <application>
-
-        <!--
-            Captures the application context for the device key vault before Application.onCreate.
-            Needed only below API 31, where the ECDH key is sealed into app-private storage.
-        -->
-        <provider
-                android:name="id.andriawan.cofinance.data.crypto.DeviceKeyVaultInitializer"
-                android:authorities="${applicationId}.devicekeyvaultinitializer"
-                android:exported="false"
-                android:initOrder="100" />
-
-    </application>
 
 </manifest>

@@ -13,7 +13,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import id.andriawan.cofinance.data.keyring.EncryptionSession
+import id.andriawan.cofinance.data.keyring.EncryptionSessionState
 import id.andriawan.cofinance.data.ocr.parser.decodeReceiptFields
+import id.andriawan.cofinance.data.session.SessionPolicy
 import id.andriawan.cofinance.navigations.destinations.Destinations
 import id.andriawan.cofinance.pages.addaccount.AddAccountScreen
 import id.andriawan.cofinance.pages.addnew.AddTransactionScreen
@@ -22,15 +25,12 @@ import id.andriawan.cofinance.pages.cyclereview.CycleReviewScreen
 import id.andriawan.cofinance.pages.editprofile.EditProfileScreen
 import id.andriawan.cofinance.pages.encryption.EncryptionSetupScreen
 import id.andriawan.cofinance.pages.encryption.RecoveryPhraseRestoreScreen
-import id.andriawan.cofinance.data.keyring.EncryptionSession
-import id.andriawan.cofinance.data.keyring.EncryptionSessionState
 import id.andriawan.cofinance.pages.lock.UnlockScreen
 import id.andriawan.cofinance.pages.login.LoginScreen
 import id.andriawan.cofinance.pages.main.MainScreen
 import id.andriawan.cofinance.pages.preview.PreviewScreen
 import id.andriawan.cofinance.pages.splash.LaunchRoute
 import id.andriawan.cofinance.pages.splash.SplashScreen
-import id.andriawan.cofinance.data.session.SessionPolicy
 import org.koin.compose.koinInject
 
 @Composable
@@ -70,11 +70,11 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
     val sessionState by encryptionSession.state.collectAsStateWithLifecycle()
     LaunchedEffect(sessionState, currentDestination) {
         val isLaunchDestination = currentDestination == null ||
-            currentDestination.hasRoute(Destinations.Splash::class) ||
-            currentDestination.hasRoute(Destinations.EncryptionSetup::class) ||
-            currentDestination.hasRoute(Destinations.RecoveryPhraseRestore::class) ||
-            currentDestination.hasRoute(Destinations.Unlock::class) ||
-            currentDestination.hasRoute(Destinations.Login::class)
+                currentDestination.hasRoute(Destinations.Splash::class) ||
+                currentDestination.hasRoute(Destinations.EncryptionSetup::class) ||
+                currentDestination.hasRoute(Destinations.RecoveryPhraseRestore::class) ||
+                currentDestination.hasRoute(Destinations.Unlock::class) ||
+                currentDestination.hasRoute(Destinations.Login::class)
 
         if (sessionState == EncryptionSessionState.Locked && !isLaunchDestination) {
             navigateToLaunch()
