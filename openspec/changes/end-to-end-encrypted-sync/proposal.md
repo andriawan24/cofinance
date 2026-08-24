@@ -8,7 +8,6 @@ Cofinance currently writes accounts and transactions to Firestore in plaintext: 
 - Generate a 12-word BIP39 recovery phrase at encryption setup, require the user to confirm it before proceeding, and use it as the sole mechanism for restoring data on a new device. **BREAKING** A user who loses both their device and their recovery phrase permanently loses access to synchronized data; this is the intended trade-off and there is no operator-side recovery path.
 - Encrypt accounts and transactions before they are written to Firestore, and decrypt them on read. This includes DRAFT transactions, which the current mirror path uploads.
 - **BREAKING** Make encryption mandatory for cloud synchronization. A user cannot sync without completing encryption setup. Encryption setup is gated on sign-in rather than on first launch, so local-only users are unaffected and nothing is required of a user until their data would otherwise leave the device.
-- **BREAKING** Migrate existing plaintext Firestore documents to encrypted form in a forced, resumable, one-time flow, removing the plaintext fields as each document is converted.
 - **BREAKING** Remove server-side ordering from Firestore finance reads. Ciphertext cannot be ordered by the server; ordering is performed locally, which the app already does from its Room source of truth.
 - Add an app lock with a required PIN and an optional biometric shortcut, both toggleable from the profile page, plus an auto-lock timeout defaulting to one minute. The PIN-derived key is combined with a non-extractable device secret so that a six-digit PIN cannot be attacked offline against synchronized material. Ten consecutive failed attempts destroy local key material, leaving the recovery phrase as the way back in.
 - Allow the recovery phrase to be re-displayed from security settings behind fresh PIN entry, so a user who loses their written copy is not left one device failure away from permanent loss.
@@ -25,7 +24,7 @@ Non-goals for this change:
 ## Capabilities
 
 ### New Capabilities
-- `client-side-encryption`: The key hierarchy, the encrypted record envelope, recovery phrase generation, re-display, and restoration, mandatory encryption setup at sign-in, and migration of existing plaintext records.
+- `client-side-encryption`: The key hierarchy, the encrypted record envelope, recovery phrase generation, re-display, and restoration, and mandatory encryption setup at sign-in.
 - `app-lock`: PIN and optional biometric gating of access to the decrypted data key, the settings that control them, auto-lock behavior, failed-attempt handling, and clearing key material from memory.
 
 ### Modified Capabilities
@@ -51,10 +50,9 @@ Dependencies:
 Data:
 
 - Firestore document shape changes for accounts and transactions. A new per-user key material document stores wrapped copies of the data key.
-- Existing plaintext documents require a one-time migration. Previously exported or backed-up copies of that plaintext are outside the app's control and remain readable.
 
 Behavioral:
 
-- Sign-in gains a mandatory setup step for new users and a mandatory migration step for existing users, both requiring network access.
+- Sign-in gains a mandatory setup step, requiring network access.
 - App launch gains an unlock step once a PIN is configured.
 - Firestore reads return unordered documents; ordering happens locally.

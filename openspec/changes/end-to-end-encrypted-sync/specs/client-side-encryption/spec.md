@@ -73,20 +73,25 @@ Cofinance SHALL hold the device key in hardware-backed platform key storage such
 - **WHEN** the device reports stronger hardware key isolation than the baseline
 - **THEN** the device key SHALL be created using it
 
-### Requirement: A 12-word recovery phrase is generated and confirmed at setup
-Cofinance SHALL generate a 12-word recovery phrase encoding at least 128 bits of entropy, SHALL require the user to confirm it before setup completes, and SHALL state that losing it means losing access to synchronized data.
+### Requirement: A 12-word recovery phrase is generated and offered for keeping at setup
+Cofinance SHALL generate a 12-word recovery phrase encoding at least 128 bits of entropy, SHALL offer to copy it to the clipboard or save it to a file, SHALL NOT require the user to re-enter any of its words, and SHALL state that losing it means losing access to synchronized data.
 
 #### Scenario: Phrase is generated
 - **WHEN** encryption setup begins
 - **THEN** a 12-word phrase SHALL be generated from the standard wordlist
 
-#### Scenario: User has not confirmed the phrase
-- **WHEN** the user has been shown the phrase but has not re-entered the requested words correctly
+#### Scenario: Phrase is still on screen
+- **WHEN** the user has been shown the phrase and has not acknowledged saving it
 - **THEN** setup SHALL NOT complete
 - **AND** synchronization SHALL NOT begin
 
-#### Scenario: User confirms the phrase
-- **WHEN** the user correctly re-enters the requested words
+#### Scenario: User keeps the phrase by copying or saving it
+- **WHEN** the user chooses to copy the phrase or save it as a file
+- **THEN** the 12 words SHALL be handed to the clipboard or written to a file the user can reach
+- **AND** the outcome SHALL be reported, reporting failure when nothing was copied or written
+
+#### Scenario: User acknowledges saving the phrase
+- **WHEN** the user acknowledges that the phrase is saved
 - **THEN** setup SHALL complete and the wrapped key material SHALL be stored
 
 #### Scenario: Consequence of loss is stated
@@ -139,25 +144,6 @@ Cofinance SHALL require completed encryption setup before any finance data is sy
 - **WHEN** a synchronization is requested and encryption setup has not completed
 - **THEN** no finance data SHALL be uploaded
 
-### Requirement: Existing plaintext records are migrated in a resumable one-time flow
-Cofinance SHALL convert previously synchronized plaintext records to encrypted form, writing the encrypted fields before removing the plaintext fields for each record, and SHALL resume correctly after interruption.
-
-#### Scenario: Signed-in user with plaintext data launches the app
-- **WHEN** a signed-in user whose cloud records are plaintext launches the app
-- **THEN** the app SHALL require migration before returning to normal use
-
-#### Scenario: Record is converted
-- **WHEN** a single plaintext record is migrated
-- **THEN** its encrypted fields SHALL be written before its plaintext fields are removed
-
-#### Scenario: Migration is interrupted
-- **WHEN** migration is interrupted after some records are converted and the app is relaunched
-- **THEN** migration SHALL resume and SHALL convert only the records that still carry plaintext fields
-
-#### Scenario: Migration completes
-- **WHEN** migration finishes
-- **THEN** no synchronized account or transaction document SHALL retain plaintext finance fields
-
 ### Requirement: Encrypted records carry an envelope version and key identifier
 Cofinance SHALL store with each encrypted record the envelope version and the identifier of the key used, so that records can be identified as encrypted and interpreted by later versions.
 
@@ -165,13 +151,9 @@ Cofinance SHALL store with each encrypted record the envelope version and the id
 - **WHEN** an encrypted record is read
 - **THEN** it SHALL carry an envelope version and a key identifier
 
-#### Scenario: Unmigrated record is distinguished
-- **WHEN** records are scanned during migration
-- **THEN** a record lacking the envelope version SHALL be treated as unmigrated
-
 ### Requirement: Cryptographic behavior is verifiable without a device
-Cofinance SHALL implement envelope handling, key wrapping, recovery phrase encoding, and migration sequencing in shared code so that they are exercisable in common tests.
+Cofinance SHALL implement envelope handling, key wrapping, and recovery phrase encoding in shared code so that they are exercisable in common tests.
 
 #### Scenario: Common tests exercise the crypto path
 - **WHEN** the common test suite runs
-- **THEN** envelope round-trip, nonce uniqueness, wrap and unwrap for both wrapped-copy types, tampered-ciphertext rejection, phrase generation and restoration, and migration resumption SHALL be covered without a device, emulator, or cloud backend
+- **THEN** envelope round-trip, nonce uniqueness, wrap and unwrap for both wrapped-copy types, tampered-ciphertext rejection, and phrase generation and restoration SHALL be covered without a device, emulator, or cloud backend

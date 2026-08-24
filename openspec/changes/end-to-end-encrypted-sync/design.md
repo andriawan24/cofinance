@@ -71,7 +71,7 @@ Both toggles live in the profile page, alongside an auto-lock timeout. The decry
 
 ### Decision 5: Encryption setup is gated at sign-in, and is mandatory there
 
-New users completing sign-in generate a data key and a 12-word phrase, must confirm the phrase by re-entering words drawn from it, and cannot reach synchronization until they do. Users with existing plaintext data enter a blocking migration flow at next launch.
+New users completing sign-in generate a data key and a 12-word phrase, are offered a one-tap copy or file save of it, and cannot reach synchronization until they acknowledge the phrase screen. Users with existing plaintext data enter a blocking migration flow at next launch.
 
 Gating at first launch was rejected: it would impose phrase custody on local-only users to protect data that never leaves their device and that this change deliberately leaves unencrypted at rest.
 
@@ -101,16 +101,49 @@ Server-side `orderBy` on `createdAt` and `date` is removed, since those fields n
 - Both: a manual end-to-end pass — sign in, set up encryption, record a transaction, confirm through the Firebase console that the stored document contains no readable finance values, then restore onto a clean install using only the recovery phrase and confirm the data returns.
 - A migration pass against a project seeded with plaintext documents, including one interrupted mid-run and resumed.
 
+### Decision 17: A separate `:core` module, so the security and OCR seams have a linkable iOS test binary
+
+The blocker above has two fixes. Making the Firebase frameworks reachable from the Gradle test link is the smaller one, but it buys a
+binary distribution of the Firebase iOS SDK that has to be kept in step with the Xcode project's SPM pins (`firebase-ios-sdk 11.15.0`)
+by hand, and it leaves the underlying coupling intact: code that has nothing to do with Firebase still cannot be tested without it.
+The chosen fix removes the coupling instead.
+
+A new Gradle module `:core` holds the code whose iOS behaviour needs testing and which has no Firebase dependency, and `composeApp`
+takes an `api` dependency on it. Package names do not change, so no import in `composeApp` is edited; only file locations and the
+module graph move.
+
+Moved into `:core`:
+
+- `data/crypto/**` — the envelope, the ciphers, the key hierarchy, the platform key vaults, the phrase, and their tests.
+- `data/lock/**` — the app lock, the lockout policy, the biometric box, the failed-attempt store, and their tests.
+- `data/keyring/**` — `EncryptionSession`, which the lock cannot be separated from.
+- `data/ocr/` root only — `OcrResult`, `OcrEngineFactory` and its actuals, `MlKitOcrEngine`, `VisionOcrEngine`, and their tests.
+- `data/model/response/AccountResponse.kt` and `TransactionResponse.kt` — the two payload types `RecordCipher` seals. Both are plain
+  serializable data classes with no further app dependency.
+
+Deliberately left in `composeApp`:
+
+- `data/ocr/parser/**` and the fixture corpus, because `ReceiptLexicon` maps merchants onto `TransactionCategory`, which is bound to
+  Compose resources and cannot leave the Compose module. The parser is pure common code that already runs green on the Android host,
+  so nothing is gained by moving it and a resource dependency would be gained by trying.
+- `ReceiptScanResponse`, `ReceiptScan`, `MerchantCategoryLocalDataSource`, and `TransactionCategory`, all of which only the parser
+  reaches.
+
+The cut is drawn at what an iOS test binary must link, not at what feels architecturally tidy: the three iOS tests that cannot run
+today — `KeychainDeviceKeyVaultTest`, `KeychainFailedAttemptStoreTest`, and `VisionCoordinateConversionTest` — sit entirely inside it.
+
+This also unblocks task 1.4 of the `on-device-receipt-scanning` change, which is stalled on the same link failure.
+
 ## Risks / Trade-offs
 
-- **A user loses their device and their recovery phrase, and their data is unrecoverable.** → This is the accepted product decision and the direct cost of removing the operator from the trust boundary. Mitigated only by making phrase custody prominent: mandatory confirmation at setup, and a re-display path in settings behind the app lock. No operator recovery path is added, because adding one would negate the change.
+- **A user loses their device and their recovery phrase, and their data is unrecoverable.** → This is the accepted product decision and the direct cost of removing the operator from the trust boundary. Mitigated only by making phrase custody easy and prominent: the words stated with their consequence at setup, one tap to copy or save them to a file, and a re-display path in settings behind the app lock. Custody is not enforced by a re-entry quiz — with the words on the screen above it, that quiz proved the user could copy, not that they had kept anything. No operator recovery path is added, because adding one would negate the change.
 - **The local Room database remains plaintext, so the app lock protects less than users may assume.** → Platform disk encryption protects a locked device, which is the common loss scenario. The lock protects against someone handed an unlocked phone. Both statements are true and neither is "your local data is encrypted"; the user-facing copy must not overclaim. Encrypting Room is a candidate follow-up change.
 - **The operator ships the client, so a future build could exfiltrate the data key.** → Unavoidable for any client-side encryption where the operator controls distribution. Mitigation is verifiability rather than mechanism: keeping the crypto module small, self-contained, and open to inspection. Worth stating honestly in user-facing copy rather than implying a stronger guarantee.
 - **Migration leaves plaintext behind for users who never return.** → Documented residue. A backend-side cleanup after a defined period is possible but is an operator action outside this change; the alternative of deleting unmigrated data would destroy the records of returning users.
 - **Nonce reuse under AES-GCM would be catastrophic, and the full-snapshot mirror re-encrypts constantly.** → Fresh random nonce per operation, never content-derived or counter-derived, with a `commonTest` asserting that encrypting identical input twice yields different nonces.
 - **Losing the wrapped key material document makes all synchronized records undecryptable.** → The device holds its own wrap independently, so the Firestore document is not the sole copy for the active device, and the phrase reconstructs the wrap on restore. Key material is written before the first encrypted record.
 - **Removing server-side ordering degrades a future feature that wants server-side queries.** → Accepted. No such feature exists, Room already answers every ordering question, and any future server-side query over encrypted data would require a fundamentally different design regardless.
-- **The `iosSimulatorArm64` test binary does not link today, so tasks 2.4 and 7.1 cannot be verified as written.** → Observed while completing group 1: `:composeApp:linkDebugTestIosSimulatorArm64` fails with `ld: framework 'FirebaseCore' not found`. Firebase reaches the iOS app through the Xcode project rather than through Gradle, so the Gradle-linked test binary has no Firebase frameworks to link against. This predates this change — CI runs only `:composeApp:testAndroidHostTest` and `:androidApp:testDebugUnitTest`, never an iOS test task — and the new `commonMain` crypto code compiles for iOS cleanly. It still has to be solved before any `iosSimulatorArm64` verification can run, either by making the Firebase frameworks available to the test link or by moving the crypto and keyring code into a module that does not depend on Firebase. The second option is the more durable one and is worth weighing before group 2 starts.
+- **The `iosSimulatorArm64` test binary does not link today, so tasks 2.4 and 7.1 cannot be verified as written.** → Observed while completing group 1: `:composeApp:linkDebugTestIosSimulatorArm64` fails with `ld: framework 'FirebaseCore' not found`. Firebase reaches the iOS app through the Xcode project rather than through Gradle, so the Gradle-linked test binary has no Firebase frameworks to link against. This predates this change — CI runs only `:composeApp:testAndroidHostTest` and `:androidApp:testDebugUnitTest`, never an iOS test task — and the new `commonMain` crypto code compiles for iOS cleanly. **Resolved by Decision 17**, which takes the durable option: extract the Firebase-free code into its own module rather than teaching the test link where Firebase's frameworks live.
 - **On API 24 to 30 the device wrap is not hardware-sealed, because Android cannot do Keystore key agreement before API 31.** → Detailed in Decision 15. Mitigated by sealing the software key under a non-extractable hardware key, which defeats an attacker holding the filesystem but not one with live root on an unlocked device. The residual choice — raise `minSdk` or state the weaker guarantee — is the remaining open question.
 - **Biometric enrollment change destroys the device key mid-use.** → Requiring a PIN before biometric makes this a six-digit recovery rather than a phrase restore. Covered by an explicit platform test.
 - **Mandatory setup at sign-in adds friction and may reduce sign-in completion.** → Deliberate: the alternative is optional encryption, which means maintaining a plaintext sync path forever and being unable to make the privacy claim at all.
