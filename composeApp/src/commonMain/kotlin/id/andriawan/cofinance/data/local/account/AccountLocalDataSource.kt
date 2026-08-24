@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.local.account
 
-import id.andriawan.cofinance.data.model.response.AccountResponse
+import id.andriawan.cofinance.data.model.AccountResponse
 import kotlinx.coroutines.flow.Flow
 
 /** Durable local account persistence contract. */

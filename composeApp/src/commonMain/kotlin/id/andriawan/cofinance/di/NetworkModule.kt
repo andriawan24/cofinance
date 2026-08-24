@@ -32,17 +32,11 @@ val networkModule = module {
     single { Firebase.firestore }
     single { Firebase.storage }
     singleOf(::FirebaseSessionPolicy) { bind<SessionPolicy>() }
-    // One session per process: the unwrapped data key exists only inside it, and the setup, unlock,
-    // and synchronization paths all have to be looking at the same lock state.
     singleOf(::InMemoryEncryptionSession) { bind<EncryptionSession>() }
     single { RecordCipher() }
-    // The device key vault is created lazily: it reaches platform key storage on first use, which
-    // must not happen while the graph is being built.
     single<DeviceKeyVault> { createDeviceKeyVault() }
     single { DeviceKeyWrapper(get()) }
     single { RecoveryPhraseKeyWrapper() }
-    // The durable local key material store lives in securityModule, next to the lock that reads
-    // and erases it.
     single<Json> {
         Json {
             isLenient = true

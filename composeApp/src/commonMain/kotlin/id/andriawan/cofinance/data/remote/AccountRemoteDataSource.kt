@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.remote
 
-import id.andriawan.cofinance.data.model.response.AccountResponse
+import id.andriawan.cofinance.data.model.AccountResponse
 
 interface AccountRemoteDataSource {
     suspend fun getAccounts(): List<AccountResponse>

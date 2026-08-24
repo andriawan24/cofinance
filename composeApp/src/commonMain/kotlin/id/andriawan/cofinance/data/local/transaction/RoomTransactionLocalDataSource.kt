@@ -3,15 +3,13 @@ package id.andriawan.cofinance.data.local.transaction
 import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import id.andriawan.cofinance.data.local.CofinanceRoomDatabase
-import id.andriawan.cofinance.data.local.account.toEntity
 import id.andriawan.cofinance.data.local.account.toResponse
 import id.andriawan.cofinance.data.model.entity.LocalAccountEntity
 import id.andriawan.cofinance.data.model.entity.LocalTransactionEntity
-import id.andriawan.cofinance.data.model.response.AccountResponse
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.AccountResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 
 class RoomTransactionLocalDataSource(
     private val roomDatabase: CofinanceRoomDatabase
@@ -124,11 +122,14 @@ class RoomTransactionLocalDataSource(
                 transactionDao.upsertTransaction(replacement)
             }
         }
+
         return getTransactions(transactionId = id, isDraft = type == TYPE_DRAFT).first()
     }
 
     override suspend fun upsertTransactions(transactions: List<TransactionResponse>) {
-        if (transactions.isNotEmpty()) transactionDao.upsertTransactions(transactions.map(TransactionResponse::toEntity))
+        if (transactions.isNotEmpty()) transactionDao.upsertTransactions(
+            transactions.map(TransactionResponse::toEntity)
+        )
     }
 
     override suspend fun clearTransactions() {

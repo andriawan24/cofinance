@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.remote
 
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 
 interface TransactionRemoteDataSource {
     suspend fun getTransactions(): List<TransactionResponse>

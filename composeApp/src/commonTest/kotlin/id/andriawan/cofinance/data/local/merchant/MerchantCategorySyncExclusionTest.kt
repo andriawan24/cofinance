@@ -5,8 +5,8 @@ import id.andriawan.cofinance.data.keyring.EncryptionSession
 import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import id.andriawan.cofinance.data.local.account.AccountLocalDataSource
 import id.andriawan.cofinance.data.local.transaction.TransactionLocalDataSource
-import id.andriawan.cofinance.data.model.response.AccountResponse
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.AccountResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import id.andriawan.cofinance.data.ocr.OcrBlock
 import id.andriawan.cofinance.data.ocr.OcrLine
 import id.andriawan.cofinance.data.ocr.OcrRect

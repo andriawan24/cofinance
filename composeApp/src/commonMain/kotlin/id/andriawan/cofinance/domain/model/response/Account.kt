@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.domain.model.response
 
-import id.andriawan.cofinance.data.model.response.AccountResponse
+import id.andriawan.cofinance.data.model.AccountResponse
 import id.andriawan.cofinance.utils.enums.AccountGroupType
 import id.andriawan.cofinance.utils.enums.AccountType
 

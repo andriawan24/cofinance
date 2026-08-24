@@ -5,7 +5,7 @@ import id.andriawan.cofinance.data.crypto.RecordCipher
 import id.andriawan.cofinance.data.crypto.toDocument
 import id.andriawan.cofinance.data.crypto.toEnvelope
 import id.andriawan.cofinance.data.keyring.EncryptionSession
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 
 /**
  * The cloud transaction source: sealed before the write, opened after the read.

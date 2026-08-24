@@ -1,7 +1,7 @@
 package id.andriawan.cofinance.domain.model.response
 
 import androidx.compose.runtime.Stable
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import id.andriawan.cofinance.utils.enums.TransactionType
 
 @Stable

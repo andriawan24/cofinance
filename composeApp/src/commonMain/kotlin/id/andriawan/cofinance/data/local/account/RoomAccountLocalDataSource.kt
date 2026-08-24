@@ -4,7 +4,7 @@ import androidx.room.immediateTransaction
 import androidx.room.useWriterConnection
 import id.andriawan.cofinance.data.local.CofinanceRoomDatabase
 import id.andriawan.cofinance.data.model.entity.LocalAccountEntity
-import id.andriawan.cofinance.data.model.response.AccountResponse
+import id.andriawan.cofinance.data.model.AccountResponse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 

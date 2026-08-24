@@ -3,8 +3,8 @@ package id.andriawan.cofinance.data.remote
 import id.andriawan.cofinance.data.crypto.DataKey
 import id.andriawan.cofinance.data.crypto.KeyWrapType
 import id.andriawan.cofinance.data.keyring.DataKeyUnavailableException
-import id.andriawan.cofinance.data.model.response.AccountResponse
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.AccountResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import id.andriawan.cofinance.utils.enums.TransactionType
 import kotlin.test.Test
 import kotlin.test.assertContains

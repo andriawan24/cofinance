@@ -1,6 +1,6 @@
 package id.andriawan.cofinance.data.local.transaction
 
-import id.andriawan.cofinance.data.model.response.TransactionResponse
+import id.andriawan.cofinance.data.model.TransactionResponse
 import kotlinx.coroutines.flow.Flow
 
 /** Durable local transaction persistence contract. */

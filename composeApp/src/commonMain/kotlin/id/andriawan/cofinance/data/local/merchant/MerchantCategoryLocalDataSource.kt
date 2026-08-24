@@ -9,13 +9,8 @@ package id.andriawan.cofinance.data.local.merchant
  * that recorded it.
  */
 interface MerchantCategoryLocalDataSource {
-    /** Every learned association, keyed by merchant key. */
     suspend fun getAssociations(): Map<String, String>
-
     suspend fun getAssociation(merchantKey: String): String?
-
     suspend fun recordAssociation(merchantKey: String, category: String)
-
-    /** Wipes all learned associations, e.g. on logout. */
     suspend fun clearAssociations()
 }
