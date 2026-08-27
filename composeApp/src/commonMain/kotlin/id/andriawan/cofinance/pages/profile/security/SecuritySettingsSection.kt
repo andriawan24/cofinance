@@ -12,12 +12,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -51,7 +53,6 @@ import cofinance.composeapp.generated.resources.biometric_prompt_negative
 import cofinance.composeapp.generated.resources.description_auto_lock
 import cofinance.composeapp.generated.resources.description_biometric_unlock
 import cofinance.composeapp.generated.resources.description_recovery_phrase_reveal
-import cofinance.composeapp.generated.resources.description_security_settings
 import cofinance.composeapp.generated.resources.error_biometric_cancelled
 import cofinance.composeapp.generated.resources.error_biometric_failed
 import cofinance.composeapp.generated.resources.error_biometric_no_hardware
@@ -62,6 +63,7 @@ import cofinance.composeapp.generated.resources.error_current_pin_incorrect
 import cofinance.composeapp.generated.resources.error_pin_confirmation_mismatch
 import cofinance.composeapp.generated.resources.error_pin_incorrect
 import cofinance.composeapp.generated.resources.error_pin_incorrect_with_delay
+import cofinance.composeapp.generated.resources.error_pin_key_material_destroyed
 import cofinance.composeapp.generated.resources.error_pin_length
 import cofinance.composeapp.generated.resources.error_pin_not_set
 import cofinance.composeapp.generated.resources.error_pin_wait
@@ -75,19 +77,16 @@ import cofinance.composeapp.generated.resources.label_close
 import cofinance.composeapp.generated.resources.label_confirm_new_pin
 import cofinance.composeapp.generated.resources.label_current_pin
 import cofinance.composeapp.generated.resources.label_new_pin
-import cofinance.composeapp.generated.resources.label_pin_not_set
-import cofinance.composeapp.generated.resources.label_pin_set
 import cofinance.composeapp.generated.resources.message_auto_lock_changed
 import cofinance.composeapp.generated.resources.message_biometric_disabled
 import cofinance.composeapp.generated.resources.message_biometric_enabled
+import cofinance.composeapp.generated.resources.message_pin_changed
+import cofinance.composeapp.generated.resources.message_pin_removed
+import cofinance.composeapp.generated.resources.message_pin_set
 import cofinance.composeapp.generated.resources.message_recovery_phrase_copied
 import cofinance.composeapp.generated.resources.message_recovery_phrase_copy_failed
 import cofinance.composeapp.generated.resources.message_recovery_phrase_save_failed
 import cofinance.composeapp.generated.resources.message_recovery_phrase_saved
-import cofinance.composeapp.generated.resources.error_pin_key_material_destroyed
-import cofinance.composeapp.generated.resources.message_pin_changed
-import cofinance.composeapp.generated.resources.message_pin_removed
-import cofinance.composeapp.generated.resources.message_pin_set
 import cofinance.composeapp.generated.resources.note_local_data_not_encrypted
 import cofinance.composeapp.generated.resources.note_recovery_phrase_export
 import cofinance.composeapp.generated.resources.title_auto_lock
@@ -106,9 +105,9 @@ import id.andriawan.cofinance.pages.lock.autoLockTimeoutLabel
 import id.andriawan.cofinance.pages.lock.lockDelayText
 import id.andriawan.cofinance.theme.CofinanceTheme
 import id.andriawan.cofinance.utils.Dimensions
-import kotlin.time.Duration
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import kotlin.time.Duration
 
 /**
  * The security section of the profile page.
@@ -165,21 +164,9 @@ fun SecuritySettingsContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
-                text = stringResource(Res.string.description_security_settings),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            SettingRow(
-                title = stringResource(Res.string.label_app_pin),
-                subtitle = stringResource(
-                    if (uiState.isPinSet) Res.string.label_pin_set else Res.string.label_pin_not_set
-                )
-            ) {
+            SettingRow(title = stringResource(Res.string.label_app_pin)) {
                 Row(horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)) {
-                    SecondaryButton(
-                        modifier = Modifier.sizeIn(minHeight = Dimensions.SIZE_44),
+                    TextButton(
                         onClick = {
                             onEvent(
                                 SecuritySettingsUiEvent.Requested(
@@ -199,10 +186,10 @@ fun SecuritySettingsContent(
                     }
 
                     if (uiState.isPinSet) {
-                        SecondaryButton(
-                            modifier = Modifier.sizeIn(minHeight = Dimensions.SIZE_44),
-                            containerColor = MaterialTheme.colorScheme.errorContainer,
-                            contentColor = MaterialTheme.colorScheme.error,
+                        TextButton(
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = MaterialTheme.colorScheme.error
+                            ),
                             onClick = {
                                 onEvent(
                                     SecuritySettingsUiEvent.Requested(SecurityIntent.RemovePin)
@@ -247,7 +234,7 @@ fun SecuritySettingsContent(
             ) {
                 Text(
                     text = autoLockTimeoutLabel(uiState.autoLockTimeout),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
@@ -256,8 +243,7 @@ fun SecuritySettingsContent(
                 title = stringResource(Res.string.title_recovery_phrase),
                 subtitle = stringResource(Res.string.description_recovery_phrase_reveal)
             ) {
-                SecondaryButton(
-                    modifier = Modifier.sizeIn(minHeight = Dimensions.SIZE_44),
+                TextButton(
                     onClick = {
                         onEvent(
                             SecuritySettingsUiEvent.Requested(SecurityIntent.RevealRecoveryPhrase)
@@ -322,7 +308,7 @@ fun SecuritySettingsContent(
 @Composable
 private fun SettingRow(
     title: String,
-    subtitle: String,
+    subtitle: String = "",
     modifier: Modifier = Modifier,
     trailing: @Composable () -> Unit
 ) {
@@ -334,14 +320,17 @@ private fun SettingRow(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Medium),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+
+            if (subtitle.isNotBlank()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
         trailing()
     }
@@ -355,7 +344,10 @@ private fun AutoLockPickerDialog(
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surface) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surface
+        ) {
             Column(
                 modifier = Modifier.padding(Dimensions.SIZE_24),
                 verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
@@ -411,7 +403,10 @@ private fun SecurityPinPromptDialog(
     onEvent: (SecuritySettingsUiEvent) -> Unit
 ) {
     Dialog(onDismissRequest = { onEvent(SecuritySettingsUiEvent.PromptDismissed) }) {
-        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surface) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surface
+        ) {
             Column(
                 modifier = Modifier
                     .padding(Dimensions.SIZE_24)
@@ -500,7 +495,10 @@ private fun RevealedPhraseDialog(
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        Surface(shape = MaterialTheme.shapes.extraLarge, color = MaterialTheme.colorScheme.surface) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            color = MaterialTheme.colorScheme.surface
+        ) {
             Column(
                 modifier = Modifier
                     .padding(Dimensions.SIZE_24)

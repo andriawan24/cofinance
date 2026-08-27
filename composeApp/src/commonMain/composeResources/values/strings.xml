@@ -192,7 +192,6 @@
 
     <!-- Security settings -->
     <string name="title_security_settings">Security</string>
-    <string name="description_security_settings">Lock Cofinance on this device and keep your recovery phrase to hand.</string>
     <string name="label_app_pin">PIN</string>
     <string name="label_pin_set">Set. You enter it to unlock Cofinance.</string>
     <string name="label_pin_not_set">Not set yet.</string>
