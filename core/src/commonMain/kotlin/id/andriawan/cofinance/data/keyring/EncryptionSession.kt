@@ -26,9 +26,6 @@ interface EncryptionSession {
     /** The current state, observable so the lock screen and auto-lock can both react to it. */
     val state: StateFlow<EncryptionSessionState>
 
-    /** True once key material exists for this installation, whether or not it is unlocked. */
-    val isSetUp: Boolean get() = state.value != EncryptionSessionState.SetupIncomplete
-
     /** The data key while unlocked, and null while setup is incomplete or the session is locked. */
     fun dataKeyOrNull(): DataKey?
 
@@ -39,7 +36,8 @@ interface EncryptionSession {
      * Callers that should degrade rather than fail — a local mutation whose mirror has to wait for
      * the next unlock — check [dataKeyOrNull] instead.
      */
-    fun requireDataKey(): DataKey = dataKeyOrNull() ?: throw DataKeyUnavailableException(state.value)
+    fun requireDataKey(): DataKey =
+        dataKeyOrNull() ?: throw DataKeyUnavailableException(state.value)
 
     /** Drops the data key from memory. Setup state is unaffected: a locked session can be unlocked. */
     fun lock()
