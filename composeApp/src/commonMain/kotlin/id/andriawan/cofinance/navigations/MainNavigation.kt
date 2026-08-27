@@ -145,11 +145,6 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
         composable<Destinations.Login> {
             LoginScreen(
                 onNavigateToHome = {
-                    // Back through the launch sequence rather than straight to main. Encryption
-                    // setup is gated at sign-in — the phrase protects the copy that leaves the
-                    // device, and a user who never signs in has no such copy — and the same
-                    // sequence also converts any plaintext this account still has in the cloud.
-                    // Deciding that here as well would be a second copy of the rule.
                     navigateToLaunch()
                 }
             )
@@ -157,9 +152,6 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
         composable<Destinations.EncryptionSetup> {
             EncryptionSetupScreen(
-                // Through the launch sequence: a user who just completed setup is exactly the user
-                // whose cloud records may still be plaintext, and migration needs the data key
-                // setup has only now produced.
                 onSetupComplete = { navigateToLaunch() },
                 onRestoreRequired = {
                     navController.navigate(Destinations.RecoveryPhraseRestore) {
@@ -172,8 +164,6 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
         composable<Destinations.Unlock> {
             UnlockScreen(
-                // Back to the launch sequence rather than straight to main: a session that has just
-                // been unlocked is one migration may now have a data key for.
                 onUnlocked = { navigateToLaunch() },
                 onRecoveryPhraseRequired = {
                     navController.navigate(Destinations.RecoveryPhraseRestore) {
@@ -254,11 +244,8 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
         composable<Destinations.Camera> {
             CameraScreen(
-                onBackPressed = {
-                    navController.navigateUp()
-                },
+                onBackPressed = { navController.navigateUp() },
                 onNavigateToPreview = { imageUri ->
-                    println("Image URI $imageUri")
                     navController.navigate(route = Destinations.Preview(imageUrl = imageUri))
                 }
             )
@@ -289,9 +276,7 @@ fun MainNavigation(modifier: Modifier = Modifier, sharedImageUri: String? = null
 
         composable<Destinations.AddAccount> {
             AddAccountScreen(
-                onBackClicked = {
-                    navController.popBackStack()
-                },
+                onBackClicked = { navController.popBackStack() },
                 onAddAccountSuccess = {
                     navController.previousBackStackEntry
                         ?.savedStateHandle
