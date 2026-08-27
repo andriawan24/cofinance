@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.AndroidUiModes
 import androidx.compose.ui.tooling.preview.Preview
 import id.andriawan.cofinance.domain.model.response.Account
 import id.andriawan.cofinance.domain.model.response.AccountByGroup
@@ -42,7 +42,7 @@ fun AccountGroupCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.extraLarge,
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Column(
             modifier = Modifier.padding(Dimensions.SIZE_16),
@@ -103,7 +103,6 @@ fun AccountGroupCard(
                 group.accounts.forEachIndexed { index, account ->
                     AccountRow(
                         account = account,
-                        backgroundColor = Color(group.backgroundColor),
                         onAccountClicked = onAccountClicked
                     )
 
@@ -122,7 +121,6 @@ fun AccountGroupCard(
 @Composable
 private fun AccountRow(
     account: Account,
-    backgroundColor: Color,
     onAccountClicked: (Account) -> Unit
 ) {
     Row(
@@ -134,15 +132,6 @@ private fun AccountRow(
         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(Dimensions.SIZE_10)
-                .background(
-                    color = backgroundColor.copy(alpha = 0.9f),
-                    shape = CircleShape
-                )
-        )
-
         Text(
             modifier = Modifier.weight(1f),
             text = account.name,
@@ -165,6 +154,106 @@ private fun AccountRow(
 @Preview
 @Composable
 private fun AccountGroupCardPreview() {
+    CofinanceTheme {
+        Surface(color = MaterialTheme.colorScheme.background) {
+            AccountGroupCard(
+                modifier = Modifier.padding(Dimensions.SIZE_24),
+                group = AccountByGroup(
+                    groupLabel = "Cash",
+                    totalAmount = 15_750_000,
+                    backgroundColor = AccountGroupType.CREDIT.getBackgroundColor(),
+                    accountGroupType = AccountGroupType.CREDIT,
+                    accounts = listOf(
+                        Account(
+                            id = "1",
+                            name = "Wallet",
+                            group = AccountGroupType.CASH,
+                            balance = 500_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-01"
+                        ),
+                        Account(
+                            id = "2",
+                            name = "Emergency Fund",
+                            group = AccountGroupType.CASH,
+                            balance = 2_000_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-02"
+                        ),
+                        Account(
+                            id = "3",
+                            name = "BCA Savings",
+                            group = AccountGroupType.CASH,
+                            balance = 3_250_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-03"
+                        ),
+                        Account(
+                            id = "4",
+                            name = "Mandiri Checking",
+                            group = AccountGroupType.CASH,
+                            balance = 1_100_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-04"
+                        ),
+                        Account(
+                            id = "5",
+                            name = "Petty Cash",
+                            group = AccountGroupType.CASH,
+                            balance = 150_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-05"
+                        ),
+                        Account(
+                            id = "6",
+                            name = "Travel Fund",
+                            group = AccountGroupType.CASH,
+                            balance = 1_800_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-06"
+                        ),
+                        Account(
+                            id = "7",
+                            name = "GoPay",
+                            group = AccountGroupType.CASH,
+                            balance = 275_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-07"
+                        ),
+                        Account(
+                            id = "8",
+                            name = "OVO",
+                            group = AccountGroupType.CASH,
+                            balance = 320_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-08"
+                        ),
+                        Account(
+                            id = "9",
+                            name = "DANA",
+                            group = AccountGroupType.CASH,
+                            balance = 4_500_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-09"
+                        ),
+                        Account(
+                            id = "10",
+                            name = "ShopeePay",
+                            group = AccountGroupType.CASH,
+                            balance = 1_855_000,
+                            accountType = AccountType.REGULAR_BALANCE,
+                            createdAt = "2024-01-10"
+                        )
+                    )
+                )
+            )
+        }
+    }
+}
+
+@Preview(uiMode = AndroidUiModes.UI_MODE_NIGHT_YES)
+@Composable
+private fun AccountGroupCardDarkPreview() {
     CofinanceTheme {
         Surface(color = MaterialTheme.colorScheme.background) {
             AccountGroupCard(
