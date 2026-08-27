@@ -189,109 +189,10 @@ fun EditAccountBottomSheetContent(
         Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
         // Name field
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Dimensions.SIZE_16)
-                .background(
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    shape = MaterialTheme.shapes.large
-                )
-                .border(
-                    width = Dimensions.SIZE_2,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = MaterialTheme.shapes.large
-                )
-                .padding(all = Dimensions.SIZE_16),
-            horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BasicTextField(
-                modifier = Modifier.weight(1f),
-                value = name,
-                onValueChange = { name = it },
-                keyboardOptions = KeyboardOptions(
-                    imeAction = ImeAction.Next,
-                    keyboardType = KeyboardType.Text
-                ),
-                textStyle = MaterialTheme.typography.labelMedium.copy(
-                    color = MaterialTheme.colorScheme.onBackground
-                ),
-                decorationBox = { innerTextField ->
-                    if (name.isBlank()) {
-                        Text(
-                            text = stringResource(Res.string.label_name),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                fontWeight = FontWeight.Medium
-                            )
-                        )
-                    }
-                    innerTextField()
-                }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
+        NameField(name = name, onNameChanged = { name = it })
 
         // Balance field
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = Dimensions.SIZE_16)
-                .border(
-                    width = Dimensions.SIZE_2,
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = MaterialTheme.shapes.large
-                )
-        ) {
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        shape = MaterialTheme.shapes.large
-                    )
-                    .padding(all = Dimensions.SIZE_16)
-            ) {
-                Row {
-                    Text(
-                        text = stringResource(Res.string.label_rupiah),
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    )
-
-                    BasicTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = amount,
-                        onValueChange = {
-                            if (it.isDigitOnly() && it.length < 13) {
-                                amount = it
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            imeAction = ImeAction.Done,
-                            keyboardType = KeyboardType.Number
-                        ),
-                        textStyle = MaterialTheme.typography.labelMedium.copy(
-                            color = MaterialTheme.colorScheme.onBackground
-                        ),
-                        decorationBox = { innerTextField ->
-                            if (amount.isBlank()) {
-                                Text(
-                                    text = stringResource(Res.string.label_zero),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                )
-                            }
-                            innerTextField()
-                        },
-                        visualTransformation = NumberFormatTransformation()
-                    )
-                }
-            }
-        }
+        BalanceField(amount = amount, onAmountChanged = { amount = it })
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
@@ -332,4 +233,117 @@ fun EditAccountBottomSheetContent(
             )
         }
     }
+}
+
+@Composable
+private fun BalanceField(amount: String, onAmountChanged: (String) -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimensions.SIZE_16)
+            .border(
+                width = Dimensions.SIZE_2,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = MaterialTheme.shapes.large
+            )
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    shape = MaterialTheme.shapes.large
+                )
+                .padding(all = Dimensions.SIZE_16)
+        ) {
+            Row {
+                Text(
+                    text = stringResource(Res.string.label_rupiah),
+                    style = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                )
+
+                BasicTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = amount,
+                    onValueChange = {
+                        if (it.isBlank()) {
+                            onAmountChanged(it)
+                            return@BasicTextField
+                        } else if (it.isDigitOnly() && it.length < 13) {
+                            onAmountChanged(it)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Done,
+                        keyboardType = KeyboardType.Number
+                    ),
+                    textStyle = MaterialTheme.typography.labelMedium.copy(
+                        color = MaterialTheme.colorScheme.onBackground
+                    ),
+                    decorationBox = { innerTextField ->
+                        if (amount.isBlank()) {
+                            Text(
+                                text = stringResource(Res.string.label_zero),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            )
+                        }
+
+                        innerTextField()
+                    },
+                    visualTransformation = NumberFormatTransformation()
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NameField(name: String, onNameChanged: (String) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = Dimensions.SIZE_16)
+            .background(
+                color = MaterialTheme.colorScheme.onPrimary,
+                shape = MaterialTheme.shapes.large
+            )
+            .border(
+                width = Dimensions.SIZE_2,
+                color = MaterialTheme.colorScheme.surfaceContainerLow,
+                shape = MaterialTheme.shapes.large
+            )
+            .padding(all = Dimensions.SIZE_16),
+        horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_10),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        BasicTextField(
+            modifier = Modifier.weight(1f),
+            value = name,
+            onValueChange = onNameChanged,
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = KeyboardType.Text
+            ),
+            textStyle = MaterialTheme.typography.labelMedium.copy(
+                color = MaterialTheme.colorScheme.onBackground
+            ),
+            decorationBox = { innerTextField ->
+                if (name.isBlank()) {
+                    Text(
+                        text = stringResource(Res.string.label_name),
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
+                }
+                innerTextField()
+            }
+        )
+    }
+
+    Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 }
