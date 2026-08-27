@@ -88,9 +88,6 @@ fun MainScreen(
                 LaunchedEffect(addAccountSucceeded) {
                     if (addAccountSucceeded) {
                         state.showMessage(accountAddedMessage)
-
-                        // Firestore account snapshots automatically re-emit after changes.
-
                         parentNavController.currentBackStackEntry
                             ?.savedStateHandle
                             ?.remove<Boolean>("add_account_result")
