@@ -33,6 +33,5 @@ dependencyResolutionManagement {
 }
 
 include(":core")
-include(":core-testing")
 include(":composeApp")
 include(":androidApp")

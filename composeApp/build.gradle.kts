@@ -23,10 +23,6 @@ kotlin {
             /* no-op */
         }
 
-        withDeviceTest {
-            instrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        }
-
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -126,17 +122,7 @@ kotlin {
         }
 
         commonTest.dependencies {
-            implementation(projects.coreTesting)
             implementation(libs.kotlin.test)
-            implementation(libs.kotlinx.coroutines.test)
-        }
-
-        getByName("androidDeviceTest").dependencies {
-            implementation(libs.kotlin.test)
-            implementation(libs.kotlinx.coroutines.test)
-            implementation(libs.androidx.test.core)
-            implementation(libs.androidx.test.runner)
-            implementation(libs.androidx.test.ext.junit)
         }
     }
 }
