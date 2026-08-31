@@ -29,7 +29,7 @@ class FirebaseDataSource(
     suspend fun login(idTokenRequest: IdTokenRequest) {
         val credential = GoogleAuthProvider.credential(
             idToken = idTokenRequest.idToken,
-            accessToken = null
+            accessToken = idTokenRequest.accessToken
         )
 
         val user = auth.signInWithCredential(credential).user

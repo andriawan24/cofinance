@@ -43,7 +43,12 @@ class LoginViewModel(
 
             when (val result = googleAuthManager.signIn(context)) {
                 is GoogleAuthResult.Success -> {
-                    loginIdTokenUseCase.execute(IdTokenParam(result.idToken)).collect { state ->
+                    loginIdTokenUseCase.execute(
+                        IdTokenParam(
+                            idToken = result.idToken,
+                            accessToken = result.accessToken
+                        )
+                    ).collect { state ->
                         when (state) {
                             is ResultState.Success -> _loginUiEvent.send(LoginUiEvent.NavigateHomePage)
                             is ResultState.Error -> _loginUiEvent.send(

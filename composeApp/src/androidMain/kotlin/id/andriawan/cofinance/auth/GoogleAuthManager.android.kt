@@ -58,6 +58,7 @@ actual class GoogleAuthManager {
                             GoogleIdTokenCredential.createFrom(credential.data)
                         GoogleAuthResult.Success(
                             idToken = googleIdTokenCredential.idToken,
+                            accessToken = null,
                             email = googleIdTokenCredential.id
                         )
                     } catch (e: GoogleIdTokenParsingException) {

@@ -30,6 +30,7 @@ final class GoogleSignInHelper: NSObject, GoogleSignInBridge {
                         callback(
                             GoogleSignInBridgeResult(
                                 idToken: nil,
+                                accessToken: nil,
                                 email: nil,
                                 errorMessage: nil,
                                 cancelled: true
@@ -49,6 +50,7 @@ final class GoogleSignInHelper: NSObject, GoogleSignInBridge {
                 callback(
                     GoogleSignInBridgeResult(
                         idToken: idToken,
+                        accessToken: user.accessToken.tokenString,
                         email: user.profile?.email,
                         errorMessage: nil,
                         cancelled: false
@@ -61,6 +63,7 @@ final class GoogleSignInHelper: NSObject, GoogleSignInBridge {
     private static func failure(_ message: String) -> GoogleSignInBridgeResult {
         GoogleSignInBridgeResult(
             idToken: nil,
+            accessToken: nil,
             email: nil,
             errorMessage: message,
             cancelled: false

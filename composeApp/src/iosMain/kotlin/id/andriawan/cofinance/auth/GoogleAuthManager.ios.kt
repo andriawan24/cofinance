@@ -25,6 +25,7 @@ actual class GoogleAuthManager {
                     result.idToken != null -> continuation.resume(
                         GoogleAuthResult.Success(
                             idToken = result.idToken,
+                            accessToken = result.accessToken,
                             email = result.email
                         )
                     )

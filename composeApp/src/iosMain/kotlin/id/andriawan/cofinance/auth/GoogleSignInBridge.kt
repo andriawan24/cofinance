@@ -9,6 +9,7 @@ package id.andriawan.cofinance.auth
  */
 data class GoogleSignInBridgeResult(
     val idToken: String?,
+    val accessToken: String?,
     val email: String?,
     val errorMessage: String?,
     val cancelled: Boolean
