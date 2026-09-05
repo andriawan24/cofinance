@@ -104,15 +104,12 @@ class FailedAttemptGuard(
     /**
      * Counts one failed attempt and returns what it cost.
      *
-     * Destruction happens here rather than being left to the caller, so that no unlock path can
+     * Destruction happens here rather than being left to the caller, so that no unlocks path can
      * count a tenth failure and then decide not to act on it.
      */
     suspend fun recordFailure(): FailedAttemptOutcome {
         val previous = when (val stored = readCounter()) {
             is CounterReading.Counted -> stored.record.consecutiveFailures
-            // A tampered or exempt reading still counts the failure it was handed: the tamper case
-            // is destroyed by the next [beginAttempt] anyway, and the exempt case has no wrap to
-            // destroy, so counting is harmless in both and losing the count would not be.
             else -> 0
         }
         val failures = previous + 1
@@ -148,13 +145,6 @@ class FailedAttemptGuard(
      */
     suspend fun arm() = recordSuccess()
 
-    /** The count as stored, for a caller that wants to show "N attempts remaining". */
-    suspend fun consecutiveFailures(): Int = when (val stored = readCounter()) {
-        is CounterReading.Counted -> stored.record.consecutiveFailures
-        is CounterReading.Tampered -> LockoutPolicy.DESTRUCTION_THRESHOLD
-        is CounterReading.Exempt -> 0
-    }
-
     /**
      * Turns a stored record into the remaining wait.
      *
@@ -177,13 +167,7 @@ class FailedAttemptGuard(
 
     private suspend fun readCounter(): CounterReading = when (val stored = attempts.read()) {
         is StoredFailedAttempts.Recorded -> CounterReading.Counted(stored.record)
-        StoredFailedAttempts.Unreadable -> if (pinWrapPresent()) {
-            CounterReading.Tampered
-        } else {
-            CounterReading.Exempt
-        }
-
-        StoredFailedAttempts.None -> if (pinWrapPresent()) {
+        StoredFailedAttempts.Unreadable, StoredFailedAttempts.None -> if (pinWrapPresent()) {
             CounterReading.Tampered
         } else {
             CounterReading.Exempt

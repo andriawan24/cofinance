@@ -46,8 +46,6 @@ private class AndroidRecoveryPhraseExporter : RecoveryPhraseExporter {
             clipboard.setPrimaryClip(clip)
             true
         } catch (_: RuntimeException) {
-            // A clipboard that refuses the clip - a transaction too large, an OEM restriction - is a
-            // failed copy, not a crash on a screen holding the only copy of the phrase.
             false
         }
     }

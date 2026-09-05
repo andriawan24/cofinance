@@ -16,17 +16,9 @@ import kotlin.time.Duration.Companion.seconds
  * 9 rejects exposing it, because its only interesting values are self-destructive or self-defeating.
  */
 object LockoutPolicy {
-
-    /** Consecutive failures that cost nothing. The fifth attempt is the first delayed one. */
     const val FREE_ATTEMPTS: Int = 4
-
-    /** Consecutive failures that destroy local key material. */
     const val DESTRUCTION_THRESHOLD: Int = 10
-
-    /** The delay imposed on the fifth attempt. */
     val FIRST_DELAY: Duration = 30.seconds
-
-    /** The ceiling the doubling stops at. */
     val MAXIMUM_DELAY: Duration = 5.minutes
 
     /**
@@ -55,12 +47,5 @@ object LockoutPolicy {
     /** True once [consecutiveFailures] has reached the destruction threshold. */
     fun destroys(consecutiveFailures: Int): Boolean = consecutiveFailures >= DESTRUCTION_THRESHOLD
 
-    /**
-     * Enough doublings to pass [MAXIMUM_DELAY] from [FIRST_DELAY], and no more.
-     *
-     * 30 seconds needs four doublings to reach 480 seconds, which is already past the cap, so
-     * clamping here changes no value the schedule produces and removes any chance of a shift
-     * overflowing on a nonsense count.
-     */
     private const val MAXIMUM_DOUBLING = 4
 }

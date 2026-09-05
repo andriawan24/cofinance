@@ -15,9 +15,7 @@ data class AccountResponse(
     val createdAt: String? = null
 ) {
     companion object {
-        const val TABLE_NAME = "accounts"
         const val CREATED_AT_FIELD = "created_at"
-        const val NAME_FIELD = "name"
         const val ACCOUNT_TYPE_FIELD = "account_type"
     }
 }

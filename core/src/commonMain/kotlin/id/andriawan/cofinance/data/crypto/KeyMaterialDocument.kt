@@ -43,8 +43,6 @@ data class KeyMaterialDocument(
     companion object {
         const val VERSION_FIELD = "key_material_version"
         const val WRAPPED_KEYS_FIELD = "wrapped_keys"
-
-        /** The only key material format this build writes. */
         const val CURRENT_VERSION: Int = 1
     }
 }

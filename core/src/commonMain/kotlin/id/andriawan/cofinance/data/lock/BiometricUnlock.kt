@@ -4,58 +4,26 @@ import id.andriawan.cofinance.data.crypto.DataKey
 
 /** What enabling biometric unlock did. */
 sealed interface BiometricEnableResult {
-
-    /** The data key is now sealed behind the biometric-gated key as well as behind the PIN. */
     data object Enabled : BiometricEnableResult
-
-    /** No PIN is set. Per Decision 4 biometric is a shortcut over the PIN, never a replacement. */
     data object PinRequired : BiometricEnableResult
-
-    /** The PIN offered to authorize the change was not the PIN in effect. */
     data object IncorrectPin : BiometricEnableResult
-
-    /** The user dismissed the biometric prompt. Nothing changed. */
     data object Cancelled : BiometricEnableResult
-
-    /** Biometric authentication cannot be offered on this device right now. */
     data class Unavailable(val capability: BiometricCapability) : BiometricEnableResult
-
-    /** The platform refused for a reason worth logging but not showing. */
     data class Failed(val reason: String) : BiometricEnableResult
 }
 
 /** What a biometric unlock attempt produced. */
 sealed interface BiometricUnlockResult {
-
-    /** Authentication succeeded and the data key is in hand, without the PIN being entered. */
     data class Unlocked(val dataKey: DataKey) : BiometricUnlockResult
-
-    /**
-     * Every way the biometric path can fail to produce a key.
-     *
-     * They are one branch on purpose: the caller's response to all of them is identical — show PIN
-     * entry — and the specification asks for exactly that in each case. [reason] exists so the
-     * unlock screen can say something useful, not so it can behave differently.
-     */
     data class FellBackToPin(val reason: PinFallbackReason) : BiometricUnlockResult
 }
 
 /** Why the biometric path handed the user back to the PIN. */
 enum class PinFallbackReason {
-
-    /** Biometric unlock is not enabled on this device. */
     NotEnabled,
-
-    /** The user dismissed the prompt. */
     Cancelled,
-
-    /** Authentication was attempted and did not succeed. */
     Failed,
-
-    /** The enrolled biometrics changed, so the biometric key was destroyed. */
     Invalidated,
-
-    /** No usable biometric hardware or enrollment right now. */
     Unavailable
 }
 
@@ -77,11 +45,8 @@ enum class PinFallbackReason {
  * concatenated so that an identifier of any length reads back exactly.
  */
 class BiometricUnlock(private val box: BiometricKeyBox) {
-
-    /** Whether a prompt can be shown, for a settings screen deciding whether to offer the toggle. */
     suspend fun capability(): BiometricCapability = box.capability()
 
-    /** Whether biometric unlock is on, which is the presence of a sealed copy of the data key. */
     suspend fun isEnabled(): Boolean = box.hasSealedSecret()
 
     /**
@@ -106,7 +71,6 @@ class BiometricUnlock(private val box: BiometricKeyBox) {
                 is BiometricSealResult.Failed -> BiometricEnableResult.Failed(sealed.reason)
             }
         } finally {
-            // The payload carries the data key in the clear. It is this function's to discard.
             payload.fill(0)
         }
     }
@@ -116,8 +80,6 @@ class BiometricUnlock(private val box: BiometricKeyBox) {
         when (val opened = box.open(prompt)) {
             is BiometricOpenResult.Opened -> decodePayload(opened.plaintext)
                 ?.let { BiometricUnlockResult.Unlocked(it) }
-                // Unreadable sealed bytes are treated as a failure rather than as corruption to
-                // report: the PIN opens the same key, so there is nothing lost and nothing to say.
                 ?: BiometricUnlockResult.FellBackToPin(PinFallbackReason.Failed)
 
             BiometricOpenResult.Cancelled ->
@@ -136,7 +98,6 @@ class BiometricUnlock(private val box: BiometricKeyBox) {
                 BiometricUnlockResult.FellBackToPin(PinFallbackReason.Unavailable)
         }
 
-    /** Turns biometric unlock off, after which unlocking requires the PIN. */
     suspend fun disable() = box.clear()
 
     private suspend fun encodePayload(dataKey: DataKey): ByteArray {
@@ -171,7 +132,6 @@ class BiometricUnlock(private val box: BiometricKeyBox) {
     }
 
     private companion object {
-        /** One length byte frames the identifier, so it cannot exceed what a byte can express. */
         const val MAXIMUM_KEY_ID_BYTES = 255
     }
 }

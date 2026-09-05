@@ -38,18 +38,14 @@ class EncryptedEnvelope(
         return result
     }
 
-    /** Describes the envelope without reproducing any of its bytes. */
     override fun toString(): String =
         "EncryptedEnvelope(version=$version, keyId=$keyId, ciphertextBytes=${ciphertext.size})"
 
     companion object {
-        /** The only envelope format this build writes. Reads reject anything else. */
         const val CURRENT_VERSION: Int = 1
 
-        /** 12 bytes is the nonce size AES-GCM is defined against and the only one accepted here. */
         const val NONCE_SIZE: Int = 12
     }
 }
 
-/** Raised when a stored record cannot be turned back into a finance record. */
 class EncryptedRecordException(message: String, cause: Throwable? = null) : Exception(message, cause)

@@ -32,17 +32,9 @@ data class BiometricPromptText(
 
 /** The outcome of sealing bytes behind biometric authentication. */
 sealed interface BiometricSealResult {
-
-    /** The secret is sealed under a key that only a successful biometric prompt can use. */
     data object Sealed : BiometricSealResult
-
-    /** The user dismissed the prompt. Nothing was stored. */
     data object Cancelled : BiometricSealResult
-
-    /** The platform refused, with [reason] for the log rather than for the user. */
     data class Failed(val reason: String) : BiometricSealResult
-
-    /** Biometric authentication cannot be offered; see [BiometricKeyBox.capability]. */
     data object Unavailable : BiometricSealResult
 }
 
@@ -57,7 +49,6 @@ sealed interface BiometricOpenResult {
 
         override fun hashCode(): Int = plaintext.contentHashCode()
 
-        /** Never reproduces the secret. */
         override fun toString(): String = "Opened(${plaintext.size} bytes)"
     }
 
@@ -101,20 +92,10 @@ sealed interface BiometricOpenResult {
  *   key — see `PinKeyWrapper`.
  */
 interface BiometricKeyBox {
-
-    /** Whether a prompt can be shown right now. */
     suspend fun capability(): BiometricCapability
-
-    /** Whether a sealed secret exists, which is what "biometric unlock is on" means. */
     suspend fun hasSealedSecret(): Boolean
-
-    /** Prompts, then seals [plaintext], replacing any secret sealed before. */
     suspend fun seal(plaintext: ByteArray, prompt: BiometricPromptText): BiometricSealResult
-
-    /** Prompts, then opens the sealed secret. */
     suspend fun open(prompt: BiometricPromptText): BiometricOpenResult
-
-    /** Discards the sealed secret and the key protecting it. */
     suspend fun clear()
 }
 

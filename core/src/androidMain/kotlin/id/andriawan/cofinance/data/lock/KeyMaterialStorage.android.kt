@@ -41,7 +41,6 @@ class FileKeyMaterialStorage internal constructor(
 
     private val mutex = Mutex()
 
-    /** The file the document lives in. Exposed so the device test can assert where that is. */
     val documentFile: File get() = File(directory(), DOCUMENT_FILE)
 
     override suspend fun read(): ByteArray? = guarded {
@@ -59,7 +58,6 @@ class FileKeyMaterialStorage internal constructor(
         }
     }
 
-    // The delete's result is ignored on purpose: an absent file is the state clear() is asking for.
     override suspend fun clear(): Unit = guarded { documentFile.delete() }
 
     private suspend fun <T> guarded(block: () -> T): T = withContext(Dispatchers.IO) {
@@ -67,7 +65,6 @@ class FileKeyMaterialStorage internal constructor(
     }
 
     companion object {
-        /** File holding the key material document, inside the lock's app-private directory. */
         const val DOCUMENT_FILE: String = "key-material.json"
     }
 }

@@ -23,10 +23,8 @@ import kotlinx.coroutines.flow.asStateFlow
  */
 interface EncryptionSession {
 
-    /** The current state, observable so the lock screen and auto-lock can both react to it. */
     val state: StateFlow<EncryptionSessionState>
 
-    /** The data key while unlocked, and null while setup is incomplete or the session is locked. */
     fun dataKeyOrNull(): DataKey?
 
     /**
@@ -36,8 +34,7 @@ interface EncryptionSession {
      * Callers that should degrade rather than fail — a local mutation whose mirror has to wait for
      * the next unlock — check [dataKeyOrNull] instead.
      */
-    fun requireDataKey(): DataKey =
-        dataKeyOrNull() ?: throw DataKeyUnavailableException(state.value)
+    fun requireDataKey(): DataKey = dataKeyOrNull() ?: throw DataKeyUnavailableException(state.value)
 
     /** Drops the data key from memory. Setup state is unaffected: a locked session can be unlocked. */
     fun lock()
@@ -45,19 +42,13 @@ interface EncryptionSession {
 
 /** The three states of [EncryptionSession], of which only one permits synchronization. */
 enum class EncryptionSessionState {
-
-    /** No key material for this installation. Encryption setup has to run before anything syncs. */
     SetupIncomplete,
-
-    /** Key material exists but the data key is not in memory. An unlock produces it. */
     Locked,
-
-    /** The data key is in memory and finance data may be encrypted, decrypted, and synchronized. */
     Unlocked
 }
 
 /** Raised when the data key is needed and the session cannot supply one. */
-class DataKeyUnavailableException(val sessionState: EncryptionSessionState) : IllegalStateException(
+class DataKeyUnavailableException(sessionState: EncryptionSessionState) : IllegalStateException(
     "The data key is unavailable because the encryption session is $sessionState"
 )
 

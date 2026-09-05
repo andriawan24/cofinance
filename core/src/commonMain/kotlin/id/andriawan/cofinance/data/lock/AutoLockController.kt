@@ -81,11 +81,4 @@ class AutoLockController(
             session.lock()
         }
     }
-
-    /** Drops any pending timer, for a caller tearing the controller down. */
-    fun cancel() {
-        scheduledLock?.cancel()
-        scheduledLock = null
-        backgroundedAtMillis = null
-    }
 }

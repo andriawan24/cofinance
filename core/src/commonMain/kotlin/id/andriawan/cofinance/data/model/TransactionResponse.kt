@@ -21,7 +21,6 @@ data class TransactionResponse(
     val updatedAt: String? = null,
     @SerialName(TRANSACTION_TYPE_FIELD)
     val type: String? = null,
-
     val sender: AccountResponse? = null,
     val receiver: AccountResponse? = null,
 ) {

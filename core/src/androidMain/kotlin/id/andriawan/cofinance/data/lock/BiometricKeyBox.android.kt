@@ -85,8 +85,6 @@ class AndroidBiometricKeyBox internal constructor(
         prompt: BiometricPromptText
     ): BiometricSealResult {
         val cipher = try {
-            // A fresh key per enable, so re-enabling after an invalidation cannot reuse a key the
-            // platform has already decided is untrustworthy.
             deleteKeyAndSecret()
             Cipher.getInstance(TRANSFORMATION).apply {
                 init(Cipher.ENCRYPT_MODE, generateKey())
@@ -118,8 +116,6 @@ class AndroidBiometricKeyBox internal constructor(
             sealedFile().takeIf { it.isFile }?.readBytes()
         } ?: return BiometricOpenResult.Absent
         val key = existingKey() ?: run {
-            // The file outlived its key, which is what a cleared Keystore or a restored backup
-            // looks like. Nothing can open it, so it goes.
             clear()
             return BiometricOpenResult.Invalidated
         }
@@ -136,8 +132,6 @@ class AndroidBiometricKeyBox internal constructor(
                 )
             }
         } catch (_: KeyPermanentlyInvalidatedException) {
-            // The enrolled biometrics changed. This is the policy working; the PIN still opens the
-            // data key through an entirely separate derivation.
             clear()
             return BiometricOpenResult.Invalidated
         } catch (cause: GeneralSecurityException) {
@@ -166,8 +160,6 @@ class AndroidBiometricKeyBox internal constructor(
     override suspend fun clear() {
         withContext(Dispatchers.IO) { deleteKeyAndSecret() }
     }
-
-    // -------------------------------------------------------------------------------------------
 
     private fun deleteKeyAndSecret() {
         sealedFile().delete()
@@ -245,7 +237,6 @@ class AndroidBiometricKeyBox internal constructor(
             val prompt = BiometricPrompt(
                 host,
                 object : BiometricPrompt.AuthenticationCallback() {
-
                     override fun onAuthenticationSucceeded(
                         result: BiometricPrompt.AuthenticationResult
                     ) {
@@ -263,6 +254,7 @@ class AndroidBiometricKeyBox internal constructor(
 
                     override fun onAuthenticationError(code: Int, message: CharSequence) {
                         if (!continuation.isActive) return
+
                         continuation.resume(
                             when (code) {
                                 BiometricPrompt.ERROR_USER_CANCELED,
@@ -281,8 +273,6 @@ class AndroidBiometricKeyBox internal constructor(
                         )
                     }
 
-                    // Deliberately not resumed: a single non-matching finger is not the end of the
-                    // attempt, and the prompt stays up until the user succeeds or leaves.
                     override fun onAuthenticationFailed() = Unit
                 }
             )
@@ -300,10 +290,7 @@ class AndroidBiometricKeyBox internal constructor(
     }
 
     companion object {
-        /** Keystore alias of the biometric-gated key. Exposed for the device test. */
         const val KEY_ALIAS: String = "id.andriawan.cofinance.lock.biometric"
-
-        /** File holding the biometrically sealed copy of the data key. */
         const val SEALED_KEY_FILE: String = "biometric-data-key.bin"
 
         /**

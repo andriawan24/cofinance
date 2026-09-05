@@ -19,15 +19,9 @@ import kotlin.time.Duration.Companion.minutes
  * constant or reordering the list cannot silently change a user's setting.
  */
 enum class AutoLockTimeout(val storedId: String, val duration: Duration) {
-
-    /** Lock as soon as the app leaves the foreground. */
     Immediately("immediately", Duration.ZERO),
-
-    /** The value in effect for a user who has never changed it. */
     OneMinute("1m", 1.minutes),
-
     FiveMinutes("5m", 5.minutes),
-
     FifteenMinutes("15m", 15.minutes);
 
     companion object {
@@ -57,11 +51,7 @@ enum class AutoLockTimeout(val storedId: String, val duration: Duration) {
  * sealed storage the failed-attempt counter needs.
  */
 interface AutoLockSettings {
-
-    /** The current timeout, starting at [AutoLockTimeout.Default] for a user who never chose. */
     val timeout: StateFlow<AutoLockTimeout>
-
-    /** Records [value] as the user's choice and publishes it to [timeout]. */
     fun setTimeout(value: AutoLockTimeout)
 }
 

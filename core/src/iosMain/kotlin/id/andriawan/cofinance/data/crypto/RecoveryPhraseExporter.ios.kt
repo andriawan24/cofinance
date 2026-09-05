@@ -42,7 +42,7 @@ private class IosRecoveryPhraseExporter : RecoveryPhraseExporter {
             listOf(mapOf(PASTEBOARD_PLAIN_TEXT to text)),
             options = mapOf(
                 UIPasteboardOptionExpirationDate to
-                    NSDate.dateWithTimeIntervalSinceNow(CLIPBOARD_LIFETIME_SECONDS)
+                        NSDate.dateWithTimeIntervalSinceNow(CLIPBOARD_LIFETIME_SECONDS)
             )
         )
         true
@@ -57,9 +57,7 @@ private class IosRecoveryPhraseExporter : RecoveryPhraseExporter {
                 ?: return@withContext null
 
             suspendCancellableCoroutine { continuation ->
-                // Held for the picker's lifetime; the delegate property is weak, so a delegate that
-                // only the picker referenced would be collected before the user picked anything.
-                var delegate: DocumentExportDelegate? = null
+                var delegate: DocumentExportDelegate?
                 delegate = DocumentExportDelegate { savedUrl ->
                     delegate = null
                     if (continuation.isActive) continuation.resume(savedUrl?.path)
@@ -84,8 +82,6 @@ private class IosRecoveryPhraseExporter : RecoveryPhraseExporter {
 
     private companion object {
         const val PASTEBOARD_PLAIN_TEXT = "public.utf8-plain-text"
-
-        /** Ten minutes: long enough to paste into a password manager, short enough to matter. */
         const val CLIPBOARD_LIFETIME_SECONDS = 10.0 * 60.0
     }
 }

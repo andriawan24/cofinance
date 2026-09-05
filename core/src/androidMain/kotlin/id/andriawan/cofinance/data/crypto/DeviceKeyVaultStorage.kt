@@ -28,6 +28,7 @@ internal object DeviceKeyVaultStorage {
         val context = applicationContext ?: throw DeviceKeyVaultException(
             "Device key storage is unavailable because the application context was never captured"
         )
+
         return File(context.filesDir, DIRECTORY_NAME)
     }
 

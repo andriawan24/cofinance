@@ -81,13 +81,8 @@ import platform.Security.kSecReturnData
 import platform.Security.kSecReturnRef
 import platform.Security.kSecValueData
 
-/** Application tag of the device key pair's Keychain item. */
 internal const val DEVICE_KEY_TAG: String = "id.andriawan.cofinance.crypto.device-key"
-
-/** Service of the device secret's generic password item. */
 internal const val DEVICE_SECRET_SERVICE: String = "id.andriawan.cofinance.crypto"
-
-/** Account of the device secret's generic password item. */
 internal const val DEVICE_SECRET_ACCOUNT: String = "device-secret"
 
 @OptIn(ExperimentalForeignApi::class)
@@ -151,7 +146,7 @@ internal class KeychainDeviceKeyVault(
         ) {
             throw DeviceKeyVaultException(
                 "Peer public key is not a ${DeviceKeyVault.PUBLIC_KEY_SIZE}-byte uncompressed " +
-                    "SEC 1 P-256 point"
+                        "SEC 1 P-256 point"
             )
         }
         val privateKey = findPrivateKey() ?: createPrivateKey()
@@ -219,7 +214,7 @@ internal class KeychainDeviceKeyVault(
             try {
                 val tokenId = CFDictionaryGetValue(attributes.reinterpret(), kSecAttrTokenID)
                 tokenId != null && tokenId.copyAsString() ==
-                    kSecAttrTokenIDSecureEnclave.copyAsString()
+                        kSecAttrTokenIDSecureEnclave.copyAsString()
             } finally {
                 CFRelease(attributes)
             }
@@ -259,8 +254,8 @@ internal class KeychainDeviceKeyVault(
         } catch (fallbackFailure: DeviceKeyVaultException) {
             throw DeviceKeyVaultException(
                 "Creating the device key failed in the Secure Enclave " +
-                    "(${enclave.exceptionOrNull()?.message}) and in the Keychain " +
-                    "(${fallbackFailure.message})",
+                        "(${enclave.exceptionOrNull()?.message}) and in the Keychain " +
+                        "(${fallbackFailure.message})",
                 fallbackFailure
             )
         }
@@ -269,9 +264,6 @@ internal class KeychainDeviceKeyVault(
     private fun createKeyPair(inSecureEnclave: Boolean): SecKeyRef = cfOwning { owner ->
         memScoped {
             val error = alloc<CFErrorRefVar>()
-            // kSecAccessControlPrivateKeyUsage is what permits the Enclave to use the private key
-            // for ECDH; kSecAttrAccessibleWhenUnlockedThisDeviceOnly is what keeps the item on this
-            // device and out of every backup.
             val flags: SecAccessControlCreateFlags =
                 if (inSecureEnclave) PRIVATE_KEY_USAGE_FLAG else NO_ACCESS_CONTROL_FLAGS
             val access: SecAccessControlRef = SecAccessControlCreateWithFlags(
@@ -315,16 +307,14 @@ internal class KeychainDeviceKeyVault(
             val encoded = SecKeyCopyExternalRepresentation(publicKey, error.ptr)
                 ?: throw error.consume("Exporting the device public key failed")
             try {
-                // SecKeyCopyExternalRepresentation on an EC public key yields the uncompressed
-                // SEC 1 point already, but the interface contract is a length, so check it.
                 val bytes = encoded.toByteArray()
                 if (bytes.size != DeviceKeyVault.PUBLIC_KEY_SIZE ||
                     bytes[0] != UNCOMPRESSED_POINT_TAG
                 ) {
                     throw DeviceKeyVaultException(
                         "Device public key is ${bytes.size} bytes tagged 0x" +
-                            "${bytes.firstOrNull()?.toUByte()?.toString(16)}, expected a " +
-                            "${DeviceKeyVault.PUBLIC_KEY_SIZE}-byte point tagged 0x04"
+                                "${bytes.firstOrNull()?.toUByte()?.toString(16)}, expected a " +
+                                "${DeviceKeyVault.PUBLIC_KEY_SIZE}-byte point tagged 0x04"
                     )
                 }
                 bytes
@@ -354,8 +344,6 @@ internal class KeychainDeviceKeyVault(
                 ) ?: throw error.consume("Peer public key is not a P-256 point")
                 owner.own(peer, "the peer key")
 
-                // Standard ECDH: the raw agreement output, with no KDF applied. HKDF belongs to
-                // the wrapping layer above, and both platforms must agree on that boundary.
                 val secret = SecKeyCopyKeyExchangeResult(
                     privateKey,
                     kSecKeyAlgorithmECDHKeyExchangeStandard,
@@ -479,7 +467,11 @@ internal class CoreFoundationOwner {
 
     fun dataOf(bytes: ByteArray, what: String): CFDataRef = own(
         bytes.usePinned { pinned ->
-            CFDataCreate(kCFAllocatorDefault, pinned.addressOf(0).reinterpret(), bytes.size.convert())
+            CFDataCreate(
+                kCFAllocatorDefault,
+                pinned.addressOf(0).reinterpret(),
+                bytes.size.convert()
+            )
         },
         what
     )

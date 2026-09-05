@@ -30,8 +30,6 @@ class LocalKeyMaterialDestroyer(
     private val vault: DeviceKeyVault,
     private val session: InMemoryEncryptionSession
 ) {
-
-    /** Erases local key material. Records stay recoverable through the recovery phrase. */
     suspend fun destroy() {
         keyMaterial.erase()
         vault.destroyKeyMaterial()

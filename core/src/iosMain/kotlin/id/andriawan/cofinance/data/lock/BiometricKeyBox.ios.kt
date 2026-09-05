@@ -128,7 +128,10 @@ internal class KeychainBiometricKeyBox(
                         kSecAttrService to owner.stringOf(service),
                         kSecAttrAccount to owner.stringOf(account),
                         kSecAttrAccessControl to access,
-                        kSecUseAuthenticationContext to owner.own(CFBridgingRetain(context), "an authentication context"),
+                        kSecUseAuthenticationContext to owner.own(
+                            CFBridgingRetain(context),
+                            "an authentication context"
+                        ),
                         kSecValueData to owner.dataOf(plaintext, "the sealed data key")
                     )
                 )
@@ -142,49 +145,49 @@ internal class KeychainBiometricKeyBox(
         }
     }
 
-    override suspend fun open(prompt: BiometricPromptText): BiometricOpenResult = cfOwning { owner ->
-        memScoped {
-            val context = LAContext().apply {
-                localizedReason = prompt.title
-                localizedFallbackTitle = prompt.negativeButtonLabel
-            }
-            val query = owner.dictionaryOf(
-                listOf(
-                    kSecClass to kSecClassGenericPassword,
-                    kSecAttrService to owner.stringOf(service),
-                    kSecAttrAccount to owner.stringOf(account),
-                    kSecUseAuthenticationContext to owner.own(CFBridgingRetain(context), "an authentication context"),
-                    kSecReturnData to kCFBooleanTrue
+    override suspend fun open(prompt: BiometricPromptText): BiometricOpenResult =
+        cfOwning { owner ->
+            memScoped {
+                val context = LAContext().apply {
+                    localizedReason = prompt.title
+                    localizedFallbackTitle = prompt.negativeButtonLabel
+                }
+                val query = owner.dictionaryOf(
+                    listOf(
+                        kSecClass to kSecClassGenericPassword,
+                        kSecAttrService to owner.stringOf(service),
+                        kSecAttrAccount to owner.stringOf(account),
+                        kSecUseAuthenticationContext to owner.own(
+                            CFBridgingRetain(context),
+                            "an authentication context"
+                        ),
+                        kSecReturnData to kCFBooleanTrue
+                    )
                 )
-            )
-            val found = alloc<CFDataRefVar>()
-            when (val status = SecItemCopyMatching(query, found.ptr.reinterpret())) {
-                errSecSuccess -> {
-                    val data = found.value
-                        ?: return@memScoped BiometricOpenResult.Failed("no data was returned")
-                    try {
-                        BiometricOpenResult.Opened(data.readBytes())
-                    } finally {
-                        CFRelease(data)
+                val found = alloc<CFDataRefVar>()
+                when (val status = SecItemCopyMatching(query, found.ptr.reinterpret())) {
+                    errSecSuccess -> {
+                        val data = found.value
+                            ?: return@memScoped BiometricOpenResult.Failed("no data was returned")
+                        try {
+                            BiometricOpenResult.Opened(data.readBytes())
+                        } finally {
+                            CFRelease(data)
+                        }
                     }
-                }
 
-                errSecItemNotFound -> BiometricOpenResult.Absent
-                errSecUserCanceled -> BiometricOpenResult.Cancelled
-                // The Keychain reports an item bound to a superseded biometric set as an
-                // authentication failure, because from its side that is what happened: the access
-                // control can no longer be satisfied by anything. Nothing will ever open it again,
-                // so it is discarded and the caller falls back to the PIN.
-                errSecAuthFailed -> {
-                    clear()
-                    BiometricOpenResult.Invalidated
-                }
+                    errSecItemNotFound -> BiometricOpenResult.Absent
+                    errSecUserCanceled -> BiometricOpenResult.Cancelled
+                    errSecAuthFailed -> {
+                        clear()
+                        BiometricOpenResult.Invalidated
+                    }
 
-                errSecInteractionNotAllowed -> BiometricOpenResult.Unavailable
-                else -> BiometricOpenResult.Failed("OSStatus $status")
+                    errSecInteractionNotAllowed -> BiometricOpenResult.Unavailable
+                    else -> BiometricOpenResult.Failed("OSStatus $status")
+                }
             }
         }
-    }
 
     override suspend fun clear() {
         cfOwning { owner ->

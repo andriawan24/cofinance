@@ -53,16 +53,12 @@ interface DeviceKeyVault {
     suspend fun destroyKeyMaterial()
 
     companion object {
-        /** Length of an uncompressed P-256 point: a one-byte tag plus two 32-byte coordinates. */
         const val PUBLIC_KEY_SIZE: Int = 65
 
-        /** 256 bits, matching the data key the material derived from it ultimately protects. */
         const val DEVICE_SECRET_SIZE: Int = 32
     }
 }
 
-/** Raised when platform key storage cannot create, reach, or use the device key material. */
 class DeviceKeyVaultException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
-/** Returns the vault backed by this platform's hardware-backed key storage. */
 expect fun createDeviceKeyVault(): DeviceKeyVault

@@ -29,8 +29,6 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun OnboardingSwiper(modifier: Modifier = Modifier) {
-//    val pagerState = rememberPagerState(pageCount = { 3 })
-
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -82,23 +80,6 @@ fun OnboardingSwiper(modifier: Modifier = Modifier) {
                 textAlign = TextAlign.Center
             )
         }
-//        HorizontalPager(state = pagerState) {
-//
-//        }
-//
-//        DotsIndicator(
-//            modifier = Modifier.padding(bottom = Dimensions.SIZE_24),
-//            dotCount = pagerState.pageCount,
-//            type = ShiftIndicatorType(
-//                dotsGraphic = DotGraphic(
-//                    size = Dimensions.SIZE_4,
-//                    color = MaterialTheme.colorScheme.primary
-//                ),
-//                shiftSizeFactor = 8f
-//            ),
-//            pagerState = pagerState,
-//            dotSpacing = Dimensions.SIZE_2
-//        )
     }
 }
 

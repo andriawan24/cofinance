@@ -16,19 +16,7 @@ import id.andriawan.cofinance.data.crypto.KeyMaterialDocument
  * fake.
  */
 interface LocalKeyMaterialStore {
-
-    /** The material held on this device, or null before setup or after destruction. */
     suspend fun read(): KeyMaterialDocument?
-
-    /** Replaces the stored material, which is how a PIN change lands. */
     suspend fun write(document: KeyMaterialDocument)
-
-    /**
-     * Removes every locally held wrapped copy of the data key.
-     *
-     * Implementations delete the local document. They must not delete, overwrite, or otherwise
-     * reach the uploaded key material: recovery-phrase restoration after destruction is the entire
-     * reason two independent wraps exist.
-     */
     suspend fun erase()
 }

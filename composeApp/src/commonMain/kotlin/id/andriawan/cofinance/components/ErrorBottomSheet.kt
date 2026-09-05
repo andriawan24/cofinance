@@ -34,10 +34,7 @@ fun ErrorBottomSheet(
 
     val sheetState = rememberModalBottomSheetState()
 
-    BaseBottomSheet(
-        state = sheetState,
-        onDismissRequest = onDismiss
-    ) {
+    BaseBottomSheet(state = sheetState, onDismissRequest = onDismiss) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

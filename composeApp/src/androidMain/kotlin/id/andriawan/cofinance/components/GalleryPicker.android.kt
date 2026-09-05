@@ -14,6 +14,8 @@ actual fun rememberGalleryLauncher(onImageSelected: (String) -> Unit): () -> Uni
     }
 
     return {
-        launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        launcher.launch(
+            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+        )
     }
 }

@@ -13,14 +13,8 @@ import kotlinx.serialization.json.Json
  * structure of what they hold.
  */
 interface KeyMaterialStorage {
-
-    /** The stored bytes, or null before anything was written and after [clear]. */
     suspend fun read(): ByteArray?
-
-    /** Replaces the stored bytes. */
     suspend fun write(bytes: ByteArray)
-
-    /** Removes the stored bytes. */
     suspend fun clear()
 }
 
@@ -85,13 +79,6 @@ class StoredLocalKeyMaterialStore(
     }
 
     companion object {
-        /**
-         * The encoding of the stored document.
-         *
-         * `ignoreUnknownKeys` is on so a document written by a later build — one carrying a wrap
-         * type this build postdates — still yields the wraps this build does understand instead of
-         * failing to parse and sending the user to restore.
-         */
         val KEY_MATERIAL_JSON: Json = Json {
             ignoreUnknownKeys = true
             encodeDefaults = true

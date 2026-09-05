@@ -14,32 +14,25 @@ import kotlinx.serialization.Serializable
  * cannot read the surrounding key material because of it is not.
  */
 sealed interface KeyWrapType {
-
-    /** The value stored in [WrappedDataKey.wrapType]. */
     val id: String
 
-    /** The non-extractable key held in Android Keystore or the iOS Keychain. Never uploaded. */
     data object Device : KeyWrapType {
         override val id: String = "device"
     }
 
-    /** The key derived from the 12-word recovery phrase. The only wrap the backend ever holds. */
     data object RecoveryPhrase : KeyWrapType {
         override val id: String = "recovery_phrase"
     }
 
-    /** The PIN composed with the device secret. Local only, so a PIN alone unlocks nothing. */
     data object Pin : KeyWrapType {
         override val id: String = "pin"
     }
 
-    /** A wrap type this build does not know about, kept intact so it survives a read and rewrite. */
     data class Unrecognized(override val id: String) : KeyWrapType
 
     companion object {
         private val known = listOf(Device, RecoveryPhrase, Pin)
 
-        /** Resolves a stored identifier, never throwing on one this build does not recognize. */
         fun of(id: String): KeyWrapType = known.firstOrNull { it.id == id } ?: Unrecognized(id)
     }
 }
@@ -68,8 +61,6 @@ data class WrappedDataKey(
     @SerialName(WRAP_PARAMETERS_FIELD)
     val wrapParameters: Map<String, String> = emptyMap()
 ) {
-
-    /** The resolved wrap type, [KeyWrapType.Unrecognized] for anything this build postdates. */
     val type: KeyWrapType get() = KeyWrapType.of(wrapType)
 
     /**
@@ -95,7 +86,10 @@ data class WrappedDataKey(
         try {
             Base64.decode(encoded)
         } catch (cause: IllegalArgumentException) {
-            throw EncryptedRecordException("Parameter $name for $wrapType is not well-formed", cause)
+            throw EncryptedRecordException(
+                "Parameter $name for $wrapType is not well-formed",
+                cause
+            )
         }
     }
 
@@ -108,14 +102,8 @@ data class WrappedDataKey(
         const val KEY_ID_FIELD = "key_id"
         const val WRAPPED_KEY_FIELD = "wrapped_key"
         const val WRAP_PARAMETERS_FIELD = "wrap_parameters"
-
-        /** The nonce the data key was sealed under, for every wrap type that seals with AES-GCM. */
         const val NONCE_PARAMETER = "nonce"
-
-        /** The salt a derived wrapping key was stretched with, for phrase and PIN wraps. */
         const val SALT_PARAMETER = "salt"
-
-        /** The ephemeral public key the device ECDH agreement is completed against. */
         const val EPHEMERAL_PUBLIC_KEY_PARAMETER = "ephemeral_public_key"
 
         /**

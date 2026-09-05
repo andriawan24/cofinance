@@ -31,24 +31,21 @@ import platform.Security.kSecClassGenericPassword
 import platform.Security.kSecReturnData
 import platform.Security.kSecValueData
 
-/** Service of the lock's Keychain items. */
 internal const val LOCK_KEYCHAIN_SERVICE: String = "id.andriawan.cofinance.lock"
-
-/** Account of the failed-attempt counter's generic password item. */
 internal const val FAILED_ATTEMPTS_ACCOUNT: String = "failed-attempts"
 
 /**
  * The failed-attempt counter as a Keychain item.
  *
- * iOS gives the reinstall requirement directly, where Android can only approximate it: a Keychain
+ * iOS gives the reinstallation requirement directly, where Android can only approximate it: a Keychain
  * item belongs to the keychain rather than to the application's container, so deleting the app does
- * not delete it and a reinstall finds the same counter. That is the same property the device key
+ * not delete it and a reinstallation finds the same counter. That is the same property the device key
  * vault relies on for the device secret, and it is why Decision 3's "the counter's persistence is
  * tied to the device key's lifetime" is literally true on this platform.
  *
  * The item is `AfterFirstUnlockThisDeviceOnly`: it never leaves the device, is excluded from
  * backups and from migration to a new device, and is readable after the first unlock following a
- * reboot, which is what lets a write happen even if the app is resumed into the background.
+ * reboot, which is what lets a White happen even if the app is resumed into the background.
  *
  * No additional encryption is layered on top. The Keychain *is* the secure storage the requirement
  * asks for, and another app cannot read or edit an item under this app's keychain access group.

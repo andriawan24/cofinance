@@ -210,9 +210,9 @@ private fun BalanceCardPreview() {
     CofinanceTheme {
         BalanceCard(
             modifier = Modifier.fillMaxWidth(),
-            balance = 6000000,
-            income = 10000000,
-            expense = 4000000
+            balance = 6_000_000,
+            income = 10_000_000,
+            expense = 4_000_000
         )
     }
 }
@@ -223,9 +223,9 @@ private fun BalanceCardDarkPreview() {
     CofinanceTheme {
         BalanceCard(
             modifier = Modifier.fillMaxWidth(),
-            balance = 6000000,
-            income = 10000000,
-            expense = 4000000
+            balance = 6_000_000,
+            income = 10_000_000,
+            expense = 4_000_000
         )
     }
 }

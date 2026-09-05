@@ -76,7 +76,6 @@ class AndroidDeviceKeyVault internal constructor(
 
     private val mutex = Mutex()
 
-    /** Cached only to avoid re-reading the Keystore on every call; holds no secret bytes. */
     private var agreementKey: AgreementKey? = null
 
     override suspend fun devicePublicKey(): ByteArray = guarded {
@@ -165,7 +164,6 @@ class AndroidDeviceKeyVault internal constructor(
     // ---------------------------------------------------------------------------------------
     // Agreement key
     // ---------------------------------------------------------------------------------------
-
     private fun loadOrCreateAgreementKey(): AgreementKey {
         agreementKey?.let { return it }
         val created = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -193,6 +191,7 @@ class AndroidDeviceKeyVault internal constructor(
             KeyProperties.KEY_ALGORITHM_EC,
             KEYSTORE_PROVIDER
         )
+
         val pair = withStrongBoxFallback { strongBox ->
             val spec = KeyGenParameterSpec.Builder(
                 AGREEMENT_KEY_ALIAS,
@@ -204,6 +203,7 @@ class AndroidDeviceKeyVault internal constructor(
             generator.initialize(spec)
             generator.generateKeyPair()
         }
+
         return AgreementKey(pair.private, pair.public.asEcPublicKey())
     }
 
@@ -280,6 +280,7 @@ class AndroidDeviceKeyVault internal constructor(
                 KeyProperties.KEY_ALGORITHM_AES,
                 KEYSTORE_PROVIDER
             )
+
             generator.init(
                 KeyGenParameterSpec.Builder(
                     SEALING_KEY_ALIAS,
@@ -292,6 +293,7 @@ class AndroidDeviceKeyVault internal constructor(
                     .apply { if (strongBox) setIsStrongBoxBacked(true) }
                     .build()
             )
+
             generator.generateKey()
         }
 
@@ -419,9 +421,9 @@ class AndroidDeviceKeyVault internal constructor(
             throw DeviceKeyVaultException("Sealed device agreement key is malformed")
         }
         val privateLength = ((encoded[0].toInt() and 0xFF) shl 24) or
-            ((encoded[1].toInt() and 0xFF) shl 16) or
-            ((encoded[2].toInt() and 0xFF) shl 8) or
-            (encoded[3].toInt() and 0xFF)
+                ((encoded[1].toInt() and 0xFF) shl 16) or
+                ((encoded[2].toInt() and 0xFF) shl 8) or
+                (encoded[3].toInt() and 0xFF)
         if (privateLength <= 0 || 4 + privateLength >= encoded.size) {
             throw DeviceKeyVaultException("Sealed device agreement key is malformed")
         }
@@ -496,8 +498,11 @@ class AndroidDeviceKeyVault internal constructor(
         val y = point.affineY
         val inRange = x.signum() >= 0 && x < prime && y.signum() >= 0 && y < prime
         val onCurve = inRange && y.modPow(BigInteger.valueOf(2), prime) ==
-            (x.modPow(BigInteger.valueOf(3), prime) + parameters.curve.a * x + parameters.curve.b)
-                .mod(prime)
+                (x.modPow(
+                    BigInteger.valueOf(3),
+                    prime
+                ) + parameters.curve.a * x + parameters.curve.b)
+                    .mod(prime)
         if (!onCurve) {
             throw DeviceKeyVaultException("Peer public key is not a point on P-256")
         }
@@ -518,16 +523,9 @@ class AndroidDeviceKeyVault internal constructor(
     }
 
     companion object {
-        /** Keystore alias of the P-256 agreement key. Exposed so a device test can inspect it. */
         const val AGREEMENT_KEY_ALIAS: String = "id.andriawan.cofinance.device.agreement"
-
-        /** Keystore alias of the AES-GCM key that seals the agreement key below API 31. */
         const val SEALING_KEY_ALIAS: String = "id.andriawan.cofinance.device.sealing"
-
-        /** Keystore alias of the HMAC key the device secret is derived from. */
         const val SECRET_KEY_ALIAS: String = "id.andriawan.cofinance.device.secret"
-
-        /** File holding the sealed agreement key below API 31. Empty on API 31 and above. */
         const val SEALED_AGREEMENT_KEY_FILE: String = "device-agreement-key.bin"
 
         private const val KEYSTORE_PROVIDER = "AndroidKeyStore"
@@ -547,16 +545,9 @@ class AndroidDeviceKeyVault internal constructor(
 
 /** Where a piece of device key material ended up, as the platform reports it. */
 enum class DeviceKeySecurityLevel {
-    /** The key lives in the Keystore's software implementation and is not hardware-protected. */
     SOFTWARE,
-
-    /** The key lives in the device's trusted execution environment. */
     TRUSTED_ENVIRONMENT,
-
-    /** The key lives in a dedicated secure element. */
     STRONG_BOX,
-
-    /** The platform declined to say. */
     UNKNOWN
 }
 

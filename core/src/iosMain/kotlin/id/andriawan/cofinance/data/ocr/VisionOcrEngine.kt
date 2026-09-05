@@ -78,8 +78,6 @@ class VisionOcrEngine : OcrEngine {
 
         if (lines.isEmpty()) return OcrResult()
 
-        // Vision has no notion of blocks, and the parser consumes lines, so every
-        // recognized line is grouped into one block.
         return OcrResult(
             blocks = listOf(
                 OcrBlock(

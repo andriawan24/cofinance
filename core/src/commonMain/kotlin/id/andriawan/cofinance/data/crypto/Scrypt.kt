@@ -13,13 +13,9 @@ import dev.whyoleg.cryptography.algorithms.SHA256
  * derivation itself. [PIN] is the set this app actually derives PIN key material under.
  */
 data class ScryptParameters(
-    /** CPU/memory cost. Must be a power of two greater than one; it fixes the working set at 128 * n * r bytes. */
     val n: Int,
-    /** Block size. Raises the size of each memory access, which is what makes the derivation hard to parallelize cheaply. */
     val r: Int,
-    /** Parallelization. Independent [n]-sized passes; raises cost without raising peak memory. */
     val p: Int,
-    /** Length in bytes of the derived key. */
     val derivedKeyLength: Int
 ) {
     init {
@@ -27,8 +23,6 @@ data class ScryptParameters(
         require(r > 0) { "scrypt r must be positive" }
         require(p > 0) { "scrypt p must be positive" }
         require(derivedKeyLength > 0) { "scrypt dkLen must be positive" }
-        // RFC 7914 section 6 bounds r * p; everything below is sized from that product, so checking
-        // it in Long arithmetic is what keeps the Int block sizes from silently wrapping negative.
         require(r.toLong() * p.toLong() < (1L shl 30)) { "scrypt r * p must be less than 2^30" }
         require(128L * r.toLong() * p.toLong() <= Int.MAX_VALUE) { "scrypt r and p are too large" }
         require(n.toLong() * 32L * r.toLong() <= Int.MAX_VALUE) { "scrypt N and r are too large" }
@@ -89,15 +83,12 @@ object Scrypt {
         require(salt.isNotEmpty()) { "scrypt salt must not be empty" }
 
         val blockBytes = 128 * parameters.r
-        // Step 1: expand the password into p independent blocks. One iteration, because the cost of
-        // scrypt lives in ROMix below, not in this expansion.
         val expanded = pbkdf2Sha256(
             password = password,
             salt = salt,
             outputSize = blockBytes * parameters.p
         )
 
-        // Step 2: run each block through ROMix. Words are little-endian throughout, per RFC 7914.
         val block = IntArray(blockBytes / 4)
         for (i in 0 until parameters.p) {
             readLittleEndianInts(expanded, i * blockBytes, block)
@@ -105,7 +96,6 @@ object Scrypt {
             writeLittleEndianInts(block, expanded, i * blockBytes)
         }
 
-        // Step 3: the mixed blocks become the salt of a second single-iteration PBKDF2.
         return pbkdf2Sha256(
             password = password,
             salt = expanded,
@@ -114,7 +104,7 @@ object Scrypt {
     }
 
     /**
-     * RFC 7914 section 5. Fills [block] with `V[j]`-dependent output, in place.
+     * RFC 7914 section 5. Fills [block] with `V.get(j)`-dependent output, in place.
      *
      * The first loop writes N successive BlockMix states into V; the second reads them back at
      * indices derived from the state itself, which is the step that forces the whole of V to be kept.
@@ -132,9 +122,7 @@ object Scrypt {
             val swap = x; x = y; y = swap
         }
 
-        for (i in 0 until n) {
-            // Integerify: the last 64-byte sub-block read as a little-endian integer. N is a power of
-            // two, so masking is the modulo.
+        (0 until n).forEach { _ ->
             val j = x[blockInts - 16] and (n - 1)
             val offset = j * blockInts
             for (k in 0 until blockInts) x[k] = x[k] xor v[offset + k]
@@ -153,7 +141,13 @@ object Scrypt {
      */
     private fun blockMix(input: IntArray, output: IntArray, r: Int, x: IntArray) {
         val subBlocks = 2 * r
-        input.copyInto(x, destinationOffset = 0, startIndex = (subBlocks - 1) * 16, endIndex = subBlocks * 16)
+        input.copyInto(
+            x,
+            destinationOffset = 0,
+            startIndex = (subBlocks - 1) * 16,
+            endIndex = subBlocks * 16
+        )
+
         for (i in 0 until subBlocks) {
             val offset = i * 16
             for (j in 0 until 16) x[j] = x[j] xor input[offset + j]
@@ -172,12 +166,24 @@ object Scrypt {
      */
     @Suppress("LongMethod")
     private fun salsa20Core8(block: IntArray) {
-        var x0 = block[0]; var x1 = block[1]; var x2 = block[2]; var x3 = block[3]
-        var x4 = block[4]; var x5 = block[5]; var x6 = block[6]; var x7 = block[7]
-        var x8 = block[8]; var x9 = block[9]; var x10 = block[10]; var x11 = block[11]
-        var x12 = block[12]; var x13 = block[13]; var x14 = block[14]; var x15 = block[15]
+        var x0 = block[0]
+        var x1 = block[1]
+        var x2 = block[2]
+        var x3 = block[3]
+        var x4 = block[4]
+        var x5 = block[5]
+        var x6 = block[6]
+        var x7 = block[7]
+        var x8 = block[8]
+        var x9 = block[9]
+        var x10 = block[10]
+        var x11 = block[11]
+        var x12 = block[12]
+        var x13 = block[13]
+        var x14 = block[14]
+        var x15 = block[15]
 
-        repeat(4) { // Four double rounds: a column round and a row round each.
+        repeat(4) {
             x4 = x4 xor (x0 + x12).rotateLeft(7)
             x8 = x8 xor (x4 + x0).rotateLeft(9)
             x12 = x12 xor (x8 + x4).rotateLeft(13)
@@ -243,13 +249,17 @@ object Scrypt {
         for (i in destination.indices) {
             val at = sourceOffset + i * 4
             destination[i] = (source[at].toInt() and 0xFF) or
-                ((source[at + 1].toInt() and 0xFF) shl 8) or
-                ((source[at + 2].toInt() and 0xFF) shl 16) or
-                ((source[at + 3].toInt() and 0xFF) shl 24)
+                    ((source[at + 1].toInt() and 0xFF) shl 8) or
+                    ((source[at + 2].toInt() and 0xFF) shl 16) or
+                    ((source[at + 3].toInt() and 0xFF) shl 24)
         }
     }
 
-    private fun writeLittleEndianInts(source: IntArray, destination: ByteArray, destinationOffset: Int) {
+    private fun writeLittleEndianInts(
+        source: IntArray,
+        destination: ByteArray,
+        destinationOffset: Int
+    ) {
         for (i in source.indices) {
             val value = source[i]
             val at = destinationOffset + i * 4

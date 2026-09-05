@@ -39,16 +39,19 @@ class RecordCipher(
                 "Unsupported envelope version ${envelope.version}"
             )
         }
+
         if (envelope.keyId != key.id) {
             throw EncryptedRecordException(
                 "Record was sealed under key ${envelope.keyId}, not ${key.id}"
             )
         }
+
         val plaintext = try {
             key.key.cipher().decryptWithIv(iv = envelope.nonce, ciphertext = envelope.ciphertext)
         } catch (cause: Throwable) {
             throw EncryptedRecordException("Record failed authentication", cause)
         }
+
         return try {
             json.decodeFromString(deserializer, plaintext.decodeToString())
         } catch (cause: SerializationException) {

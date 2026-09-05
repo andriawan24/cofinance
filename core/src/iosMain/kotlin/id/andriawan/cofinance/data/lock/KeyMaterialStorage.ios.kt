@@ -33,7 +33,7 @@ internal const val KEY_MATERIAL_ACCOUNT: String = "key-material"
  * The iOS key material storage: a Keychain generic password holding the serialized document.
  *
  * The Keychain rather than a file in the app container, because it is the storage iOS offers for
- * exactly this and it comes with the two properties this document needs. `ThisDeviceOnly` excludes
+ * exactly this, and it comes with the two properties this document needs. `ThisDeviceOnly` excludes
  * it from iCloud Keychain and from encrypted backups, so the device wrap cannot be carried to
  * another device and quietly work there — the recovery phrase is meant to be the only route onto a
  * new device, and a synchronizing item would silently make it not so. `WhenUnlocked` means the
@@ -45,7 +45,7 @@ internal const val KEY_MATERIAL_ACCOUNT: String = "key-material"
  * document does not, so it takes the stricter class.
  *
  * As with every Keychain item, this outlives an app uninstall. That matches the device key vault,
- * whose key material also survives, so a reinstall finds a device wrap and the platform key it
+ * whose key material also survives, so a reinstallation finds a device wrap and the platform key it
  * opens against still paired rather than a wrap with nothing behind it.
  */
 @OptIn(ExperimentalForeignApi::class)
@@ -75,9 +75,6 @@ internal class KeychainKeyMaterialStorage(
                     }
                 }
 
-                // Anything other than success is treated as "no readable document", which routes
-                // the launch to set up or restore. Throwing here would instead produce an app that
-                // cannot start on a device whose Keychain is momentarily unavailable.
                 else -> null
             }
         }

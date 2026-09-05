@@ -121,29 +121,14 @@ class PinKeyWrapper(
         val stretched = Scrypt.derive(pin.encodeToByteArray(), salt, ScryptParameters.PIN)
         val composed = stretched + deviceSecret
         try {
-            // The salt is passed to HKDF as well as to scrypt. It is not secret in either role, and
-            // reusing it ties both stages of the derivation to the same stored parameter, so an
-            // edited salt fails the whole derivation rather than only its first half.
             return KeyWrapping.wrappingKey(composed, salt = salt, info = INFO)
         } finally {
-            // The stretched PIN and the composition are this function's to discard: either one is
-            // as good as the PIN itself to an attacker who reads process memory afterwards.
             stretched.fill(0)
             composed.fill(0)
         }
     }
 
     private companion object {
-        /**
-         * The HKDF domain separator for this wrap type.
-         *
-         * It differs from the device and phrase separators for the reason described on
-         * [KeyWrapping.wrappingKey]: all three end in an AES-256-GCM seal of the same 32 bytes, and
-         * the separator is what keeps their wrapping keys unrelated, so a copy sealed in one context
-         * cannot be opened by a key derived for another. The trailing version lets a later build
-         * change what is derived — raising the scrypt cost, say — without silently opening copies
-         * written under the older rule.
-         */
         const val INFO = "cofinance/e2ee/data-key-wrap/pin/v1"
     }
 }

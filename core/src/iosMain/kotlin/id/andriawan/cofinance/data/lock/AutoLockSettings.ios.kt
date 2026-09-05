@@ -7,7 +7,7 @@ import platform.Foundation.NSUserDefaults
  *
  * A preference rather than a secret, so it stays out of the Keychain the failed-attempt counter
  * uses: nothing about the data is revealed by the timeout, and keeping it here means a user who
- * reinstalls gets the default back rather than an inherited setting they cannot see.
+ * installs gets the default back rather than an inherited setting they cannot see.
  */
 actual fun createAutoLockSettings(): AutoLockSettings = KeyValueAutoLockSettings(
     readStoredId = { NSUserDefaults.standardUserDefaults.stringForKey(TIMEOUT_KEY) },

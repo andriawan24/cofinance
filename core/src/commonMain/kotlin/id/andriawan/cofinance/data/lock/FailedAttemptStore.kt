@@ -22,29 +22,23 @@ data class FailedAttemptRecord(
  * edited, truncated, or separated from the key that seals it.
  */
 sealed interface StoredFailedAttempts {
-
-    /** Nothing has been written, which is the state before the first failure. */
     data object None : StoredFailedAttempts
-
-    /** A well-formed record, as it was last written. */
     data class Recorded(val record: FailedAttemptRecord) : StoredFailedAttempts
-
-    /** Something is stored under the counter's name and it does not open. */
     data object Unreadable : StoredFailedAttempts
 }
 
 /**
  * Where consecutive failed PIN attempts are counted.
  *
- * The specification requires the count to live in secure storage and to survive a reinstall, and
+ * The specification requires the count to live in secure storage and to survive a reinstallation, and
  * the two platforms deliver that differently enough that the difference is worth stating in the
  * port rather than discovering per implementation:
  *
  * - **iOS** gives it directly. A Keychain item outlives the application that wrote it, so
  *   deleting and reinstalling the app returns to the same counter.
- * - **Android** has no storage that outlives an uninstall. What it has instead is a coupling: the
+ * - **Android** has no storage that outlives an uninstallation. What it has instead is a coupling: the
  *   counter is sealed under a non-extractable Keystore key, and clearing app data or uninstalling
- *   destroys that key *together with* the device key material the PIN protects. A reinstall
+ *   destroys that key *together with* the device key material the PIN protects. A reinstallation
  *   therefore does not hand the attacker a fresh set of attempts against the same wrapped key —
  *   there is no wrapped key left to attack, and access requires the recovery phrase. That is the
  *   property the requirement is after; "the number survives" is not literally true there, and
@@ -55,14 +49,8 @@ sealed interface StoredFailedAttempts {
  * [FailedAttemptGuard] as an absence where a PIN wrap exists.
  */
 interface FailedAttemptStore {
-
-    /** Reads the counter. Implementations never throw for an absent or damaged record. */
     suspend fun read(): StoredFailedAttempts
-
-    /** Writes [record], replacing whatever was stored. */
     suspend fun write(record: FailedAttemptRecord)
-
-    /** Removes the record, which a successful unlock and destruction both do. */
     suspend fun clear()
 }
 

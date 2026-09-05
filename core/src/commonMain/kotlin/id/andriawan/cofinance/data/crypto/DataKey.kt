@@ -17,36 +17,24 @@ import kotlin.io.encoding.ExperimentalEncodingApi
  *
  * The key is held in memory only. Nothing here writes it anywhere.
  */
-class DataKey internal constructor(
-    /** Identifies which key sealed a given record, so a record can be matched to a key. */
-    val id: String,
-    internal val key: AES.GCM.Key
-) {
-
-    /**
-     * Returns the raw key bytes, for the wrapping layer to seal. Callers must not persist or
-     * transmit the result unwrapped.
-     */
+class DataKey internal constructor(val id: String, internal val key: AES.GCM.Key) {
     suspend fun exportRawBytes(): ByteArray = key.encodeToByteArray(AES.Key.Format.RAW)
 
-    /** Describes the key without reproducing any of its bytes. */
     override fun toString(): String = "DataKey(id=$id)"
 
     companion object {
-        /** AES-256, matching the 128-bit security level of the recovery phrase that wraps it. */
         private val KEY_SIZE = AES.Key.Size.B256
 
         private val algorithm get() = CryptographyProvider.Default.get(AES.GCM)
 
-        /** Generates a new data key with a random identifier. */
         suspend fun generate(): DataKey = DataKey(
             id = randomKeyId(),
             key = algorithm.keyGenerator(KEY_SIZE).generateKey()
         )
 
-        /** Rebuilds a data key from bytes the wrapping layer has just unwrapped. */
         suspend fun fromRawBytes(id: String, raw: ByteArray): DataKey {
             require(raw.size == RAW_KEY_BYTES) { "Data key must be $RAW_KEY_BYTES bytes" }
+
             return DataKey(
                 id = id,
                 key = algorithm.keyDecoder().decodeFromByteArray(AES.Key.Format.RAW, raw)

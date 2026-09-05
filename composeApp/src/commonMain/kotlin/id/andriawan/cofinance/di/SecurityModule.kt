@@ -45,16 +45,11 @@ val securityModule = module {
     // ------------------------------------------------------------------------------------------
     // Local key material
     // ------------------------------------------------------------------------------------------
-
-    // Durable, and the only local key material store there is. The device wrap has to outlive the
-    // process: the backend holds the recovery-phrase wrap alone, so if this were per-process every
-    // relaunch would present setup or restore.
     single<LocalKeyMaterialStore> { StoredLocalKeyMaterialStore(createKeyMaterialStorage()) }
 
     // ------------------------------------------------------------------------------------------
-    // The lock
+    // App Lock
     // ------------------------------------------------------------------------------------------
-
     single<FailedAttemptStore> { createFailedAttemptStore() }
     single<BiometricKeyBox> { createBiometricKeyBox() }
     single<AutoLockSettings> { createAutoLockSettings() }
@@ -63,8 +58,6 @@ val securityModule = module {
     single { PinKeyWrapper(get()) }
     singleOf(::BiometricUnlock)
     singleOf(::LocalKeyMaterialDestroyer)
-    // Constructed explicitly: the trailing LockClock has a default that tests replace and that the
-    // graph has no business resolving.
     single { FailedAttemptGuard(get(), get(), get()) }
     singleOf(::AppLock)
 

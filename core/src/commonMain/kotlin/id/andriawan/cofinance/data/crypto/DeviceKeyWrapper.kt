@@ -42,9 +42,6 @@ class DeviceKeyWrapper(
             throw KeyWrapException("Device public key is not a usable P-256 point", cause)
         }
 
-        // No salt is stored for this wrap: the ECDH output is already a full-entropy secret, so
-        // HKDF's extract step has nothing to concentrate, and the per-wrap freshness a salt would
-        // add comes from the ephemeral key pair, which has to be stored regardless.
         val wrappingKey = KeyWrapping.wrappingKey(sharedSecret, salt = null, info = INFO)
         val nonce = random.nextBytes(KeyWrapping.NONCE_SIZE)
         return WrappedDataKey.of(
@@ -54,7 +51,7 @@ class DeviceKeyWrapper(
             parameters = mapOf(
                 WrappedDataKey.NONCE_PARAMETER to nonce,
                 WrappedDataKey.EPHEMERAL_PUBLIC_KEY_PARAMETER to
-                    ephemeral.publicKey.encodeToByteArray(EC.PublicKey.Format.RAW)
+                        ephemeral.publicKey.encodeToByteArray(EC.PublicKey.Format.RAW)
             )
         )
     }
@@ -83,15 +80,6 @@ class DeviceKeyWrapper(
     }
 
     private companion object {
-        /**
-         * The HKDF domain separator for this wrap type.
-         *
-         * It differs from every other wrap type's for the reason described on
-         * [KeyWrapping.wrappingKey]: the separator is the only thing keeping two derivations that
-         * both end in an AES-256-GCM wrap of the same data key from producing interchangeable keys.
-         * The trailing version lets a later build change what is derived without silently opening
-         * copies written under the older rule.
-         */
         const val INFO = "cofinance/e2ee/data-key-wrap/device/v1"
     }
 }

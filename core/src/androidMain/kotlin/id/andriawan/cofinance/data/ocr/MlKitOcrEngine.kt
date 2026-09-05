@@ -21,7 +21,6 @@ import kotlin.coroutines.resumeWithException
  * delivered by Play services so a first scan cannot fail on a model download.
  */
 class MlKitOcrEngine : OcrEngine {
-
     private val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
 
     override suspend fun recognize(image: ByteArray): OcrResult {

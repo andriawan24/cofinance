@@ -1,5 +1,7 @@
 package id.andriawan.cofinance.data.lock
 
+import androidx.core.content.edit
+
 /**
  * The auto-lock choice in ordinary app preferences.
  *
@@ -11,7 +13,7 @@ package id.andriawan.cofinance.data.lock
 actual fun createAutoLockSettings(): AutoLockSettings = KeyValueAutoLockSettings(
     readStoredId = { LockStorage.preferences().getString(TIMEOUT_KEY, null) },
     writeStoredId = { value ->
-        LockStorage.preferences().edit().putString(TIMEOUT_KEY, value).apply()
+        LockStorage.preferences().edit { putString(TIMEOUT_KEY, value) }
     }
 )
 

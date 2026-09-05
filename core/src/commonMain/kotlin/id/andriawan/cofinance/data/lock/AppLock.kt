@@ -11,29 +11,18 @@ import id.andriawan.cofinance.data.keyring.InMemoryEncryptionSession
 import kotlinx.coroutines.flow.StateFlow
 import kotlin.time.Duration
 
-/** What a PIN unlock produced. */
 sealed interface PinUnlockResult {
-
-    /** The data key is in memory and the app is usable. */
     data object Unlocked : PinUnlockResult
-
-    /** The PIN did not open the wrap. */
     data class Incorrect(
         val attemptsRemaining: Int,
         val nextAttemptDelay: Duration
     ) : PinUnlockResult
 
-    /** The escalating delay has not elapsed; no derivation was attempted. */
     data class Throttled(val remaining: Duration) : PinUnlockResult
-
-    /** Consecutive failures reached the threshold. Only the recovery phrase restores access. */
     data object KeyMaterialDestroyed : PinUnlockResult
-
-    /** This device holds no PIN wrap, so there is nothing to unlock with a PIN. */
     data object PinNotSet : PinUnlockResult
 }
 
-/** What checking the PIN produced, for callers that need the key rather than a session. */
 sealed interface PinVerification {
 
     /** The PIN was correct. [dataKey] is in memory and is the caller's to use and drop. */
@@ -49,15 +38,9 @@ sealed interface PinVerification {
     data object PinNotSet : PinVerification
 }
 
-/** What setting, changing, or removing the PIN produced. */
 sealed interface PinChangeResult {
-
     data object Changed : PinChangeResult
-
-    /** The current PIN is required to change or remove an existing one, and was wrong or absent. */
     data class CurrentPinRejected(val verification: PinVerification) : PinChangeResult
-
-    /** No PIN is set yet and the session is locked, so there is no data key to wrap. */
     data object SessionLocked : PinChangeResult
 }
 
@@ -89,20 +72,14 @@ class AppLock(
     private val biometrics: BiometricUnlock,
     val autoLockSettings: AutoLockSettings
 ) {
-
-    /** The session state the UI gates finance data on: unlock is required before anything shows. */
     val state: StateFlow<EncryptionSessionState> get() = session.state
 
-    /** Whether this device holds a PIN wrap at all. */
     suspend fun isPinSet(): Boolean = pinWrap() != null
 
-    /** Whether biometric unlock is on. */
     suspend fun isBiometricEnabled(): Boolean = biometrics.isEnabled()
 
-    /** Whether a biometric prompt could be shown, for the settings toggle's enabled state. */
     suspend fun biometricCapability(): BiometricCapability = biometrics.capability()
 
-    /** Unlocks the session with [pin], or explains why it did not. */
     suspend fun unlockWithPin(pin: String): PinUnlockResult = when (val outcome = verifyPin(pin)) {
         is PinVerification.Verified -> {
             session.unlock(outcome.dataKey)
@@ -136,9 +113,6 @@ class AppLock(
         val dataKey = try {
             pinKeyWrapper.unwrap(wrap, pin)
         } catch (_: KeyWrapException) {
-            // The wrong PIN and a wrap carried to another device fail identically here, by design:
-            // the derivation produces a different wrapping key and AES-GCM refuses it. Nothing in
-            // this catch inspects why, so there is no branch an attacker could aim at.
             return when (val outcome = attempts.recordFailure()) {
                 is FailedAttemptOutcome.Counted -> PinVerification.Incorrect(
                     attemptsRemaining = outcome.attemptsRemaining,
@@ -161,8 +135,6 @@ class AppLock(
      */
     suspend fun unlockWithBiometric(prompt: BiometricPromptText): BiometricUnlockResult {
         if (pinWrap() == null) {
-            // A biometric copy with no PIN behind it should not exist; if one somehow does, it is
-            // not honored, because Decision 4 makes the PIN the floor rather than an option.
             return BiometricUnlockResult.FellBackToPin(PinFallbackReason.NotEnabled)
         }
         val result = biometrics.unlock(prompt)
@@ -196,11 +168,9 @@ class AppLock(
         )
         val replaced = document.copy(
             wrappedKeys = document.wrappedKeys.filterNot { it.type == KeyWrapType.Pin } +
-                pinKeyWrapper.wrap(dataKey, newPin)
+                    pinKeyWrapper.wrap(dataKey, newPin)
         )
         keyMaterial.write(replaced)
-        // Arming after the write, so an interruption leaves a device with no PIN wrap and no
-        // counter rather than a counter whose absence would later read as tampering.
         attempts.arm()
         return PinChangeResult.Changed
     }
@@ -244,10 +214,8 @@ class AppLock(
         }
     }
 
-    /** Turns biometric unlock off. Subsequent unlocks require the PIN. */
     suspend fun disableBiometric() = biometrics.disable()
 
-    /** Drops the data key from memory, which is what auto-lock and an explicit lock both do. */
     fun lock() = session.lock()
 
     private suspend fun pinWrap(): WrappedDataKey? =
