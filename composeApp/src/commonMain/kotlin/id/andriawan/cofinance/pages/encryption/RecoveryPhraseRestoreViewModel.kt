@@ -30,20 +30,20 @@ import kotlinx.coroutines.launch
 /**
  * Why a restore attempt did not work, kept apart so the screen can say something useful.
  *
- * The three parse failures are distinct because the user can act on each differently: a word that
- * is not in the list at all is a spelling mistake they can see, whereas a phrase whose every word
- * is real but which does not check out means a word is wrong or out of order, which reading it back
- * will not reveal.
+ * The three parse failures are distinct because the user can act on each differently: a group that
+ * could never be part of any phrase is a transcription mistake they can see, whereas a phrase whose
+ * every group is well formed but which does not check out means a group is wrong or out of order,
+ * which reading it back will not reveal.
  */
 sealed interface RecoveryPhraseEntryError {
 
-    /** [actual] words were entered where twelve were expected. */
-    data class WrongWordCount(val actual: Int) : RecoveryPhraseEntryError
+    /** [actual] groups were entered where six were expected. */
+    data class WrongGroupCount(val actual: Int) : RecoveryPhraseEntryError
 
-    /** The word at 1-based [position] is not in the recovery wordlist. */
-    data class UnknownWord(val position: Int, val word: String) : RecoveryPhraseEntryError
+    /** The group at 1-based [position] is not one this app could ever have produced. */
+    data class MalformedGroup(val position: Int, val group: String) : RecoveryPhraseEntryError
 
-    /** Every word is real, but the phrase as a whole is not one this app ever produced. */
+    /** Every group is well formed, but the phrase as a whole is not one this app ever produced. */
     data object ChecksumFailed : RecoveryPhraseEntryError
 
     /** A well-formed phrase that does not open this account's key material. */
@@ -86,7 +86,7 @@ sealed interface RecoveryPhraseRestoreUiEvent {
  * the last two statements in the flow and each is a single batch upsert.
  *
  * Retrying is always available: nothing here is one-shot, and a failed attempt leaves the typed
- * phrase in place so the user can correct one word rather than all twelve.
+ * phrase in place so the user can correct one group rather than all six.
  */
 @Stable
 class RecoveryPhraseRestoreViewModel(
@@ -123,13 +123,13 @@ class RecoveryPhraseRestoreViewModel(
         val phrase = when (val parsed = RecoveryPhrase.parse(state.phraseInput)) {
             is RecoveryPhraseResult.Valid -> parsed.phrase
 
-            is RecoveryPhraseResult.WrongWordCount ->
-                return fail(RecoveryPhraseEntryError.WrongWordCount(parsed.actual))
+            is RecoveryPhraseResult.WrongGroupCount ->
+                return fail(RecoveryPhraseEntryError.WrongGroupCount(parsed.actual))
 
-            is RecoveryPhraseResult.UnknownWords -> {
-                // The first unknown word is the one to fix; reporting all of them at once buries it.
-                val first = parsed.words.first()
-                return fail(RecoveryPhraseEntryError.UnknownWord(first.position, first.word))
+            is RecoveryPhraseResult.MalformedGroups -> {
+                // The first bad group is the one to fix; reporting all of them at once buries it.
+                val first = parsed.groups.first()
+                return fail(RecoveryPhraseEntryError.MalformedGroup(first.position, first.group))
             }
 
             is RecoveryPhraseResult.ChecksumFailed ->
@@ -192,7 +192,7 @@ class RecoveryPhraseRestoreViewModel(
 
         // The user just proved they hold the phrase, so this device can offer re-display too. It is
         // the phrase that was typed rather than one read back from anywhere, so a restore onto a
-        // second device leaves both able to show the same words.
+        // second device leaves both able to show the same phrase.
         recoveryPhraseVault.store(phrase, dataKey)
 
         localAccountSource.upsertAccounts(accounts)

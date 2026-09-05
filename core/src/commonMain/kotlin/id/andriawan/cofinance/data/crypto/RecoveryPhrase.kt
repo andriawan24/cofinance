@@ -5,24 +5,30 @@ import dev.whyoleg.cryptography.algorithms.SHA256
 import dev.whyoleg.cryptography.random.CryptographyRandom
 
 /**
- * The 12-word BIP-0039 phrase that is the user's only route back to their synchronized data.
+ * The recovery phrase that is the user's only route back to their synchronized data: six groups of
+ * four characters drawn from lowercase letters, uppercase letters and digits, such as
+ * `k3Rm 9XaQ 2mNp 7fTz bW4h Ld6s`.
  *
- * 12 words carry 128 bits of entropy, which matches the security level of everything the phrase
- * wraps, so the extra words of a 24-word phrase would protect nothing while being materially harder
- * to transcribe by hand. The entropy is what the wrapping layer derives from; the words exist so
- * that a human can write it down and read it back, and the checksum exists so that a mistake made
- * doing so is caught at entry rather than surfacing as an unopenable wrap.
+ * The phrase carries 128 bits of entropy, which matches the security level of everything it wraps.
+ * The entropy is what the wrapping layer derives from; the groups exist so that a human can write it
+ * down and read it back, and the checksum exists so that a mistake made doing so is caught at entry
+ * rather than surfacing as an unopenable wrap.
+ *
+ * Four characters of the 58-character alphabet hold the 22 bits each group encodes, and six groups
+ * carry the 128 bits of entropy plus 4 checksum bits exactly, with nothing left over. The alphabet
+ * omits `0`, `O`, `I` and `l` because the phrase is meant to be copied by hand, and those four are
+ * the pairs a reader confuses. Everything else about the phrase is case-sensitive: unlike a wordlist
+ * phrase, `k3Rm` and `K3rm` are different groups, so entry is not normalized beyond whitespace.
  *
  * A phrase is held in memory only. Nothing here writes it anywhere, and nothing here logs it.
  */
 class RecoveryPhrase private constructor(
-    /** The 12 words in order. Position is part of the encoding, so the list must not be reordered. */
-    val words: List<String>,
+    val groups: List<String>,
     private val entropy: ByteArray
 ) {
 
     /** The phrase as a single space-separated line, for display and for the confirmation step. */
-    val text: String get() = words.joinToString(separator = " ")
+    val text: String get() = groups.joinToString(separator = " ")
 
     /**
      * Returns the 128 bits of entropy this phrase encodes, for the wrapping layer to derive a key
@@ -31,34 +37,49 @@ class RecoveryPhrase private constructor(
      */
     fun toEntropy(): ByteArray = entropy.copyOf()
 
-    /** Describes the phrase without reproducing any of its words. */
-    override fun toString(): String = "RecoveryPhrase($WORD_COUNT words)"
+    /** Describes the phrase without reproducing any of its groups. */
+    override fun toString(): String = "RecoveryPhrase($GROUP_COUNT groups)"
 
     companion object {
-        /** Fixed by Decision 5: 12 words, 128 bits, 4 checksum bits. */
-        const val WORD_COUNT: Int = 12
+        /** Six groups of four characters: 128 bits of entropy plus 4 checksum bits. */
+        const val GROUP_COUNT: Int = 6
+        const val GROUP_LENGTH: Int = 4
         const val ENTROPY_BYTES: Int = 16
 
-        /** Each word encodes one index into the 2048-entry wordlist, so 11 bits per word. */
-        private const val INDEX_BITS = 11
-        private const val INDEX_MASK = (1 shl INDEX_BITS) - 1
+        /**
+         * The characters a group may contain, in the order that gives each its digit value.
+         *
+         * Lowercase, uppercase and digits, less `0`, `O`, `I` and `l`. Fifty-eight characters is
+         * enough that four of them cover the 22 bits a group carries, so dropping the confusable
+         * four costs nothing.
+         */
+        const val ALPHABET: String =
+            "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
 
-        /** BIP-0039 appends entropy-length-in-bits / 32 checksum bits; 128 / 32 is 4. */
+        /** 6 groups * 22 bits is 132 bits, which is the entropy plus its checksum exactly. */
+        private const val GROUP_BITS = 22
+        private const val GROUP_MASK = (1 shl GROUP_BITS) - 1
+
+        /** A four-character group can spell values up to 58^4, of which only these are phrases. */
+        private const val GROUP_LIMIT = 1 shl GROUP_BITS
+
+        /** Entropy-length-in-bits / 32 checksum bits, as BIP-0039 does it; 128 / 32 is 4. */
         private const val CHECKSUM_BITS = ENTROPY_BYTES * 8 / 32
 
         private val digest get() = CryptographyProvider.Default.get(SHA256)
 
-        /** Runs of any whitespace separate words, so a phrase pasted across lines still parses. */
+        private val valueByChar: Map<Char, Int> by lazy {
+            ALPHABET.withIndex().associate { (value, char) -> char to value }
+        }
+
+        /** Runs of any whitespace separate groups, so a phrase pasted across lines still parses. */
         private val WHITESPACE = Regex("\\s+")
 
         /** Generates a new phrase from 128 bits drawn from the platform CSPRNG. */
         suspend fun generate(): RecoveryPhrase =
             fromEntropy(CryptographyRandom.nextBytes(ENTROPY_BYTES))
 
-        /**
-         * Encodes [entropy] as a phrase. Exposed for the published BIP-0039 test vectors, which pin
-         * this encoding to the standard rather than to this implementation.
-         */
+        /** Encodes [entropy] as a phrase. Exposed so the encoding can be pinned by test vectors. */
         suspend fun fromEntropy(entropy: ByteArray): RecoveryPhrase {
             require(entropy.size == ENTROPY_BYTES) { "Entropy must be $ENTROPY_BYTES bytes" }
             return RecoveryPhrase(encode(entropy), entropy.copyOf())
@@ -67,84 +88,109 @@ class RecoveryPhrase private constructor(
         /**
          * Parses a phrase the user typed.
          *
-         * Input is normalized before anything is looked up: surrounding whitespace is trimmed, runs
-         * of whitespace between words are collapsed, and words are lowercased. All three are safe
-         * because the BIP-0039 English wordlist is lowercase ASCII with no multi-word entries, so
-         * normalization can only turn an input that a human would call correct into one that
-         * matches — it can never turn one valid phrase into a different valid phrase. It is worth
-         * doing because phones capitalize the first word of a text field by default and a phrase
-         * read off paper arrives with arbitrary spacing and line breaks; without this, a user who
-         * typed their phrase perfectly would be told it was wrong.
+         * Input is normalized only where normalizing cannot change which phrase was meant:
+         * surrounding whitespace is trimmed and runs of whitespace between groups are collapsed, so
+         * a phrase read off paper with arbitrary spacing and line breaks still parses. Case is left
+         * alone, because case carries entropy here — which is also why the entry field must not
+         * autocapitalize.
          *
          * The result distinguishes the three ways entry fails so the screen can say which one
-         * happened: the wrong number of words, words that are not in the list at all, or the right
-         * words with a checksum that does not hold — which is what a swapped or transposed word
-         * looks like.
+         * happened: the wrong number of groups, a group that could never be part of any phrase, or
+         * six well-formed groups with a checksum that does not hold — which is what a mistyped or
+         * transposed group looks like.
          */
         suspend fun parse(input: String): RecoveryPhraseResult {
-            val words = input.trim().split(WHITESPACE)
-                .filter(String::isNotEmpty)
-                .map(String::lowercase)
+            val groups = input.trim().split(WHITESPACE).filter(String::isNotEmpty)
 
-            if (words.size != WORD_COUNT) return RecoveryPhraseResult.WrongWordCount(words.size)
+            if (groups.size != GROUP_COUNT) return RecoveryPhraseResult.WrongGroupCount(groups.size)
 
-            val indices = IntArray(WORD_COUNT)
-            val unknown = mutableListOf<RecoveryPhraseResult.UnknownWord>()
-            words.forEachIndexed { position, word ->
-                val index = Bip39EnglishWordlist.indexOf(word)
-                if (index < 0) {
-                    unknown += RecoveryPhraseResult.UnknownWord(position = position + 1, word = word)
+            val values = IntArray(GROUP_COUNT)
+            val malformed = mutableListOf<RecoveryPhraseResult.MalformedGroup>()
+            groups.forEachIndexed { position, group ->
+                val value = valueOf(group)
+                if (value == null) {
+                    malformed += RecoveryPhraseResult.MalformedGroup(
+                        position = position + 1,
+                        group = group
+                    )
                 } else {
-                    indices[position] = index
+                    values[position] = value
                 }
             }
-            if (unknown.isNotEmpty()) return RecoveryPhraseResult.UnknownWords(unknown)
+            if (malformed.isNotEmpty()) return RecoveryPhraseResult.MalformedGroups(malformed)
 
             val entropy = ByteArray(ENTROPY_BYTES)
-            val checksum = decode(indices, entropy)
+            val checksum = decode(values, entropy)
             if (checksum != checksumOf(entropy)) return RecoveryPhraseResult.ChecksumFailed
 
-            return RecoveryPhraseResult.Valid(RecoveryPhrase(words, entropy))
+            return RecoveryPhraseResult.Valid(RecoveryPhrase(groups, entropy))
         }
 
         /**
-         * Appends the checksum byte to [entropy] and reads the concatenation 11 bits at a time. The
-         * 136 available bits yield 12 indices and leave 4 unread, which is exactly the discipline
+         * Appends the checksum byte to [entropy] and reads the concatenation 22 bits at a time. The
+         * 136 available bits yield 6 groups and leave 4 unread, which is the same discipline
          * BIP-0039 describes as taking the leading 4 checksum bits.
          */
         private suspend fun encode(entropy: ByteArray): List<String> {
             val source = entropy + digest.hasher().hash(entropy)[0]
-            val words = ArrayList<String>(WORD_COUNT)
+            val groups = ArrayList<String>(GROUP_COUNT)
             var accumulator = 0
             var pending = 0
             for (byte in source) {
                 accumulator = (accumulator shl 8) or (byte.toInt() and 0xFF)
                 pending += 8
-                while (pending >= INDEX_BITS && words.size < WORD_COUNT) {
-                    pending -= INDEX_BITS
-                    words += Bip39EnglishWordlist.words[(accumulator ushr pending) and INDEX_MASK]
+                while (pending >= GROUP_BITS && groups.size < GROUP_COUNT) {
+                    pending -= GROUP_BITS
+                    groups += spell((accumulator ushr pending) and GROUP_MASK)
                 }
             }
-            return words
+            return groups
         }
 
         /**
-         * The inverse of [encode]: fills [entropy] from the 11-bit indices and returns the 4 bits
-         * left over, which are the checksum the phrase claims.
+         * The inverse of [encode]: fills [entropy] from the 22-bit group values and returns the 4
+         * bits left over, which are the checksum the phrase claims.
          */
-        private fun decode(indices: IntArray, entropy: ByteArray): Int {
+        private fun decode(values: IntArray, entropy: ByteArray): Int {
             var accumulator = 0
             var pending = 0
             var written = 0
-            for (index in indices) {
-                accumulator = (accumulator shl INDEX_BITS) or index
-                pending += INDEX_BITS
+            for (value in values) {
+                accumulator = (accumulator shl GROUP_BITS) or value
+                pending += GROUP_BITS
                 while (pending >= 8 && written < entropy.size) {
                     pending -= 8
                     entropy[written++] = ((accumulator ushr pending) and 0xFF).toByte()
                 }
             }
             return accumulator and ((1 shl pending) - 1)
+        }
+
+        /** Writes [value] as [GROUP_LENGTH] alphabet characters, most significant first. */
+        private fun spell(value: Int): String {
+            val characters = CharArray(GROUP_LENGTH)
+            var remaining = value
+            for (position in GROUP_LENGTH - 1 downTo 0) {
+                characters[position] = ALPHABET[remaining % ALPHABET.length]
+                remaining /= ALPHABET.length
+            }
+            return characters.concatToString()
+        }
+
+        /**
+         * The inverse of [spell], or null when [group] is not something [spell] could have written:
+         * the wrong length, a character outside the alphabet, or a value above the 22 bits a group
+         * carries — the last of which is possible because four characters can spell more values
+         * than a group is allowed to hold.
+         */
+        private fun valueOf(group: String): Int? {
+            if (group.length != GROUP_LENGTH) return null
+            var value = 0
+            for (character in group) {
+                val digit = valueByChar[character] ?: return null
+                value = value * ALPHABET.length + digit
+            }
+            return value.takeIf { it < GROUP_LIMIT }
         }
 
         /** The leading [CHECKSUM_BITS] bits of SHA-256 over the entropy. */
@@ -156,24 +202,25 @@ class RecoveryPhrase private constructor(
 /**
  * The outcome of parsing a phrase the user typed.
  *
- * The failures are kept apart because the screen has something different to say about each: an
- * unknown word is a spelling problem the user can see and fix, whereas a checksum failure means
- * every word is real but at least one is the wrong real word, which the user cannot spot by reading.
+ * The failures are kept apart because the screen has something different to say about each: a
+ * malformed group is a transcription problem the user can see and fix, whereas a checksum failure
+ * means every group is well formed but at least one is the wrong group, which the user cannot spot
+ * by reading.
  */
 sealed interface RecoveryPhraseResult {
 
     /** The phrase parsed and its checksum holds. */
     data class Valid(val phrase: RecoveryPhrase) : RecoveryPhraseResult
 
-    /** [actual] words were entered where [RecoveryPhrase.WORD_COUNT] were expected. */
-    data class WrongWordCount(val actual: Int) : RecoveryPhraseResult
+    /** [actual] groups were entered where [RecoveryPhrase.GROUP_COUNT] were expected. */
+    data class WrongGroupCount(val actual: Int) : RecoveryPhraseResult
 
-    /** One or more entered words are not in the BIP-0039 English wordlist. */
-    data class UnknownWords(val words: List<UnknownWord>) : RecoveryPhraseResult
+    /** One or more entered groups are not something this app could ever have produced. */
+    data class MalformedGroups(val groups: List<MalformedGroup>) : RecoveryPhraseResult
 
-    /** Every word is in the wordlist, but the phrase as a whole does not check out. */
+    /** Every group is well formed, but the phrase as a whole does not check out. */
     data object ChecksumFailed : RecoveryPhraseResult
 
-    /** A word that is not in the wordlist, at its 1-based [position] in the entered phrase. */
-    data class UnknownWord(val position: Int, val word: String)
+    /** A group that is not a valid group, at its 1-based [position] in the entered phrase. */
+    data class MalformedGroup(val position: Int, val group: String)
 }

@@ -8,7 +8,7 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 /**
- * Where this device keeps the words, so that security settings can show them again.
+ * Where this device keeps the phrase, so that security settings can show it again.
  *
  * Decision 10 makes the recovery phrase re-displayable rather than show-once, and nothing else in
  * the system can supply it: the recovery-phrase wrap is a copy of the data key sealed *under* the

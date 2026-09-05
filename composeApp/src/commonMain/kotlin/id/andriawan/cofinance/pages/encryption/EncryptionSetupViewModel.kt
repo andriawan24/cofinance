@@ -33,7 +33,7 @@ enum class EncryptionSetupStep {
     /** Key material already exists for this account, so the restore flow owns this device. */
     RestoreRequired,
 
-    /** The twelve words are on screen, to be copied, saved to a file, or written down. */
+    /** The six groups are on screen, to be copied, saved to a file, or written down. */
     PhraseDisplay,
 
     /** Key material is published and the session holds the data key. */
@@ -50,7 +50,7 @@ sealed interface EncryptionSetupError {
 @Stable
 data class EncryptionSetupUiState(
     val step: EncryptionSetupStep = EncryptionSetupStep.Preparing,
-    val words: List<String> = emptyList(),
+    val groups: List<String> = emptyList(),
     val isBusy: Boolean = false,
     val error: EncryptionSetupError? = null,
     val exportStatus: PhraseExportStatus? = null
@@ -70,13 +70,13 @@ sealed interface EncryptionSetupUiEvent {
  * gating lives in navigation; what lives here is the sequence that publishes key material and then
  * unlocks the session, and the rule that neither happens until the user has moved past the phrase.
  *
- * Setup no longer asks for words back. Re-typing three words proved little — the phrase was on the
- * screen above, so the test was satisfied by copying from it — while costing every user a typing
- * exercise. Keeping the phrase is offered instead of examined: it can go on the clipboard or into a
+ * Setup no longer asks for part of the phrase back. Re-typing three groups proved little — the
+ * phrase was on the screen above, so the test was satisfied by copying from it — while costing every
+ * user a typing exercise. Keeping the phrase is offered instead of examined: it can go on the clipboard or into a
  * file in one tap, and the user says when they are done with it.
  *
  * The data key and the phrase are held in fields rather than in [EncryptionSetupUiState], because
- * state is what the screen renders and neither of those belongs in a recomposition. The words
+ * state is what the screen renders and neither of those belongs in a recomposition. The groups
  * themselves do reach the state — they have to be read off the screen — but the entropy behind them
  * does not.
  *
@@ -149,7 +149,7 @@ class EncryptionSetupViewModel(
         _uiState.update {
             it.copy(
                 step = EncryptionSetupStep.PhraseDisplay,
-                words = phrase.words,
+                groups = phrase.groups,
                 isBusy = false
             )
         }
@@ -186,7 +186,7 @@ class EncryptionSetupViewModel(
             // Uploads the recovery-phrase wrap only; the gate decides what may leave the device.
             keyMaterialGate.publishKeyMaterial(material)
             localKeyMaterialStore.write(material)
-            // Kept so security settings can show the words again, per Decision 10. It is sealed
+            // Kept so security settings can show the phrase again, per Decision 10. It is sealed
             // under the data key, so it is stored after the material that makes that key openable
             // and before the session is unlocked: an interruption here leaves a device that can
             // still be unlocked and restored, only without re-display.

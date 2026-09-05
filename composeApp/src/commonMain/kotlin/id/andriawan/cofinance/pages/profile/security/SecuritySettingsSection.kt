@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -297,7 +298,7 @@ fun SecuritySettingsContent(
 
     if (uiState.revealedPhrase.isNotEmpty()) {
         RevealedPhraseDialog(
-            words = uiState.revealedPhrase,
+            groups = uiState.revealedPhrase,
             exportStatus = uiState.exportStatus,
             onEvent = onEvent,
             onDismiss = { onEvent(SecuritySettingsUiEvent.RecoveryPhraseDismissed) }
@@ -489,7 +490,7 @@ private fun SecurityPinPromptDialog(
 
 @Composable
 private fun RevealedPhraseDialog(
-    words: List<String>,
+    groups: List<String>,
     exportStatus: PhraseExportStatus?,
     onEvent: (SecuritySettingsUiEvent) -> Unit,
     onDismiss: () -> Unit
@@ -521,10 +522,13 @@ private fun RevealedPhraseDialog(
                         .padding(Dimensions.SIZE_16),
                     verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)
                 ) {
-                    words.forEachIndexed { index, word ->
+                    groups.forEachIndexed { index, group ->
                         Text(
-                            text = "${index + 1}. $word",
+                            text = "${index + 1}. $group",
+                            // Monospace, for the same reason setup uses it: the groups mix cases
+                            // and digits, and copying them down means telling them apart.
                             style = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.Medium
                             ),
                             color = MaterialTheme.colorScheme.onSurface

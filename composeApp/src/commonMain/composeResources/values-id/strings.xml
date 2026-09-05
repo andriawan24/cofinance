@@ -153,29 +153,29 @@
     <string name="title_encryption_setup">Siapkan enkripsi</string>
     <string name="description_encryption_setup">Cofinance mengenkripsi akun dan transaksi Anda di perangkat ini sebelum disinkronkan. Salinan yang tersimpan di cloud tidak dapat dibaca tanpa kunci yang ada di perangkat Anda.</string>
     <string name="title_recovery_phrase">Frasa pemulihan Anda</string>
-    <string name="description_recovery_phrase">Simpan 12 kata ini, sesuai urutannya, di tempat yang aman. Salin ke pengelola kata sandi, simpan sebagai berkas, atau tulis di kertas.</string>
-    <string name="warning_recovery_phrase_loss">Jika Anda kehilangan 12 kata ini dan kehilangan perangkat ini, akun dan transaksi yang sudah tersinkronisasi akan hilang selamanya. Tidak ada seorang pun yang dapat mengembalikannya — baik kami maupun pihak lain. Tidak ada pengaturan ulang dan tidak ada kode cadangan.</string>
+    <string name="description_recovery_phrase">Simpan 6 kelompok ini, sesuai urutannya, di tempat yang aman. Huruf besar, huruf kecil, dan angka semuanya berpengaruh. Salin ke pengelola kata sandi, simpan sebagai berkas, atau tulis di kertas.</string>
+    <string name="warning_recovery_phrase_loss">Jika Anda kehilangan 6 kelompok ini dan kehilangan perangkat ini, akun dan transaksi yang sudah tersinkronisasi akan hilang selamanya. Tidak ada seorang pun yang dapat mengembalikannya — baik kami maupun pihak lain. Tidak ada pengaturan ulang dan tidak ada kode cadangan.</string>
     <string name="note_local_data_not_encrypted">Ini tidak mengenkripsi salinan yang tersimpan di ponsel ini. Yang dilindungi adalah salinan yang disinkronkan ke cloud.</string>
     <string name="action_copy_recovery_phrase">Salin frasa</string>
     <string name="action_download_recovery_phrase">Simpan sebagai berkas</string>
-    <string name="note_recovery_phrase_export">Menyalin atau menyimpan berarti kata-kata itu berada di luar Cofinance. Simpanlah di pengelola kata sandi atau tempat yang hanya bisa Anda akses.</string>
-    <string name="message_recovery_phrase_copied">Frasa disalin. Kata-kata itu tetap ada di papan klip sampai tergantikan oleh salinan lain.</string>
-    <string name="message_recovery_phrase_copy_failed">Frasa tidak dapat disalin. Tuliskan kata-katanya secara manual.</string>
+    <string name="note_recovery_phrase_export">Menyalin atau menyimpan berarti frasa itu berada di luar Cofinance. Simpanlah di pengelola kata sandi atau tempat yang hanya bisa Anda akses.</string>
+    <string name="message_recovery_phrase_copied">Frasa disalin. Frasa itu tetap ada di papan klip sampai tergantikan oleh salinan lain.</string>
+    <string name="message_recovery_phrase_copy_failed">Frasa tidak dapat disalin. Tuliskan frasanya secara manual.</string>
     <string name="message_recovery_phrase_saved">Tersimpan di %1$s</string>
-    <string name="message_recovery_phrase_save_failed">Tidak ada berkas yang tersimpan. Coba lagi, atau tuliskan kata-katanya secara manual.</string>
+    <string name="message_recovery_phrase_save_failed">Tidak ada berkas yang tersimpan. Coba lagi, atau tuliskan frasanya secara manual.</string>
     <string name="action_written_it_down">Saya sudah menyimpan frasa saya</string>
     <string name="error_encryption_setup_failed">Penyiapan enkripsi tidak dapat diselesaikan, sehingga belum ada data yang disinkronkan. Silakan coba lagi.</string>
 
     <!-- Pemulihan dengan frasa -->
     <string name="title_restore_data">Pulihkan data Anda</string>
-    <string name="description_restore_data">Masukkan 12 kata yang Anda tulis saat menyiapkan enkripsi. Kata-kata itu satu-satunya cara untuk membaca data yang disinkronkan dari perangkat Anda sebelumnya.</string>
+    <string name="description_restore_data">Masukkan 6 kelompok yang Anda tulis saat menyiapkan enkripsi. Kelompok itu satu-satunya cara untuk membaca data yang disinkronkan dari perangkat Anda sebelumnya, dan huruf besar, huruf kecil, serta angka semuanya berpengaruh.</string>
     <string name="label_recovery_phrase_input">Frasa pemulihan</string>
     <string name="action_restore">Pulihkan</string>
     <string name="message_restore_complete">Berhasil memulihkan %1$d akun dan %2$d transaksi.</string>
-    <string name="error_recovery_phrase_word_count">Masukkan seluruh 12 kata. Anda memasukkan %1$d kata.</string>
-    <string name="error_recovery_phrase_unknown_word">Kata ke-%1$d, “%2$s”, bukan salah satu kata pemulihan. Periksa ejaannya.</string>
-    <string name="error_recovery_phrase_checksum">Setiap kata memang kata pemulihan yang sah, tetapi rangkaian frasanya tidak sah. Kemungkinan ada satu kata yang salah atau tertukar urutannya.</string>
-    <string name="error_recovery_phrase_mismatch">Frasa ini tidak dapat membuka data pada akun ini. Tidak ada data yang dipulihkan. Periksa kata-kata Anda lalu coba lagi.</string>
+    <string name="error_recovery_phrase_group_count">Masukkan seluruh 6 kelompok. Anda memasukkan %1$d kelompok.</string>
+    <string name="error_recovery_phrase_malformed_group">Kelompok ke-%1$d, “%2$s”, bukan kelompok pemulihan yang sah. Periksa apakah ada karakter atau huruf besar-kecil yang keliru.</string>
+    <string name="error_recovery_phrase_checksum">Setiap kelompok memang tersusun benar, tetapi rangkaian frasanya tidak sah. Kemungkinan ada satu kelompok yang salah atau tertukar urutannya.</string>
+    <string name="error_recovery_phrase_mismatch">Frasa ini tidak dapat membuka data pada akun ini. Tidak ada data yang dipulihkan. Periksa kelompok-kelompoknya lalu coba lagi.</string>
     <string name="error_recovery_phrase_no_key_material">Belum ada data tersinkronisasi yang dapat dipulihkan untuk akun ini.</string>
     <string name="error_restore_failed">Pemulihan tidak dapat diselesaikan, sehingga tidak ada data yang diimpor. Silakan coba lagi.</string>
     <!-- Peluncuran: buka kunci dan migrasi data lama -->
@@ -191,7 +191,7 @@
     <string name="error_pin_incorrect_with_delay">PIN itu salah. Tersisa %1$d percobaan sebelum perangkat ini kehilangan kuncinya. Tunggu %2$s sebelum mencoba lagi.</string>
     <string name="error_pin_wait">Terlalu banyak percobaan. Coba lagi dalam %1$s.</string>
     <string name="error_pin_not_set">Belum ada PIN yang diatur di perangkat ini.</string>
-    <string name="error_pin_key_material_destroyed">Terlalu banyak PIN yang salah, sehingga perangkat ini tidak lagi menyimpan kunci Anda. Pulihkan dengan 12 kata pemulihan Anda.</string>
+    <string name="error_pin_key_material_destroyed">Terlalu banyak PIN yang salah, sehingga perangkat ini tidak lagi menyimpan kunci Anda. Pulihkan dengan 6 kelompok pemulihan Anda.</string>
     <string name="error_biometric_fell_back">Sidik jari atau wajah tidak digunakan. Masukkan PIN Anda.</string>
     <string name="error_biometric_invalidated">Sidik jari atau wajah Anda berubah, sehingga pintasannya dimatikan. Masukkan PIN Anda.</string>
     <string name="label_duration_seconds">%1$d detik</string>
@@ -220,8 +220,8 @@
     <string name="label_auto_lock_1_minute">1 menit</string>
     <string name="label_auto_lock_5_minutes">5 menit</string>
     <string name="label_auto_lock_15_minutes">15 menit</string>
-    <string name="description_recovery_phrase_reveal">Tampilkan 12 kata itu lagi. PIN Anda diperlukan setiap kali.</string>
-    <string name="action_view_recovery_phrase">Tampilkan kata</string>
+    <string name="description_recovery_phrase_reveal">Tampilkan 6 kelompok itu lagi. PIN Anda diperlukan setiap kali.</string>
+    <string name="action_view_recovery_phrase">Tampilkan frasa</string>
     <string name="title_current_pin_required">Masukkan PIN Anda</string>
     <string name="title_set_pin">Pilih PIN</string>
     <string name="label_current_pin">PIN saat ini</string>
@@ -238,7 +238,7 @@
     <string name="error_biometric_unavailable">Sidik jari atau wajah belum dapat digunakan saat ini. Coba lagi nanti.</string>
     <string name="error_biometric_cancelled">Proses itu dibatalkan, jadi tidak ada yang berubah.</string>
     <string name="error_biometric_failed">Pintasan sidik jari atau wajah tidak dapat diaktifkan. Tidak ada yang berubah.</string>
-    <string name="error_recovery_phrase_unavailable">Perangkat ini tidak menyimpan salinan kata-kata Anda, sehingga tidak dapat menampilkannya. Kata-kata yang Anda tulis tetap berlaku.</string>
+    <string name="error_recovery_phrase_unavailable">Perangkat ini tidak menyimpan salinan frasa Anda, sehingga tidak dapat menampilkannya. Frasa yang Anda tulis tetap berlaku.</string>
     <string name="message_pin_set">PIN Anda sudah diatur.</string>
     <string name="message_pin_changed">PIN Anda sudah diubah.</string>
     <string name="message_pin_removed">PIN Anda sudah dihapus, beserta pintasan sidik jari atau wajahnya.</string>

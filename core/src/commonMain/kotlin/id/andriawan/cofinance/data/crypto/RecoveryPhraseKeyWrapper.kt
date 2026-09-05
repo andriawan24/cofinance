@@ -3,12 +3,13 @@ package id.andriawan.cofinance.data.crypto
 import dev.whyoleg.cryptography.random.CryptographyRandom
 
 /**
- * Wraps and unwraps the data key against the user's 12-word recovery phrase.
+ * Wraps and unwraps the data key against the user's recovery phrase.
  *
  * This is the only wrapped copy that leaves the device, and the only route back to synchronized
  * records on a device that holds no key material. It derives from the phrase's entropy rather than
- * from its words: the words are a transcription format, and two phrases that differ only in spacing
- * or capitalization are the same phrase, which is already settled by [RecoveryPhrase.parse].
+ * from its characters: the groups are a transcription format, and settling what counts as the same
+ * phrase — spacing, and the fact that case is not one of the things that may differ — is already
+ * [RecoveryPhrase.parse]'s job.
  *
  * The derivation is HKDF-SHA256 with a random per-wrap salt, not a memory-hard function. That is
  * deliberate. The phrase carries 128 bits of real entropy, so an attacker holding the uploaded wrap

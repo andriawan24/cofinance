@@ -152,29 +152,29 @@
     <string name="title_encryption_setup">Set up encryption</string>
     <string name="description_encryption_setup">Cofinance encrypts your accounts and transactions on this device before syncing them. The copy kept in the cloud cannot be read without the key on your device.</string>
     <string name="title_recovery_phrase">Your recovery phrase</string>
-    <string name="description_recovery_phrase">Keep these 12 words, in this order, somewhere safe. Copy them into a password manager, save them as a file, or write them on paper.</string>
-    <string name="warning_recovery_phrase_loss">If you lose these 12 words and lose this device, your synced accounts and transactions are gone for good. Nobody can bring them back — not us, not anyone. There is no reset and no backup code.</string>
+    <string name="description_recovery_phrase">Keep these 6 groups, in this order, somewhere safe. Capital letters, small letters and digits all matter. Copy them into a password manager, save them as a file, or write them on paper.</string>
+    <string name="warning_recovery_phrase_loss">If you lose these 6 groups and lose this device, your synced accounts and transactions are gone for good. Nobody can bring them back — not us, not anyone. There is no reset and no backup code.</string>
     <string name="note_local_data_not_encrypted">This does not encrypt the copy stored on this phone. It protects the copy that is synced to the cloud.</string>
     <string name="action_copy_recovery_phrase">Copy phrase</string>
     <string name="action_download_recovery_phrase">Save as file</string>
-    <string name="note_recovery_phrase_export">Copying or saving puts the words somewhere outside Cofinance. Keep them in a password manager or somewhere only you can reach.</string>
+    <string name="note_recovery_phrase_export">Copying or saving puts the phrase somewhere outside Cofinance. Keep it in a password manager or somewhere only you can reach.</string>
     <string name="message_recovery_phrase_copied">Phrase copied. It stays on your clipboard until something else replaces it.</string>
-    <string name="message_recovery_phrase_copy_failed">The phrase could not be copied. Write the words down instead.</string>
+    <string name="message_recovery_phrase_copy_failed">The phrase could not be copied. Write it down instead.</string>
     <string name="message_recovery_phrase_saved">Saved to %1$s</string>
-    <string name="message_recovery_phrase_save_failed">No file was saved. Try again, or write the words down instead.</string>
+    <string name="message_recovery_phrase_save_failed">No file was saved. Try again, or write the phrase down instead.</string>
     <string name="action_written_it_down">I have saved my phrase</string>
     <string name="error_encryption_setup_failed">Encryption setup could not be completed, so nothing has been synced. Please try again.</string>
 
     <!-- Recovery phrase restore -->
     <string name="title_restore_data">Restore your data</string>
-    <string name="description_restore_data">Enter the 12 words you wrote down when you set up encryption. They are the only way to read the data synced from your other device.</string>
+    <string name="description_restore_data">Enter the 6 groups you wrote down when you set up encryption. They are the only way to read the data synced from your other device, and capital letters, small letters and digits all matter.</string>
     <string name="label_recovery_phrase_input">Recovery phrase</string>
     <string name="action_restore">Restore</string>
     <string name="message_restore_complete">Restored %1$d accounts and %2$d transactions.</string>
-    <string name="error_recovery_phrase_word_count">Enter all 12 words. You entered %1$d.</string>
-    <string name="error_recovery_phrase_unknown_word">Word %1$d, “%2$s”, is not one of the recovery words. Check its spelling.</string>
-    <string name="error_recovery_phrase_checksum">Each word is a real recovery word, but the phrase as a whole is not valid. One word is probably wrong or in the wrong place.</string>
-    <string name="error_recovery_phrase_mismatch">This phrase does not open the data on this account. Nothing was restored. Check your words and try again.</string>
+    <string name="error_recovery_phrase_group_count">Enter all 6 groups. You entered %1$d.</string>
+    <string name="error_recovery_phrase_malformed_group">Group %1$d, “%2$s”, is not a recovery group. Check it for a wrong character or the wrong capitalization.</string>
+    <string name="error_recovery_phrase_checksum">Every group is well formed, but the phrase as a whole is not valid. One group is probably wrong or in the wrong place.</string>
+    <string name="error_recovery_phrase_mismatch">This phrase does not open the data on this account. Nothing was restored. Check the groups and try again.</string>
     <string name="error_recovery_phrase_no_key_material">There is no synced data to restore for this account.</string>
     <string name="error_restore_failed">The restore could not be completed, so nothing was imported. Please try again.</string>
     <!-- Launch: unlock and plaintext migration -->
@@ -190,7 +190,7 @@
     <string name="error_pin_incorrect_with_delay">That PIN is not right. %1$d attempts left before this device loses its key. Wait %2$s before trying again.</string>
     <string name="error_pin_wait">Too many attempts. Try again in %1$s.</string>
     <string name="error_pin_not_set">No PIN is set on this device.</string>
-    <string name="error_pin_key_material_destroyed">Too many wrong PINs, so this device no longer holds your key. Restore with your 12 recovery words.</string>
+    <string name="error_pin_key_material_destroyed">Too many wrong PINs, so this device no longer holds your key. Restore with your 6 recovery groups.</string>
     <string name="error_biometric_fell_back">Fingerprint or face was not used. Enter your PIN instead.</string>
     <string name="error_biometric_invalidated">Your fingerprint or face has changed, so the shortcut was turned off. Enter your PIN.</string>
     <string name="label_duration_seconds">%1$d sec</string>
@@ -218,8 +218,8 @@
     <string name="label_auto_lock_1_minute">1 minute</string>
     <string name="label_auto_lock_5_minutes">5 minutes</string>
     <string name="label_auto_lock_15_minutes">15 minutes</string>
-    <string name="description_recovery_phrase_reveal">Show the 12 words again. Your PIN is needed each time.</string>
-    <string name="action_view_recovery_phrase">Show words</string>
+    <string name="description_recovery_phrase_reveal">Show the 6 groups again. Your PIN is needed each time.</string>
+    <string name="action_view_recovery_phrase">Show phrase</string>
     <string name="title_current_pin_required">Enter your PIN</string>
     <string name="title_set_pin">Choose a PIN</string>
     <string name="label_current_pin">Current PIN</string>
@@ -236,7 +236,7 @@
     <string name="error_biometric_unavailable">Fingerprint or face is not available right now. Try again later.</string>
     <string name="error_biometric_cancelled">That was cancelled, so nothing changed.</string>
     <string name="error_biometric_failed">The fingerprint or face shortcut could not be turned on. Nothing changed.</string>
-    <string name="error_recovery_phrase_unavailable">This device did not keep a copy of your words, so it cannot show them. The words you wrote down still work.</string>
+    <string name="error_recovery_phrase_unavailable">This device did not keep a copy of your phrase, so it cannot show it. The phrase you wrote down still works.</string>
     <string name="message_pin_set">Your PIN is set.</string>
     <string name="message_pin_changed">Your PIN has been changed.</string>
     <string name="message_pin_removed">Your PIN has been removed, and the fingerprint or face shortcut with it.</string>

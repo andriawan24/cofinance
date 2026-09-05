@@ -1,10 +1,10 @@
 package id.andriawan.cofinance.data.crypto
 
 /**
- * Getting the twelve words off the screen and somewhere the user actually keeps them.
+ * Getting the six groups off the screen and somewhere the user actually keeps them.
  *
- * Setup used to prove the phrase had been written down by asking for three words back. That proved
- * little — the words were still on the screen above — and cost every user a typing exercise, so the
+ * Setup used to prove the phrase had been written down by asking for part of it back. That proved
+ * little — the phrase was still on the screen above — and cost every user a typing exercise, so the
  * check is gone and this takes its place: the phrase can be put on the clipboard or written to a
  * file in one tap, and saving it is the user's decision rather than a gate.
  *
@@ -48,12 +48,12 @@ sealed interface PhraseExportStatus {
     data object SaveFailed : PhraseExportStatus
 }
 
-/** The exact bytes that get copied or written: the numbered words, one per line. */
-fun RecoveryPhrase.toExportText(): String = words.toRecoveryPhraseExportText()
+/** The exact bytes that get copied or written: the numbered groups, one per line. */
+fun RecoveryPhrase.toExportText(): String = groups.toRecoveryPhraseExportText()
 
-/** Same formatting, for callers that hold the words rather than the phrase. */
+/** Same formatting, for callers that hold the groups rather than the phrase. */
 fun List<String>.toRecoveryPhraseExportText(): String =
-    mapIndexed { index, word -> "${index + 1}. $word" }.joinToString(separator = "\n")
+    mapIndexed { index, group -> "${index + 1}. $group" }.joinToString(separator = "\n")
 
 /** File name used for a downloaded phrase. Constant, so a second save replaces the first. */
 const val RECOVERY_PHRASE_FILE_NAME: String = "cofinance-recovery-phrase.txt"

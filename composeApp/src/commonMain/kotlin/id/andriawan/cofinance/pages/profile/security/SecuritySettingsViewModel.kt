@@ -39,7 +39,7 @@ sealed interface SecurityIntent {
 
     data object DisableBiometric : SecurityIntent
 
-    /** Showing the twelve words again, per Decision 10. */
+    /** Showing the phrase again, per Decision 10. */
     data object RevealRecoveryPhrase : SecurityIntent
 
     data class ChangeAutoLock(val timeout: AutoLockTimeout) : SecurityIntent
@@ -127,9 +127,9 @@ data class SecuritySettingsUiState(
     val autoLockOptions: List<AutoLockTimeout> = AutoLockTimeout.options,
     val prompt: SecurityPinPrompt? = null,
     val isBusy: Boolean = false,
-    /** The twelve words, and only ever after a PIN entered for this request. */
+    /** The six groups, and only ever after a PIN entered for this request. */
     val revealedPhrase: List<String> = emptyList(),
-    /** What the last copy or save of the revealed phrase did. Cleared when the words are hidden. */
+    /** What the last copy or save of the revealed phrase did. Cleared when the phrase is hidden. */
     val exportStatus: PhraseExportStatus? = null,
     val notice: SecurityNotice? = null,
     /** A refusal that has no prompt behind it, such as biometric asked for with no PIN. */
@@ -371,7 +371,7 @@ class SecuritySettingsViewModel(
      * Shows the phrase, and only against a PIN entered for this request.
      *
      * The session's own data key is never used here even when one is held, which is the whole of
-     * Decision 10: an unlocked phone handed to someone else must not surrender the words.
+     * Decision 10: an unlocked phone handed to someone else must not surrender the phrase.
      */
     private suspend fun applyRevealPhrase(prompt: SecurityPinPrompt) {
         when (val verification = appLock.verifyPin(prompt.currentPin)) {
@@ -381,7 +381,7 @@ class SecuritySettingsViewModel(
                     failPrompt(SecuritySettingsError.RecoveryPhraseUnavailable)
                 } else {
                     _uiState.update {
-                        it.copy(isBusy = false, prompt = null, revealedPhrase = phrase.words)
+                        it.copy(isBusy = false, prompt = null, revealedPhrase = phrase.groups)
                     }
                     refresh()
                 }
@@ -423,14 +423,14 @@ class SecuritySettingsViewModel(
     /**
      * Copies the phrase that is currently on screen.
      *
-     * Only the revealed words are reachable here — the vault is not read again — so a copy is
+     * Only the revealed groups are reachable here — the vault is not read again — so a copy is
      * possible exactly while the dialog the PIN opened is still up.
      */
     suspend fun copyRevealedPhrase() {
-        val words = _uiState.value.revealedPhrase
-        if (words.isEmpty()) return
+        val groups = _uiState.value.revealedPhrase
+        if (groups.isEmpty()) return
         val copied = try {
-            recoveryPhraseExporter.copyToClipboard(words.toRecoveryPhraseExportText())
+            recoveryPhraseExporter.copyToClipboard(groups.toRecoveryPhraseExportText())
         } catch (cause: Throwable) {
             if (cause is CancellationException) throw cause
             false
@@ -445,12 +445,12 @@ class SecuritySettingsViewModel(
 
     /** Writes the revealed phrase to a file. A cancelled picker reports a failure, not a file. */
     suspend fun downloadRevealedPhrase() {
-        val words = _uiState.value.revealedPhrase
-        if (words.isEmpty()) return
+        val groups = _uiState.value.revealedPhrase
+        if (groups.isEmpty()) return
         val location = try {
             recoveryPhraseExporter.saveToFile(
                 RECOVERY_PHRASE_FILE_NAME,
-                words.toRecoveryPhraseExportText()
+                groups.toRecoveryPhraseExportText()
             )
         } catch (cause: Throwable) {
             if (cause is CancellationException) throw cause

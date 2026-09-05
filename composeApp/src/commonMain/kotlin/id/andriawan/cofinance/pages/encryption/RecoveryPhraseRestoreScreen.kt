@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -18,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -27,10 +29,10 @@ import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.action_restore
 import cofinance.composeapp.generated.resources.description_restore_data
 import cofinance.composeapp.generated.resources.error_recovery_phrase_checksum
+import cofinance.composeapp.generated.resources.error_recovery_phrase_group_count
+import cofinance.composeapp.generated.resources.error_recovery_phrase_malformed_group
 import cofinance.composeapp.generated.resources.error_recovery_phrase_mismatch
 import cofinance.composeapp.generated.resources.error_recovery_phrase_no_key_material
-import cofinance.composeapp.generated.resources.error_recovery_phrase_unknown_word
-import cofinance.composeapp.generated.resources.error_recovery_phrase_word_count
 import cofinance.composeapp.generated.resources.error_restore_failed
 import cofinance.composeapp.generated.resources.label_recovery_phrase_input
 import cofinance.composeapp.generated.resources.title_restore_data
@@ -43,11 +45,14 @@ import org.koin.compose.viewmodel.koinViewModel
 /**
  * Restore on a device that holds no key material.
  *
- * The whole phrase is typed into one field rather than into twelve, because a phrase read off paper
+ * The whole phrase is typed into one field rather than into six, because a phrase read off paper
  * arrives with arbitrary spacing and line breaks and the parser already normalizes both. What the
  * screen has to do well is say precisely what is wrong when entry fails, which is why the errors are
- * distinct: a misspelled word names its position, and a phrase whose words are all real but which
- * does not check out says so instead of pretending the phrase is simply "wrong".
+ * distinct: a mistyped group names its position, and a phrase whose groups are all well formed but
+ * which does not check out says so instead of pretending the phrase is simply "wrong".
+ *
+ * Case carries entropy in this phrase, so the field neither autocapitalizes nor autocorrects, and it
+ * renders in monospace so the user can tell the characters apart while typing them.
  */
 @Composable
 fun RecoveryPhraseRestoreScreen(
@@ -108,9 +113,11 @@ private fun RecoveryPhraseRestoreContent(
             minLines = 3,
             isError = uiState.error != null,
             enabled = !uiState.isRestoring,
+            textStyle = LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace),
             keyboardOptions = KeyboardOptions(
                 imeAction = ImeAction.Done,
-                capitalization = KeyboardCapitalization.None
+                capitalization = KeyboardCapitalization.None,
+                autoCorrectEnabled = false
             )
         )
 
@@ -142,11 +149,11 @@ private fun RecoveryPhraseRestoreContent(
 
 @Composable
 private fun RecoveryPhraseEntryError.asMessage(): String = when (this) {
-    is RecoveryPhraseEntryError.WrongWordCount ->
-        stringResource(Res.string.error_recovery_phrase_word_count, actual)
+    is RecoveryPhraseEntryError.WrongGroupCount ->
+        stringResource(Res.string.error_recovery_phrase_group_count, actual)
 
-    is RecoveryPhraseEntryError.UnknownWord ->
-        stringResource(Res.string.error_recovery_phrase_unknown_word, position, word)
+    is RecoveryPhraseEntryError.MalformedGroup ->
+        stringResource(Res.string.error_recovery_phrase_malformed_group, position, group)
 
     RecoveryPhraseEntryError.ChecksumFailed ->
         stringResource(Res.string.error_recovery_phrase_checksum)
@@ -168,8 +175,8 @@ private fun RecoveryPhraseRestorePreview() {
         Surface {
             RecoveryPhraseRestoreContent(
                 uiState = RecoveryPhraseRestoreUiState(
-                    phraseInput = "abandon ability able about above absent",
-                    error = RecoveryPhraseEntryError.WrongWordCount(actual = 6)
+                    phraseInput = "k3Rm 9XaQ 2mNp",
+                    error = RecoveryPhraseEntryError.WrongGroupCount(actual = 3)
                 ),
                 onEvent = { }
             )

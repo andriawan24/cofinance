@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -55,9 +56,9 @@ import org.koin.compose.viewmodel.koinViewModel
 /**
  * Encryption setup, shown once at sign-in and never to a local-only user.
  *
- * The screen exists to get twelve words onto paper, so the words are laid out to be read aloud and
- * copied rather than skimmed, and the consequence of losing them is stated before the button that
- * moves past them.
+ * The screen exists to get six groups of characters onto paper, so the groups are laid out to be
+ * read aloud and copied rather than skimmed, and the consequence of losing them is stated before the
+ * button that moves past them.
  */
 @Composable
 fun EncryptionSetupScreen(
@@ -174,7 +175,7 @@ private fun PhraseDisplayContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_16))
 
-        RecoveryPhraseWords(words = uiState.words)
+        RecoveryPhraseGroups(groups = uiState.groups)
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_12))
 
@@ -233,7 +234,7 @@ private fun PhraseDisplayContent(
 
         Spacer(modifier = Modifier.height(Dimensions.SIZE_24))
 
-        // The consequence sits above the button that moves past the words, not below it.
+        // The consequence sits above the button that moves past the phrase, not below it.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -302,9 +303,9 @@ private fun exportStatusText(status: PhraseExportStatus): String = when (status)
         stringResource(Res.string.message_recovery_phrase_save_failed)
 }
 
-/** The twelve words, numbered and two to a row, which is the shape people copy from. */
+/** The six groups, numbered and two to a row, which is the shape people copy from. */
 @Composable
-private fun RecoveryPhraseWords(words: List<String>, modifier: Modifier = Modifier) {
+private fun RecoveryPhraseGroups(groups: List<String>, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -313,12 +314,12 @@ private fun RecoveryPhraseWords(words: List<String>, modifier: Modifier = Modifi
             .padding(Dimensions.SIZE_16),
         verticalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
     ) {
-        words.chunked(2).forEachIndexed { rowIndex, pair ->
+        groups.chunked(2).forEachIndexed { rowIndex, pair ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_12)
             ) {
-                pair.forEachIndexed { columnIndex, word ->
+                pair.forEachIndexed { columnIndex, group ->
                     Row(
                         modifier = Modifier.weight(1f),
                         horizontalArrangement = Arrangement.spacedBy(Dimensions.SIZE_8)
@@ -331,8 +332,11 @@ private fun RecoveryPhraseWords(words: List<String>, modifier: Modifier = Modifi
                         )
 
                         Text(
-                            text = word,
+                            text = group,
+                            // Monospace, because the groups mix cases and digits and the reader has
+                            // to tell one character from another to copy them down.
                             style = MaterialTheme.typography.bodyLarge.copy(
+                                fontFamily = FontFamily.Monospace,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onBackground
                             )
@@ -352,9 +356,8 @@ private fun EncryptionSetupPreview() {
             EncryptionSetupContent(
                 uiState = EncryptionSetupUiState(
                     step = EncryptionSetupStep.PhraseDisplay,
-                    words = listOf(
-                        "abandon", "ability", "able", "about", "above", "absent",
-                        "absorb", "abstract", "absurd", "abuse", "access", "accident"
+                    groups = listOf(
+                        "k3Rm", "9XaQ", "2mNp", "7fTz", "bW4h", "Ld6s"
                     )
                 ),
                 onEvent = { }
