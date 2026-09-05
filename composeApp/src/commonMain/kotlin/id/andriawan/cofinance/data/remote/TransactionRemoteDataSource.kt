@@ -5,4 +5,5 @@ import id.andriawan.cofinance.data.model.TransactionResponse
 interface TransactionRemoteDataSource {
     suspend fun getTransactions(): List<TransactionResponse>
     suspend fun upsertTransactions(transactions: List<TransactionResponse>)
+    suspend fun deleteTransaction(id: String)
 }

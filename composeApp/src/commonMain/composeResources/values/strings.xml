@@ -116,6 +116,17 @@
     <string name="title_no_activities">No Activities Yet</string>
     <string name="description_empty_activity">Start tracking your expense now</string>
 
+    <!-- Delete Account -->
+    <string name="title_delete_account">Delete this account?</string>
+    <string name="description_delete_account">Every transaction recorded against this account will be deleted too, and transfers will return their amount to the other account. This cannot be undone.</string>
+
+    <!-- Delete Transaction -->
+    <string name="action_delete_transaction">Delete Transaction</string>
+    <string name="title_delete_transaction">Delete this transaction?</string>
+    <string name="description_delete_transaction">The transaction will be removed and the amount returned to its account. This cannot be undone.</string>
+    <string name="action_delete">Delete</string>
+    <string name="content_description_delete_transaction">Delete transaction</string>
+
     <!-- Common Actions / Labels -->
     <string name="label_yes">Yes</string>
     <string name="label_cancel">Cancel</string>

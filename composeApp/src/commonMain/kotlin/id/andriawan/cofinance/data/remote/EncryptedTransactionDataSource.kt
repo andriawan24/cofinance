@@ -56,4 +56,12 @@ class EncryptedTransactionDataSource(
             store.writeDocument(FinanceCollection.TRANSACTIONS, id, envelope.toDocument())
         }
     }
+
+    /**
+     * Removal needs neither the data key nor the key material gate: nothing is read back and nothing
+     * new is written, and the identifier being addressed was already plaintext.
+     */
+    override suspend fun deleteTransaction(id: String) {
+        store.deleteDocument(FinanceCollection.TRANSACTIONS, id)
+    }
 }

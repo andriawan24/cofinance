@@ -22,6 +22,10 @@ interface TransactionRepository {
         oldTransaction: Transaction,
         params: AddTransactionParam
     ): Transaction
+
+    suspend fun deleteTransaction(id: String)
+
+    suspend fun deleteTransactionsForAccount(accountId: String)
 }
 
 
@@ -98,5 +102,15 @@ class TransactionRepositoryImpl(
         syncCoordinator.mirrorDataIfSignedIn()
 
         return Transaction.from(updated)
+    }
+
+    override suspend fun deleteTransaction(id: String) {
+        database.deleteTransaction(id)
+        syncCoordinator.deleteTransactionIfSignedIn(id)
+    }
+
+    override suspend fun deleteTransactionsForAccount(accountId: String) {
+        val deleted = database.deleteTransactionsForAccount(accountId)
+        deleted.forEach { syncCoordinator.deleteTransactionIfSignedIn(it) }
     }
 }

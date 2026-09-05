@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import cofinance.composeapp.generated.resources.Res
+import cofinance.composeapp.generated.resources.action_delete_transaction
 import cofinance.composeapp.generated.resources.action_save
 import cofinance.composeapp.generated.resources.ic_account
 import cofinance.composeapp.generated.resources.ic_calendar
@@ -28,6 +29,7 @@ import cofinance.composeapp.generated.resources.label_account
 import cofinance.composeapp.generated.resources.label_category
 import cofinance.composeapp.generated.resources.label_dates
 import id.andriawan.cofinance.components.PrimaryButton
+import id.andriawan.cofinance.components.SecondaryButton
 import id.andriawan.cofinance.utils.NumberHelper
 import id.andriawan.cofinance.pages.addnew.AddNewDialogEvent
 import id.andriawan.cofinance.pages.addnew.AddNewUiEvent
@@ -154,7 +156,8 @@ fun IncomeSection(
         PrimaryButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(all = Dimensions.SIZE_16),
+                .padding(horizontal = Dimensions.SIZE_16)
+                .padding(top = Dimensions.SIZE_16),
             enabled = uiState.isValid,
             onClick = {
                 onEvent.invoke(AddNewUiEvent.SaveTransaction)
@@ -165,6 +168,26 @@ fun IncomeSection(
                 style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
             )
         }
+
+        if (uiState.isEditing) {
+            SecondaryButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = Dimensions.SIZE_16),
+                containerColor = MaterialTheme.colorScheme.errorContainer,
+                contentColor = MaterialTheme.colorScheme.error,
+                onClick = {
+                    onDialogEvent.invoke(AddNewDialogEvent.ToggleDeleteConfirmationDialog(true))
+                }
+            ) {
+                Text(
+                    text = stringResource(Res.string.action_delete_transaction),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.padding(bottom = Dimensions.SIZE_16))
     }
 }
 

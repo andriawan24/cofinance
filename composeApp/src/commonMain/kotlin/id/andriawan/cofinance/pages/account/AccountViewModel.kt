@@ -25,7 +25,9 @@ data class UiState(
     val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val balance: Long = 0L,
-    val editingAccount: Account? = null
+    val editingAccount: Account? = null,
+    /** The account a delete tap has proposed removing, held until the confirmation is answered. */
+    val accountPendingDelete: Account? = null
 )
 
 @Stable
@@ -99,9 +101,21 @@ class AccountViewModel(
         }
     }
 
-    fun onDeleteAccount(accountId: String) {
+    fun onDeleteAccountRequested(account: Account) {
+        _uiState.update { it.copy(accountPendingDelete = account) }
+    }
+
+    fun onDismissDeleteAccount() {
+        _uiState.update { it.copy(accountPendingDelete = null) }
+    }
+
+    /** Removes the account the confirmation was raised for, along with its transactions. */
+    fun onDeleteAccountConfirmed() {
+        val account = uiState.value.accountPendingDelete ?: return
+        _uiState.update { it.copy(accountPendingDelete = null) }
+
         viewModelScope.launch {
-            deleteAccountUseCase.execute(accountId).collect { }
+            deleteAccountUseCase.execute(account.id).collect { }
             _uiState.update { it.copy(editingAccount = null) }
             refreshAccounts()
         }

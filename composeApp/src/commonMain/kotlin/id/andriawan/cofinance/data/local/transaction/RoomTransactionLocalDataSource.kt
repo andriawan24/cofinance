@@ -132,6 +132,37 @@ class RoomTransactionLocalDataSource(
         )
     }
 
+    override suspend fun deleteTransaction(id: String) {
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                val existing = transactionDao.getTransaction(id) ?: return@immediateTransaction
+                applyBalanceDeltas(existing, -1)
+                transactionDao.deleteTransaction(id)
+            }
+        }
+    }
+
+    override suspend fun deleteTransactionsForAccount(accountId: String): List<String> {
+        val doomed = transactionDao.getTransactionsForAccount(accountId)
+        if (doomed.isEmpty()) return emptyList()
+
+        roomDatabase.useWriterConnection {
+            it.immediateTransaction {
+                doomed.forEach { transaction ->
+                    // The account being emptied out is about to be deleted, so the balance handed
+                    // back to it is discarded moments later; the point of the reversal is the other
+                    // side of a transfer, which survives and would otherwise keep money that no
+                    // longer has a transaction behind it. A counterpart that is already gone is
+                    // skipped rather than failing the cascade halfway through.
+                    reverseBalanceDeltasWhereAccountsRemain(transaction)
+                    transactionDao.deleteTransaction(transaction.id)
+                }
+            }
+        }
+
+        return doomed.map(LocalTransactionEntity::id)
+    }
+
     override suspend fun clearTransactions() {
         transactionDao.deleteAllTransactions()
     }
@@ -143,6 +174,15 @@ class RoomTransactionLocalDataSource(
         balanceDeltas(transaction).forEach { (accountId, delta) ->
             val account = accountDao.getAccount(accountId) ?: error("Account does not exist")
             accountDao.updateAccount(account.copy(balance = account.balance + delta * multiplier))
+        }
+    }
+
+    private suspend fun reverseBalanceDeltasWhereAccountsRemain(
+        transaction: LocalTransactionEntity
+    ) {
+        balanceDeltas(transaction).forEach { (accountId, delta) ->
+            val account = accountDao.getAccount(accountId) ?: return@forEach
+            accountDao.updateAccount(account.copy(balance = account.balance - delta))
         }
     }
 

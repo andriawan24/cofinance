@@ -48,6 +48,15 @@ interface TransactionLocalDataSource {
 
     suspend fun upsertTransactions(transactions: List<TransactionResponse>)
 
+    /** Removes one transaction and gives back the balance it took from its accounts. */
+    suspend fun deleteTransaction(id: String)
+
+    /**
+     * Removes every transaction that names [accountId] as sender or receiver, returning their
+     * identifiers so the caller can carry the same removals to the cloud mirror.
+     */
+    suspend fun deleteTransactionsForAccount(accountId: String): List<String>
+
     /** Wipes all locally persisted transactions, e.g. on logout. */
     suspend fun clearTransactions()
 }

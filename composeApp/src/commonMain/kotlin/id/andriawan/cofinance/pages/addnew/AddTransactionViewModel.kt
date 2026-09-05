@@ -16,6 +16,7 @@ import id.andriawan.cofinance.domain.model.response.AccountByGroup
 import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.usecases.accounts.GetAccountsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.CreateTransactionUseCase
+import id.andriawan.cofinance.domain.usecases.transactions.DeleteTransactionUseCase
 import id.andriawan.cofinance.utils.None
 import id.andriawan.cofinance.utils.UiText
 import id.andriawan.cofinance.utils.collectResult
@@ -66,6 +67,7 @@ data class AddNewDialogState(
     var showAccountBottomSheet: Boolean = false,
     var showAddAccountBottomSheet: Boolean = false,
     var showTimePickerDialog: Boolean = false,
+    val showDeleteConfirmation: Boolean = false,
 )
 
 sealed class AddNewDialogEvent {
@@ -74,6 +76,7 @@ sealed class AddNewDialogEvent {
     data class ToggleTimePickerDialog(val isShow: Boolean) : AddNewDialogEvent()
     data class ToggleAccountDialog(val isShow: Boolean) : AddNewDialogEvent()
     data class ToggleAddAccountDialog(val isShow: Boolean) : AddNewDialogEvent()
+    data class ToggleDeleteConfirmationDialog(val isShow: Boolean) : AddNewDialogEvent()
 }
 
 sealed class AddNewUiEvent {
@@ -82,6 +85,7 @@ sealed class AddNewUiEvent {
     data object UpdateAccount : AddNewUiEvent()
     data class SetTransactionType(val type: TransactionType) : AddNewUiEvent()
     data object SaveTransaction : AddNewUiEvent()
+    data object DeleteTransaction : AddNewUiEvent()
     data class SetIncludeFee(val includeFee: Boolean) : AddNewUiEvent()
     data class SetAmount(val amount: String) : AddNewUiEvent()
     data class SetCategory(val category: TransactionCategory) : AddNewUiEvent()
@@ -107,6 +111,7 @@ fun categoryCorrectionOf(scannedCategory: String?, chosenCategory: String): Stri
 class AddNewViewModel(
     private val getAccountsUseCase: GetAccountsUseCase,
     private val createTransactionUseCase: CreateTransactionUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val transactionRepository: TransactionRepository,
     private val merchantCategoryLearning: MerchantCategoryLearning
 ) : ViewModel() {
@@ -213,6 +218,10 @@ class AddNewViewModel(
             is AddNewDialogEvent.ToggleTimePickerDialog -> {
                 _dialogState.update { it.copy(showTimePickerDialog = dialogEvent.isShow) }
             }
+
+            is AddNewDialogEvent.ToggleDeleteConfirmationDialog -> {
+                _dialogState.update { it.copy(showDeleteConfirmation = dialogEvent.isShow) }
+            }
         }
     }
 
@@ -230,6 +239,7 @@ class AddNewViewModel(
             is AddNewUiEvent.SetTransactionType -> handleTransactionTypeChange(event.type)
             is AddNewUiEvent.SetAccountChooserType -> handleAccountChooserTypeChange(event.accountTransferType)
             is AddNewUiEvent.SaveTransaction -> handleSaveTransaction()
+            is AddNewUiEvent.DeleteTransaction -> handleDeleteTransaction()
 
             is AddNewUiEvent.OnBackPressed,
             is AddNewUiEvent.OnPictureClicked -> Unit
@@ -348,6 +358,33 @@ class AddNewViewModel(
                     }
                 )
             }
+        }
+    }
+
+    /**
+     * Removes the transaction being edited. Only a saved transaction can be deleted: a draft from an
+     * unfinished scan is not something the user has committed to, and an unsaved new entry has
+     * nothing behind it to remove.
+     */
+    private fun handleDeleteTransaction() {
+        val id = uiState.value.transactionId
+        if (!uiState.value.isEditing || id.isNullOrBlank()) return
+
+        viewModelScope.launch {
+            deleteTransactionUseCase.execute(id).collectResult(
+                onLoading = { _uiState.update { it.copy(isLoading = true) } },
+                onError = { exception ->
+                    _uiState.update { it.copy(isLoading = false) }
+                    _showMessage.send(
+                        exception.message?.let { msg -> UiText.Raw(msg) }
+                            ?: UiText.Res(Res.string.error_generic)
+                    )
+                },
+                onSuccess = {
+                    _uiState.update { it.copy(isLoading = false) }
+                    _onSuccessSaved.send(None)
+                }
+            )
         }
     }
 

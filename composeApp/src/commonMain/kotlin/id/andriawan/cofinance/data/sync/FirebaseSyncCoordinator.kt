@@ -28,8 +28,6 @@ class FirebaseSyncCoordinator(
 ) {
     suspend fun syncDataAfterSignIn() {
         sessionPolicy.requireUserId()
-        // Setup incomplete or locked: nothing is read, because reading means decrypting, and nothing
-        // is written, because writing would mean writing plaintext.
         if (encryptionSession.dataKeyOrNull() == null) return
 
         val localAccountRecords = localAccountSource.getAccounts()
@@ -54,6 +52,24 @@ class FirebaseSyncCoordinator(
 
         remoteAccountSource.upsertAccounts(localAccountSource.getAccounts())
         remoteTransactionSource.upsertTransactions(localTransactionSource.getAllTransactions())
+    }
+
+    /**
+     * Removes one transaction from the cloud mirror.
+     *
+     * Unlike [mirrorDataIfSignedIn] this does not need the data key — a deletion produces no
+     * ciphertext — so a locked device can still propagate the removal instead of leaving a row that
+     * the next sign-in would pull back in.
+     */
+    suspend fun deleteTransactionIfSignedIn(id: String) {
+        if (!sessionPolicy.isSignedIn()) return
+        remoteTransactionSource.deleteTransaction(id)
+    }
+
+    /** Removes one account from the cloud mirror, on the same terms as a transaction removal. */
+    suspend fun deleteAccountIfSignedIn(id: String) {
+        if (!sessionPolicy.isSignedIn()) return
+        remoteAccountSource.deleteAccount(id)
     }
 
     suspend fun clearLocalData() {

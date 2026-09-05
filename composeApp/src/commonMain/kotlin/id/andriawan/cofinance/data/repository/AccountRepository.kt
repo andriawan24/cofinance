@@ -78,6 +78,8 @@ class AccountRepositoryImpl(
 
     override suspend fun deleteAccount(accountId: String) {
         database.deleteAccount(accountId)
-        syncCoordinator.mirrorDataIfSignedIn()
+        // The mirror only upserts, so the removal has to be sent on its own or the next sign-in
+        // pulls the account back in.
+        syncCoordinator.deleteAccountIfSignedIn(accountId)
     }
 }

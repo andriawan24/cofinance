@@ -44,6 +44,10 @@ class FirestoreFinanceDocumentStore(
         collection(collection).document(id).set(document)
     }
 
+    override suspend fun deleteDocument(collection: FinanceCollection, id: String) {
+        collection(collection).document(id).delete()
+    }
+
     private fun collection(collection: FinanceCollection) =
         userDocument().collection(collection.path)
 

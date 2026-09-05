@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.diamondedge.logging.logging
 import id.andriawan.cofinance.domain.model.request.GetTransactionsParam
+import id.andriawan.cofinance.domain.model.response.Transaction
 import id.andriawan.cofinance.domain.model.response.TransactionByDate
 import id.andriawan.cofinance.domain.usecases.authentications.GetUserUseCase
+import id.andriawan.cofinance.domain.usecases.transactions.DeleteTransactionUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetBalanceStatsUseCase
 import id.andriawan.cofinance.domain.usecases.transactions.GetTransactionsGroupByMonthUseCase
 import id.andriawan.cofinance.data.repository.AccountRepository
@@ -34,18 +36,24 @@ data class ActivityUiState(
     val transactions: List<TransactionByDate> = emptyList(),
     var isLoading: Boolean = true,
     var message: String = emptyString(),
-    val shouldShowCycleReview: Boolean = false
+    val shouldShowCycleReview: Boolean = false,
+    /** The row a swipe has proposed removing, held until the confirmation is answered. */
+    val transactionPendingDelete: Transaction? = null
 )
 
 sealed class ActivityUiEvent {
     data object OnNextMonth : ActivityUiEvent()
     data object OnPreviousMonth : ActivityUiEvent()
+    data class OnDeleteRequested(val transaction: Transaction) : ActivityUiEvent()
+    data object OnDeleteConfirmed : ActivityUiEvent()
+    data object OnDeleteDismissed : ActivityUiEvent()
 }
 
 @Stable
 class ActivityViewModel(
     private val getTransactionsGroupByMonthUseCase: GetTransactionsGroupByMonthUseCase,
     private val getBalanceStateUseCase: GetBalanceStatsUseCase,
+    private val deleteTransactionUseCase: DeleteTransactionUseCase,
     private val getUserUseCase: GetUserUseCase,
     private val accountRepository: AccountRepository,
     private val authenticationRepository: id.andriawan.cofinance.data.repository.AuthenticationRepository
@@ -108,6 +116,34 @@ class ActivityViewModel(
                 getBalance()
                 fetchTransaction()
             }
+
+            is ActivityUiEvent.OnDeleteRequested -> {
+                _uiState.update { it.copy(transactionPendingDelete = event.transaction) }
+            }
+
+            ActivityUiEvent.OnDeleteDismissed -> {
+                _uiState.update { it.copy(transactionPendingDelete = null) }
+            }
+
+            ActivityUiEvent.OnDeleteConfirmed -> deleteTransaction()
+        }
+    }
+
+    /**
+     * Removes the row the confirmation was raised for. The list and the balance card both read from
+     * database flows, so neither is refreshed by hand here.
+     */
+    private fun deleteTransaction() {
+        val transaction = uiState.value.transactionPendingDelete ?: return
+        _uiState.update { it.copy(transactionPendingDelete = null) }
+
+        viewModelScope.launch {
+            deleteTransactionUseCase.execute(transaction.id).collectResult(
+                onError = { exception ->
+                    log.error { "Error deleting transaction: ${exception.message}" }
+                    _uiState.update { it.copy(message = exception.message.orEmpty()) }
+                }
+            )
         }
     }
 

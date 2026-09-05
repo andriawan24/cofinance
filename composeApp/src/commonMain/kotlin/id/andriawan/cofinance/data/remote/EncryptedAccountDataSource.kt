@@ -56,4 +56,12 @@ class EncryptedAccountDataSource(
             store.writeDocument(FinanceCollection.ACCOUNTS, id, envelope.toDocument())
         }
     }
+
+    /**
+     * Removal needs neither the data key nor the key material gate: nothing is read back and nothing
+     * new is written, and the identifier being addressed was already plaintext.
+     */
+    override suspend fun deleteAccount(id: String) {
+        store.deleteDocument(FinanceCollection.ACCOUNTS, id)
+    }
 }

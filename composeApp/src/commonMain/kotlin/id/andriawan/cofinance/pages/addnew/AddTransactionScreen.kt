@@ -44,6 +44,7 @@ import cofinance.composeapp.generated.resources.title_edit_activity
 import id.andriawan.cofinance.components.AccountBottomSheetContent
 import id.andriawan.cofinance.components.AddAccountBottomSheet
 import id.andriawan.cofinance.components.BaseBottomSheet
+import id.andriawan.cofinance.components.DeleteTransactionDialog
 import id.andriawan.cofinance.components.ErrorBottomSheet
 import id.andriawan.cofinance.data.ocr.parser.ReceiptField
 import id.andriawan.cofinance.utils.UiText
@@ -159,6 +160,18 @@ fun AddNewContent(
     TimePickerDialog(dialogState, uiState, onEvent, onDialogEvent)
     AccountBottomSheetDialog(dialogState, uiState, onEvent, onDialogEvent)
     AddAccountBottomSheetDialog(dialogState, onEvent, onDialogEvent)
+
+    if (dialogState.showDeleteConfirmation) {
+        DeleteTransactionDialog(
+            onConfirm = {
+                onDialogEvent(AddNewDialogEvent.ToggleDeleteConfirmationDialog(false))
+                onEvent(AddNewUiEvent.DeleteTransaction)
+            },
+            onDismiss = {
+                onDialogEvent(AddNewDialogEvent.ToggleDeleteConfirmationDialog(false))
+            }
+        )
+    }
 }
 
 @Composable

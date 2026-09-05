@@ -20,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cofinance.composeapp.generated.resources.Res
 import cofinance.composeapp.generated.resources.label_activity
 import id.andriawan.cofinance.components.BalanceCard
+import id.andriawan.cofinance.components.DeleteTransactionDialog
 import id.andriawan.cofinance.components.EmptyView
 import id.andriawan.cofinance.components.TransactionByMonth
 import id.andriawan.cofinance.domain.model.response.Transaction
@@ -113,7 +114,10 @@ fun ActivityContent(
                         TransactionByMonth(
                             modifier = Modifier.padding(horizontal = Dimensions.SIZE_16),
                             item = item,
-                            onTransactionClicked = onTransactionClicked
+                            onTransactionClicked = onTransactionClicked,
+                            onTransactionDeleteRequested = { transaction ->
+                                onEvent(ActivityUiEvent.OnDeleteRequested(transaction))
+                            }
                         )
                     }
                 }
@@ -124,6 +128,13 @@ fun ActivityContent(
                 )
             }
         }
+    }
+
+    if (uiState.transactionPendingDelete != null) {
+        DeleteTransactionDialog(
+            onConfirm = { onEvent(ActivityUiEvent.OnDeleteConfirmed) },
+            onDismiss = { onEvent(ActivityUiEvent.OnDeleteDismissed) }
+        )
     }
 }
 

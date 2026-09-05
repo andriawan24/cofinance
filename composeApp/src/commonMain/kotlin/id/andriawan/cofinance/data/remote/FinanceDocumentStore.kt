@@ -46,4 +46,12 @@ interface FinanceDocumentStore {
         id: String,
         document: EncryptedEnvelopeDocument
     )
+
+    /**
+     * Removes the document stored under [id] in [collection].
+     *
+     * The mirror is an upsert of the whole local snapshot, so a row deleted locally would otherwise
+     * survive in the cloud and be pulled back on the next sign-in. Deletion has to travel.
+     */
+    suspend fun deleteDocument(collection: FinanceCollection, id: String)
 }

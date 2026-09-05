@@ -117,6 +117,17 @@
     <string name="title_no_activities">Belum ada aktivitas</string>
     <string name="description_empty_activity">Mulai track pengeluaranmu sekarang</string>
 
+    <!-- Delete Account -->
+    <string name="title_delete_account">Hapus akun ini?</string>
+    <string name="description_delete_account">Semua transaksi pada akun ini akan ikut terhapus, dan transfer akan mengembalikan nominalnya ke akun lawan. Tindakan ini tidak dapat dibatalkan.</string>
+
+    <!-- Delete Transaction -->
+    <string name="action_delete_transaction">Hapus Transaksi</string>
+    <string name="title_delete_transaction">Hapus transaksi ini?</string>
+    <string name="description_delete_transaction">Transaksi akan dihapus dan nominalnya dikembalikan ke akunnya. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="action_delete">Hapus</string>
+    <string name="content_description_delete_transaction">Hapus transaksi</string>
+
     <!-- Common Actions / Labels -->
     <string name="label_yes">Ya</string>
     <string name="label_cancel">Batalkan</string>

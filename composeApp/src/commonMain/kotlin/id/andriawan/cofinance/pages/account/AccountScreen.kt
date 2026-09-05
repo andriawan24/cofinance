@@ -33,6 +33,7 @@ import cofinance.composeapp.generated.resources.label_account_type_regular
 import cofinance.composeapp.generated.resources.label_add_account
 import cofinance.composeapp.generated.resources.title_no_accounts
 import id.andriawan.cofinance.components.BaseBottomSheet
+import id.andriawan.cofinance.components.DeleteAccountDialog
 import id.andriawan.cofinance.components.EditAccountBottomSheetContent
 import id.andriawan.cofinance.components.PageTitle
 import id.andriawan.cofinance.components.SecondaryButton
@@ -79,11 +80,18 @@ fun AccountScreen(
                     )
                 },
                 onDeleteClicked = {
-                    accountViewModel.onDeleteAccount(uiState.editingAccount!!.id)
+                    accountViewModel.onDeleteAccountRequested(uiState.editingAccount!!)
                 },
                 onCloseClicked = { accountViewModel.onDismissEditAccount() }
             )
         }
+    }
+
+    if (uiState.accountPendingDelete != null) {
+        DeleteAccountDialog(
+            onConfirm = { accountViewModel.onDeleteAccountConfirmed() },
+            onDismiss = { accountViewModel.onDismissDeleteAccount() }
+        )
     }
 }
 
