@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.kotlinSerialization)
     alias(libs.plugins.androidxRoom)
     alias(libs.plugins.ksp)
-    id("com.codingfeline.buildkonfig")
+    alias(libs.plugins.buildkonfig)
 }
 
 kotlin {
