@@ -1,59 +1,19 @@
 # Cofinance - AGENTS.md
 
-## Mandatory OpenSpec Workflow
+## Research notes
 
-OpenSpec is the source of truth for every implementation change in this repository. This policy applies to the root agent, built-in workers, custom agents, subagents, automated continuations, and especially work started or resumed through a goal.
+`docs/research/` is where this project records how each area works, why it was built that way, and what is still open. Start at `docs/research/README.md`.
 
-An **implementation change** is any edit that changes application behavior, build behavior, architecture, dependencies, data contracts, tests for changed behavior, deployment behavior, or user-facing requirements. Read-only investigation and purely editorial corrections may proceed without a change.
+- **Before changing an area, read its note.** Each one ends with an "Open" section listing known defects and unverified behaviour.
+- **When a question needs investigating**, run `/mattpocock-skills:research` with the question. It investigates against primary sources — this repository's code first, then official documentation — and writes one Markdown note to `docs/research/`, citing the source of every claim.
+- **When a change alters behaviour a note describes, update the note in the same change.** Remove an "Open" item once it is resolved.
+- **Say how a claim was established.** "Read in code" and "observed on a device" are different strengths of evidence. Do not record something as verified because it compiles.
 
-### Before implementation
-
-1. Run `openspec list --json` and inspect `openspec/specs/`.
-2. Associate the request or active goal with exactly one relevant OpenSpec change.
-   - If a matching change exists, run `openspec status --change "<name>" --json` and read every artifact path returned for proposal, design, specs, and tasks.
-   - If multiple changes could match, do not guess; ask the user to select one.
-   - If no matching change exists, use the `openspec-propose` workflow to create the change and all artifacts required by its schema before editing implementation files.
-3. Run `openspec instructions apply --change "<name>" --json`.
-4. Do not edit implementation files until the change is apply-ready and its artifacts pass `openspec validate "<name>" --strict`.
-
-### During implementation
-
-- Use the `openspec-apply-change` workflow and implement only work represented in the selected change's artifacts and `tasks.md`.
-- Keep the active change name visible in plans, delegated prompts, and progress updates.
-- Give every implementation subagent the change name. Each subagent must read this file, the change status, apply instructions, and returned context files before editing.
-- Mark a task complete only after its implementation and proportional verification succeed.
-- If implementation reveals missing requirements, scope, or a design conflict, update the appropriate OpenSpec artifact first, validate it, and only then continue coding.
-- Never create a parallel plan in `plans/`, ad-hoc design documents, or chat-only task lists that compete with the OpenSpec artifacts.
-
-### Goal-driven work
-
-When a goal is created, resumed, or automatically continued:
-
-- Treat the full goal objective as the scope to map to OpenSpec; do not narrow it to existing tasks.
-- Record the selected OpenSpec change name in the working plan.
-- Do not mark the goal complete merely because code compiles or some tasks are checked.
-- Goal completion requires all in-scope OpenSpec tasks complete, requirement-by-requirement verification, relevant tests/builds passing, strict change validation passing, and delta specs synchronized to main specs when applicable.
-- Archive a completed change only when the user explicitly requests finalization or archival.
-
-### Completion gate
-
-Before claiming an implementation is complete:
-
-1. Re-run the verification commands required by `tasks.md` and the affected specifications.
-2. Compare the final diff and runtime/build evidence against every applicable requirement and scenario.
-3. Run `openspec validate "<name>" --strict`.
-4. Use `openspec-sync-specs` when delta specs must update `openspec/specs/`, then validate the main specs.
-5. Report remaining unchecked tasks or unverified requirements as incomplete; do not silently defer them.
-
-Repository-scoped Codex roles are defined in `.codex/agents/`:
-
-- `openspec-planner`: explores and prepares apply-ready OpenSpec artifacts without implementing code.
-- `openspec-implementer`: executes tasks from one named, apply-ready change.
-- `openspec-verifier`: independently audits requirements, task completion, tests, and validation before completion is claimed.
+There is no separate proposal or task-list workflow. OpenSpec was removed on 2026-11-16; `docs/research/history.md` summarizes what was decided under it.
 
 ## Project Overview
 
-Cofinance is a Kotlin Multiplatform (KMP) personal finance app targeting Android, iOS, Desktop (JVM), and Web (JS/WASM). It uses Compose Multiplatform for the UI layer.
+Cofinance is a Kotlin Multiplatform personal finance app for Android and iOS, with a Compose Multiplatform UI. It works with no account on durable on-device data; signing in with Google turns on end-to-end encrypted cloud synchronization.
 
 ## Build & Run
 
@@ -61,35 +21,55 @@ Cofinance is a Kotlin Multiplatform (KMP) personal finance app targeting Android
 # Build the project
 ./gradlew build
 
-# Run Android app
+# Install the Android app on a connected device
 ./gradlew :androidApp:installDebug
 
-# Run Desktop app
-./gradlew :composeApp:run
+# Build the Android release APK
+./gradlew :androidApp:assembleRelease
 
-# Run tests
-./gradlew :composeApp:allTests
+# Android lint, as run in CI
+./gradlew :androidApp:lint
+
+# Build the iOS framework (or open iosApp/iosApp.xcodeproj in Xcode and run)
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
 ```
+
+`:composeApp` is a library. The Android application tasks are on `:androidApp`.
+
+The repository currently has no tests. The test tasks CI runs (`:composeApp:testAndroidHostTest`, `:androidApp:testDebugUnitTest`) execute nothing.
 
 ### Build Configuration
 
-A `local.properties` file is required with:
-- `google_auth_client_id`
+A `local.properties` file is required with all six keys; the build fails without them. Each can instead be supplied through the environment variable shown.
 
-Firebase uses the standard platform configuration files: `androidApp/google-services.json` and `iosApp/iosApp/GoogleService-Info.plist`. Download each file for the matching registered application in Firebase Console; do not copy configuration values into BuildKonfig. The remaining `local.properties` values are injected at build time and must never be committed, included in screenshots, or printed to CI logs. `local.properties` is already in `.gitignore` — do not remove it. To share keys across machines or CI, use environment variables or a secret manager rather than checking the file in.
+| `local.properties` key | Environment variable | Purpose |
+|------------------------|----------------------|---------|
+| `google_auth_client_id` | `GOOGLE_AUTH_CLIENT_ID` | Web OAuth client ID for Google sign-in |
+| `storage.base_url` | `STORAGE_BASE_URL` | S3-compatible storage for avatars |
+| `storage.access_key` | `STORAGE_ACCESS_KEY` | |
+| `storage.access_secret` | `STORAGE_ACCESS_SECRET` | |
+| `storage.bucket_name` | `STORAGE_BUCKET_NAME` | |
+| `storage.region` | `STORAGE_REGION` | |
+
+Firebase uses the standard platform configuration files: `androidApp/google-services.json` and `iosApp/iosApp/GoogleService-Info.plist`. Download each file for the matching registered application in Firebase Console; do not copy configuration values into BuildKonfig.
+
+These values must never be committed, included in screenshots, or printed to CI logs. `local.properties` and both Firebase files are already in `.gitignore` — do not remove them. To share keys across machines or CI, use environment variables or a secret manager rather than checking a file in.
 
 ## Architecture
 
 **MVVM + Clean Architecture** with Koin dependency injection.
 
 ```text
-Presentation (pages/, components/)  →  Domain (usecases/, model/)  →  Data (repository/, datasource/)
+Presentation (pages/, components/)  →  Domain (usecases/, model/)  →  Data (repository/, local/, remote/)
 ```
 
-- **ViewModels**: Use `StateFlow<UiState>` + sealed `UiEvent` classes for unidirectional data flow
-- **Navigation**: Type-safe routes via Kotlin serialization (`Destinations.kt`)
-- **Async results**: Wrapped in `ResultState<T>` (Loading, Success, Error)
-- **DI modules**: `networkModule`, `repositoryModule`, `useCaseModule`, `viewModelModule` — all registered in `App.kt`
+- **Source of truth**: the Room database on the device. Repositories write locally first, then mirror to Firebase for signed-in users.
+- **ViewModels**: `StateFlow<UiState>` plus sealed `UiEvent` types for unidirectional data flow
+- **Navigation**: type-safe routes via Kotlin serialization (`navigations/destinations/Destinations.kt`)
+- **Async results**: wrapped in `ResultState<T>` (Loading, Success, Error)
+- **DI modules**: `networkModule`, `databaseModule`, `repositoryModule`, `securityModule`, `useCaseModule`, `viewModelModule` — all registered in `pages/App.kt`
+
+See `docs/research/architecture.md` for the screen list, the full `expect`/`actual` inventory, and where existing code departs from the conventions below.
 
 ## Naming Conventions
 
@@ -98,52 +78,80 @@ Presentation (pages/, components/)  →  Domain (usecases/, model/)  →  Data (
 | ViewModel | `[Feature]ViewModel` | `ActivityViewModel` |
 | Screen | `[Feature]Screen` | `LoginScreen` |
 | UiState | `[Feature]UiState` | `ActivityUiState` |
-| UiEvent | `[Feature]UiEvent` (sealed class) | `ActivityUiEvent` |
-| Repository | `[Entity]Repository` / `[Entity]RepositoryImpl` | `AuthenticationRepository` |
-| UseCase | `[Action][Entity]UseCase` | `FetchUserUseCase` |
+| UiEvent | `[Feature]UiEvent` (sealed) | `ActivityUiEvent` |
+| Repository | `[Entity]Repository` / `[Entity]RepositoryImpl` | `AccountRepository` |
+| UseCase | `[Action][Entity]UseCase` | `DeleteTransactionUseCase` |
 | Component | Descriptive name | `BalanceCard`, `TransactionItem` |
 
 ## Module Structure
 
-- **composeApp/** — Main KMP module with all shared and platform-specific code
-- **androidApp/** — Thin Android wrapper
-- **iosApp/** — iOS Xcode project wrapper
+- **core/** — KMP library with no Compose and no Firebase: encryption, app lock, and the OCR engines
+- **composeApp/** — KMP library with the UI, data and domain layers, DI, and the receipt parser; builds the iOS framework
+- **androidApp/** — Android application wrapper
+- **iosApp/** — Xcode project wrapper; Firebase and Google Sign-In come from Swift Package Manager
+
+`core` and `composeApp` share the `id.andriawan.cofinance.data.*` package namespace.
 
 ### Source Sets
 
-All shared code lives under `composeApp/src/commonMain/kotlin/id/andriawan/cofinance/`:
+Each KMP module has `commonMain`, `androidMain`, and `iosMain`.
 
-- `pages/` — Screen composables (one package per feature)
-- `components/` — Reusable UI components
-- `navigations/` — Route definitions
-- `domain/usecases/` — Business logic
-- `data/repository/` — Repository implementations
-- `data/datasource/` — Firebase and on-device receipt scanning data sources
+`core/src/commonMain/kotlin/id/andriawan/cofinance/data/`:
+
+- `crypto/` — record encryption, key wrapping, recovery phrase, device key vault
+- `keyring/` — the in-memory encryption session
+- `lock/` — PIN, biometric, failed-attempt guard, auto-lock
+- `model/` — the account and transaction payloads that get encrypted
+- `ocr/` — the OCR engine interface and result model
+
+`composeApp/src/commonMain/kotlin/id/andriawan/cofinance/`:
+
+- `pages/` — screen composables and ViewModels (one package per feature)
+- `components/` — reusable UI components
+- `navigations/` — navigation graph and route definitions
+- `domain/usecases/`, `domain/model/` — business logic and domain models
+- `data/repository/` — repository interfaces and implementations
+- `data/local/` — Room database, DAOs, local data sources
+- `data/remote/` — Firestore document store and encrypted remote data sources
+- `data/sync/` — the coordinator that mirrors Room to Firestore
+- `data/session/` — the sign-in session policy
+- `data/datasource/` — Firebase auth and profile, avatar storage, the receipt scanner
+- `data/ocr/parser/` — the receipt parser
+- `auth/` — Google sign-in
 - `di/` — Koin modules
 - `theme/` — Material Design 3 theming
-- `localization/` — English and Indonesian strings
-- `utils/` — Extensions, helpers, enums
+- `localization/` — locale detection
+- `utils/` — extensions, helpers, enums
 
-Platform-specific code uses `expect`/`actual` for: permissions, Google auth, camera, gallery picker, locale management.
+Strings are in `composeApp/src/commonMain/composeResources/values/` (English) and `values-id/` (Indonesian).
 
 ## Key Libraries
 
-- **Kotlin** 2.4.0 — Multiplatform language and compiler
-- **Android Gradle Plugin** 9.2.1 — Android and Android-KMP build tooling
-- **Compose Multiplatform** 1.11.1 — UI framework
+Versions are declared once, in `gradle/libs.versions.toml`. Update that file, then this list.
+
+- **Kotlin** 2.4.21 — Multiplatform language and compiler
+- **Android Gradle Plugin** 9.5.1, **Gradle** 9.9.1 — Build tooling
+- **Compose Multiplatform** 1.12.2 — UI framework
 - **Material 3** 1.9.0 — Compose design system components
-- **Firebase Kotlin SDK** 2.4.0 — Authentication, Cloud Firestore, and Storage
-- **Ktor** 3.5.1 — HTTP client
+- **Navigation Compose** 2.10.0 — Type-safe navigation
+- **Firebase Kotlin SDK** 2.8.0 — Authentication and Cloud Firestore
+- **Room** 2.8.5 — Local database, with bundled SQLite 2.7.1
 - **Koin** 4.2.2 — Dependency injection
-- **Coil** 3.5.0 — Image loading
+- **cryptography-kotlin** 0.6.0 — AES-GCM, ECDH, HKDF, PBKDF2
+- **AndroidX Biometric** 1.1.0 — Biometric prompt on Android
 - **ML Kit Text Recognition** 16.0.1 — On-device OCR for receipt scanning (Android; iOS uses Vision)
-- **CameraK** 1.1 — Multiplatform camera
+- **CameraK** 1.2 — Multiplatform camera
+- **Coil** 3.6.3 — Image loading
+- **Ktor** 3.6.1 — HTTP engines used by Coil
+- **AWS SDK for Kotlin (S3)** 1.9.37 — Avatar upload on Android
 - **Kotlinx Datetime** 0.8.0 — Date/time handling
-- **BuildKonfig** 0.22.0 — Multiplatform build-time configuration
+- **BuildKonfig** 0.24.0 — Multiplatform build-time configuration
 
 ## Code Style
 
 - Kotlin official code style (`kotlin.code.style=official`)
-- No automated linting tools configured (no ktlint/detekt)
+- No ktlint or detekt. Android Lint runs in CI.
+- Pull request titles must follow conventional commits (`feat`, `fix`, `refactor`, `docs`, `chore`, `test`, `perf`, `style`, `build`, `ci`), with a lowercase subject.
 - Package: `id.andriawan.cofinance`
-- Android: minSdk 24, targetSdk 36, JVM 17
+- Android: minSdk 24, targetSdk 37, compileSdk 37, JVM 17
+- iOS: deployment target 18.2
